@@ -35,18 +35,21 @@ export function AssessmentScene({
     "Welcome. This assessment is perfectly ordinary. Please select your preferred work environment.",
   );
   const [panelShake, setPanelShake] = useState(false);
-  const [lightsAlign, setLightsAlign] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowCavern(true), 2200);
+    const t = setTimeout(() => {
+      setShowCavern(true);
+      setAiLine((prev) =>
+        prev.startsWith("Welcome")
+          ? "I don't remember adding that."
+          : prev,
+      );
+      onMood("nervous");
+    }, 2200);
     return () => clearTimeout(t);
+    // One-shot cavern reveal for the vertical slice.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (!showCavern || choice) return;
-    onMood("nervous");
-    setAiLine("I don't remember adding that.");
-  }, [showCavern, choice, onMood]);
 
   const pick = (id: Exclude<WorkChoice, null>) => {
     if (choice || systemActive) return;
@@ -75,15 +78,11 @@ export function AssessmentScene({
     }
   };
 
-  useEffect(() => {
-    if (!systemActive) return;
-    setLightsAlign(true);
-    setAiLine("…");
-  }, [systemActive]);
+  const displayLine = systemActive ? "…" : aiLine;
 
   return (
     <div className="absolute inset-0 z-20">
-      <FacilityBackground intensity={systemActive ? 0.4 : 1} systemLock={lightsAlign} />
+      <FacilityBackground intensity={systemActive ? 0.4 : 1} systemLock={systemActive} />
       <BackgroundGags paused={systemActive} />
 
       <div className="relative z-10 flex h-full flex-col items-center justify-center gap-8 px-4 py-8 lg:flex-row lg:items-end lg:justify-center lg:gap-12 lg:pb-16">
@@ -95,14 +94,14 @@ export function AssessmentScene({
           <AssistantOrb mood={systemActive ? "nervous" : orbMood} size={150} />
           <motion.div
             className="glass-panel mt-4 max-w-xs px-4 py-3 text-sm leading-relaxed text-[#d7e6f5]"
-            key={aiLine}
+            key={displayLine}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="mb-1 font-mono text-[10px] tracking-[0.22em] text-cyan/70">
               ASSISTANT
             </div>
-            {aiLine}
+            {displayLine}
           </motion.div>
         </motion.div>
 

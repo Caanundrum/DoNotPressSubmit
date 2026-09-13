@@ -16,11 +16,7 @@ export function BeginControl({
   const [pressed, setPressed] = useState(false);
 
   useEffect(() => {
-    if (!hovering) {
-      setHoverMs(0);
-      onHoverChange(false, 0);
-      return;
-    }
+    if (!hovering) return;
     const start = performance.now();
     const id = window.setInterval(() => {
       const ms = performance.now() - start;
@@ -30,6 +26,14 @@ export function BeginControl({
     return () => clearInterval(id);
   }, [hovering, onHoverChange]);
 
+  const setHover = (next: boolean) => {
+    setHovering(next);
+    if (!next) {
+      setHoverMs(0);
+      onHoverChange(false, 0);
+    }
+  };
+
   return (
     <div className="relative flex flex-col items-center gap-3">
       <motion.button
@@ -37,10 +41,10 @@ export function BeginControl({
         className="relative isolate overflow-hidden rounded-full px-12 py-5 text-lg tracking-[0.28em] text-white outline-none"
         style={{ fontFamily: "var(--font-display)", minWidth: 280 }}
         onHoverStart={() => {
-          setHovering(true);
+          setHover(true);
           audio.play("hover", 0.35);
         }}
-        onHoverEnd={() => setHovering(false)}
+        onHoverEnd={() => setHover(false)}
         onTapStart={() => setPressed(true)}
         onTapCancel={() => setPressed(false)}
         onClick={() => {

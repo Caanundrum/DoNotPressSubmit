@@ -17,17 +17,16 @@ export function GameRoot() {
   const [orbMood, setOrbMood] = useState<OrbMood>("neutral");
   const [choice, setChoice] = useState<WorkChoice>(null);
   const [systemActive, setSystemActive] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  });
   const [armed, setArmed] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
     const onChange = () => setReducedMotion(mq.matches);
     mq.addEventListener("change", onChange);
-    if (window.localStorage.getItem(SKIP_KEY) === "1") {
-      // After first viewing, intros are skippable faster via button; still show title.
-    }
     return () => mq.removeEventListener("change", onChange);
   }, []);
 

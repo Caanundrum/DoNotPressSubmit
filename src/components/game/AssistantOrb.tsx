@@ -35,7 +35,11 @@ export function AssistantOrb({
   const m = MOOD[mood] ?? MOOD.neutral;
 
   return (
-    <div className="relative flex flex-col items-center gap-3" style={{ width: size }}>
+    <div
+      className="pointer-events-none relative flex flex-col items-center gap-3"
+      style={{ width: size }}
+      aria-hidden
+    >
       <motion.div
         className="relative"
         style={{ width: size, height: size }}

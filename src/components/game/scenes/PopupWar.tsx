@@ -51,7 +51,7 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="relative h-[300px] w-full overflow-hidden border border-white/25 bg-black/40">
+    <div className="relative h-[min(56vh,460px)] w-full overflow-hidden border border-white/25 bg-black/40">
       <div className="absolute left-3 top-3 z-20 font-mono text-[10px] tracking-[0.22em] text-system-warn">
         POPUP WAR // CLEARED {progress}/{needed}
       </div>

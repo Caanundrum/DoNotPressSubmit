@@ -25,7 +25,7 @@ export function EscapingButton({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="relative h-[280px] w-full overflow-hidden border border-danger/30 bg-black/35">
+    <div className="relative h-[min(56vh,460px)] w-full overflow-hidden border border-danger/30 bg-black/35">
       <div className="absolute left-3 top-3 font-mono text-[10px] tracking-[0.22em] text-danger/80">
         CONTAINMENT // HITS {hits}/3
       </div>

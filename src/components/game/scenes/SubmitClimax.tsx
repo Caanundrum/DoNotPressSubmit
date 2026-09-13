@@ -19,7 +19,7 @@ export function SubmitClimax({
   return (
     <div className="relative w-full">
       <motion.div
-        className="relative mx-auto mb-8 flex h-40 w-full max-w-lg items-center justify-center"
+        className="relative mx-auto mb-8 flex h-48 w-full items-center justify-center sm:h-56"
         initial={{ opacity: 0, scale: 0.9, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 120, damping: 16 }}
@@ -30,20 +30,20 @@ export function SubmitClimax({
           transition={{ duration: 2.8, repeat: Infinity }}
         />
         <div
-          className="relative border border-danger/70 bg-gradient-to-b from-[#5a1824] via-[#2a0c12] to-[#12060a] px-10 py-8 text-center shadow-[0_0_60px_rgba(255,77,109,0.35)]"
+          className="relative w-full max-w-3xl border border-danger/70 bg-gradient-to-b from-[#5a1824] via-[#2a0c12] to-[#12060a] px-10 py-10 text-center shadow-[0_0_80px_rgba(255,77,109,0.4)]"
           style={{ fontFamily: "var(--font-display)" }}
         >
           <div className="font-mono text-[10px] tracking-[0.35em] text-danger/90">FINAL CONTROL</div>
-          <div className="mt-2 text-4xl tracking-[0.2em] text-white sm:text-5xl">SUBMIT</div>
+          <div className="mt-2 text-5xl tracking-[0.2em] text-white sm:text-6xl">SUBMIT</div>
           <div className="mt-3 font-mono text-[10px] tracking-[0.18em] text-[#ffc2cc]">
             BEAUTIFUL · TEMPTING · TERRIBLE
           </div>
         </div>
       </motion.div>
 
-      <p className="mb-5 text-center text-sm text-[#d2dceb]">{aiLine}</p>
+      <p className="mb-5 text-center text-base text-[#d2dceb] sm:text-lg">{aiLine}</p>
 
-      <div className="grid gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         {options.map((opt) => (
           <motion.button
             key={opt.id}
@@ -65,7 +65,7 @@ export function SubmitClimax({
               color: "#e8eef8",
               fontFamily: "var(--font-display)",
             }}
-            whileHover={{ x: 4 }}
+            whileHover={{ x: 4, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => {
               audio.play(opt.id === "submit" ? "system" : "begin", opt.id === "submit" ? 0.7 : 0.55);

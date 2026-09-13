@@ -77,7 +77,7 @@ export function AssessmentScene({
       setTimeout(() => setPanelShake(false), 700);
       setTimeout(() => {
         onMood("nervous");
-        setAiLine("...that was not supposed to be funny.");
+        setAiLine("\u2026that was not supposed to be funny.");
       }, 1600);
       setTimeout(() => {
         onSystem();
@@ -87,13 +87,13 @@ export function AssessmentScene({
       setAiLine("Noted. A conventional selection. How refreshing.");
       setTimeout(() => {
         onMood("thinking");
-        setAiLine("Still... something about this room feels edited.");
+        setAiLine("Still\u2026 something about this room feels edited.");
       }, 1800);
       setTimeout(() => onSystem(), 3600);
     }
   };
 
-  const displayLine = systemActive ? "..." : aiLine;
+  const displayLine = systemActive ? "\u2026" : aiLine;
 
   if (hidden) {
     return (

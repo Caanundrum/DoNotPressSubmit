@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { audio } from "@/lib/audio";
+import { speech } from "@/lib/speech";
 import type { OrbMood, WorkChoice } from "@/lib/types";
 import { AssistantOrb } from "./AssistantOrb";
 import { BackgroundGags } from "./BackgroundGags";
@@ -19,6 +20,7 @@ export function AssessmentScene({
   orbMood,
   choice,
   systemActive,
+  hidden,
   onMood,
   onChoice,
   onSystem,
@@ -26,6 +28,8 @@ export function AssessmentScene({
   orbMood: OrbMood;
   choice: WorkChoice;
   systemActive: boolean;
+  /** When true (completion overlay), clear the form chrome entirely. */
+  hidden?: boolean;
   onMood: (mood: OrbMood) => void;
   onChoice: (choice: Exclude<WorkChoice, null>) => void;
   onSystem: () => void;
@@ -51,8 +55,19 @@ export function AssessmentScene({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (hidden || systemActive) {
+      speech.cancel();
+      return;
+    }
+    speech.speak(aiLine);
+    return () => {
+      speech.cancel();
+    };
+  }, [aiLine, systemActive, hidden]);
+
   const pick = (id: Exclude<WorkChoice, null>) => {
-    if (choice || systemActive) return;
+    if (choice || systemActive || hidden) return;
     audio.play("click", 0.5);
     onChoice(id);
     if (id === "cavern") {
@@ -62,7 +77,7 @@ export function AssessmentScene({
       setTimeout(() => setPanelShake(false), 700);
       setTimeout(() => {
         onMood("nervous");
-        setAiLine("…that was not supposed to be funny.");
+        setAiLine("...that was not supposed to be funny.");
       }, 1600);
       setTimeout(() => {
         onSystem();
@@ -72,13 +87,22 @@ export function AssessmentScene({
       setAiLine("Noted. A conventional selection. How refreshing.");
       setTimeout(() => {
         onMood("thinking");
-        setAiLine("Still… something about this room feels edited.");
+        setAiLine("Still... something about this room feels edited.");
       }, 1800);
       setTimeout(() => onSystem(), 3600);
     }
   };
 
-  const displayLine = systemActive ? "…" : aiLine;
+  const displayLine = systemActive ? "..." : aiLine;
+
+  if (hidden) {
+    return (
+      <div className="absolute inset-0 z-20">
+        <FacilityBackground intensity={0.35} systemLock />
+        <BackgroundGags paused />
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 z-20">
@@ -98,7 +122,7 @@ export function AssessmentScene({
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="mb-1 font-mono text-[10px] tracking-[0.22em] text-cyan/70">
+            <div className="mb-1 font-mono text-[10px] tracking-[0.22em] text-cyan">
               ASSISTANT
             </div>
             {displayLine}
@@ -111,15 +135,16 @@ export function AssessmentScene({
             panelShake
               ? { rotate: [-0.6, 0.6, -0.3, 0], y: [0, -4, 0] }
               : systemActive
-                ? { y: [0, -12, 0], scale: [1, 0.985, 1] }
-                : { y: 0 }
+                ? { y: [0, -12, 0], scale: [1, 0.985, 1], opacity: 0.55 }
+                : { y: 0, opacity: 1 }
           }
           transition={{ duration: panelShake ? 0.5 : 0.8 }}
           style={{
             transformOrigin: "center bottom",
+            pointerEvents: systemActive ? "none" : "auto",
           }}
         >
-          <div className="mb-1 font-mono text-[10px] tracking-[0.28em] text-mist/70">
+          <div className="mb-1 font-mono text-[10px] tracking-[0.28em] text-[#b8c6d8]">
             FORM 01 // ENVIRONMENT PREFERENCE
           </div>
           <h2
@@ -168,7 +193,7 @@ export function AssessmentScene({
                       {opt.label}
                     </span>
                     {opt.id === "cavern" ? (
-                      <span className="font-mono text-[9px] tracking-widest text-cyan/70">
+                      <span className="font-mono text-[9px] tracking-widest text-[#7ee9ff]">
                         UNAUTHORIZED?
                       </span>
                     ) : null}
@@ -189,7 +214,7 @@ export function AssessmentScene({
           <AnimatePresence>
             {choice ? (
               <motion.div
-                className="mt-5 font-mono text-[11px] tracking-[0.18em] text-mist"
+                className="mt-5 font-mono text-[11px] tracking-[0.18em] text-[#c0cede]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
               >

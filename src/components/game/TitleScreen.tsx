@@ -7,20 +7,25 @@ import { BackgroundGags } from "./BackgroundGags";
 import { BeginControl } from "./BeginControl";
 import { FacilityBackground } from "./FacilityBackground";
 import { TitleLogo } from "./TitleLogo";
-import type { OrbMood } from "@/lib/types";
+import type { OrbMood } from "@/game/types";
+import { audio } from "@/lib/audio";
 
 export function TitleScreen({
   orbMood,
   onBegin,
+  onContinue,
   onHoverChange,
+  escapedBefore = false,
 }: {
   orbMood: OrbMood;
   onBegin: () => void;
+  onContinue?: () => void;
   onHoverChange: (hovering: boolean, ms: number) => void;
+  escapedBefore?: boolean;
 }) {
   return (
     <div className="absolute inset-0 z-20">
-      <FacilityBackground />
+      <FacilityBackground environment={escapedBefore ? "escape" : "pristine"} />
       <BackgroundGags />
 
       <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 py-10 sm:py-14">
@@ -31,6 +36,7 @@ export function TitleScreen({
           transition={{ delay: 0.2 }}
         >
           HCOS // ASSESSMENT FACILITY 01
+          {escapedBefore ? " // CHANNEL RESIDUE DETECTED" : ""}
         </motion.div>
 
         <div className="flex w-full max-w-5xl flex-col items-center gap-8">
@@ -50,15 +56,31 @@ export function TitleScreen({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.45 }}
             >
-              <AssistantOrb mood={orbMood} label="ASSISTANT ONLINE" />
+              <AssistantOrb
+                mood={orbMood}
+                label={escapedBefore ? "ASSISTANT ELSEWHERE" : "ASSISTANT ONLINE"}
+              />
             </motion.div>
 
             <motion.div
+              className="flex flex-col items-center gap-4"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55 }}
             >
               <BeginControl onBegin={onBegin} onHoverChange={onHoverChange} />
+              {onContinue ? (
+                <button
+                  type="button"
+                  className="border border-white/25 px-5 py-2 font-mono text-[11px] tracking-[0.24em] text-[#d2dceb] transition hover:border-cyan/45"
+                  onClick={() => {
+                    audio.play("click", 0.4);
+                    onContinue();
+                  }}
+                >
+                  CONTINUE ASSESSMENT
+                </button>
+              ) : null}
             </motion.div>
           </div>
         </div>
@@ -71,7 +93,7 @@ export function TitleScreen({
         >
           <span>CHAOS STANDARD</span>
           <span className="text-cyan/70">/</span>
-          <span>PHASE 1 VERTICAL SLICE</span>
+          <span>PHASE 2 SCRIPTED GAME</span>
           <span className="text-cyan/70">/</span>
           <span>NO ACCOUNT REQUIRED</span>
         </motion.div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { audio } from "@/lib/audio";
 
 export function ChaosSplash({
@@ -11,11 +11,16 @@ export function ChaosSplash({
   onDone: () => void;
   reducedMotion: boolean;
 }) {
+  const onDoneRef = useRef(onDone);
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
+
   useEffect(() => {
     audio.play("logo", 0.45);
-    const t = setTimeout(onDone, reducedMotion ? 1800 : 5200);
+    const t = setTimeout(() => onDoneRef.current(), reducedMotion ? 1800 : 5200);
     return () => clearTimeout(t);
-  }, [onDone, reducedMotion]);
+  }, [reducedMotion]);
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black">
@@ -81,7 +86,7 @@ export function ChaosSplash({
             CHAOS STANDARD
           </div>
           <motion.div
-            className="mt-3 font-mono text-[10px] tracking-[0.28em] text-mist/80"
+            className="mt-3 font-mono text-[10px] tracking-[0.28em] text-[#c5d3e4]"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 1, 0] }}
             transition={{ delay: 2.4, duration: 2.2, times: [0, 0.15, 0.75, 1] }}
@@ -92,7 +97,7 @@ export function ChaosSplash({
       </div>
 
       <motion.div
-        className="absolute inset-0 bg-black"
+        className="pointer-events-none absolute inset-0 bg-black"
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 0, 1] }}
         transition={{ duration: reducedMotion ? 1.6 : 5.1, times: [0, 0.88, 1] }}
@@ -100,7 +105,7 @@ export function ChaosSplash({
 
       <button
         type="button"
-        className="absolute bottom-6 right-6 z-10 font-mono text-[10px] tracking-[0.2em] text-mist/50 hover:text-mist"
+        className="absolute bottom-6 right-6 z-20 font-mono text-[10px] tracking-[0.2em] text-[#b4c2d4] hover:text-[#e8eef8]"
         onClick={onDone}
       >
         SKIP

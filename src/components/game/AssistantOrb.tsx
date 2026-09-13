@@ -122,7 +122,7 @@ export function AssistantOrb({
       </motion.div>
 
       {label ? (
-        <div className="max-w-[220px] text-center font-mono text-[10px] tracking-[0.18em] text-mist/80">
+        <div className="max-w-[220px] text-center font-mono text-[10px] tracking-[0.18em] text-[#c5d3e4]">
           {label}
         </div>
       ) : null}

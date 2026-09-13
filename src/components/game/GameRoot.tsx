@@ -2,23 +2,26 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
+import { createInitialState } from "@/game/state";
+import { clearSave, loadSave, writeSave } from "@/game/storage";
+import type { GameState, OrbMood, ShellPhase } from "@/game/types";
+import { SKIP_INTRO_KEY } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
-import type { GamePhase, OrbMood, WorkChoice } from "@/lib/types";
-import { AssessmentScene } from "./AssessmentScene";
 import { AudioEnableControl } from "./AudioEnableControl";
 import { ChaosSplash } from "./ChaosSplash";
 import { HcosSplash } from "./HcosSplash";
-import { SystemInterruption } from "./SystemInterruption";
 import { TitleScreen } from "./TitleScreen";
-
-const SKIP_KEY = "dnps-skip-intros";
+import { ScenePlayer } from "./scenes/ScenePlayer";
 
 export function GameRoot() {
-  const [phase, setPhase] = useState<GamePhase>("chaos");
+  const [phase, setPhase] = useState<ShellPhase>("chaos");
   const [orbMood, setOrbMood] = useState<OrbMood>("neutral");
-  const [choice, setChoice] = useState<WorkChoice>(null);
-  const [systemActive, setSystemActive] = useState(false);
+  const [game, setGame] = useState<GameState | null>(null);
+  const [hasContinue, setHasContinue] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!loadSave();
+  });
   const [reducedMotion, setReducedMotion] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -32,9 +35,14 @@ export function GameRoot() {
   }, []);
 
   useEffect(() => {
-    // Cancel speech cleanly on every major phase change.
     speech.cancel();
   }, [phase]);
+
+  useEffect(() => {
+    if (game && phase === "playing") {
+      writeSave(game);
+    }
+  }, [game, phase]);
 
   const warmAudio = useCallback(() => {
     audio.unlock();
@@ -42,11 +50,11 @@ export function GameRoot() {
 
   const goTitle = useCallback(() => {
     setPhase("title");
-    window.localStorage.setItem(SKIP_KEY, "1");
-    // Ambience only after explicit unmute via AudioEnableControl.
+    window.localStorage.setItem(SKIP_INTRO_KEY, "1");
     if (!audio.isMuted()) {
       audio.play("ambience", 0.22);
     }
+    setHasContinue(!!loadSave());
   }, []);
 
   const onHoverChange = useCallback((hovering: boolean, ms: number) => {
@@ -57,34 +65,61 @@ export function GameRoot() {
     setOrbMood(ms > 4500 ? "amused" : "listening");
   }, []);
 
-  const begin = useCallback(() => {
+  const beginNew = useCallback(() => {
     warmAudio();
     speech.cancel();
-    setPhase("assessment");
+    clearSave();
+    const next = createInitialState();
+    setGame(next);
+    writeSave(next);
+    setHasContinue(true);
     setOrbMood("neutral");
-    setChoice(null);
-    setSystemActive(false);
+    setPhase("playing");
   }, [warmAudio]);
+
+  const continueAssessment = useCallback(() => {
+    warmAudio();
+    speech.cancel();
+    const saved = loadSave();
+    if (!saved) {
+      beginNew();
+      return;
+    }
+    setGame(saved);
+    setHasContinue(true);
+    setOrbMood(saved.aiMood);
+    setPhase("playing");
+  }, [warmAudio, beginNew]);
 
   const finishChaos = useCallback(() => {
     warmAudio();
     setPhase("hcos");
   }, [warmAudio]);
 
-  const finishSystem = useCallback(() => {
-    speech.cancel();
-    setPhase("complete");
-    setOrbMood("nervous");
+  const updateGame = useCallback((next: GameState) => {
+    setGame(next);
+    setOrbMood(next.aiMood);
   }, []);
 
-  const triggerSystem = useCallback(() => {
+  const returnTitle = useCallback(() => {
     speech.cancel();
-    setSystemActive(true);
-    setPhase("system");
+    setPhase("title");
+    setHasContinue(!!loadSave());
+    setOrbMood("neutral");
   }, []);
 
-  const showAudioCorner =
-    phase === "assessment" || phase === "system" || phase === "complete" || phase === "hcos";
+  const replay = useCallback(() => {
+    speech.cancel();
+    clearSave();
+    const next = createInitialState();
+    setGame(next);
+    writeSave(next);
+    setHasContinue(true);
+    setOrbMood("neutral");
+    setPhase("playing");
+  }, []);
+
+  const showAudioCorner = phase === "playing" || phase === "hcos";
 
   return (
     <div
@@ -98,13 +133,23 @@ export function GameRoot() {
 
       <AnimatePresence mode="wait">
         {phase === "chaos" ? (
-          <motion.div key="chaos" className="absolute inset-0" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+          <motion.div
+            key="chaos"
+            className="absolute inset-0"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
             <ChaosSplash reducedMotion={reducedMotion} onDone={finishChaos} />
           </motion.div>
         ) : null}
 
         {phase === "hcos" ? (
-          <motion.div key="hcos" className="absolute inset-0" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+          <motion.div
+            key="hcos"
+            className="absolute inset-0"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
             <HcosSplash reducedMotion={reducedMotion} onDone={goTitle} />
           </motion.div>
         ) : null}
@@ -118,73 +163,33 @@ export function GameRoot() {
             exit={{ opacity: 0, filter: "brightness(1.4)" }}
             transition={{ duration: 0.6 }}
           >
-            <TitleScreen orbMood={orbMood} onBegin={begin} onHoverChange={onHoverChange} />
+            <TitleScreen
+              orbMood={orbMood}
+              onBegin={beginNew}
+              onContinue={hasContinue ? continueAssessment : undefined}
+              onHoverChange={onHoverChange}
+              escapedBefore={!!loadSave()?.ending && loadSave()?.ending === "escape"}
+            />
           </motion.div>
         ) : null}
 
-        {phase === "assessment" || phase === "system" || phase === "complete" ? (
+        {phase === "playing" && game ? (
           <motion.div
-            key="assessment"
+            key="playing"
             className="absolute inset-0"
             initial={{ opacity: 0, scale: 1.02 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7 }}
           >
-            <AssessmentScene
-              orbMood={orbMood}
-              choice={choice}
-              systemActive={systemActive}
-              hidden={phase === "complete"}
-              onMood={setOrbMood}
-              onChoice={setChoice}
-              onSystem={triggerSystem}
+            <ScenePlayer
+              state={game}
+              onState={updateGame}
+              onTitle={returnTitle}
+              onNewGame={replay}
             />
           </motion.div>
         ) : null}
       </AnimatePresence>
-
-      {phase === "system" ? <SystemInterruption onDone={finishSystem} /> : null}
-
-      {phase === "complete" ? (
-        <motion.div
-          className="absolute inset-0 z-50 flex items-center justify-center bg-black/72 px-4 backdrop-blur-[2px]"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="phase1-complete-title"
-        >
-          <motion.div
-            className="w-[min(92vw,480px)] border border-cyan/35 bg-black/88 px-6 py-5 text-center shadow-[0_0_50px_rgba(110,231,255,0.12)]"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <div
-              id="phase1-complete-title"
-              className="font-mono text-[10px] tracking-[0.28em] text-cyan"
-            >
-              PHASE 1 VERTICAL SLICE COMPLETE
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-[#d2dceb]">
-              Intro → title → assessment → System interruption. Full game content comes after this gate.
-            </p>
-            <button
-              type="button"
-              className="mt-5 border border-white/30 px-4 py-2 font-mono text-[11px] tracking-[0.2em] text-white transition hover:border-cyan/55"
-              onClick={() => {
-                audio.play("click", 0.4);
-                speech.cancel();
-                setChoice(null);
-                setSystemActive(false);
-                setOrbMood("neutral");
-                setPhase("title");
-              }}
-            >
-              RETURN TO TITLE
-            </button>
-          </motion.div>
-        </motion.div>
-      ) : null}
 
       <div className="vignette" />
       <div className="scanlines" />

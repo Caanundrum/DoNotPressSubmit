@@ -10,30 +10,34 @@ export function orbStageStyle(anchor: OrbAnchor | undefined, mood: OrbMood): {
   const jitter =
     mood === "nervous" || mood === "frightened" || mood === "glitching" ? 1 : 0;
 
+  // Safe zones: keep orb+dialogue clear of the primary form CTA column
+  // (center stage / lower-middle). Decorative only — pointer-events stay off.
   switch (anchor ?? "dock-left") {
     case "dock-right":
-      return { left: "78%", top: "58%", transform: "translate(-50%, -50%)", size: 132 };
+      return { left: "86%", top: "62%", transform: "translate(-50%, -50%)", size: 124 };
     case "listen":
-      return { left: "18%", top: "42%", transform: "translate(-50%, -50%)", size: 150 };
+      return { left: "11%", top: "38%", transform: "translate(-50%, -50%)", size: 140 };
     case "pace":
-      return { left: "50%", top: "78%", transform: "translate(-50%, -50%)", size: 120 };
+      return { left: "50%", top: "88%", transform: "translate(-50%, -50%)", size: 110 };
     case "flee":
-      return { left: "88%", top: "18%", transform: "translate(-50%, -50%)", size: 96 };
+      return { left: "90%", top: "14%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
-      return { left: "50%", top: "28%", transform: "translate(-50%, -50%)", size: 190 };
+      // Loom from the upper-right, not dead-center over choices.
+      return { left: "88%", top: "22%", transform: "translate(-50%, -50%)", size: 168 };
     case "hide":
-      return { left: "6%", top: "82%", transform: "translate(-50%, -50%)", size: 78 };
+      return { left: "6%", top: "86%", transform: "translate(-50%, -50%)", size: 72 };
     case "overhead":
-      return { left: "72%", top: "12%", transform: "translate(-50%, -50%)", size: 110 };
+      return { left: "82%", top: "8%", transform: "translate(-50%, -50%)", size: 100 };
     case "center":
-      return { left: "50%", top: "46%", transform: "translate(-50%, -50%)", size: 160 };
+      // “Center” docks just left of the form so CTAs stay readable.
+      return { left: "12%", top: "48%", transform: "translate(-50%, -50%)", size: 148 };
     case "dock-left":
     default:
       return {
-        left: `${14 + jitter}%`,
-        top: "62%",
+        left: `${10 + jitter}%`,
+        top: "68%",
         transform: "translate(-50%, -50%)",
-        size: 140,
+        size: 128,
       };
   }
 }
@@ -122,37 +126,39 @@ export function panelLayoutClass(motion: PanelMotion | undefined): string {
 export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
   switch (motion) {
     case "restless":
+      // Slow patterned sway — still mischievous, readable as challenge.
       return {
-        initial: { opacity: 0, y: 16 + index * 4, x: index % 2 ? 12 : -12 },
+        initial: { opacity: 0, y: 12 + index * 3, x: index % 2 ? 8 : -8 },
         animate: {
           opacity: 1,
-          y: [0, -3, 2, 0],
-          x: [0, index % 2 ? 4 : -4, 0],
+          y: [0, -2, 1.5, 0],
+          x: [0, index % 2 ? 3 : -3, 0],
         },
       };
     case "scatter":
       return {
         initial: {
           opacity: 0,
-          x: (index % 2 ? 1 : -1) * (40 + index * 18),
-          y: -20 + index * 10,
-          rotate: (index % 2 ? 1 : -1) * 4,
+          x: (index % 2 ? 1 : -1) * (28 + index * 12),
+          y: -12 + index * 6,
+          rotate: (index % 2 ? 1 : -1) * 3,
         },
         animate: { opacity: 1, x: 0, y: 0, rotate: 0 },
       };
     case "slide-in":
       return {
-        initial: { opacity: 0, x: -50 - index * 12 },
+        initial: { opacity: 0, x: -36 - index * 8 },
         animate: { opacity: 1, x: 0 },
       };
     case "dodge":
+      // Idle sway only; hover pauses (handled in ScenePlayer).
       return {
-        initial: { opacity: 0, scale: 0.9 },
-        animate: { opacity: 1, scale: 1, x: [0, 6, -6, 0] },
+        initial: { opacity: 0, scale: 0.94 },
+        animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },
       };
     default:
       return {
-        initial: { opacity: 0, y: 12 },
+        initial: { opacity: 0, y: 10 },
         animate: { opacity: 1, y: 0 },
       };
   }

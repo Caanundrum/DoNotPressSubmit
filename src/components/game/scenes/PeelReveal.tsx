@@ -24,7 +24,7 @@ export function PeelReveal({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="relative h-[min(52vh,420px)] w-full overflow-hidden border border-[#c9a0ff]/35 bg-black/50">
+    <div className="relative h-[min(46vh,360px)] w-full overflow-hidden border border-[#c9a0ff]/35 bg-black/50">
       <div className="absolute left-3 top-3 z-20 font-mono text-[10px] tracking-[0.22em] text-[#c9a0ff]">
         INTERFACE PEEL // {peeled}/{LAYERS.length}
       </div>
@@ -57,7 +57,7 @@ export function PeelReveal({ onComplete }: { onComplete: () => void }) {
             transition={{ duration: gone ? 0.55 : 1.6, repeat: gone ? 0 : Infinity }}
           >
             <div className="text-lg tracking-[0.14em] text-white">{layer.label}</div>
-            <div className="mt-1 font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
+            <div className="mt-1 font-mono text-[10px] tracking-[0.16em] text-[#d2dceb]">
               {peeled === i ? `CLICK TO PEEL — ${layer.hint}` : layer.hint}
             </div>
           </motion.button>

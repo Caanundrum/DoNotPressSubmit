@@ -52,9 +52,11 @@ export function TitleScreen({
 
           <div className="flex w-full flex-col items-center justify-center gap-8 lg:flex-row lg:gap-16">
             <motion.div
+              className="pointer-events-none"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.45 }}
+              aria-hidden
             >
               <AssistantOrb
                 mood={orbMood}
@@ -86,7 +88,7 @@ export function TitleScreen({
         </div>
 
         <motion.div
-          className="flex flex-wrap items-center justify-center gap-4 font-mono text-[10px] tracking-[0.2em] text-[#a9b8ca]"
+          className="flex flex-wrap items-center justify-center gap-4 font-mono text-[10px] tracking-[0.2em] text-[#c5d3e4]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}

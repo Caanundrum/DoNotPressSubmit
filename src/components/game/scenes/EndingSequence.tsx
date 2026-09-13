@@ -18,7 +18,7 @@ export function EndingSequence({
 }) {
   return (
     <motion.div
-      className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 px-4 backdrop-blur-[3px]"
+      className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/75 px-3 backdrop-blur-[3px]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       role="dialog"
@@ -26,7 +26,7 @@ export function EndingSequence({
       aria-labelledby="ending-title"
     >
       <motion.div
-        className="w-[min(92vw,560px)] border px-6 py-6 text-center"
+        className="no-scroll max-h-[90vh] w-[min(92vw,560px)] overflow-hidden border px-5 py-5 text-center"
         style={{
           borderColor:
             endingId === "submit"

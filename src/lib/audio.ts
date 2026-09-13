@@ -18,22 +18,82 @@ const FILES: Record<Exclude<Cue, "stopAmbience">, string> = {
   ambience: "/audio/ambience.wav",
 };
 
+type Listener = (state: { unlocked: boolean; muted: boolean }) => void;
+
 class AudioDirector {
   private unlocked = false;
   private cache = new Map<string, HTMLAudioElement>();
   private ambience: HTMLAudioElement | null = null;
-  private muted = false;
+  /** Start muted until the player explicitly enables sound. */
+  private muted = true;
+  private listeners = new Set<Listener>();
 
+  subscribe(listener: Listener) {
+    this.listeners.add(listener);
+    listener(this.getState());
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private emit() {
+    const state = this.getState();
+    this.listeners.forEach((l) => l(state));
+  }
+
+  getState() {
+    return { unlocked: this.unlocked, muted: this.muted };
+  }
+
+  isUnlocked() {
+    return this.unlocked;
+  }
+
+  isMuted() {
+    return this.muted;
+  }
+
+  /** Warm the AudioContext path after a user gesture (does not unmute). */
   unlock() {
     if (this.unlocked || typeof window === "undefined") return;
     this.unlocked = true;
-    // Warm a silent play path after first gesture.
-    void this.play("click", 0.001);
+    void this.playSilentWarmup();
+    this.emit();
+  }
+
+  private async playSilentWarmup() {
+    try {
+      const el = this.get(FILES.click);
+      el.volume = 0.001;
+      await el.play();
+      el.pause();
+      el.currentTime = 0;
+    } catch {
+      // Gesture may still be required for later cues.
+    }
+  }
+
+  /** Explicit player opt-in for SFX, ambience, and speech. */
+  enableSound() {
+    this.unlock();
+    this.muted = false;
+    this.emit();
+    this.play("click", 0.45);
+    this.play("ambience", 0.22);
   }
 
   setMuted(muted: boolean) {
     this.muted = muted;
     if (muted) this.stopAmbience();
+    this.emit();
+  }
+
+  toggleMuted() {
+    if (this.muted) {
+      this.enableSound();
+    } else {
+      this.setMuted(true);
+    }
   }
 
   private get(src: string) {

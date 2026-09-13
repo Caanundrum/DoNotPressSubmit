@@ -1,1 +1,1 @@
-FILE:/tmp/sp-create-content.txt
+PLACEHOLDER_LOAD_FROM_/tmp/sp-ready.tsx

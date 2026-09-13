@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { createInitialState } from "@/game/state";
-import { clearSave, loadSave, writeSave } from "@/game/storage";
+import { clearSave, loadSave, loadTitleWave, writeSave } from "@/game/storage";
 import type { GameState, OrbMood, ShellPhase } from "@/game/types";
 import { SKIP_INTRO_KEY } from "@/game/types";
 import { audio } from "@/lib/audio";
@@ -21,6 +21,10 @@ export function GameRoot() {
   const [hasContinue, setHasContinue] = useState(() => {
     if (typeof window === "undefined") return false;
     return !!loadSave();
+  });
+  const [titleWave, setTitleWave] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return loadTitleWave().waved;
   });
   const [reducedMotion, setReducedMotion] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -55,6 +59,7 @@ export function GameRoot() {
       audio.play("ambience", 0.22);
     }
     setHasContinue(!!loadSave());
+    setTitleWave(loadTitleWave().waved);
   }, []);
 
   const onHoverChange = useCallback((hovering: boolean, ms: number) => {
@@ -105,7 +110,8 @@ export function GameRoot() {
     speech.cancel();
     setPhase("title");
     setHasContinue(!!loadSave());
-    setOrbMood("neutral");
+    setTitleWave(loadTitleWave().waved);
+    setOrbMood(loadTitleWave().waved ? "excited" : "neutral");
   }, []);
 
   const replay = useCallback(() => {
@@ -169,6 +175,7 @@ export function GameRoot() {
               onContinue={hasContinue ? continueAssessment : undefined}
               onHoverChange={onHoverChange}
               escapedBefore={!!loadSave()?.ending && loadSave()?.ending === "escape"}
+              assistantWaving={titleWave}
             />
           </motion.div>
         ) : null}

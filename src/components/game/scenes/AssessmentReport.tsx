@@ -57,6 +57,7 @@ export function AssessmentReport({
           <Stat label="Secrets found" value={secretsDisplay} highlight={secretCount > 5} />
           <Stat label="AI cooperation" value={String(state.counters.aiCooperation)} />
           <Stat label="System compliance" value={String(state.counters.systemCompliance)} />
+          <Stat label="Orb pokes" value={String(state.counters.orbPokes ?? 0)} />
           <Stat label="Personality" value={state.aiPersonality} />
           <Stat label="Session" value={state.sessionId.slice(0, 14)} />
         </div>

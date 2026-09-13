@@ -21,6 +21,34 @@ export type OrbMood =
   | "excited"
   | "glitching";
 
+/** Where the assistant occupies the facility stage. */
+export type OrbAnchor =
+  | "dock-left"
+  | "dock-right"
+  | "listen"
+  | "pace"
+  | "flee"
+  | "loom"
+  | "hide"
+  | "overhead"
+  | "center";
+
+/** How the assessment prompt/panel enters and lives on stage. */
+export type PanelMotion =
+  | "settle"
+  | "slide-left"
+  | "slide-right"
+  | "rise"
+  | "drop"
+  | "drift"
+  | "scatter"
+  | "reanchor"
+  | "pressure"
+  | "edge";
+
+/** How choice buttons behave beyond static click-next. */
+export type ChoiceMotion = "static" | "restless" | "scatter" | "slide-in" | "dodge";
+
 export type EndingId =
   | "submit"
   | "refuse"
@@ -51,7 +79,10 @@ export type SetpieceId =
   | "escaping-button"
   | "popup-war"
   | "checkbox-rebellion"
-  | "submit-button";
+  | "submit-button"
+  | "restless-options"
+  | "authority-stamp"
+  | "peel-reveal";
 
 export type ShellPhase =
   | "chaos"
@@ -137,6 +168,12 @@ export interface SceneDef {
   endingId?: EndingId;
   /** Visual note for act evolution */
   anomalyLevel?: number;
+  /** Assistant stage position for this beat */
+  orbAnchor?: OrbAnchor;
+  /** Assessment panel choreography */
+  panelMotion?: PanelMotion;
+  /** Choice button kinetic style */
+  choiceMotion?: ChoiceMotion;
 }
 
 export const SAVE_KEY = "dnps-save-v2";

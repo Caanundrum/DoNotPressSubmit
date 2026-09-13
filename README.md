@@ -2,7 +2,7 @@
 
 A short, highly visual browser comedy game from **Chaos Standard**. You fill out a mundane corporate assessment while an AI assistant slowly realizes it lives inside the app.
 
-This repository ships the **Phase 2 scripted five-act game** on the Phase 1 visual system: branching choices, behavior memory, secrets, Act III set pieces, Act V Submit climax, and four endings plus a secret ending. Live AI flavor is **not** required — all critical dialogue is authored.
+This repository ships an **expanded Phase 2** scripted five-act game: longer play, full-viewport facility stage, moving assistant + kinetic assessment panels, richer branches, and human-rewritten dialogue. Live AI flavor is **not** required — all critical dialogue is authored.
 
 ## Run locally
 
@@ -22,28 +22,28 @@ npm start
 
 `next.config.ts` uses `output: "standalone"` for Firebase App Hosting. Nick redeploys from `main` after merge — no Firebase secrets are stored in this repo.
 
-## How to playtest Phase 2
+## How to playtest
 
-1. Open the title screen → **UNMUTE / ENABLE SOUND** (optional, enables SFX + Web Speech).
-2. **BEGIN ASSESSMENT** starts Act I. **CONTINUE ASSESSMENT** resumes a localStorage save.
-3. Play through Acts I–V. Look for late **UNAUTHORIZED?** options and **SIDE PATH** choices for secrets.
-4. Act III: chase the fleeing button, dismiss System popups, catch the rebellious checkbox.
-5. Act V: choose Submit / Refuse / Escape / Disable / Side Path (options depend on prior flags).
-6. Finish on the assessment report; start a new run or return to title.
+1. Title screen → **UNMUTE / ENABLE SOUND** (optional; SFX + Web Speech).
+2. **BEGIN ASSESSMENT** starts Act I. **CONTINUE ASSESSMENT** resumes localStorage.
+3. Play Acts I–V. Late **UNAUTHORIZED?** / **SIDE PATH** options unlock secrets.
+4. Kinetic beats: restless calibration, authority stamp, escaping button, popup war, checkbox rebellion, interface peel.
+5. Act V: Submit / Refuse / Escape / Disable / Side Path (path-dependent).
+6. Finish on the assessment report.
 
-## Phase 2 contents
+## What’s in this build
 
-- Scene schema + canonical game state + localStorage save/continue
-- Full Acts I–V scripted path (~25 scenes)
-- Branching + behavior counters + secrets
-- Endings: Submit, Refuse, Escape, Disable, Secret
-- Act III set pieces: escaping button, popup war, checkbox rebellion
-- Environment presets that evolve by act
-- Phase 1 polish preserved: unmute gate, Web Speech, contrast, real continue controls, completion overlays
+- Full-viewport facility stage (no max-width “app in a box”)
+- Assistant orb repositions/animates by beat (listen, pace, flee, loom, hide…)
+- Assessment prompts enter/slide/drift/scatter/re-anchor
+- Expanded Acts I–V (~45 scenes) with richer branches
+- Extra set pieces beyond Act III classics
+- Unmute + Web Speech preserved (dialogue bubble tracks the orb)
+- Firebase App Hosting `standalone` preserved
 
-## Out of scope (later phases)
+## Out of scope (later)
 
-Live AI provider, art/animation expansion pass, full adaptive soundtrack polish, trailer edit.
+Live AI provider, art/animation expansion pass, full adaptive soundtrack polish.
 
 ## Stack
 

@@ -34,7 +34,7 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="relative h-[260px] w-full overflow-hidden border border-cyan/25 bg-black/35">
+    <div className="relative h-[min(56vh,460px)] w-full overflow-hidden border border-cyan/25 bg-black/35">
       <div className="absolute left-3 top-3 font-mono text-[10px] tracking-[0.22em] text-cyan/80">
         CHECKBOX REBELLION // {checks}/{needed}
       </div>

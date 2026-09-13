@@ -97,25 +97,25 @@ export function panelVariants(motion: PanelMotion | undefined) {
 export function panelLayoutClass(motion: PanelMotion | undefined): string {
   switch (motion) {
     case "edge":
-      return "left-[4%] top-[12%] w-[min(92vw,560px)]";
+      return "left-[2%] top-[10%] w-[min(96vw,720px)]";
     case "pressure":
-      return "left-[2%] right-[2%] top-[14%] mx-auto w-[min(96vw,920px)]";
+      return "left-[1.5%] right-[1.5%] top-[10%] mx-auto w-[min(97vw,1180px)]";
     case "reanchor":
-      return "right-[4%] top-[14%] w-[min(92vw,600px)]";
+      return "right-[2%] top-[10%] w-[min(96vw,760px)]";
     case "drift":
-      return "left-[6%] bottom-[8%] w-[min(92vw,680px)]";
+      return "left-[2%] bottom-[5%] w-[min(96vw,900px)]";
     case "scatter":
-      return "left-[8%] top-[18%] w-[min(94vw,740px)]";
+      return "left-[2%] top-[12%] w-[min(96vw,980px)]";
     case "slide-right":
-      return "right-[4%] top-[16%] w-[min(92vw,640px)]";
+      return "right-[2%] top-[12%] w-[min(96vw,820px)]";
     case "slide-left":
-      return "left-[4%] top-[16%] w-[min(92vw,640px)]";
+      return "left-[2%] top-[12%] w-[min(96vw,820px)]";
     case "drop":
-      return "left-[4%] right-[4%] top-[8%] mx-auto w-[min(94vw,800px)]";
+      return "left-[1.5%] right-[1.5%] top-[6%] mx-auto w-[min(97vw,1120px)]";
     case "rise":
-      return "left-[4%] right-[4%] bottom-[6%] mx-auto w-[min(94vw,800px)]";
+      return "left-[1.5%] right-[1.5%] bottom-[4%] mx-auto w-[min(97vw,1120px)]";
     default:
-      return "left-[3%] right-[3%] top-[12%] mx-auto w-[min(96vw,880px)]";
+      return "left-[1.5%] right-[1.5%] top-[9%] mx-auto w-[min(97vw,1140px)]";
   }
 }
 

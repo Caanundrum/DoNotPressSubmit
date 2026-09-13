@@ -305,7 +305,7 @@ function ScenePlayerInner({
 
       {/* Assessment panel — free on the stage */}
       <motion.div
-        className={`glass-panel absolute z-20 max-h-[78vh] overflow-y-auto p-5 sm:p-7 ${panelLayoutClass(panelMotion)}`}
+        className={`glass-panel absolute z-20 max-h-[86vh] overflow-y-auto p-6 sm:p-9 ${panelLayoutClass(panelMotion)}`}
         initial={panelVar.initial}
         animate={
           panelShake

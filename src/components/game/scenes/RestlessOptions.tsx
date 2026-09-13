@@ -37,7 +37,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
   };
 
   return (
-    <div className="relative h-[min(52vh,420px)] w-full overflow-hidden border border-cyan/25 bg-black/40">
+    <div className="relative h-[min(62vh,520px)] w-full overflow-hidden border border-cyan/25 bg-black/40">
       <div className="absolute left-3 top-3 z-10 font-mono text-[10px] tracking-[0.22em] text-cyan/80">
         CALIBRATION DRIFT // PINNED {pins}/3
       </div>

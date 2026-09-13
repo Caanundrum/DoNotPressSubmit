@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function HcosSplash({
   onDone,
@@ -10,10 +10,15 @@ export function HcosSplash({
   onDone: () => void;
   reducedMotion: boolean;
 }) {
+  const onDoneRef = useRef(onDone);
   useEffect(() => {
-    const t = setTimeout(onDone, reducedMotion ? 1600 : 4200);
+    onDoneRef.current = onDone;
+  }, [onDone]);
+
+  useEffect(() => {
+    const t = setTimeout(() => onDoneRef.current(), reducedMotion ? 1600 : 4200);
     return () => clearTimeout(t);
-  }, [onDone, reducedMotion]);
+  }, [reducedMotion]);
 
   const metrics = [
     "RELATIONSHIP ANALYSIS: PRIMED",

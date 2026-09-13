@@ -66,6 +66,23 @@ export function GameRoot() {
     setSystemActive(false);
   }, [warmAudio]);
 
+  const finishChaos = useCallback(() => {
+    warmAudio();
+    setPhase("hcos");
+  }, [warmAudio]);
+
+  const finishSystem = useCallback(() => {
+    speech.cancel();
+    setPhase("complete");
+    setOrbMood("nervous");
+  }, []);
+
+  const triggerSystem = useCallback(() => {
+    speech.cancel();
+    setSystemActive(true);
+    setPhase("system");
+  }, []);
+
   const showAudioCorner =
     phase === "assessment" || phase === "system" || phase === "complete" || phase === "hcos";
 
@@ -82,13 +99,7 @@ export function GameRoot() {
       <AnimatePresence mode="wait">
         {phase === "chaos" ? (
           <motion.div key="chaos" className="absolute inset-0" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
-            <ChaosSplash
-              reducedMotion={reducedMotion}
-              onDone={() => {
-                warmAudio();
-                setPhase("hcos");
-              }}
-            />
+            <ChaosSplash reducedMotion={reducedMotion} onDone={finishChaos} />
           </motion.div>
         ) : null}
 
@@ -126,25 +137,13 @@ export function GameRoot() {
               hidden={phase === "complete"}
               onMood={setOrbMood}
               onChoice={setChoice}
-              onSystem={() => {
-                speech.cancel();
-                setSystemActive(true);
-                setPhase("system");
-              }}
+              onSystem={triggerSystem}
             />
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      {phase === "system" ? (
-        <SystemInterruption
-          onDone={() => {
-            speech.cancel();
-            setPhase("complete");
-            setOrbMood("nervous");
-          }}
-        />
-      ) : null}
+      {phase === "system" ? <SystemInterruption onDone={finishSystem} /> : null}
 
       {phase === "complete" ? (
         <motion.div

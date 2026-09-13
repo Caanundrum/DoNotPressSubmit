@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Static export for Firebase Hosting (Nick deploys separately).
-  output: "export",
-  images: { unoptimized: true },
-  trailingSlash: true,
+  // Firebase App Hosting (@apphosting/adapter-nextjs) expects standalone output.
+  output: "standalone",
 };
 
 export default nextConfig;

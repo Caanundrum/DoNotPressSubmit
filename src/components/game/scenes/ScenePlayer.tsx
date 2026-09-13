@@ -1,1 +1,1 @@
-LOADING_FROM_FILE
+FILE:/tmp/sp-create-content.txt

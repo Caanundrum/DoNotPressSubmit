@@ -13,16 +13,23 @@ npm run dev
 
 Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
-## Production build (static export)
+## Production build (Firebase App Hosting)
 
 ```bash
+npm ci
 npm run build
 ```
 
-Output lands in `out/` (Next.js `output: "export"`), ready for Firebase Hosting or any static host. Nick owns Firebase deploy credentials separately — this repo does not require them.
+This app targets **Firebase App Hosting** (Node / `@apphosting/adapter-nextjs`), not classic static Firebase Hosting.
+
+- Next is configured with `output: "standalone"`.
+- After a successful build, App Hosting expects artifacts under `.next/standalone/` (including `.next/standalone/.next/routes-manifest.json`).
+- Do **not** use `output: "export"` / the `out/` folder for this deploy path — that breaks the App Hosting Next adapter.
+
+Nick owns Firebase console credentials and redeploy. After merging this change, reconnect/redeploy the App Hosting backend from `main` (or the PR branch if testing a preview).
 
 ```bash
-npm start   # serves the `out/` folder on port 43123
+npm start   # serves the Next standalone server on port 43123
 ```
 
 ## Phase 1 contents

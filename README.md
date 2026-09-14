@@ -34,12 +34,14 @@ npm start
 ## What’s in this build
 
 - Full-viewport facility stage (no max-width “app in a box”)
-- Assistant orb as scene partner: moods (orbit / aperture / dim-flush), spotlight pitches, companion beats, light pokes
+- Assistant orb as scene partner: expressive moods (tint / orbit / ring tightness / aperture / squash), glance toward choices, spotlight pitches, companion beats, poke escalation (1 → 3 → 7 + report flag)
+- Ambient facility life: ≥6 chrome hotspots, hover language, roamers (crumb / checkbox / stamp), chaos vs obedient residue by Act III+
+- Title remembers escape wave **and** ally/refuse residue (clickable gag)
 - Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
 - Expanded Acts I–V with richer branches + Submit callbacks
 - Extra set pieces beyond Act III classics
-- Title screen remembers the escape wave (tell-a-friend loop)
-- Unmute + Web Speech preserved (dialogue bubble tracks the orb)
+- Unmute + Web Speech preserved (dialogue bubble tracks the orb; safe-zone max-height)
+- Zero scrollbars — viewport-fit shell
 - Firebase App Hosting `standalone` preserved
 
 ## Out of scope (later)

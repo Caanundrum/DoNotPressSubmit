@@ -1,7 +1,11 @@
 import type { ChoiceMotion, OrbAnchor, OrbMood, PanelMotion } from "./types";
 
 /** Pixel / percent stage positions for the assistant. */
-export function orbStageStyle(anchor: OrbAnchor | undefined, mood: OrbMood): {
+export function orbStageStyle(
+  anchor: OrbAnchor | undefined,
+  mood: OrbMood,
+  spotlight = false,
+): {
   left: string;
   top: string;
   transform: string;
@@ -11,7 +15,13 @@ export function orbStageStyle(anchor: OrbAnchor | undefined, mood: OrbMood): {
     mood === "nervous" || mood === "frightened" || mood === "glitching" ? 1 : 0;
 
   // Safe zones: keep orb+dialogue clear of the primary form CTA column
-  // (center stage / lower-middle). Decorative only — pointer-events stay off.
+  // (center stage / lower-middle). Decorative only — pointer-events stay off
+  // unless a scene explicitly enables a tiny poke target.
+  if (spotlight || anchor === "spotlight") {
+    // Bigger presence, left-of-center — form dims and retreats; CTAs stay hittable.
+    return { left: "22%", top: "42%", transform: "translate(-50%, -50%)", size: 200 };
+  }
+
   switch (anchor ?? "dock-left") {
     case "dock-right":
       return { left: "86%", top: "62%", transform: "translate(-50%, -50%)", size: 124 };
@@ -31,6 +41,9 @@ export function orbStageStyle(anchor: OrbAnchor | undefined, mood: OrbMood): {
     case "center":
       // “Center” docks just left of the form so CTAs stay readable.
       return { left: "12%", top: "48%", transform: "translate(-50%, -50%)", size: 148 };
+    case "avoid-submit":
+      // Comedy in motion: refuses the Submit light column (stage right / low).
+      return { left: "8%", top: "78%", transform: "translate(-50%, -50%)", size: 118 };
     case "dock-left":
     default:
       return {
@@ -98,7 +111,11 @@ export function panelVariants(motion: PanelMotion | undefined) {
   }
 }
 
-export function panelLayoutClass(motion: PanelMotion | undefined): string {
+/** When spotlighted, the form steps back — smaller, lower, dimmer layout. */
+export function panelLayoutClass(motion: PanelMotion | undefined, spotlight = false): string {
+  if (spotlight) {
+    return "right-[2%] bottom-[4%] w-[min(92vw,520px)] opacity-55";
+  }
   switch (motion) {
     case "edge":
       return "left-[2%] top-[10%] w-[min(96vw,720px)]";

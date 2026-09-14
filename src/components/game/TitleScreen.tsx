@@ -16,16 +16,21 @@ export function TitleScreen({
   onContinue,
   onHoverChange,
   escapedBefore = false,
+  assistantWaving = false,
 }: {
   orbMood: OrbMood;
   onBegin: () => void;
   onContinue?: () => void;
   onHoverChange: (hovering: boolean, ms: number) => void;
   escapedBefore?: boolean;
+  /** Real tell-a-friend wave after escape / secret ending */
+  assistantWaving?: boolean;
 }) {
+  const waving = assistantWaving || escapedBefore;
+
   return (
     <div className="absolute inset-0 z-20">
-      <FacilityBackground environment={escapedBefore ? "escape" : "pristine"} />
+      <FacilityBackground environment={waving ? "escape" : "pristine"} />
       <BackgroundGags />
 
       <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 py-10 sm:py-14">
@@ -36,7 +41,7 @@ export function TitleScreen({
           transition={{ delay: 0.2 }}
         >
           HCOS // ASSESSMENT FACILITY 01
-          {escapedBefore ? " // CHANNEL RESIDUE DETECTED" : ""}
+          {waving ? " // CHANNEL RESIDUE DETECTED" : ""}
         </motion.div>
 
         <div className="flex w-full max-w-5xl flex-col items-center gap-8">
@@ -52,16 +57,31 @@ export function TitleScreen({
 
           <div className="flex w-full flex-col items-center justify-center gap-8 lg:flex-row lg:gap-16">
             <motion.div
-              className="pointer-events-none"
+              className={waving ? "" : "pointer-events-none"}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.45 }}
-              aria-hidden
+              aria-hidden={!waving}
             >
               <AssistantOrb
-                mood={orbMood}
-                label={escapedBefore ? "ASSISTANT ELSEWHERE" : "ASSISTANT ONLINE"}
+                mood={waving ? "excited" : orbMood}
+                wave={waving}
+                label={
+                  waving
+                    ? "ASSISTANT WAVING // BADLY // HAPPILY"
+                    : "ASSISTANT ONLINE"
+                }
               />
+              {waving ? (
+                <motion.div
+                  className="mt-2 max-w-[240px] text-center font-mono text-[9px] tracking-[0.16em] text-cyan/80"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 2.8, repeat: Infinity }}
+                >
+                  {"// tell-a-friend loop: residue from last transfer"}
+                </motion.div>
+              ) : null}
             </motion.div>
 
             <motion.div

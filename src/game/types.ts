@@ -31,7 +31,14 @@ export type OrbAnchor =
   | "loom"
   | "hide"
   | "overhead"
-  | "center";
+  | "center"
+  /** Key pitch: bigger, more present — still clear of form CTAs */
+  | "spotlight"
+  /** Act V: refuses to stand under Submit lights */
+  | "avoid-submit";
+
+/** Non-form companion beat — relationship as play, not only narration. */
+export type CompanionBeat = "wait" | "watch" | "respond";
 
 /** How the assessment prompt/panel enters and lives on stage. */
 export type PanelMotion =
@@ -73,7 +80,8 @@ export type SceneKind =
   | "setpiece"
   | "climax"
   | "ending"
-  | "report";
+  | "report"
+  | "companion";
 
 export type SetpieceId =
   | "escaping-button"
@@ -102,6 +110,8 @@ export interface BehaviorCounters {
   rapidClicks: number;
   waitedForAI: number;
   attemptedEscape: number;
+  /** Tiny illegal orb pokes — relationship without blocking CTAs */
+  orbPokes: number;
 }
 
 export interface GameState {
@@ -174,7 +184,21 @@ export interface SceneDef {
   panelMotion?: PanelMotion;
   /** Choice button kinetic style */
   choiceMotion?: ChoiceMotion;
+  /**
+   * Key dialogue / pitch beat: orb enlarges & centers presence,
+   * assessment form dims so the player answers the assistant.
+   */
+  spotlight?: boolean;
+  /** Short non-form companion interaction */
+  companion?: CompanionBeat;
+  /**
+   * Allow a tiny poke hit-target on the orb.
+   * Only when docked clear of form CTAs / during spotlight+companion.
+   */
+  orbPokeable?: boolean;
 }
 
 export const SAVE_KEY = "dnps-save-v2";
 export const SKIP_INTRO_KEY = "dnps-skip-intros";
+/** Survives new-game clear — title screen wave after escape ending */
+export const TITLE_WAVE_KEY = "dnps-title-wave-v1";

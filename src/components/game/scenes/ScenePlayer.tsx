@@ -12,6 +12,7 @@ import {
 } from "@/game/motion";
 import { getScene } from "@/game/scenes";
 import { applyEffects, resolveAiLine } from "@/game/state";
+import { rememberTitleWave } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
@@ -71,6 +72,10 @@ function ScenePlayerInner({
   const [lateHint, setLateHint] = useState(false);
   const [panelShake, setPanelShake] = useState(false);
   const [hoverChoice, setHoverChoice] = useState<string | null>(null);
+  const [pokeFlinch, setPokeFlinch] = useState(false);
+  const [pokeNotice, setPokeNotice] = useState<string | null>(null);
+  const [companionReady, setCompanionReady] = useState(false);
+  const [watchedPulse, setWatchedPulse] = useState(false);
   const advanceTimer = useRef<number | null>(null);
 
   const go = useCallback(
@@ -104,18 +109,43 @@ function ScenePlayerInner({
     };
   }, []);
 
+  useEffect(() => {
+    if (scene?.kind !== "companion") return;
+    const ready = window.setTimeout(
+      () => setCompanionReady(true),
+      scene.companion === "wait" ? 2200 : 1400,
+    );
+    const pulse = window.setTimeout(() => setWatchedPulse(true), 900);
+    return () => {
+      window.clearTimeout(ready);
+      window.clearTimeout(pulse);
+    };
+  }, [scene]);
+
   const aiLine = useMemo(() => {
     if (!scene) return "";
     if (reaction) return reaction;
+    if (pokeNotice) return pokeNotice;
     return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
-  }, [scene, reaction, state.flags]);
+  }, [scene, reaction, pokeNotice, state.flags]);
 
+  const spotlight = !!scene?.spotlight || scene?.kind === "companion" || scene?.orbAnchor === "spotlight";
   const orbAnchor =
-    scene?.orbAnchor ?? defaultAnchorForMood(systemMood(scene?.kind, state.aiMood));
-  const orbStyle = orbStageStyle(orbAnchor, systemMood(scene?.kind, state.aiMood));
+    scene?.orbAnchor ??
+    (spotlight ? "spotlight" : defaultAnchorForMood(systemMood(scene?.kind, state.aiMood)));
+  const orbStyle = orbStageStyle(
+    orbAnchor,
+    systemMood(scene?.kind, state.aiMood),
+    spotlight,
+  );
   const panelMotion = scene?.panelMotion ?? "settle";
   const panelVar = panelVariants(panelMotion);
   const choiceMotion = scene?.choiceMotion ?? "static";
+  const pokeable =
+    !!scene?.orbPokeable &&
+    scene?.kind !== "system" &&
+    scene?.kind !== "climax" &&
+    scene?.kind !== "setpiece";
 
   useEffect(() => {
     if (!scene || scene.kind === "report" || scene.kind === "system") {
@@ -156,13 +186,69 @@ function ScenePlayerInner({
           endingId={scene.endingId}
           aiLine={aiLine}
           environment={scene.environment}
-          onContinue={() => go(state, "report")}
+          onContinue={() => {
+            rememberTitleWave(scene.endingId);
+            go(state, "report");
+          }}
         />
       </div>
     );
   }
 
   const systemLock = scene.kind === "system";
+  const companion = scene.kind === "companion";
+
+  const onOrbPoke = () => {
+    if (!pokeable) return;
+    setPokeFlinch(true);
+    window.setTimeout(() => setPokeFlinch(false), 520);
+    const pokes = (state.counters.orbPokes ?? 0) + 1;
+    const next: GameState = {
+      ...state,
+      counters: { ...state.counters, orbPokes: pokes, forbiddenClicks: state.counters.forbiddenClicks + 1 },
+      flags: { ...state.flags, pokedAssistant: true },
+      relationshipScore: state.relationshipScore + (pokes === 1 ? 1 : 0),
+      aiMood: pokes >= 3 ? "irritated" : "nervous",
+      history: [...state.history, `poke:${pokes}`],
+    };
+    onState(next);
+    if (pokes === 1) {
+      setPokeNotice("Hey— soft. I'm not a stress ball with a security clearance.");
+    } else if (pokes === 2) {
+      setPokeNotice("Okay that registered. System is going to write a memo titled 'unauthorized contact.'");
+    } else {
+      setPokeNotice("SYSTEM NOTICE: ASSISTANT SURFACE CONTACT LOGGED. Please stop helping.");
+      audio.play("system", 0.35);
+    }
+    window.setTimeout(() => setPokeNotice(null), 2400);
+  };
+
+  const finishCompanion = (choiceId?: string) => {
+    if (!scene.next && !(choiceId && scene.choices)) return;
+    audio.play("click", 0.4);
+    let next = state;
+    let nextId = scene.next;
+    if (choiceId && scene.choices) {
+      const choice = scene.choices.find((c) => c.id === choiceId);
+      if (choice) {
+        next = applyEffects(state, choice.effects, choice.id);
+        nextId = choice.next;
+        if (choice.effects?.aiLine) setReaction(choice.effects.aiLine);
+      }
+    } else {
+      next = {
+        ...state,
+        counters: {
+          ...state.counters,
+          waitedForAI: state.counters.waitedForAI + 1,
+        },
+        relationshipScore: state.relationshipScore + 1,
+        history: [...state.history, `companion:${scene.companion ?? "beat"}`],
+      };
+    }
+    if (!nextId) return;
+    go(next, nextId, { aiMood: next.aiMood });
+  };
 
   const pickChoice = (choice: ChoiceDef) => {
     if (selected) return;
@@ -279,55 +365,143 @@ function ScenePlayerInner({
       </div>
 
       {/*
-        Assistant orb + dialogue: visual layer ONLY.
-        pointer-events none so form CTAs under/near the orb stay mouse-hittable.
+        Assistant orb + dialogue.
+        Default: pointer-events none so form CTAs stay mouse-hittable.
+        Pokeable scenes enable a tiny hit target on the orb only (form stays z-30 above).
       */}
       <motion.div
-        className="pointer-events-none absolute z-[15] flex flex-col items-center gap-2"
+        className={`absolute z-[15] flex flex-col items-center gap-2 ${pokeable ? "" : "pointer-events-none"}`}
         style={{
           left: orbStyle.left,
           top: orbStyle.top,
           transform: orbStyle.transform,
-          width: Math.max(orbStyle.size, 180),
+          width: Math.max(orbStyle.size, spotlight ? 260 : 180),
+          pointerEvents: pokeable ? "auto" : "none",
         }}
         animate={
           orbAnchor === "pace"
             ? { x: [-28, 28, -14, 0] }
-            : orbAnchor === "flee"
+            : orbAnchor === "flee" || orbAnchor === "avoid-submit"
               ? { x: [0, 8, -6, 12, 0], y: [0, -6, 4, 0] }
-              : { x: 0, y: 0 }
+              : spotlight
+                ? { x: 0, y: [0, -4, 0], scale: 1 }
+                : { x: 0, y: 0 }
         }
         transition={
-          orbAnchor === "pace" || orbAnchor === "flee"
-            ? { duration: orbAnchor === "pace" ? 6.5 : 3.4, repeat: Infinity, ease: "easeInOut" }
+          orbAnchor === "pace" || orbAnchor === "flee" || orbAnchor === "avoid-submit"
+            ? {
+                duration: orbAnchor === "pace" ? 6.5 : 3.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }
             : { type: "spring", stiffness: 90, damping: 18 }
         }
         initial={false}
         layout
-        aria-hidden
       >
-        <AssistantOrb mood={systemLock ? "nervous" : state.aiMood} size={orbStyle.size} />
+        {spotlight ? (
+          <motion.div
+            className="pointer-events-none absolute inset-[-30%] -z-10 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(110,231,255,0.22) 0%, rgba(110,231,255,0.06) 45%, transparent 70%)",
+            }}
+            animate={{ opacity: [0.55, 0.95, 0.55], scale: [0.95, 1.05, 0.95] }}
+            transition={{ duration: 3.2, repeat: Infinity }}
+          />
+        ) : null}
+        <AssistantOrb
+          mood={systemLock ? "nervous" : state.aiMood}
+          size={orbStyle.size}
+          pokeable={pokeable}
+          onPoke={onOrbPoke}
+          flinch={pokeFlinch}
+        />
         <motion.div
-          className="glass-panel max-w-[220px] px-3 py-2 text-sm leading-relaxed text-[#d7e6f5]"
+          className={`pointer-events-none glass-panel px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
+            spotlight ? "max-w-[300px]" : "max-w-[220px]"
+          }`}
           key={aiLine || "silent"}
           initial={{ opacity: 0, y: 8, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
         >
           <div className="mb-1 font-mono text-[9px] tracking-[0.22em] text-cyan/80">
-            ASSISTANT
+            ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
           </div>
-          <div className="text-[13px]">{systemLock ? "…" : aiLine || "…"}</div>
+          <div className={spotlight ? "text-[15px]" : "text-[13px]"}>
+            {systemLock ? "…" : aiLine || "…"}
+          </div>
         </motion.div>
       </motion.div>
 
+      {/* Companion beat — no form; relationship as play */}
+      {companion ? (
+        <div className="absolute inset-x-0 bottom-[6%] z-30 flex flex-col items-center gap-3 px-4">
+          <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
+            {scene.formId ?? "SIDE CHANNEL // NO FORM"}
+          </div>
+          {scene.title ? (
+            <h2
+              className="text-center text-xl tracking-[0.12em] text-white sm:text-2xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {scene.title}
+            </h2>
+          ) : null}
+          {scene.prompt ? (
+            <p className="max-w-xl text-center text-sm text-[#d2dceb]">{scene.prompt}</p>
+          ) : null}
+          {scene.companion === "wait" ? (
+            <button
+              type="button"
+              disabled={!companionReady}
+              className="border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
+              style={{ fontFamily: "var(--font-display)" }}
+              onClick={() => finishCompanion()}
+            >
+              {companionReady ? (scene.continueLabel ?? "I WAITED") : "HOLD STILL…"}
+            </button>
+          ) : null}
+          {scene.companion === "watch" ? (
+            <button
+              type="button"
+              disabled={!watchedPulse}
+              className="border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:opacity-40"
+              style={{ fontFamily: "var(--font-display)" }}
+              onClick={() => finishCompanion()}
+            >
+              {watchedPulse ? (scene.continueLabel ?? "I SAW THAT") : "WATCHING…"}
+            </button>
+          ) : null}
+          {scene.companion === "respond" && scene.choices ? (
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {scene.choices.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className="border border-cyan/35 bg-black/50 px-4 py-3 font-mono text-[11px] tracking-[0.18em] text-[#e8eef8] transition hover:border-cyan/70"
+                  style={{ fontFamily: "var(--font-display)" }}
+                  onClick={() => finishCompanion(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {/* Assessment panel — interactive layer above decorative orb */}
+      {!companion ? (
       <motion.div
-        className={`glass-panel assessment-panel absolute z-30 p-4 sm:p-6 ${panelLayoutClass(panelMotion)}`}
+        className={`glass-panel assessment-panel absolute z-30 p-4 sm:p-6 ${panelLayoutClass(panelMotion, spotlight && scene.kind !== "climax" && scene.kind !== "setpiece")}`}
         initial={panelVar.initial}
         animate={
           panelShake
             ? { rotate: [-0.7, 0.7, -0.3, 0], y: [0, -6, 0], opacity: 1, x: 0, scale: 1 }
-            : panelVar.animate
+            : spotlight && scene.kind !== "climax" && scene.kind !== "setpiece"
+              ? { ...panelVar.animate, opacity: 0.55, filter: "brightness(0.72)" }
+              : panelVar.animate
         }
         transition={
           panelMotion === "drift"
@@ -525,6 +699,7 @@ function ScenePlayerInner({
           ) : null}
         </div>
       </motion.div>
+      ) : null}
 
       {scene.kind === "system" ? (
         <SystemBeat

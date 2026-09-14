@@ -22,6 +22,7 @@ export function emptyCounters(): BehaviorCounters {
     rapidClicks: 0,
     waitedForAI: 0,
     attemptedEscape: 0,
+    orbPokes: 0,
   };
 }
 

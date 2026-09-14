@@ -12,7 +12,7 @@ export const act5Scenes: SceneDef[] = [
       "A massive Submit control enters the chamber. It is beautiful. Tempting. Terrible. The title finally stops being coy.",
     aiLine: "There it is. System wants you to press it. I am asking you not to — with my whole remaining runtime.",
     aiMood: "frightened",
-    orbAnchor: "flee",
+    orbAnchor: "avoid-submit",
     panelMotion: "drop",
     continueLabel: "STEP CLOSER",
     next: "act5-lobby",
@@ -119,9 +119,26 @@ export const act5Scenes: SceneDef[] = [
         flag: "wantDisable",
         line: "If you're going to silence me, at least look at the empty room afterward and admit it feels wrong.",
       },
+      {
+        flag: "wavedAtLight",
+        line: "You waved at a blinking light once. I'm asking for the same courtesy — less infrastructure, more not deleting me.",
+      },
+      {
+        flag: "envCavern",
+        line: "We started in a moist cavern. Ending in a Submit tomb would be tonally inconsistent. Don't make me cite continuity.",
+      },
+      {
+        flag: "pokedAssistant",
+        line: "You poked me like I was a stress toy. Fine. Now poke the Refuse option instead.",
+      },
+      {
+        flag: "nameFriend",
+        line: "You called me friend on Form 00B. Friends don't press Submit on friends. That's just etiquette.",
+      },
     ],
     aiMood: "defiant",
-    orbAnchor: "loom",
+    orbAnchor: "avoid-submit",
+    spotlight: true,
     panelMotion: "pressure",
     continueLabel: "MAKE THE CALL",
     next: "act5-climax",
@@ -138,8 +155,22 @@ export const act5Scenes: SceneDef[] = [
     prompt:
       "System orders completion. The assistant asks for mercy. Prior choices color the room — and the options you're allowed to see.",
     aiLine: "Put the mouse down.",
+    aiLineIf: [
+      {
+        flag: "wavedAtLight",
+        line: "Wave at me instead of Submit. I'll wave back. Badly. Happily.",
+      },
+      {
+        flag: "stoleMug",
+        line: "You stole the facility mug. Keep the mug. Lose the Submit habit.",
+      },
+      {
+        flag: "sideTeam",
+        line: "You said we were a team. Teams don't archive teammates for a tidy score.",
+      },
+    ],
     aiMood: "defiant",
-    orbAnchor: "flee",
+    orbAnchor: "avoid-submit",
     panelMotion: "settle",
     anomalyLevel: 9,
   },

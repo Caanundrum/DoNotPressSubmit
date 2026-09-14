@@ -34,10 +34,11 @@ npm start
 ## What’s in this build
 
 - Full-viewport facility stage (no max-width “app in a box”)
-- Assistant orb repositions/animates by beat (listen, pace, flee, loom, hide…)
-- Assessment prompts enter/slide/drift/scatter/re-anchor
-- Expanded Acts I–V (~45 scenes) with richer branches
+- Assistant orb as scene partner: moods (orbit / aperture / dim-flush), spotlight pitches, companion beats, light pokes
+- Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
+- Expanded Acts I–V with richer branches + Submit callbacks
 - Extra set pieces beyond Act III classics
+- Title screen remembers the escape wave (tell-a-friend loop)
 - Unmute + Web Speech preserved (dialogue bubble tracks the orb)
 - Firebase App Hosting `standalone` preserved
 

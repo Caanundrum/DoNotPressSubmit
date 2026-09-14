@@ -1,8 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type TargetAndTransition } from "framer-motion";
 import { panelLayoutClass } from "@/game/motion";
-import type { ChoiceDef, GameState, SceneDef } from "@/game/types";
+import type {
+  ChoiceDef,
+  ChoiceMotion,
+  GameState,
+  OrbAnchor,
+  PanelMotion,
+  SceneDef,
+} from "@/game/types";
 import { AmbientChrome, AmbientRoamers } from "../AmbientInteractives";
 import { AssistantOrb } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
@@ -27,20 +34,20 @@ export type ScenePlayerViewProps = {
   residue: "chaos" | "obedient" | "neutral";
   pokeable: boolean;
   orbStyle: { left: string; top: string; transform: string; size: number };
-  orbAnchor: string;
+  orbAnchor: OrbAnchor | string;
   spotlight: boolean;
   aiLine: string;
   glance: number;
   pokeFlinch: boolean;
   companionReady: boolean;
   watchedPulse: boolean;
-  panelMotion: string;
-  panelVar: { initial: object; animate: object };
+  panelMotion: PanelMotion;
+  panelVar: { initial: TargetAndTransition; animate: TargetAndTransition };
   panelShake: boolean;
   hasLatePending: boolean;
   lateHint: boolean;
   visibleChoices: ChoiceDef[];
-  choiceMotion: string;
+  choiceMotion: ChoiceMotion;
   selected: string | null;
   hoverChoice: string | null;
   onAmbient: (id: string, secret?: string) => void;

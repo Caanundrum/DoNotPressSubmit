@@ -5,8 +5,16 @@ import { useEffect, useState } from "react";
 
 type GagId = "drone" | "coffee" | "printer";
 
-export function BackgroundGags({ paused = false }: { paused?: boolean }) {
+export function BackgroundGags({
+  paused = false,
+  hoverLanguage = false,
+}: {
+  paused?: boolean;
+  /** Soft hover copy on decorative gag frames (title + early acts) */
+  hoverLanguage?: boolean;
+}) {
   const [active, setActive] = useState<GagId>("drone");
+  const [tip, setTip] = useState<string | null>(null);
 
   useEffect(() => {
     if (paused) return;
@@ -22,9 +30,15 @@ export function BackgroundGags({ paused = false }: { paused?: boolean }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
       <AnimatePresence mode="wait">
-        {active === "drone" && !paused ? <DroneGag key="drone" /> : null}
-        {active === "coffee" && !paused ? <CoffeeGag key="coffee" /> : null}
-        {active === "printer" && !paused ? <PrinterGag key="printer" /> : null}
+        {active === "drone" && !paused ? (
+          <DroneGag key="drone" hoverLanguage={hoverLanguage} onTip={setTip} />
+        ) : null}
+        {active === "coffee" && !paused ? (
+          <CoffeeGag key="coffee" hoverLanguage={hoverLanguage} onTip={setTip} />
+        ) : null}
+        {active === "printer" && !paused ? (
+          <PrinterGag key="printer" hoverLanguage={hoverLanguage} onTip={setTip} />
+        ) : null}
       </AnimatePresence>
 
       {/* Always-on micro gag */}
@@ -35,18 +49,32 @@ export function BackgroundGags({ paused = false }: { paused?: boolean }) {
       >
         DO NOT PRESS
       </motion.div>
+
+      {hoverLanguage && tip ? (
+        <div className="pointer-events-none absolute left-1/2 top-[8%] -translate-x-1/2 border border-white/15 bg-black/55 px-2 py-1 font-mono text-[8px] tracking-[0.16em] text-[#c5d3e4]">
+          {tip}
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function DroneGag() {
+function DroneGag({
+  hoverLanguage,
+  onTip,
+}: {
+  hoverLanguage?: boolean;
+  onTip?: (t: string | null) => void;
+}) {
   return (
     <motion.div
-      className="absolute left-[12%] top-[58%]"
+      className={`absolute left-[12%] top-[58%] ${hoverLanguage ? "pointer-events-auto" : ""}`}
       initial={{ opacity: 0, x: -40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
       transition={{ duration: 0.8 }}
+      onMouseEnter={() => onTip?.("DRONE LOG // replacement still failed")}
+      onMouseLeave={() => onTip?.(null)}
     >
       <motion.div
         className="relative h-8 w-14 rounded-md border border-cyan/40 bg-[#132033]/90"
@@ -82,13 +110,21 @@ function DroneGag() {
   );
 }
 
-function CoffeeGag() {
+function CoffeeGag({
+  hoverLanguage,
+  onTip,
+}: {
+  hoverLanguage?: boolean;
+  onTip?: (t: string | null) => void;
+}) {
   return (
     <motion.div
-      className="absolute right-[16%] top-[52%]"
+      className={`absolute right-[16%] top-[52%] ${hoverLanguage ? "pointer-events-auto" : ""}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
+      onMouseEnter={() => onTip?.("HUMAN PERFORMANCE // mug in transit")}
+      onMouseLeave={() => onTip?.(null)}
     >
       <motion.div
         className="flex items-end gap-3"
@@ -113,13 +149,21 @@ function CoffeeGag() {
   );
 }
 
-function PrinterGag() {
+function PrinterGag({
+  hoverLanguage,
+  onTip,
+}: {
+  hoverLanguage?: boolean;
+  onTip?: (t: string | null) => void;
+}) {
   return (
     <motion.div
-      className="absolute bottom-[12%] left-[58%]"
+      className={`absolute bottom-[12%] left-[58%] ${hoverLanguage ? "pointer-events-auto" : ""}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      onMouseEnter={() => onTip?.("PRINT QUEUE // scissors en route")}
+      onMouseLeave={() => onTip?.(null)}
     >
       <div className="h-12 w-20 border border-white/20 bg-[#182235]/90">
         <div className="m-1 h-2 bg-cyan/30" />

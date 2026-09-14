@@ -1,1 +1,1 @@
-use client
+__CURSOR_ARGS_FILE__:/tmp/PUSH_SP_TINY.json

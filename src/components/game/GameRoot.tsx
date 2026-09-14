@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { createInitialState } from "@/game/state";
-import { clearSave, loadSave, loadTitleWave, writeSave } from "@/game/storage";
+import { clearSave, loadSave, loadTitleAlly, loadTitleWave, writeSave } from "@/game/storage";
 import type { GameState, OrbMood, ShellPhase } from "@/game/types";
 import { SKIP_INTRO_KEY } from "@/game/types";
 import { audio } from "@/lib/audio";
@@ -25,6 +25,10 @@ export function GameRoot() {
   const [titleWave, setTitleWave] = useState(() => {
     if (typeof window === "undefined") return false;
     return loadTitleWave().waved;
+  });
+  const [titleAlly, setTitleAlly] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return loadTitleAlly().ally;
   });
   const [reducedMotion, setReducedMotion] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -60,6 +64,7 @@ export function GameRoot() {
     }
     setHasContinue(!!loadSave());
     setTitleWave(loadTitleWave().waved);
+    setTitleAlly(loadTitleAlly().ally);
   }, []);
 
   const onHoverChange = useCallback((hovering: boolean, ms: number) => {
@@ -111,7 +116,8 @@ export function GameRoot() {
     setPhase("title");
     setHasContinue(!!loadSave());
     setTitleWave(loadTitleWave().waved);
-    setOrbMood(loadTitleWave().waved ? "excited" : "neutral");
+    setTitleAlly(loadTitleAlly().ally);
+    setOrbMood(loadTitleWave().waved ? "excited" : loadTitleAlly().ally ? "amused" : "neutral");
   }, []);
 
   const replay = useCallback(() => {
@@ -176,6 +182,7 @@ export function GameRoot() {
               onHoverChange={onHoverChange}
               escapedBefore={!!loadSave()?.ending && loadSave()?.ending === "escape"}
               assistantWaving={titleWave}
+              allyBefore={titleAlly}
             />
           </motion.div>
         ) : null}

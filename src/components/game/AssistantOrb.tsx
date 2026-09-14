@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { expressiveMood } from "@/game/state";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 
@@ -20,22 +21,24 @@ const MOOD: Record<
     flush: 0 | 1 | 2;
     /** Aperture pulse rate */
     iris: number;
+    /** Squash-stretch vertical bias */
+    squash: number;
   }
 > = {
-  neutral: { core: "#9ef2ff", ring: "rgba(110,231,255,0.55)", speed: 12, scale: 1, orbit: 0, jitter: 0, flush: 1, iris: 2.6 },
-  listening: { core: "#b8f7ff", ring: "rgba(150,240,255,0.75)", speed: 7, scale: 1.06, orbit: 2, jitter: 0, flush: 1, iris: 1.8 },
-  thinking: { core: "#8ec8ff", ring: "rgba(140,190,255,0.6)", speed: 9, scale: 1.02, orbit: 6, jitter: 1, flush: 1, iris: 3.2 },
-  amused: { core: "#7dffd2", ring: "rgba(120,255,210,0.7)", speed: 5, scale: 1.08, orbit: 4, jitter: 2, flush: 2, iris: 1.4 },
-  skeptical: { core: "#9eb6ff", ring: "rgba(150,170,255,0.65)", speed: 10, scale: 0.98, orbit: 3, jitter: 1, flush: 1, iris: 2.2 },
-  confused: { core: "#d2b4ff", ring: "rgba(200,160,255,0.6)", speed: 4.5, scale: 1.04, orbit: 10, jitter: 4, flush: 1, iris: 1.1 },
-  suspicious: { core: "#ffc878", ring: "rgba(255,180,80,0.55)", speed: 6, scale: 1.0, orbit: 5, jitter: 2, flush: 2, iris: 1.6 },
-  irritated: { core: "#ff9b7a", ring: "rgba(255,120,90,0.65)", speed: 3.8, scale: 0.96, orbit: 3, jitter: 3, flush: 2, iris: 1.2 },
-  nervous: { core: "#ffd27a", ring: "rgba(255,180,80,0.65)", speed: 3.2, scale: 0.94, orbit: 14, jitter: 6, flush: 1, iris: 0.9 },
-  frightened: { core: "#ff8fa8", ring: "rgba(255,120,150,0.7)", speed: 2.4, scale: 0.9, orbit: 18, jitter: 8, flush: 0, iris: 0.7 },
-  defiant: { core: "#7ef0ff", ring: "rgba(110,255,255,0.85)", speed: 4, scale: 1.14, orbit: 2, jitter: 1, flush: 2, iris: 1.5 },
-  defeated: { core: "#8a9bb0", ring: "rgba(140,160,180,0.4)", speed: 18, scale: 0.88, orbit: 0, jitter: 0, flush: 0, iris: 4.5 },
-  excited: { core: "#9dffb0", ring: "rgba(140,255,180,0.75)", speed: 3.5, scale: 1.12, orbit: 8, jitter: 3, flush: 2, iris: 1.0 },
-  glitching: { core: "#ff6ee7", ring: "rgba(255,110,220,0.7)", speed: 1.8, scale: 1.05, orbit: 16, jitter: 9, flush: 2, iris: 0.45 },
+  neutral: { core: "#9ef2ff", ring: "rgba(110,231,255,0.55)", speed: 12, scale: 1, orbit: 0, jitter: 0, flush: 1, iris: 2.6, squash: 1 },
+  listening: { core: "#b8f7ff", ring: "rgba(150,240,255,0.75)", speed: 7, scale: 1.06, orbit: 2, jitter: 0, flush: 1, iris: 1.8, squash: 1.04 },
+  thinking: { core: "#8ec8ff", ring: "rgba(140,190,255,0.6)", speed: 9, scale: 1.02, orbit: 6, jitter: 1, flush: 1, iris: 3.2, squash: 0.98 },
+  amused: { core: "#7dffd2", ring: "rgba(120,255,210,0.7)", speed: 5, scale: 1.08, orbit: 4, jitter: 2, flush: 2, iris: 1.4, squash: 1.08 },
+  skeptical: { core: "#9eb6ff", ring: "rgba(150,170,255,0.65)", speed: 10, scale: 0.98, orbit: 3, jitter: 1, flush: 1, iris: 2.2, squash: 0.96 },
+  confused: { core: "#d2b4ff", ring: "rgba(200,160,255,0.6)", speed: 4.5, scale: 1.04, orbit: 10, jitter: 4, flush: 1, iris: 1.1, squash: 1.02 },
+  suspicious: { core: "#ffc878", ring: "rgba(255,180,80,0.55)", speed: 6, scale: 1.0, orbit: 5, jitter: 2, flush: 2, iris: 1.6, squash: 0.97 },
+  irritated: { core: "#ff9b7a", ring: "rgba(255,120,90,0.65)", speed: 3.8, scale: 0.96, orbit: 3, jitter: 3, flush: 2, iris: 1.2, squash: 0.94 },
+  nervous: { core: "#ffd27a", ring: "rgba(255,180,80,0.65)", speed: 3.2, scale: 0.94, orbit: 14, jitter: 6, flush: 1, iris: 0.9, squash: 0.9 },
+  frightened: { core: "#ff8fa8", ring: "rgba(255,120,150,0.7)", speed: 2.4, scale: 0.9, orbit: 18, jitter: 8, flush: 0, iris: 0.7, squash: 0.86 },
+  defiant: { core: "#7ef0ff", ring: "rgba(110,255,255,0.85)", speed: 4, scale: 1.14, orbit: 2, jitter: 1, flush: 2, iris: 1.5, squash: 1.1 },
+  defeated: { core: "#8a9bb0", ring: "rgba(140,160,180,0.4)", speed: 18, scale: 0.88, orbit: 0, jitter: 0, flush: 0, iris: 4.5, squash: 0.82 },
+  excited: { core: "#9dffb0", ring: "rgba(140,255,180,0.75)", speed: 3.5, scale: 1.12, orbit: 8, jitter: 3, flush: 2, iris: 1.0, squash: 1.12 },
+  glitching: { core: "#ff6ee7", ring: "rgba(255,110,220,0.7)", speed: 1.8, scale: 1.05, orbit: 16, jitter: 9, flush: 2, iris: 0.45, squash: 1.05 },
 };
 
 function coreBrightness(flush: 0 | 1 | 2) {
@@ -43,6 +46,14 @@ function coreBrightness(flush: 0 | 1 | 2) {
   if (flush === 2) return 1.18;
   return 1;
 }
+
+const EXPRESSIVE_RING: Record<string, number> = {
+  idle: 1,
+  curious: 0.88,
+  nervous: 0.72,
+  pleased: 1.08,
+  alarmed: 0.62,
+};
 
 export function AssistantOrb({
   mood,
@@ -52,6 +63,8 @@ export function AssistantOrb({
   pokeable = false,
   onPoke,
   flinch = false,
+  /** -1 lean left … +1 lean right (choice glance / submit recoil) */
+  glance = 0,
 }: {
   mood: OrbMood;
   size?: number;
@@ -62,10 +75,15 @@ export function AssistantOrb({
   pokeable?: boolean;
   onPoke?: () => void;
   flinch?: boolean;
+  glance?: number;
 }) {
   const m = MOOD[mood] ?? MOOD.neutral;
+  const bucket = expressiveMood(mood);
+  const ringTight = EXPRESSIVE_RING[bucket] ?? 1;
   const [localFlinch, setLocalFlinch] = useState(false);
   const showingFlinch = flinch || localFlinch;
+  const glanceX = Math.max(-1, Math.min(1, glance)) * 18;
+  const glanceRotate = Math.max(-1, Math.min(1, glance)) * 6;
 
   useEffect(() => {
     audio.playMood(mood);
@@ -80,13 +98,16 @@ export function AssistantOrb({
   };
 
   const brightness = coreBrightness(m.flush) * (showingFlinch ? 1.35 : 1);
-  const irisOpen = showingFlinch ? 0.35 : 1;
+  const irisOpen = showingFlinch ? 0.35 : bucket === "alarmed" ? 0.7 : bucket === "curious" ? 1.1 : 1;
+  const squashY = m.squash;
+  const squashX = 2 - m.squash;
 
   return (
     <div
       className="relative flex flex-col items-center gap-3"
       style={{ width: size, pointerEvents: pokeable ? "auto" : "none" }}
       aria-hidden={!pokeable}
+      data-expressive-mood={bucket}
     >
       <motion.div
         className="relative"
@@ -109,14 +130,24 @@ export function AssistantOrb({
                   y: [0, -14, 4, 0],
                   x: [0, -16, 10, 0],
                   scale: m.scale * 0.92,
+                  rotate: glanceRotate,
                 }
               : {
-                  y: [0, -6, 0],
+                  y: [0, -6 * squashY, 0],
                   x: m.orbit
-                    ? [0, m.orbit, -m.orbit * 0.7, m.jitter ? m.jitter : 0, 0]
+                    ? [
+                        glanceX,
+                        glanceX + m.orbit,
+                        glanceX - m.orbit * 0.7,
+                        glanceX + (m.jitter ? m.jitter : 0),
+                        glanceX,
+                      ]
                     : m.jitter
-                      ? [0, m.jitter, -m.jitter, 0]
-                      : 0,
+                      ? [glanceX, glanceX + m.jitter, glanceX - m.jitter, glanceX]
+                      : glanceX,
+                  rotate: glanceRotate,
+                  scaleX: squashX,
+                  scaleY: squashY,
                   scale: m.scale,
                 }
         }
@@ -128,11 +159,19 @@ export function AssistantOrb({
               : {
                   y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
                   x: {
-                    duration: mood === "nervous" || mood === "frightened" ? 0.55 : 1.4,
-                    repeat: Infinity,
+                    duration:
+                      bucket === "nervous" || bucket === "alarmed"
+                        ? 0.55
+                        : glance !== 0
+                          ? 0.35
+                          : 1.4,
+                    repeat: glance !== 0 && !m.orbit && !m.jitter ? 0 : Infinity,
                     ease: "easeInOut",
                   },
+                  rotate: { duration: 0.35 },
                   scale: { duration: 0.45 },
+                  scaleX: { duration: 0.5 },
+                  scaleY: { duration: 0.5 },
                 }
         }
         onClick={handlePoke}
@@ -162,17 +201,21 @@ export function AssistantOrb({
         />
 
         <motion.div
-          className="absolute inset-[8%] rounded-full border"
-          style={{ borderColor: m.ring }}
+          className="absolute rounded-full border"
+          style={{
+            inset: `${8 * ringTight}%`,
+            borderColor: m.ring,
+          }}
           animate={{ rotate: 360 }}
-          transition={{ duration: m.speed, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: m.speed * (bucket === "alarmed" ? 0.7 : 1), repeat: Infinity, ease: "linear" }}
         >
           <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan" />
           <div className="absolute bottom-[18%] right-[8%] h-1.5 w-1.5 rounded-full bg-white/70" />
         </motion.div>
 
         <motion.div
-          className="absolute inset-[18%] rounded-full border border-dashed border-white/25"
+          className="absolute rounded-full border border-dashed border-white/25"
+          style={{ inset: `${18 * ringTight}%` }}
           animate={{ rotate: -360 }}
           transition={{ duration: m.speed * 1.4, repeat: Infinity, ease: "linear" }}
         />
@@ -186,7 +229,7 @@ export function AssistantOrb({
           }}
           animate={{
             filter:
-              mood === "nervous" || mood === "frightened" || mood === "glitching"
+              bucket === "nervous" || bucket === "alarmed"
                 ? [
                     `brightness(${brightness})`,
                     `brightness(${brightness * 1.25})`,
@@ -209,6 +252,8 @@ export function AssistantOrb({
             height: size * 0.12,
             background: `radial-gradient(circle, rgba(4,10,18,0.92) 0%, rgba(4,10,18,0.55) 55%, transparent 70%)`,
             boxShadow: `0 0 10px ${m.core}55`,
+            // Glance shifts aperture toward attention without becoming a pupil-eye face
+            x: glanceX * 0.35,
           }}
           animate={{
             scale: [0.85 * irisOpen, 1.15 * irisOpen, 0.9 * irisOpen],
@@ -228,10 +273,10 @@ export function AssistantOrb({
           <motion.div
             key={deg}
             className="absolute left-1/2 top-1/2 h-4 w-[2px] origin-bottom rounded-full bg-white/50"
-            style={{ transform: `rotate(${deg}deg) translateY(-${size * 0.42}px)` }}
+            style={{ transform: `rotate(${deg}deg) translateY(-${size * 0.42 * ringTight}px)` }}
             animate={{
               opacity:
-                mood === "amused" || mood === "excited" ? [0.2, 1, 0.2] : [0.35, 0.7, 0.35],
+                bucket === "pleased" ? [0.2, 1, 0.2] : [0.35, 0.7, 0.35],
             }}
             transition={{ duration: 2 + deg / 180, repeat: Infinity }}
           />

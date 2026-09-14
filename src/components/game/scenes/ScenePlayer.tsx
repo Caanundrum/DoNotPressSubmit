@@ -17,15 +17,12 @@ import { FacilityBackground } from "../FacilityBackground";
 import { AssessmentReport } from "./AssessmentReport";
 import { EndingSequence } from "./EndingSequence";
 import { ScenePlayerView } from "./ScenePlayerView";
-import { SystemBeat } from "./SystemBeat";
 import {
   applyAmbientClick,
   applyOrbPoke,
   applyRoamerCatch,
   choiceGlance,
 } from "./sceneAmbient";
-
-void SystemBeat;
 
 export function ScenePlayer({
   state,

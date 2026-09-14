@@ -37,7 +37,7 @@ export function SubmitClimax({
         >
           <div className="font-mono text-[10px] tracking-[0.35em] text-danger/90">FINAL CONTROL</div>
           <div className="mt-2 text-4xl tracking-[0.2em] text-white sm:text-5xl">SUBMIT</div>
-          <div className="mt and-3 font-mono text-[10px] tracking-[0.18em] text-[#ffc2cc]">
+          <div className="mt-3 font-mono text-[10px] tracking-[0.18em] text-[#ffc2cc]">
             BEAUTIFUL · TEMPTING · TERRIBLE
           </div>
         </div>

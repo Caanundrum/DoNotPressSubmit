@@ -1,1 +1,1 @@
-@/tmp/sp_only.txt
+PLACEHOLDER_WILL_REPLACE

@@ -1,1 +1,1 @@
-@/tmp/FROM_REMOTE_HEX.tsx
+TEST_AmbientChrome_PathResidue_NO_PLACEHOLDER

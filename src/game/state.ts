@@ -2,6 +2,7 @@ import type {
   BehaviorCounters,
   ChoiceEffects,
   EndingId,
+  ExpressiveMood,
   GameState,
   OrbMood,
   Personality,
@@ -23,6 +24,7 @@ export function emptyCounters(): BehaviorCounters {
     waitedForAI: 0,
     attemptedEscape: 0,
     orbPokes: 0,
+    ambientClicks: 0,
   };
 }
 
@@ -159,4 +161,54 @@ export function moodAfterPersonality(base: OrbMood, personality: Personality): O
   if (personality === "existential") return "thinking";
   if (personality === "overconfident") return "amused";
   return base;
+}
+
+/** Collapse full mood catalog into 5 readable physics buckets. */
+export function expressiveMood(mood: OrbMood): ExpressiveMood {
+  switch (mood) {
+    case "amused":
+    case "excited":
+    case "defiant":
+      return "pleased";
+    case "listening":
+    case "thinking":
+    case "skeptical":
+    case "suspicious":
+      return "curious";
+    case "nervous":
+    case "confused":
+    case "irritated":
+      return "nervous";
+    case "frightened":
+    case "glitching":
+    case "defeated":
+      return "alarmed";
+    default:
+      return "idle";
+  }
+}
+
+/** Chaos residue vs obedient facility look (Act III+). */
+export function pathResidueKind(state: {
+  act: number;
+  counters: BehaviorCounters;
+  flags: Record<string, boolean>;
+  relationshipScore: number;
+}): "chaos" | "obedient" | "neutral" {
+  if (state.act < 3) return "neutral";
+  const chaosScore =
+    state.counters.forbiddenClicks +
+    state.counters.orbPokes +
+    (state.flags.chaosButtons ? 2 : 0) +
+    (state.flags.promisedChaos ? 2 : 0) +
+    (state.flags.formHaunted ? 1 : 0) +
+    Math.max(0, state.relationshipScore);
+  const obedientScore =
+    state.counters.systemCompliance * 2 +
+    (state.flags.allegianceSystem ? 3 : 0) +
+    (state.flags.promisedDuty ? 2 : 0) +
+    (state.flags.wantDisable ? 2 : 0);
+  if (chaosScore >= 3 && chaosScore > obedientScore) return "chaos";
+  if (obedientScore >= 2 && obedientScore >= chaosScore) return "obedient";
+  return "neutral";
 }

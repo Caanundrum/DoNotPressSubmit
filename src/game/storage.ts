@@ -1,6 +1,6 @@
 import { createInitialState } from "./state";
 import type { EndingId, GameState } from "./types";
-import { SAVE_KEY, TITLE_WAVE_KEY } from "./types";
+import { SAVE_KEY, TITLE_ALLY_KEY, TITLE_WAVE_KEY } from "./types";
 
 export function loadSave(): GameState | null {
   if (typeof window === "undefined") return null;
@@ -12,6 +12,9 @@ export function loadSave(): GameState | null {
     // Backfill counters added in later passes.
     if (parsed.counters && typeof parsed.counters.orbPokes !== "number") {
       parsed.counters.orbPokes = 0;
+    }
+    if (parsed.counters && typeof parsed.counters.ambientClicks !== "number") {
+      parsed.counters.ambientClicks = 0;
     }
     return parsed;
   } catch {
@@ -66,5 +69,31 @@ export function loadTitleWave(): { waved: boolean; ending?: EndingId } {
     return { waved: !!parsed.waved, ending: parsed.ending };
   } catch {
     return { waved: false };
+  }
+}
+
+/** Ally / refuse-mercy residue on title (survives clearSave). */
+export function rememberTitleAlly(ending?: EndingId, allied = false) {
+  if (typeof window === "undefined") return;
+  if (!allied && ending !== "refuse" && ending !== "escape" && ending !== "secret") return;
+  try {
+    window.localStorage.setItem(
+      TITLE_ALLY_KEY,
+      JSON.stringify({ ally: true, ending, at: Date.now() }),
+    );
+  } catch {
+    // ignore
+  }
+}
+
+export function loadTitleAlly(): { ally: boolean; ending?: EndingId } {
+  if (typeof window === "undefined") return { ally: false };
+  try {
+    const raw = window.localStorage.getItem(TITLE_ALLY_KEY);
+    if (!raw) return { ally: false };
+    const parsed = JSON.parse(raw) as { ally?: boolean; ending?: EndingId };
+    return { ally: !!parsed.ally, ending: parsed.ending };
+  } catch {
+    return { ally: false };
   }
 }

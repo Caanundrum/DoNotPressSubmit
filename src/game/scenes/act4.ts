@@ -164,7 +164,9 @@ export const act4Scenes: SceneDef[] = [
       },
     ],
     aiMood: "nervous",
-    orbAnchor: "listen",
+    orbAnchor: "spotlight",
+    spotlight: true,
+    orbPokeable: true,
     panelMotion: "settle",
     choiceMotion: "restless",
     choices: [

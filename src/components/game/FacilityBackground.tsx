@@ -20,11 +20,14 @@ export function FacilityBackground({
   systemLock = false,
   environment = "pristine",
   anomalyLevel = 0,
+  hoverLanguage = false,
 }: {
   intensity?: number;
   systemLock?: boolean;
   environment?: EnvironmentPreset;
   anomalyLevel?: number;
+  /** Soft hover copy on decorative panels (title + select acts) */
+  hoverLanguage?: boolean;
 }) {
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -127,8 +130,13 @@ export function FacilityBackground({
       </motion.div>
 
       <motion.div className="absolute inset-0" style={{ x: midX, y: midY }}>
-        <div className="absolute left-[6%] top-[22%] h-44 w-28 border border-white/10 bg-white/5 backdrop-blur-[2px]">
-          <div className="m-2 h-full border border-cyan/20 bg-[#0a1524]/70 p-2 font-mono text-[9px] tracking-widest text-cyan/70">
+        <div
+          className={`absolute left-[6%] top-[22%] h-44 w-28 border border-white/10 bg-white/5 backdrop-blur-[2px] ${
+            hoverLanguage ? "pointer-events-auto cursor-help" : ""
+          }`}
+          title={hoverLanguage ? "CHAMBER 07 — queue theater" : undefined}
+        >
+          <div className="m-2 h-full border border-cyan/20 bg-[#0a1524]/70 p-2 font-mono text-[9px] tracking-widest text-cyan/70 transition hover:border-cyan/45 hover:text-cyan">
             <div>CHAMBER 07</div>
             <motion.div
               className="mt-3"
@@ -148,9 +156,14 @@ export function FacilityBackground({
           </div>
         </div>
 
-        <div className="absolute right-[8%] top-[28%] h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent">
+        <div
+          className={`absolute right-[8%] top-[28%] h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent ${
+            hoverLanguage ? "pointer-events-auto cursor-help" : ""
+          }`}
+          title={hoverLanguage ? "Decorative frame — do not trust" : undefined}
+        >
           <motion.div
-            className="absolute inset-3 border border-dashed border-white/20"
+            className="absolute inset-3 border border-dashed border-white/20 transition hover:border-cyan/40"
             animate={{
               rotate: systemLock || sterile ? 0 : peel ? [0, 3, -4, 1, 0] : [0, 1.5, -1.5, 0],
             }}

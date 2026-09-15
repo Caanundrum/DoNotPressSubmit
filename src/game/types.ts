@@ -112,6 +112,8 @@ export interface BehaviorCounters {
   attemptedEscape: number;
   /** Tiny illegal orb pokes — relationship without blocking CTAs */
   orbPokes: number;
+  /** Facility chrome / ambient gag clicks (report-visible) */
+  ambientClicks: number;
 }
 
 export interface GameState {
@@ -202,3 +204,16 @@ export const SAVE_KEY = "dnps-save-v2";
 export const SKIP_INTRO_KEY = "dnps-skip-intros";
 /** Survives new-game clear — title screen wave after escape ending */
 export const TITLE_WAVE_KEY = "dnps-title-wave-v1";
+/** Survives new-game clear — title remembers ally / refuse mercy */
+export const TITLE_ALLY_KEY = "dnps-title-ally-v1";
+
+/**
+ * Five readable “expressive” moods for the enjoyment pass.
+ * Full OrbMood still drives color; these collapse presentation physics.
+ */
+export type ExpressiveMood =
+  | "idle"
+  | "curious"
+  | "nervous"
+  | "pleased"
+  | "alarmed";

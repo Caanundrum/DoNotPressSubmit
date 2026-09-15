@@ -58,8 +58,16 @@ export function AssessmentReport({
           <Stat label="AI cooperation" value={String(state.counters.aiCooperation)} />
           <Stat label="System compliance" value={String(state.counters.systemCompliance)} />
           <Stat label="Orb pokes" value={String(state.counters.orbPokes ?? 0)} />
+          <Stat
+            label="Ambient clicks"
+            value={String(state.counters.ambientClicks ?? 0)}
+            highlight={(state.counters.ambientClicks ?? 0) >= 3}
+          />
           <Stat label="Personality" value={state.aiPersonality} />
           <Stat label="Session" value={state.sessionId.slice(0, 14)} />
+          {state.flags.serialPoker || state.secrets.includes("orb-poker-serial") ? (
+            <Stat label="Secret flag" value="SERIAL POKER" highlight />
+          ) : null}
         </div>
 
         {state.majorChoices.length ? (

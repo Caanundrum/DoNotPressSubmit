@@ -9,10 +9,12 @@ export function SubmitClimax({
   state,
   aiLine,
   onChoose,
+  onHoverOption,
 }: {
   state: GameState;
   aiLine: string;
   onChoose: (action: "submit" | "refuse" | "escape" | "disable" | "secret") => void;
+  onHoverOption?: (id: string | null) => void;
 }) {
   const options = climaxOptions(state);
 
@@ -67,6 +69,11 @@ export function SubmitClimax({
             }}
             whileHover={{ x: 4, y: -2 }}
             whileTap={{ scale: 0.98 }}
+            onHoverStart={() => {
+              onHoverOption?.(opt.id);
+              audio.play("hover", 0.2);
+            }}
+            onHoverEnd={() => onHoverOption?.(null)}
             onClick={() => {
               audio.play(opt.id === "submit" ? "system" : "begin", opt.id === "submit" ? 0.7 : 0.55);
               onChoose(opt.id);

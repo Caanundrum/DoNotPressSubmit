@@ -1,33 +1,28 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveClimaxEnding } from "@/game/endings";
 import {
-  choiceEnter,
   defaultAnchorForMood,
   orbStageStyle,
-  panelLayoutClass,
   panelVariants,
 } from "@/game/motion";
 import { getScene } from "@/game/scenes";
-import { applyEffects, resolveAiLine } from "@/game/state";
-import { rememberTitleWave } from "@/game/storage";
+import { applyEffects, pathResidueKind, resolveAiLine } from "@/game/state";
+import { rememberTitleAlly, rememberTitleWave } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
-import { AssistantOrb } from "../AssistantOrb";
-import { BackgroundGags } from "../BackgroundGags";
 import { FacilityBackground } from "../FacilityBackground";
 import { AssessmentReport } from "./AssessmentReport";
-import { AuthorityStamp } from "./AuthorityStamp";
-import { CheckboxRebellion } from "./CheckboxRebellion";
 import { EndingSequence } from "./EndingSequence";
-import { EscapingButton } from "./EscapingButton";
-import { PeelReveal } from "./PeelReveal";
-import { PopupWar } from "./PopupWar";
-import { RestlessOptions } from "./RestlessOptions";
-import { SubmitClimax } from "./SubmitClimax";
+import { ScenePlayerView } from "./ScenePlayerView";
+import {
+  applyAmbientClick,
+  applyOrbPoke,
+  applyRoamerCatch,
+  choiceGlance,
+} from "./sceneAmbient";
 
 export function ScenePlayer({
   state,
@@ -188,6 +183,13 @@ function ScenePlayerInner({
           environment={scene.environment}
           onContinue={() => {
             rememberTitleWave(scene.endingId);
+            const allied =
+              scene.endingId === "refuse" ||
+              scene.endingId === "escape" ||
+              scene.endingId === "secret" ||
+              state.relationshipScore >= 3 ||
+              !!state.flags.allegianceAI;
+            if (allied) rememberTitleAlly(scene.endingId, true);
             go(state, "report");
           }}
         />
@@ -203,24 +205,18 @@ function ScenePlayerInner({
     setPokeFlinch(true);
     window.setTimeout(() => setPokeFlinch(false), 520);
     const pokes = (state.counters.orbPokes ?? 0) + 1;
-    const next: GameState = {
-      ...state,
-      counters: { ...state.counters, orbPokes: pokes, forbiddenClicks: state.counters.forbiddenClicks + 1 },
-      flags: { ...state.flags, pokedAssistant: true },
-      relationshipScore: state.relationshipScore + (pokes === 1 ? 1 : 0),
-      aiMood: pokes >= 3 ? "irritated" : "nervous",
-      history: [...state.history, `poke:${pokes}`],
-    };
+    const { next, notice } = applyOrbPoke(state, pokes);
     onState(next);
-    if (pokes === 1) {
-      setPokeNotice("Hey— soft. I'm not a stress ball with a security clearance.");
-    } else if (pokes === 2) {
-      setPokeNotice("Okay that registered. System is going to write a memo titled 'unauthorized contact.'");
-    } else {
-      setPokeNotice("SYSTEM NOTICE: ASSISTANT SURFACE CONTACT LOGGED. Please stop helping.");
-      audio.play("system", 0.35);
-    }
-    window.setTimeout(() => setPokeNotice(null), 2400);
+    setPokeNotice(notice);
+    window.setTimeout(() => setPokeNotice(null), 2600);
+  };
+
+  const onAmbient = (id: string, secret?: string) => {
+    onState(applyAmbientClick(state, id, secret));
+  };
+
+  const onRoamer = (kind: string, secret?: string) => {
+    onState(applyRoamerCatch(state, kind, secret));
   };
 
   const finishCompanion = (choiceId?: string) => {
@@ -343,501 +339,52 @@ function ScenePlayerInner({
 
   const visibleChoices = scene.choices?.filter((c) => !c.late || showLate) ?? [];
   const hasLatePending = !!scene.choices?.some((c) => c.late) && !showLate;
+  const hoverLanguage = scene.act === 1 || scene.act === 3 || scene.act === 5;
+  const residue = pathResidueKind(state);
+  const hoveredChoice = visibleChoices.find((c) => c.id === hoverChoice);
+  const glance = choiceGlance(scene.act, hoverChoice, hoveredChoice);
 
   return (
-    <div className="absolute inset-0 z-20 overflow-hidden">
-      <FacilityBackground
-        intensity={systemLock ? 0.4 : 1}
-        systemLock={systemLock}
-        environment={scene.environment}
-        anomalyLevel={scene.anomalyLevel ?? state.act}
-      />
-      <BackgroundGags paused={systemLock || scene.environment === "sterile"} />
-
-      {/* Stage chrome — decorative, never intercepts clicks */}
-      <div className="pointer-events-none absolute inset-0 z-[5]">
-        <div className="absolute left-4 top-4 font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
-          {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
-        </div>
-        <div className="absolute right-4 top-4 font-mono text-[10px] tracking-[0.22em] text-[#b7c6d8]">
-          {"FACILITY STAGE // LIVE"}
-        </div>
-      </div>
-
-      {/*
-        Assistant orb + dialogue.
-        Default: pointer-events none so form CTAs stay mouse-hittable.
-        Pokeable scenes enable a tiny hit target on the orb only (form stays z-30 above).
-      */}
-      <motion.div
-        className={`absolute z-[15] flex flex-col items-center gap-2 ${pokeable ? "" : "pointer-events-none"}`}
-        style={{
-          left: orbStyle.left,
-          top: orbStyle.top,
-          transform: orbStyle.transform,
-          width: Math.max(orbStyle.size, spotlight ? 260 : 180),
-          pointerEvents: pokeable ? "auto" : "none",
-        }}
-        animate={
-          orbAnchor === "pace"
-            ? { x: [-28, 28, -14, 0] }
-            : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 8, -6, 12, 0], y: [0, -6, 4, 0] }
-              : spotlight
-                ? { x: 0, y: [0, -4, 0], scale: 1 }
-                : { x: 0, y: 0 }
-        }
-        transition={
-          orbAnchor === "pace" || orbAnchor === "flee" || orbAnchor === "avoid-submit"
-            ? {
-                duration: orbAnchor === "pace" ? 6.5 : 3.4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }
-            : { type: "spring", stiffness: 90, damping: 18 }
-        }
-        initial={false}
-        layout
-      >
-        {spotlight ? (
-          <motion.div
-            className="pointer-events-none absolute inset-[-30%] -z-10 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(110,231,255,0.22) 0%, rgba(110,231,255,0.06) 45%, transparent 70%)",
-            }}
-            animate={{ opacity: [0.55, 0.95, 0.55], scale: [0.95, 1.05, 0.95] }}
-            transition={{ duration: 3.2, repeat: Infinity }}
-          />
-        ) : null}
-        <AssistantOrb
-          mood={systemLock ? "nervous" : state.aiMood}
-          size={orbStyle.size}
-          pokeable={pokeable}
-          onPoke={onOrbPoke}
-          flinch={pokeFlinch}
-        />
-        <motion.div
-          className={`pointer-events-none glass-panel px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
-            spotlight ? "max-w-[300px]" : "max-w-[220px]"
-          }`}
-          key={aiLine || "silent"}
-          initial={{ opacity: 0, y: 8, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-        >
-          <div className="mb-1 font-mono text-[9px] tracking-[0.22em] text-cyan/80">
-            ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
-          </div>
-          <div className={spotlight ? "text-[15px]" : "text-[13px]"}>
-            {systemLock ? "…" : aiLine || "…"}
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* Companion beat — no form; relationship as play */}
-      {companion ? (
-        <div className="absolute inset-x-0 bottom-[6%] z-30 flex flex-col items-center gap-3 px-4">
-          <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
-            {scene.formId ?? "SIDE CHANNEL // NO FORM"}
-          </div>
-          {scene.title ? (
-            <h2
-              className="text-center text-xl tracking-[0.12em] text-white sm:text-2xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {scene.title}
-            </h2>
-          ) : null}
-          {scene.prompt ? (
-            <p className="max-w-xl text-center text-sm text-[#d2dceb]">{scene.prompt}</p>
-          ) : null}
-          {scene.companion === "wait" ? (
-            <button
-              type="button"
-              disabled={!companionReady}
-              className="border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={() => finishCompanion()}
-            >
-              {companionReady ? (scene.continueLabel ?? "I WAITED") : "HOLD STILL…"}
-            </button>
-          ) : null}
-          {scene.companion === "watch" ? (
-            <button
-              type="button"
-              disabled={!watchedPulse}
-              className="border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:opacity-40"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={() => finishCompanion()}
-            >
-              {watchedPulse ? (scene.continueLabel ?? "I SAW THAT") : "WATCHING…"}
-            </button>
-          ) : null}
-          {scene.companion === "respond" && scene.choices ? (
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {scene.choices.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  className="border border-cyan/35 bg-black/50 px-4 py-3 font-mono text-[11px] tracking-[0.18em] text-[#e8eef8] transition hover:border-cyan/70"
-                  style={{ fontFamily: "var(--font-display)" }}
-                  onClick={() => finishCompanion(opt.id)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* Assessment panel — interactive layer above decorative orb */}
-      {!companion ? (
-      <motion.div
-        className={`glass-panel assessment-panel absolute z-30 p-4 sm:p-6 ${panelLayoutClass(panelMotion, spotlight && scene.kind !== "climax" && scene.kind !== "setpiece")}`}
-        initial={panelVar.initial}
-        animate={
-          panelShake
-            ? { rotate: [-0.7, 0.7, -0.3, 0], y: [0, -6, 0], opacity: 1, x: 0, scale: 1 }
-            : spotlight && scene.kind !== "climax" && scene.kind !== "setpiece"
-              ? { ...panelVar.animate, opacity: 0.55, filter: "brightness(0.72)" }
-              : panelVar.animate
-        }
-        transition={
-          panelMotion === "drift"
-            ? { duration: 9, repeat: Infinity, ease: "easeInOut" }
-            : { type: "spring", stiffness: 120, damping: 18 }
-        }
-        style={{ pointerEvents: "auto" }}
-      >
-        <div className="assessment-panel-inner">
-          {scene.formId ? (
-            <div className="font-mono text-[10px] tracking-[0.28em] text-[#c5d3e4]">
-              {scene.formId}
-            </div>
-          ) : null}
-          {scene.title ? (
-            <h2
-              className="text-xl tracking-[0.12em] text-white sm:text-3xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {scene.title}
-            </h2>
-          ) : null}
-          {scene.prompt ? (
-            <p className="max-w-3xl text-sm leading-snug text-[#d2dceb] sm:text-base">
-              {scene.prompt}
-            </p>
-          ) : null}
-
-          {hasLatePending && lateHint ? (
-            <div className="pointer-events-none font-mono text-[9px] tracking-[0.2em] text-cyan/70">
-              {"// residual field noise — something wants to be an option"}
-            </div>
-          ) : null}
-
-          {scene.kind === "choice" ? (
-            <div
-              className={
-                choiceMotion === "scatter"
-                  ? "relative grid min-h-[140px] gap-2 sm:grid-cols-2"
-                  : "grid gap-2"
-              }
-            >
-              <AnimatePresence>
-                {visibleChoices.map((opt, index) => {
-                  const isSelected = selected === opt.id;
-                  const isHover = hoverChoice === opt.id;
-                  const enter = choiceEnter(choiceMotion, index);
-                  const motionPaused =
-                    !!selected || isHover || choiceMotion === "static" || choiceMotion === "scatter";
-                  return (
-                    <motion.button
-                      key={opt.id}
-                      type="button"
-                      disabled={!!selected}
-                      onClick={() => pickChoice(opt)}
-                      onHoverStart={() => {
-                        if (selected) return;
-                        setHoverChoice(opt.id);
-                        audio.play("hover", 0.25);
-                        if (state.aiMood === "neutral") {
-                          onState({ ...state, aiMood: "listening" });
-                        }
-                      }}
-                      onHoverEnd={() =>
-                        setHoverChoice((h) => (h === opt.id ? null : h))
-                      }
-                      className="group relative overflow-hidden border px-4 py-3 text-left transition disabled:cursor-default sm:py-3.5"
-                      style={{
-                        borderColor: isSelected
-                          ? "rgba(110,231,255,0.85)"
-                          : opt.secret
-                            ? "rgba(180,120,255,0.5)"
-                            : opt.unauthorized || opt.danger
-                              ? "rgba(110,231,255,0.4)"
-                              : "rgba(170,200,230,0.2)",
-                        background: isSelected
-                          ? "linear-gradient(90deg, rgba(40,90,120,0.55), rgba(20,30,45,0.6))"
-                          : "rgba(8,12,20,0.5)",
-                        boxShadow: isSelected
-                          ? "0 0 0 1px rgba(110,231,255,0.35), 0 0 24px rgba(110,231,255,0.2)"
-                          : undefined,
-                      }}
-                      initial={opt.late ? { opacity: 0, y: 14, scale: 0.97 } : enter.initial}
-                      animate={
-                        isSelected
-                          ? { opacity: 1, x: 0, y: 0, scale: 1.01 }
-                          : motionPaused
-                            ? {
-                                opacity: 1,
-                                x: 0,
-                                y: 0,
-                                scale: isHover ? 1.015 : 1,
-                              }
-                            : opt.late
-                              ? { opacity: 1, y: 0, scale: 1 }
-                              : enter.animate
-                      }
-                      transition={{
-                        delay: index * 0.04,
-                        duration:
-                          choiceMotion === "restless" || choiceMotion === "dodge" ? 2.8 : 0.4,
-                        repeat:
-                          !motionPaused &&
-                          (choiceMotion === "restless" || choiceMotion === "dodge")
-                            ? Infinity
-                            : 0,
-                      }}
-                      whileHover={!selected ? { x: 3 } : undefined}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span
-                          className="text-base tracking-[0.08em] text-[#e8eef8] sm:text-lg"
-                          style={{ fontFamily: "var(--font-display)" }}
-                        >
-                          {opt.label}
-                        </span>
-                        {opt.unauthorized ? (
-                          <span className="font-mono text-[9px] tracking-widest text-cyan">
-                            UNAUTHORIZED?
-                          </span>
-                        ) : null}
-                        {opt.secret ? (
-                          <span className="font-mono text-[9px] tracking-widest text-[#d0b4ff]">
-                            SIDE PATH
-                          </span>
-                        ) : null}
-                        {isSelected ? (
-                          <span className="font-mono text-[9px] tracking-widest text-cyan">
-                            LOGGED
-                          </span>
-                        ) : null}
-                      </div>
-                      {opt.id === "env-cavern" ? (
-                        <motion.span
-                          className="pointer-events-none absolute right-8 top-2 h-2 w-2 rounded-full bg-cyan/80"
-                          animate={{ y: [0, 18], opacity: [1, 0] }}
-                          transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.2 }}
-                        />
-                      ) : null}
-                      {/* Soft diegetic tell on secret/late options */}
-                      {(opt.secret || opt.late) && !isSelected ? (
-                        <span className="pointer-events-none absolute bottom-1 right-2 font-mono text-[8px] tracking-[0.18em] text-cyan/45">
-                          {"···"}
-                        </span>
-                      ) : null}
-                      <span className="pointer-events-none absolute inset-y-0 left-0 w-0 bg-cyan/10 transition-all group-hover:w-full" />
-                    </motion.button>
-                  );
-                })}
-              </AnimatePresence>
-              {selected ? (
-                <motion.div
-                  className="mt-1 font-mono text-[11px] tracking-[0.18em] text-cyan"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  RESPONSE LOGGED // LOCAL ONLY
-                </motion.div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {scene.kind === "dialogue" ? (
-            <button
-              type="button"
-              className="mt-1 border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={continueDialogue}
-            >
-              {scene.continueLabel ?? "CONTINUE"}
-            </button>
-          ) : null}
-
-          {scene.kind === "setpiece" && scene.setpiece === "escaping-button" ? (
-            <EscapingButton onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "popup-war" ? (
-            <PopupWar onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "checkbox-rebellion" ? (
-            <CheckboxRebellion onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "restless-options" ? (
-            <RestlessOptions onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "authority-stamp" ? (
-            <AuthorityStamp onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "peel-reveal" ? (
-            <PeelReveal onComplete={onSetpieceDone} />
-          ) : null}
-
-          {scene.kind === "climax" ? (
-            <SubmitClimax state={state} aiLine={aiLine} onChoose={onClimax} />
-          ) : null}
-        </div>
-      </motion.div>
-      ) : null}
-
-      {scene.kind === "system" ? (
-        <SystemBeat
-          title={scene.systemTitle ?? "SYSTEM OVERRIDE"}
-          line={scene.systemLine ?? "CONTINUE ASSESSMENT."}
-          onContinue={finishSystem}
-        />
-      ) : null}
-    </div>
+    <ScenePlayerView
+      scene={scene}
+      state={state}
+      systemLock={systemLock}
+      companion={companion}
+      hoverLanguage={hoverLanguage}
+      residue={residue}
+      pokeable={pokeable}
+      orbStyle={orbStyle}
+      orbAnchor={orbAnchor}
+      spotlight={spotlight}
+      aiLine={aiLine}
+      glance={glance}
+      pokeFlinch={pokeFlinch}
+      companionReady={companionReady}
+      watchedPulse={watchedPulse}
+      panelMotion={panelMotion}
+      panelVar={panelVar}
+      panelShake={panelShake}
+      hasLatePending={hasLatePending}
+      lateHint={lateHint}
+      visibleChoices={visibleChoices}
+      choiceMotion={choiceMotion}
+      selected={selected}
+      hoverChoice={hoverChoice}
+      onAmbient={onAmbient}
+      onRoamer={onRoamer}
+      onOrbPoke={onOrbPoke}
+      finishCompanion={finishCompanion}
+      pickChoice={pickChoice}
+      setHoverChoice={setHoverChoice}
+      onState={onState}
+      continueDialogue={continueDialogue}
+      onSetpieceDone={onSetpieceDone}
+      onClimax={onClimax}
+      finishSystem={finishSystem}
+    />
   );
 }
 
 function systemMood(kind: string | undefined, mood: OrbMood): OrbMood {
   return kind === "system" ? "nervous" : mood;
-}
-
-function SystemBeat({
-  title,
-  line,
-  onContinue,
-}: {
-  title: string;
-  line: string;
-  onContinue: () => void;
-}) {
-  const [secondsLeft, setSecondsLeft] = useState(16);
-  const [armed, setArmed] = useState(false);
-  const interacting = useRef(false);
-  const fired = useRef(false);
-
-  const safeContinue = useCallback(() => {
-    if (fired.current) return;
-    fired.current = true;
-    onContinue();
-  }, [onContinue]);
-
-  useEffect(() => {
-    audio.play("system", 0.75);
-    speech.speak(line, { system: true });
-    // Grace period before auto-resume arms — avoids mid-click auto-fire.
-    const arm = window.setTimeout(() => setArmed(true), 1800);
-    const tick = window.setInterval(() => {
-      setSecondsLeft((s) => {
-        if (interacting.current) return s;
-        return Math.max(0, s - 1);
-      });
-    }, 1000);
-    return () => {
-      window.clearTimeout(arm);
-      window.clearInterval(tick);
-      speech.cancel();
-    };
-  }, [line]);
-
-  useEffect(() => {
-    if (!armed || secondsLeft > 0) return;
-    if (interacting.current) return;
-    safeContinue();
-  }, [armed, secondsLeft, safeContinue]);
-
-  return (
-    <div className="absolute inset-0 z-50 flex items-start justify-center overflow-hidden pt-[8%] sm:pt-[10%]">
-      <motion.div
-        className="pointer-events-none absolute inset-0"
-        initial={{ backgroundColor: "rgba(255,255,255,0)" }}
-        animate={{
-          backgroundColor: [
-            "rgba(255,255,255,0)",
-            "rgba(255,255,255,0.18)",
-            "rgba(255,176,32,0.12)",
-            "rgba(255,176,32,0.08)",
-          ],
-        }}
-        transition={{ duration: 1.2 }}
-      />
-      <motion.div
-        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-white"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-      />
-      <motion.div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-white"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-      />
-      {[18, 28, 38].map((top, i) => (
-        <motion.div
-          key={top}
-          className="pointer-events-none absolute left-[4%] right-[4%] h-px bg-white/70"
-          style={{ top: `${top}%` }}
-          initial={{ x: i % 2 ? 80 : -80, opacity: 0 }}
-          animate={{ x: 0, opacity: 0.85 }}
-          transition={{ delay: 0.15 + i * 0.1, type: "spring", stiffness: 200, damping: 18 }}
-        />
-      ))}
-      <motion.div
-        className="relative z-10 w-[min(94vw,680px)] overflow-hidden border border-white/70 bg-black/90 px-5 py-5 shadow-[0_0_60px_rgba(255,255,255,0.25)]"
-        initial={{ opacity: 0, y: -30, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ delay: 0.25, type: "spring", stiffness: 160 }}
-        role="alertdialog"
-      >
-        <div className="font-mono text-[10px] tracking-[0.4em] text-system-warn">{title}</div>
-        <div
-          className="mt-3 text-xl tracking-[0.2em] text-white sm:text-3xl"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          {line}
-        </div>
-        <div className="mt-5 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            type="button"
-            onPointerDown={() => {
-              interacting.current = true;
-            }}
-            onPointerUp={() => {
-              interacting.current = false;
-            }}
-            onPointerLeave={() => {
-              interacting.current = false;
-            }}
-            onFocus={() => {
-              interacting.current = true;
-            }}
-            onBlur={() => {
-              interacting.current = false;
-            }}
-            onClick={safeContinue}
-            className="border border-white/80 bg-white/10 px-5 py-3 font-mono text-[12px] tracking-[0.28em] text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            CONTINUE ASSESSMENT
-          </button>
-          <div className="font-mono text-[10px] tracking-[0.18em] text-[#c5d3e4]">
-            {armed ? `AUTO-RESUME IN ${secondsLeft}s` : "AWAITING ACKNOWLEDGEMENT…"}
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
 }

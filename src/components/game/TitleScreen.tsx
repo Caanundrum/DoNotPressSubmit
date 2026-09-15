@@ -194,9 +194,11 @@ export function TitleScreen({
             CHAOS STANDARD
           </span>
           <span className="text-cyan/70">/</span>
-          <span title="Scripted five-act comedy">PHASE 2 SCRIPTED GAME</span>
+          <span title="Facility chamber">HCOS // CHAMBER 07</span>
           <span className="text-cyan/70">/</span>
-          <span title="Local only">NO ACCOUNT REQUIRED</span>
+          <span title="Facility residue">
+            {waving ? "ASSISTANT WAVING // BADLY // HAPPILY" : "FACILITY RESIDUE"}
+          </span>
         </motion.div>
       </div>
     </div>

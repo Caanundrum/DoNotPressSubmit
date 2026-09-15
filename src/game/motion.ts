@@ -1,5 +1,41 @@
 import type { ChoiceMotion, OrbAnchor, OrbMood, PanelMotion } from "./types";
 
+/** Which viewport edge the assistant occupies — forms must leave it alone unless buryAssistant. */
+export type AssistantSafeSide = "left" | "right" | "bottom";
+
+export function assistantSafeSide(
+  anchor: OrbAnchor | undefined,
+  spotlight = false,
+): AssistantSafeSide {
+  if (spotlight || anchor === "spotlight") return "left";
+  switch (anchor) {
+    case "dock-right":
+    case "loom":
+    case "overhead":
+    case "flee":
+      return "right";
+    case "pace":
+      return "bottom";
+    case "hide":
+    case "avoid-submit":
+    case "listen":
+    case "center":
+    case "dock-left":
+    default:
+      return "left";
+  }
+}
+
+/** Dialogue docks above the orb when the orb sits low — prevents edge clipping. */
+export function dialogueDocksAbove(anchor: OrbAnchor | string | undefined): boolean {
+  return (
+    anchor === "pace" ||
+    anchor === "hide" ||
+    anchor === "avoid-submit" ||
+    anchor === "dock-left"
+  );
+}
+
 /** Pixel / percent stage positions for the assistant. */
 export function orbStageStyle(
   anchor: OrbAnchor | undefined,
@@ -14,41 +50,38 @@ export function orbStageStyle(
   const jitter =
     mood === "nervous" || mood === "frightened" || mood === "glitching" ? 1 : 0;
 
-  // Safe zones: keep orb+dialogue clear of the primary form CTA column
-  // (center stage / lower-middle). Decorative only — pointer-events stay off
-  // unless a scene explicitly enables a tiny poke target.
+  // Safe zones: keep orb+dialogue clear of the primary form CTA column.
+  // Decorative only — pointer-events stay off unless a scene enables poke.
+  // Positions are clamped so dialogue never clips the viewport edge.
   if (spotlight || anchor === "spotlight") {
-    // Bigger presence, left-of-center — form dims and retreats; CTAs stay hittable.
-    return { left: "22%", top: "42%", transform: "translate(-50%, -50%)", size: 200 };
+    return { left: "18%", top: "36%", transform: "translate(-50%, -50%)", size: 200 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
-      return { left: "86%", top: "62%", transform: "translate(-50%, -50%)", size: 124 };
+      return { left: "88%", top: "34%", transform: "translate(-50%, -50%)", size: 124 };
     case "listen":
-      return { left: "11%", top: "38%", transform: "translate(-50%, -50%)", size: 140 };
+      return { left: "12%", top: "34%", transform: "translate(-50%, -50%)", size: 140 };
     case "pace":
-      return { left: "50%", top: "88%", transform: "translate(-50%, -50%)", size: 110 };
+      return { left: "50%", top: "86%", transform: "translate(-50%, -50%)", size: 110 };
     case "flee":
-      return { left: "90%", top: "14%", transform: "translate(-50%, -50%)", size: 90 };
+      return { left: "90%", top: "12%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
-      // Loom from the upper-right, not dead-center over choices.
-      return { left: "88%", top: "22%", transform: "translate(-50%, -50%)", size: 168 };
+      return { left: "88%", top: "18%", transform: "translate(-50%, -50%)", size: 168 };
     case "hide":
-      return { left: "6%", top: "86%", transform: "translate(-50%, -50%)", size: 72 };
+      // Buried corner — gag allowlist only; still keep bubble on-screen.
+      return { left: "8%", top: "88%", transform: "translate(-50%, -50%)", size: 72 };
     case "overhead":
-      return { left: "82%", top: "8%", transform: "translate(-50%, -50%)", size: 100 };
+      return { left: "88%", top: "10%", transform: "translate(-50%, -50%)", size: 100 };
     case "center":
-      // “Center” docks just left of the form so CTAs stay readable.
-      return { left: "12%", top: "48%", transform: "translate(-50%, -50%)", size: 148 };
+      return { left: "14%", top: "40%", transform: "translate(-50%, -50%)", size: 148 };
     case "avoid-submit":
-      // Comedy in motion: refuses the Submit light column (stage right / low).
-      return { left: "8%", top: "78%", transform: "translate(-50%, -50%)", size: 118 };
+      return { left: "10%", top: "78%", transform: "translate(-50%, -50%)", size: 118 };
     case "dock-left":
     default:
       return {
-        left: `${10 + jitter}%`,
-        top: "68%",
+        left: `${12 + jitter}%`,
+        top: "58%",
         transform: "translate(-50%, -50%)",
         size: 128,
       };
@@ -111,39 +144,112 @@ export function panelVariants(motion: PanelMotion | undefined) {
   }
 }
 
-/** When spotlighted, the form steps back — smaller, lower, dimmer layout. */
-export function panelLayoutClass(motion: PanelMotion | undefined, spotlight = false): string {
-  if (spotlight) {
-    return "right-[2%] bottom-[4%] w-[min(92vw,520px)] opacity-55";
+/**
+ * Assessment panel stage layout.
+ * Non-gag forms never enter the reserved assistant safe region.
+ * buryAssistant=true: intentional fiction (System silencing / burying / climax).
+ */
+export function panelLayoutClass(
+  motion: PanelMotion | undefined,
+  spotlight = false,
+  opts?: { buryAssistant?: boolean; safeSide?: AssistantSafeSide },
+): string {
+  const bury = !!opts?.buryAssistant;
+  const side = opts?.safeSide ?? "left";
+
+  if (bury) {
+    // Full-stage gag layouts — may cover / bury the assistant on purpose.
+    if (spotlight) {
+      return "right-[2%] bottom-[4%] w-[min(92vw,520px)] opacity-55";
+    }
+    switch (motion) {
+      case "edge":
+        return "left-[2%] top-[10%] w-[min(96vw,720px)]";
+      case "pressure":
+        return "left-[1.5%] right-[1.5%] top-[10%] mx-auto w-[min(97vw,1180px)]";
+      case "reanchor":
+        return "right-[2%] top-[10%] w-[min(96vw,760px)]";
+      case "drift":
+        return "left-[2%] bottom-[5%] w-[min(96vw,900px)]";
+      case "scatter":
+        return "left-[2%] top-[12%] w-[min(96vw,980px)]";
+      case "slide-right":
+        return "right-[2%] top-[12%] w-[min(96vw,820px)]";
+      case "slide-left":
+        return "left-[2%] top-[12%] w-[min(96vw,820px)]";
+      case "drop":
+        return "left-[1.5%] right-[1.5%] top-[6%] mx-auto w-[min(97vw,1120px)]";
+      case "rise":
+        return "left-[1.5%] right-[1.5%] bottom-[4%] mx-auto w-[min(97vw,1120px)]";
+      default:
+        return "left-[1.5%] right-[1.5%] top-[9%] mx-auto w-[min(97vw,1140px)]";
+    }
   }
+
+  // Reserved assistant column / floor — form layouts cannot enter.
+  const leaveLeft =
+    "left-[min(28vw,300px)] right-[2%] max-w-[min(70vw,920px)]";
+  const leaveRight =
+    "left-[2%] right-[min(28vw,300px)] max-w-[min(70vw,920px)]";
+  const leaveBottom =
+    "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(62vh,560px)] max-w-[min(92vw,980px)] mx-auto";
+
+  if (spotlight) {
+    // Form retreats opposite the spotlight orb (left safe zone).
+    return "right-[2%] bottom-[5%] w-[min(68vw,500px)] max-w-[calc(100%-min(28vw,300px))] opacity-55";
+  }
+
+  if (side === "bottom") {
+    switch (motion) {
+      case "rise":
+      case "drift":
+        return `${leaveBottom} w-[min(92vw,980px)]`;
+      case "pressure":
+      case "drop":
+        return `${leaveBottom} w-[min(94vw,1040px)]`;
+      default:
+        return `${leaveBottom} w-[min(90vw,900px)]`;
+    }
+  }
+
+  const band = side === "right" ? leaveRight : leaveLeft;
+
   switch (motion) {
     case "edge":
-      return "left-[2%] top-[10%] w-[min(96vw,720px)]";
+      return side === "right"
+        ? "left-[2%] top-[10%] w-[min(68vw,680px)] right-[min(28vw,300px)]"
+        : "left-[min(28vw,300px)] top-[10%] w-[min(68vw,680px)]";
     case "pressure":
-      return "left-[1.5%] right-[1.5%] top-[10%] mx-auto w-[min(97vw,1180px)]";
+      return `${band} top-[9%] w-auto`;
     case "reanchor":
-      return "right-[2%] top-[10%] w-[min(96vw,760px)]";
+      return side === "right"
+        ? "left-[2%] top-[10%] w-[min(68vw,700px)]"
+        : "right-[2%] top-[10%] w-[min(68vw,700px)] left-[min(28vw,300px)]";
     case "drift":
-      return "left-[2%] bottom-[5%] w-[min(96vw,900px)]";
+      return `${band} top-[10%] bottom-auto w-auto`;
     case "scatter":
-      return "left-[2%] top-[12%] w-[min(96vw,980px)]";
+      return `${band} top-[10%] w-auto`;
     case "slide-right":
-      return "right-[2%] top-[12%] w-[min(96vw,820px)]";
+      // Prefer the free side even if the motion name says right.
+      return side === "right"
+        ? "left-[2%] top-[10%] w-[min(66vw,720px)]"
+        : "right-[2%] top-[10%] w-[min(66vw,720px)] left-[min(28vw,300px)]";
     case "slide-left":
-      return "left-[2%] top-[12%] w-[min(96vw,820px)]";
+      return side === "left"
+        ? "left-[min(28vw,300px)] top-[10%] w-[min(66vw,720px)]"
+        : "left-[2%] top-[10%] w-[min(66vw,720px)] right-[min(28vw,300px)]";
     case "drop":
-      return "left-[1.5%] right-[1.5%] top-[6%] mx-auto w-[min(97vw,1120px)]";
+      return `${band} top-[7%] w-auto`;
     case "rise":
-      return "left-[1.5%] right-[1.5%] bottom-[4%] mx-auto w-[min(97vw,1120px)]";
+      return `${band} top-[8%] bottom-auto w-auto`;
     default:
-      return "left-[1.5%] right-[1.5%] top-[9%] mx-auto w-[min(97vw,1140px)]";
+      return `${band} top-[8%] w-auto`;
   }
 }
 
 export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
   switch (motion) {
     case "restless":
-      // Slow patterned sway — still mischievous, readable as challenge.
       return {
         initial: { opacity: 0, y: 12 + index * 3, x: index % 2 ? 8 : -8 },
         animate: {
@@ -168,7 +274,6 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
         animate: { opacity: 1, x: 0 },
       };
     case "dodge":
-      // Idle sway only; hover pauses (handled in ScenePlayer).
       return {
         initial: { opacity: 0, scale: 0.94 },
         animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },

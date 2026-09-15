@@ -1,7 +1,12 @@
 "use client";
 
 import { motion, type TargetAndTransition } from "framer-motion";
-import { panelLayoutClass } from "@/game/motion";
+import {
+  assistantSafeSide,
+  dialogueDocksAbove,
+  panelLayoutClass,
+  type AssistantSafeSide,
+} from "@/game/motion";
 import type {
   ChoiceDef,
   ChoiceMotion,
@@ -36,6 +41,8 @@ export type ScenePlayerViewProps = {
   orbStyle: { left: string; top: string; transform: string; size: number };
   orbAnchor: OrbAnchor | string;
   spotlight: boolean;
+  buryAssistant: boolean;
+  safeSide: AssistantSafeSide;
   aiLine: string;
   glance: number;
   pokeFlinch: boolean;
@@ -66,15 +73,22 @@ export type ScenePlayerViewProps = {
 export function ScenePlayerView(p: ScenePlayerViewProps) {
   const {
     scene, state, systemLock, companion, hoverLanguage, residue, pokeable,
-    orbStyle, orbAnchor, spotlight, aiLine, glance, pokeFlinch,
+    orbStyle, orbAnchor, spotlight, buryAssistant, safeSide, aiLine, glance, pokeFlinch,
     companionReady, watchedPulse, panelMotion, panelVar, panelShake,
     hasLatePending, lateHint, visibleChoices, choiceMotion, selected, hoverChoice,
     onAmbient, onRoamer, onOrbPoke, finishCompanion, pickChoice, setHoverChoice,
     onState, continueDialogue, onSetpieceDone, onClimax, finishSystem,
   } = p;
 
+  const dockAbove = dialogueDocksAbove(orbAnchor);
+  const assistantZ = buryAssistant ? "z-[15]" : "z-[32]";
+
   return (
-    <div className="absolute inset-0 z-20 overflow-hidden">
+    <div
+      className="absolute inset-0 z-20 overflow-hidden"
+      data-assistant-safe={buryAssistant ? "gag" : safeSide}
+      data-bury-assistant={buryAssistant ? "true" : "false"}
+    >
       <FacilityBackground
         intensity={systemLock ? 0.4 : 1}
         systemLock={systemLock}
@@ -118,24 +132,29 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       </div>
 
       {/*
-        Assistant orb + dialogue.
+        Assistant orb + dialogue — reserved safe zone on non-gag forms.
         Default: pointer-events none so form CTAs stay mouse-hittable.
-        Pokeable scenes enable a tiny hit target on the orb only (form stays z-30 above).
+        Pokeable scenes enable a tiny hit target on the orb only.
+        buryAssistant gag scenes keep the orb under/behind the form on purpose.
       */}
       <motion.div
-        className={`absolute z-[15] flex flex-col items-center gap-2 ${pokeable ? "" : "pointer-events-none"}`}
+        className={`absolute ${assistantZ} flex items-center gap-2 ${
+          dockAbove ? "flex-col-reverse" : "flex-col"
+        } ${pokeable ? "" : "pointer-events-none"}`}
         style={{
           left: orbStyle.left,
           top: orbStyle.top,
           transform: orbStyle.transform,
           width: Math.max(orbStyle.size, spotlight ? 260 : 180),
+          maxWidth: "min(42vw, 300px)",
           pointerEvents: pokeable ? "auto" : "none",
         }}
+        data-assistant-dock={dockAbove ? "above" : "below"}
         animate={
           orbAnchor === "pace"
-            ? { x: [-28, 28, -14, 0] }
+            ? { x: [-20, 20, -10, 0] }
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 8, -6, 12, 0], y: [0, -6, 4, 0] }
+              ? { x: [0, 6, -4, 8, 0], y: [0, -4, 3, 0] }
               : spotlight
                 ? { x: 0, y: [0, -4, 0], scale: 1 }
                 : { x: 0, y: 0 }
@@ -173,17 +192,15 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
         <motion.div
           className={`pointer-events-none glass-panel overflow-hidden px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
-            spotlight ? "max-w-[min(300px,42vw)] max-h-[28vh]" : "max-w-[min(220px,36vw)] max-h-[22vh]"
+            spotlight ? "max-w-[min(280px,40vw)] max-h-[26vh]" : "max-w-[min(210px,34vw)] max-h-[20vh]"
           }`}
           key={aiLine || "silent"}
-          initial={{ opacity: 0, y: 8, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          style={{
-            marginBottom: orbAnchor === "avoid-submit" || orbAnchor === "hide" ? 0 : undefined,
-          }}
+          initial={{ opacity: 0, y: dockAbove ? -8 : 8, scale: 0.96 }}
+          animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, y: 0, scale: 1 }}
         >
           <div className="mb-1 font-mono text-[9px] tracking-[0.22em] text-cyan/80">
             ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
+            {buryAssistant ? " // UNDER PRESSURE" : ""}
             {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
           </div>
           <div className={`overflow-hidden ${spotlight ? "text-[15px]" : "text-[13px]"}`}>
@@ -250,7 +267,18 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {!companion ? (
       <motion.div
-        className={`glass-panel assessment-panel absolute z-30 p-4 sm:p-6 ${panelLayoutClass(panelMotion, spotlight && scene.kind !== "climax" && scene.kind !== "setpiece")}`}
+        className={`glass-panel assessment-panel absolute z-30 p-4 sm:p-6 ${panelLayoutClass(
+          panelMotion,
+          spotlight && scene.kind !== "climax" && scene.kind !== "setpiece",
+          {
+            buryAssistant,
+            safeSide:
+              scene.kind === "climax" || scene.kind === "setpiece"
+                ? assistantSafeSide(orbAnchor as OrbAnchor, false)
+                : safeSide,
+          },
+        )}`}
+        data-panel-safe={buryAssistant ? "gag-overlap" : "respects-assistant"}
         initial={panelVar.initial}
         animate={
           panelShake

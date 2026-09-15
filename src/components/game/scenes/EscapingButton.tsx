@@ -18,7 +18,7 @@ export function EscapingButton({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="relative h-[min(48vh,380px)] w-full overflow-hidden border border-danger/30 bg-black/35">
       <div className="absolute left-3 top-3 z-10 font-mono text-[10px] tracking-[0.22em] text-[#ff9aab]">
-        CONTAINMENT // HITS {hits}/3
+        CONTAINMENT // HITS {hits}/3{hits === 0 ? " // IT'S SMUG" : hits === 1 ? " // FLUSTERED" : hits === 2 ? " // PANICKING" : " // ARCHIVED"}
       </div>
       <motion.div
         className="pointer-events-none absolute inset-x-8 top-10 h-px bg-cyan/30"

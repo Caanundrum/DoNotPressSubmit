@@ -90,6 +90,7 @@ function ScenePlayerInner({
 
   useEffect(() => {
     if (!scene?.choices?.some((c) => c.late)) return;
+    // Soft diegetic tell before the unauthorized option materializes.
     const hint = window.setTimeout(() => setLateHint(true), 900);
     const reveal = window.setTimeout(() => setShowLate(true), 1600);
     return () => {
@@ -264,6 +265,7 @@ function ScenePlayerInner({
       next = { ...next, aiMood: choice.effects.mood };
       onState(next);
     }
+    // Visible select beat before advance — player sees registration.
     const delay = choice.effects?.aiLine ? 1900 : 1100;
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
     advanceTimer.current = window.setTimeout(() => {

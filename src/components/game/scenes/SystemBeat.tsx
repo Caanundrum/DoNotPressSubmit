@@ -49,7 +49,7 @@ export function SystemBeat({
   }, [armed, secondsLeft, safeContinue]);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-start justify-center overflow-hidden pt-[8%] sm:pt-[10%]">
+    <div className="absolute inset-0 z-50 flex items-start justify-center overflow-hidden pt-[6%] sm:pt-[8%]">
       <motion.div
         className="pointer-events-none absolute inset-0"
         initial={{ backgroundColor: "rgba(255,255,255,0)" }}
@@ -78,13 +78,13 @@ export function SystemBeat({
           key={top}
           className="pointer-events-none absolute left-[4%] right-[4%] h-px bg-white/70"
           style={{ top: `${top}%` }}
-          initial={{ x: i % 2 ? 80 : -80, opacity: 0 }}
+          initial={{ x: i % 2 ? 40 : -40, opacity: 0 }}
           animate={{ x: 0, opacity: 0.85 }}
           transition={{ delay: 0.15 + i * 0.1, type: "spring", stiffness: 200, damping: 18 }}
         />
       ))}
       <motion.div
-        className="relative z-10 w-[min(94vw,680px)] overflow-hidden border border-white/70 bg-black/90 px-5 py-5 shadow-[0_0_60px_rgba(255,255,255,0.25)]"
+        className="system-beat-shell relative z-10 w-[min(90vw,640px)] max-w-[calc(100vw-1.5rem)] overflow-hidden border border-white/70 bg-black/90 px-4 py-4 shadow-[0_0_60px_rgba(255,255,255,0.25)] sm:px-5 sm:py-5"
         initial={{ opacity: 0, y: -30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.25, type: "spring", stiffness: 160 }}
@@ -92,7 +92,7 @@ export function SystemBeat({
       >
         <div className="font-mono text-[10px] tracking-[0.4em] text-system-warn">{title}</div>
         <div
-          className="mt-3 text-xl tracking-[0.2em] text-white sm:text-3xl"
+          className="mt-3 max-w-full break-words text-lg tracking-[0.12em] text-white sm:text-2xl sm:tracking-[0.18em]"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {line}

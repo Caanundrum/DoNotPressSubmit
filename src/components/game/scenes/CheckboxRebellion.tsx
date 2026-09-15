@@ -9,6 +9,7 @@ const LABELS = [
   "I agree to some terms",
   "I agree this checkbox is fleeing",
   "Fine. I agree. Catch me.",
+  "CONSENT HAS LEFT THE BUILDING",
 ];
 
 export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {

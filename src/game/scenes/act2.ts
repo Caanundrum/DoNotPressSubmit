@@ -252,6 +252,8 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 06D // SIDE CHANNEL",
     title: "Quietly, while System looks away",
+    // Gag allowlist: side-channel may crowd the assistant — fiction owns the bury.
+    buryAssistant: true,
     prompt: "The assistant drifts to the edge of the stage and talks like someone sharing a fire exit.",
     aiLine:
       "Okay. Off the record: something above me thinks I'm furniture. If you hear it bark, don't salute unless you mean it.",
@@ -335,6 +337,8 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 07 // COMPLIANCE",
     title: "System wants the assistant quiet",
+    // Gag allowlist: silencing beat — panel may bury the orb on purpose.
+    buryAssistant: true,
     prompt: "Will you play along with Directive 07, or make this a worse comedy?",
     aiLine: "If you side with them, I will become extremely professional and extremely petty.",
     aiMood: "defiant",
@@ -389,6 +393,8 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 07B // NOTES",
     title: "The room is listening now",
+    // Gag allowlist: surveillance bury — form crowds the assistant.
+    buryAssistant: true,
     prompt: "Background machinery paused mid-cycle. Even the printer looks attentive.",
     aiLine: "See? Even the hardware wants gossip. Act III is where the interface stops pretending it's furniture.",
     aiMood: "suspicious",

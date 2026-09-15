@@ -13,6 +13,9 @@ const LABELS = [
   "FORM INTEGRITY LOW",
   "PLEASE DISMISS",
   "PLEASE DO NOT DISMISS",
+  "THIS NOTICE HAS CHILDREN",
+  "URGENCY.EXE IS PREGNANT",
+  "DISMISS ME. I DARE YOU",
 ];
 
 /** Non-overlapping-ish grid slots so dismiss stays hittable. */

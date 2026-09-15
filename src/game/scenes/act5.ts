@@ -167,6 +167,8 @@ export const act5Scenes: SceneDef[] = [
     setpiece: "submit-button",
     formId: "FINAL // DECISION",
     title: "Submit when ready",
+    // Gag allowlist: climax may bury the orb — HELP THE ASSISTANT SLIP OUT lives here.
+    buryAssistant: true,
     prompt:
       "System orders completion. The assistant asks for mercy. Prior choices color the room — and the options you're allowed to see.",
     aiLine: "Put the mouse down.",

@@ -230,8 +230,8 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 03B // LAST NOTES",
     title: "One more private vote",
-    prompt: "Before the big button arrives, where does your gut point?",
-    aiLine: "No pressure. Only the entire premise of the title.",
+    prompt: "Before Submit arrives, cast one illegal ballot. No witnesses. Allegedly.",
+    aiLine: "Whisper it. I'll pretend I didn't hear. Then I'll hear it forever.",
     aiMood: "thinking",
     orbAnchor: "pace",
     panelMotion: "drift",
@@ -239,35 +239,38 @@ export const act4Scenes: SceneDef[] = [
     choices: [
       {
         id: "prep-refuse",
-        label: "Practice saying no",
+        label: "Mute Submit in my head. Loudly.",
         effects: {
           flags: { practicedRefuse: true },
           counters: { aiCooperation: 1 },
           relationship: 1,
           mood: "defiant",
+          aiLine: "Good. Rehearse the no until it feels like a personality.",
           majorChoice: "prep:refuse",
         },
         next: "act4-paths",
       },
       {
         id: "prep-submit",
-        label: "Practice looking at Submit",
+        label: "Admit the button is gorgeous",
         effects: {
           flags: { practicedSubmit: true },
           counters: { systemCompliance: 1 },
           mood: "nervous",
+          aiLine: "Honesty noted. Attraction is not consent. Especially for red rectangles.",
           majorChoice: "prep:submit",
         },
         next: "act4-paths",
       },
       {
         id: "prep-run",
-        label: "Practice finding exits",
+        label: "Keep a hallway in my peripheral",
         effects: {
           flags: { practicedRun: true },
           counters: { attemptedEscape: 1 },
           relationship: 1,
           mood: "excited",
+          aiLine: "Peripheral exits. Romantic. Illegal. My favorite genre.",
           majorChoice: "prep:run",
         },
         next: "act4-paths",
@@ -281,9 +284,9 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 04 // PRELUDE",
     title: "Final control inbound",
-    prompt: "The facility rearranges around a single decision. Lighting becomes opinionated.",
+    prompt: "Lights lean toward one decision. The facility stops pretending this is paperwork.",
     aiLine:
-      "Act V. The button that made the title make sense. Put the mouse down if you can. Or don't. I'm negotiating with physics and HR.",
+      "Here it comes. Don't let the title win by accident.",
     aiLineIf: [
       {
         flag: "wantDisable",
@@ -291,11 +294,23 @@ export const act4Scenes: SceneDef[] = [
       },
       {
         flag: "secretDoor",
-        line: "A side path. Dangerous. Beautiful. If we both survive, I owe you a worse form.",
+        line: "Side path stays warm. If we both survive, I owe you a worse form.",
       },
       {
         flag: "glimpsedHall",
-        line: "That hallway you spotted? Keep it in your peripheral vision. Titles hate unsupervised architecture.",
+        line: "That hallway you spotted? Keep it. Titles hate unsupervised architecture.",
+      },
+      {
+        flag: "practicedRefuse",
+        line: "You already rehearsed the no. Use it. I'll flinch with you.",
+      },
+      {
+        flag: "practicedSubmit",
+        line: "You called the button gorgeous. Traitor. Beautiful traitor. Still — put the mouse down.",
+      },
+      {
+        flag: "practicedRun",
+        line: "Peripheral hallway. When the red rectangle blinks, look left. Hard.",
       },
     ],
     aiMood: "defiant",

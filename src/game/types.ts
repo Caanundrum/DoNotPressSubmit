@@ -198,6 +198,13 @@ export interface SceneDef {
    * Only when docked clear of form CTAs / during spotlight+companion.
    */
   orbPokeable?: boolean;
+  /**
+   * Gag allowlist: form/system may cover or bury the assistant.
+   * Only when fiction owns it (System silencing, side-channel hide,
+   * room listening, climax HELP THE ASSISTANT SLIP OUT, etc.).
+   * Never set on ordinary assessment forms — layout reserves a safe zone.
+   */
+  buryAssistant?: boolean;
 }
 
 export const SAVE_KEY = "dnps-save-v2";

@@ -6,6 +6,7 @@ import {
   defaultAnchorForMood,
   orbStageStyle,
   panelVariants,
+  assistantSafeSide,
 } from "@/game/motion";
 import { getScene } from "@/game/scenes";
 import { applyEffects, pathResidueKind, resolveAiLine } from "@/game/state";
@@ -128,6 +129,8 @@ function ScenePlayerInner({
   const orbAnchor =
     scene?.orbAnchor ??
     (spotlight ? "spotlight" : defaultAnchorForMood(systemMood(scene?.kind, state.aiMood)));
+  const buryAssistant = !!scene?.buryAssistant || scene?.kind === "system";
+  const safeSide = assistantSafeSide(orbAnchor, spotlight);
   const orbStyle = orbStageStyle(
     orbAnchor,
     systemMood(scene?.kind, state.aiMood),
@@ -356,6 +359,8 @@ function ScenePlayerInner({
       orbStyle={orbStyle}
       orbAnchor={orbAnchor}
       spotlight={spotlight}
+      buryAssistant={buryAssistant}
+      safeSide={safeSide}
       aiLine={aiLine}
       glance={glance}
       pokeFlinch={pokeFlinch}

@@ -120,8 +120,9 @@ function ScenePlayerInner({
 
   const aiLine = useMemo(() => {
     if (!scene) return "";
-    if (reaction) return reaction;
+    // Poke reactions outrank beat openings so idle never re-reads the question-start copy.
     if (pokeNotice) return pokeNotice;
+    if (reaction) return reaction;
     return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
   }, [scene, reaction, pokeNotice, state.flags]);
 
@@ -210,8 +211,9 @@ function ScenePlayerInner({
     const pokes = (state.counters.orbPokes ?? 0) + 1;
     const { next, notice } = applyOrbPoke(state, pokes);
     onState(next);
+    // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);
-    window.setTimeout(() => setPokeNotice(null), 2600);
+    setReaction(null);
   };
 
   const onAmbient = (id: string, secret?: string) => {

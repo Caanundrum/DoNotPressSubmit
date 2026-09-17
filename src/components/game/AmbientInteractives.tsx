@@ -52,7 +52,10 @@ const TARGET_LINES: Record<AmbientTargetId, { hover: string; click: string; secr
   },
 };
 
-/** Hotspots for facility chrome — never overlap primary CTA column. */
+/**
+ * Tiny visible egg pins only — never large invisible hitboxes.
+ * Empty mid-stage space must not highlight or change cursor.
+ */
 const HOTSPOTS: {
   id: AmbientTargetId;
   style: CSSProperties;
@@ -62,49 +65,49 @@ const HOTSPOTS: {
   {
     id: "chamber-07",
     label: "CHAMBER 07",
-    style: { left: "6%", top: "20%", width: "9%", height: "18%" },
+    style: { left: "9%", top: "28%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "everything-fine",
     label: "STATUS",
-    style: { left: "7%", top: "30%", width: "8%", height: "6%" },
+    style: { left: "10%", top: "36%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "server-bars",
     label: "STACK",
-    style: { left: "18%", top: "58%", width: "14%", height: "12%" },
+    style: { left: "24%", top: "64%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "do-not-press",
     label: "PROPAGANDA",
-    style: { left: "42%", top: "72%", width: "12%", height: "5%" },
+    style: { left: "47%", top: "74%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "monitor-frame",
     label: "FRAME",
-    style: { left: "78%", top: "26%", width: "12%", height: "14%" },
+    style: { left: "84%", top: "32%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "replacement-failed",
     label: "DRONE",
-    style: { left: "10%", top: "54%", width: "14%", height: "10%" },
+    style: { left: "16%", top: "58%" },
     acts: [1, 2, 3],
   },
   {
     id: "coffee-mug",
     label: "MUG",
-    style: { left: "72%", top: "48%", width: "12%", height: "10%" },
+    style: { left: "78%", top: "52%" },
     acts: [1, 2, 3, 4],
   },
   {
     id: "printer-scissors",
     label: "PRINTER",
-    style: { left: "56%", top: "82%", width: "10%", height: "8%" },
+    style: { left: "60%", top: "86%" },
     acts: [2, 3, 4, 5],
   },
 ];
@@ -134,7 +137,7 @@ export function AmbientChrome({
           <button
             key={spot.id}
             type="button"
-            className="pointer-events-auto absolute border border-transparent bg-transparent transition hover:border-cyan/35 hover:bg-cyan/5 focus-visible:border-cyan/50 focus-visible:outline-none"
+            className="pointer-events-auto absolute flex h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan/50 bg-cyan/20 shadow-[0_0_8px_rgba(110,231,255,0.35)] transition hover:border-cyan hover:bg-cyan/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
             style={spot.style}
             aria-label={`Inspect ${spot.label}`}
             onMouseEnter={() => {
@@ -150,8 +153,9 @@ export function AmbientChrome({
               window.setTimeout(() => setFlash(null), 2200);
             }}
           >
+            <span className="h-1 w-1 rounded-full bg-cyan" />
             {hovering ? (
-              <span className="pointer-events-none absolute bottom-full left-0 mb-1 whitespace-nowrap border border-cyan/30 bg-black/70 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.16em] text-cyan/85">
+              <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap border border-cyan/30 bg-black/70 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.16em] text-cyan/85">
                 {meta.hover}
               </span>
             ) : null}
@@ -240,7 +244,7 @@ export function AmbientRoamers({
     <div className="pointer-events-none absolute inset-0 z-[9] overflow-hidden">
       <motion.button
         type="button"
-        className="pointer-events-auto absolute border-0 bg-transparent p-0"
+        className="pointer-events-auto absolute h-auto w-auto border-0 bg-transparent p-0"
         style={{ left: 0, top: 0 }}
         animate={{
           left: path.x,

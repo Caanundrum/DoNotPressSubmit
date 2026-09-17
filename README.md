@@ -35,13 +35,13 @@ npm start
 
 - Full-viewport facility stage (no max-width “app in a box”)
 - Assistant orb as scene partner: expressive moods (tint / orbit / ring tightness / aperture / squash), glance toward choices, spotlight pitches, companion beats, poke escalation (1 → 3 → 7 + report flag)
-- Ambient facility life: ≥6 chrome hotspots, hover language, roamers (crumb / checkbox / stamp), chaos vs obedient residue by Act III+
+- Ambient facility life: visible egg pins (no ghost hover hitboxes), roamers, chaos vs obedient residue
 - Title remembers escape wave **and** ally/refuse residue (clickable gag)
+- Assistant safe zone + sticky orb poke dialogue (never re-reads beat opening after poke)
+- Choice / Allegiance / lobby panels stay high-contrast; HCOS splash dwells ~9.5s
 - Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
-- Expanded Acts I–V with richer branches + Submit callbacks
-- Extra set pieces beyond Act III classics
-- Unmute + Web Speech preserved (dialogue bubble tracks the orb; safe-zone max-height)
-- Zero scrollbars — viewport-fit shell
+- Unmute + Web Speech preserved
+- Zero scrollbars — viewport-fit shell (System Directive included)
 - Firebase App Hosting `standalone` preserved
 
 ## Out of scope (later)

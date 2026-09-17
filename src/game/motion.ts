@@ -32,7 +32,9 @@ export function dialogueDocksAbove(anchor: OrbAnchor | string | undefined): bool
     anchor === "pace" ||
     anchor === "hide" ||
     anchor === "avoid-submit" ||
-    anchor === "dock-left"
+    anchor === "dock-left" ||
+    anchor === "listen" ||
+    anchor === "center"
   );
 }
 
@@ -54,34 +56,34 @@ export function orbStageStyle(
   // Decorative only — pointer-events stay off unless a scene enables poke.
   // Positions are clamped so dialogue never clips the viewport edge.
   if (spotlight || anchor === "spotlight") {
-    return { left: "18%", top: "36%", transform: "translate(-50%, -50%)", size: 200 };
+    return { left: "16%", top: "34%", transform: "translate(-50%, -50%)", size: 200 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
       return { left: "88%", top: "34%", transform: "translate(-50%, -50%)", size: 124 };
     case "listen":
-      return { left: "12%", top: "34%", transform: "translate(-50%, -50%)", size: 140 };
+      return { left: "12%", top: "42%", transform: "translate(-50%, -50%)", size: 140 };
     case "pace":
-      return { left: "50%", top: "86%", transform: "translate(-50%, -50%)", size: 110 };
+      return { left: "50%", top: "82%", transform: "translate(-50%, -50%)", size: 110 };
     case "flee":
-      return { left: "90%", top: "12%", transform: "translate(-50%, -50%)", size: 90 };
+      return { left: "88%", top: "14%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
       return { left: "88%", top: "18%", transform: "translate(-50%, -50%)", size: 168 };
     case "hide":
       // Buried corner — gag allowlist only; still keep bubble on-screen.
-      return { left: "8%", top: "88%", transform: "translate(-50%, -50%)", size: 72 };
+      return { left: "10%", top: "78%", transform: "translate(-50%, -50%)", size: 72 };
     case "overhead":
-      return { left: "88%", top: "10%", transform: "translate(-50%, -50%)", size: 100 };
+      return { left: "88%", top: "12%", transform: "translate(-50%, -50%)", size: 100 };
     case "center":
-      return { left: "14%", top: "40%", transform: "translate(-50%, -50%)", size: 148 };
+      return { left: "14%", top: "38%", transform: "translate(-50%, -50%)", size: 148 };
     case "avoid-submit":
-      return { left: "10%", top: "78%", transform: "translate(-50%, -50%)", size: 118 };
+      return { left: "12%", top: "72%", transform: "translate(-50%, -50%)", size: 118 };
     case "dock-left":
     default:
       return {
         left: `${12 + jitter}%`,
-        top: "58%",
+        top: "52%",
         transform: "translate(-50%, -50%)",
         size: 128,
       };
@@ -160,7 +162,7 @@ export function panelLayoutClass(
   if (bury) {
     // Full-stage gag layouts — may cover / bury the assistant on purpose.
     if (spotlight) {
-      return "right-[2%] bottom-[4%] w-[min(92vw,520px)] opacity-55";
+      return "right-[2%] bottom-[4%] w-[min(92vw,520px)]";
     }
     switch (motion) {
       case "edge":
@@ -195,8 +197,8 @@ export function panelLayoutClass(
     "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(62vh,560px)] max-w-[min(92vw,980px)] mx-auto";
 
   if (spotlight) {
-    // Form retreats opposite the spotlight orb (left safe zone).
-    return "right-[2%] bottom-[5%] w-[min(68vw,500px)] max-w-[calc(100%-min(28vw,300px))] opacity-55";
+    // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
+    return "right-[2%] bottom-[5%] w-[min(68vw,500px)] max-w-[calc(100%-min(28vw,300px))]";
   }
 
   if (side === "bottom") {

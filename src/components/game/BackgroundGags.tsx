@@ -68,16 +68,18 @@ function DroneGag({
 }) {
   return (
     <motion.div
-      className={`absolute left-[12%] top-[58%] ${hoverLanguage ? "pointer-events-auto" : ""}`}
+      className="pointer-events-none absolute left-[12%] top-[58%]"
       initial={{ opacity: 0, x: -40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
       transition={{ duration: 0.8 }}
-      onMouseEnter={() => onTip?.("DRONE LOG // replacement still failed")}
-      onMouseLeave={() => onTip?.(null)}
     >
       <motion.div
-        className="relative h-8 w-14 rounded-md border border-cyan/40 bg-[#132033]/90"
+        className={`relative h-8 w-14 rounded-md border border-cyan/40 bg-[#132033]/90 ${
+          hoverLanguage ? "pointer-events-auto cursor-help" : ""
+        }`}
+        onMouseEnter={() => onTip?.("DRONE LOG // replacement still failed")}
+        onMouseLeave={() => onTip?.(null)}
         animate={{ y: [0, -4, 0] }}
         transition={{ duration: 2.2, repeat: Infinity }}
       >
@@ -119,17 +121,17 @@ function CoffeeGag({
 }) {
   return (
     <motion.div
-      className={`absolute right-[16%] top-[52%] ${hoverLanguage ? "pointer-events-auto" : ""}`}
+      className="pointer-events-none absolute right-[16%] top-[52%]"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      onMouseEnter={() => onTip?.("HUMAN PERFORMANCE // mug in transit")}
-      onMouseLeave={() => onTip?.(null)}
     >
       <motion.div
-        className="flex items-end gap-3"
+        className={`flex items-end gap-3 ${hoverLanguage ? "pointer-events-auto cursor-help" : ""}`}
         animate={{ x: [0, 40, 80] }}
         transition={{ duration: 7, ease: "easeInOut" }}
+        onMouseEnter={() => onTip?.("HUMAN PERFORMANCE // mug in transit")}
+        onMouseLeave={() => onTip?.(null)}
       >
         <div className="h-10 w-2 rounded bg-metal/50" />
         <div className="relative h-7 w-6 rounded-b-md rounded-t-sm border border-white/30 bg-gradient-to-b from-[#5a3a24] to-[#2a180e]">
@@ -158,14 +160,18 @@ function PrinterGag({
 }) {
   return (
     <motion.div
-      className={`absolute bottom-[12%] left-[58%] ${hoverLanguage ? "pointer-events-auto" : ""}`}
+      className="pointer-events-none absolute bottom-[12%] left-[58%]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      onMouseEnter={() => onTip?.("PRINT QUEUE // scissors en route")}
-      onMouseLeave={() => onTip?.(null)}
     >
-      <div className="h-12 w-20 border border-white/20 bg-[#182235]/90">
+      <div
+        className={`h-12 w-20 border border-white/20 bg-[#182235]/90 ${
+          hoverLanguage ? "pointer-events-auto cursor-help" : ""
+        }`}
+        onMouseEnter={() => onTip?.("PRINT QUEUE // scissors en route")}
+        onMouseLeave={() => onTip?.(null)}
+      >
         <div className="m-1 h-2 bg-cyan/30" />
         <div className="mx-2 mt-2 h-1 bg-white/20" />
       </div>

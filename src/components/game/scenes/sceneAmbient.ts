@@ -36,6 +36,12 @@ export function applyOrbPoke(
   } else if (pokes === 3) {
     notice = "SYSTEM NOTICE: ASSISTANT SURFACE CONTACT LOGGED. Please stop helping.";
     audio.play("system", 0.35);
+  } else if (pokes === 4) {
+    notice = "Already said that. Still logging. Still judging.";
+  } else if (pokes === 5) {
+    notice = "You already poked that reaction out of me. Novelty expired.";
+  } else if (pokes === 6) {
+    notice = "Same poke. Same me. Slightly less patience.";
   } else if (pokes >= 7) {
     notice =
       "SECRET FLAG: SERIAL POKER. You've turned affection into a felony. I'm weirdly honored.";

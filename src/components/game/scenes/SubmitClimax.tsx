@@ -56,14 +56,14 @@ export function SubmitClimax({
                 opt.tone === "danger"
                   ? "rgba(255,77,109,0.7)"
                   : opt.tone === "secret"
-                    ? "rgba(180,120,255,0.55)"
+                    ? "rgba(180,120,255,0.65)"
                     : opt.tone === "sterile"
-                      ? "rgba(200,210,220,0.45)"
-                      : "rgba(110,231,255,0.45)",
+                      ? "rgba(200,210,220,0.55)"
+                      : "rgba(110,231,255,0.55)",
               background:
                 opt.tone === "danger"
-                  ? "linear-gradient(90deg, rgba(90,20,35,0.55), rgba(20,10,14,0.6))"
-                  : "rgba(8,12,20,0.55)",
+                  ? "linear-gradient(90deg, rgba(90,20,35,0.78), rgba(20,10,14,0.88))"
+                  : "linear-gradient(155deg, rgba(22,32,48,0.92) 0%, rgba(10,14,22,0.94) 100%)",
               color: "#e8eef8",
               fontFamily: "var(--font-display)",
             }}

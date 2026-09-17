@@ -138,16 +138,15 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         buryAssistant gag scenes keep the orb under/behind the form on purpose.
       */}
       <motion.div
-        className={`absolute ${assistantZ} flex items-center gap-2 ${
+        className={`absolute ${assistantZ} flex items-center gap-2 pointer-events-none ${
           dockAbove ? "flex-col-reverse" : "flex-col"
-        } ${pokeable ? "" : "pointer-events-none"}`}
+        }`}
         style={{
           left: orbStyle.left,
           top: orbStyle.top,
           transform: orbStyle.transform,
           width: Math.max(orbStyle.size, spotlight ? 260 : 180),
           maxWidth: "min(42vw, 300px)",
-          pointerEvents: pokeable ? "auto" : "none",
         }}
         data-assistant-dock={dockAbove ? "above" : "below"}
         animate={
@@ -192,7 +191,9 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
         <motion.div
           className={`pointer-events-none glass-panel overflow-hidden px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
-            spotlight ? "max-w-[min(280px,40vw)] max-h-[26vh]" : "max-w-[min(210px,34vw)] max-h-[20vh]"
+            spotlight
+              ? "max-w-[min(280px,40vw)] max-h-[min(22vh,160px)]"
+              : "max-w-[min(210px,34vw)] max-h-[min(18vh,140px)]"
           }`}
           key={aiLine || "silent"}
           initial={{ opacity: 0, y: dockAbove ? -8 : 8, scale: 0.96 }}
@@ -210,7 +211,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       </motion.div>
 
       {companion ? (
-        <div className="absolute inset-x-0 bottom-[6%] z-30 flex flex-col items-center gap-3 px-4">
+        <div className="absolute inset-x-0 bottom-[5%] z-30 flex max-h-[38vh] flex-col items-center gap-2 overflow-hidden px-4">
           <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
             {scene.formId ?? "SIDE CHANNEL // NO FORM"}
           </div>
@@ -283,9 +284,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         animate={
           panelShake
             ? { rotate: [-0.7, 0.7, -0.3, 0], y: [0, -6, 0], opacity: 1, x: 0, scale: 1 }
-            : spotlight && scene.kind !== "climax" && scene.kind !== "setpiece"
-              ? { ...panelVar.animate, opacity: 0.55, filter: "brightness(0.72)" }
-              : panelVar.animate
+            : panelVar.animate
         }
         transition={
           panelMotion === "drift"

@@ -16,7 +16,7 @@ export function HcosSplash({
   }, [onDone]);
 
   useEffect(() => {
-    const t = setTimeout(() => onDoneRef.current(), reducedMotion ? 1600 : 4200);
+    const t = setTimeout(() => onDoneRef.current(), reducedMotion ? 3200 : 9500);
     return () => clearTimeout(t);
   }, [reducedMotion]);
 

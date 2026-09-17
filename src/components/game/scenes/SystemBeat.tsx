@@ -90,10 +90,12 @@ export function SystemBeat({
         transition={{ delay: 0.25, type: "spring", stiffness: 160 }}
         role="alertdialog"
       >
-        <div className="font-mono text-[10px] tracking-[0.4em] text-system-warn">{title}</div>
+        <div className="max-w-full truncate font-mono text-[10px] tracking-[0.28em] text-system-warn sm:tracking-[0.36em]">
+          {title}
+        </div>
         <div
-          className="mt-3 max-w-full break-words text-lg tracking-[0.12em] text-white sm:text-2xl sm:tracking-[0.18em]"
-          style={{ fontFamily: "var(--font-display)" }}
+          className="mt-3 max-w-full break-words text-lg leading-snug tracking-[0.06em] text-white sm:text-2xl sm:tracking-[0.1em]"
+          style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere" }}
         >
           {line}
         </div>

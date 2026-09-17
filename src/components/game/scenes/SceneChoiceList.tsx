@@ -59,16 +59,16 @@ export function SceneChoiceList({
                 borderColor: isSelected
                   ? "rgba(110,231,255,0.85)"
                   : opt.secret
-                    ? "rgba(180,120,255,0.5)"
+                    ? "rgba(180,120,255,0.65)"
                     : opt.unauthorized || opt.danger
-                      ? "rgba(110,231,255,0.4)"
-                      : "rgba(170,200,230,0.2)",
+                      ? "rgba(110,231,255,0.55)"
+                      : "rgba(190,215,240,0.48)",
                 background: isSelected
-                  ? "linear-gradient(90deg, rgba(40,90,120,0.55), rgba(20,30,45,0.6))"
-                  : "rgba(8,12,20,0.5)",
+                  ? "linear-gradient(90deg, rgba(40,90,120,0.75), rgba(20,30,45,0.85))"
+                  : "linear-gradient(155deg, rgba(22,32,48,0.92) 0%, rgba(10,14,22,0.94) 100%)",
                 boxShadow: isSelected
                   ? "0 0 0 1px rgba(110,231,255,0.35), 0 0 24px rgba(110,231,255,0.2)"
-                  : undefined,
+                  : "0 0 0 1px rgba(0,0,0,0.35) inset, 0 8px 24px rgba(0,0,0,0.35)",
               }}
               initial={opt.late ? { opacity: 0, y: 14, scale: 0.97 } : enter.initial}
               animate={

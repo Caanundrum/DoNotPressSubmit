@@ -1,2 +1,1 @@
-"use client";
-PLACEHOLDER
+file:///workspace/src/components/game/scenes/ScenePlayerView.tsx

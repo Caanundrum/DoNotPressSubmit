@@ -77,7 +77,8 @@ export function orbStageStyle(
       return { left: "12%", top: "42%", transform: "translate(-50%, -50%)", size: 140 };
     case "pace":
       // Stay above the floor so orb+dialogue clear the viewport at 1280×800.
-      return { left: "50%", top: "72%", transform: "translate(-50%, -50%)", size: 104 };
+      // Keep x travel small — wide pace loops were clipping dialogue off-stage.
+      return { left: "50%", top: "68%", transform: "translate(-50%, -50%)", size: 104 };
     case "flee":
       return { left: "76%", top: "16%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
@@ -167,10 +168,16 @@ export function panelVariants(motion: PanelMotion | undefined) {
 export function panelLayoutClass(
   motion: PanelMotion | undefined,
   spotlight = false,
-  opts?: { buryAssistant?: boolean; safeSide?: AssistantSafeSide },
+  opts?: { buryAssistant?: boolean; safeSide?: AssistantSafeSide; climax?: boolean },
 ): string {
   const bury = !!opts?.buryAssistant;
   const side = opts?.safeSide ?? "left";
+  const climax = !!opts?.climax;
+
+  // Climax: reclaim nearly the full stage so every ending fits in one glance @ 1280×800.
+  if (climax) {
+    return "left-[1.5%] right-[1.5%] top-[7%] bottom-[2%] mx-auto w-[min(97%,1100px)] max-h-[min(90dvh,720px)]";
+  }
 
   if (bury) {
     // Full-stage gag layouts — may cover / bury the assistant on purpose.
@@ -291,7 +298,7 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
     case "dodge":
       return {
         initial: { opacity: 0, scale: 0.94 },
-        // Opacity stays 1 — only x loops (SceneChoiceList locks opacity during repeat).
+        // Opacity stays 1 — only x loops (ScenePlayerView locks opacity during repeat).
         animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },
       };
     default:

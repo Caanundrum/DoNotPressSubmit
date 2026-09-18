@@ -42,6 +42,9 @@ npm start
 - Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
 - Unmute + Web Speech preserved
 - Zero scrollbars — viewport-fit shell (System Message / System Directive included; no 100vw gutters)
+- System Directive CTA always matches its prompt (Continue vs later Submit climax)
+- Act V climax endings fit in one glance (including the off-map hallway)
+- End report in human language (no debug choice codes / session dump)
 - Firebase App Hosting `standalone` preserved
 
 ## Out of scope (later)

@@ -209,7 +209,10 @@ function ScenePlayerInner({
     setPokeFlinch(true);
     window.setTimeout(() => setPokeFlinch(false), 520);
     const pokes = (state.counters.orbPokes ?? 0) + 1;
-    const { next, notice } = applyOrbPoke(state, pokes);
+    // Pass the line currently on the bubble so mid/late pokes never silently no-op.
+    const currentLine =
+      pokeNotice ?? reaction ?? resolveAiLine(scene?.aiLine, scene?.aiLineIf, state.flags);
+    const { next, notice } = applyOrbPoke(state, pokes, currentLine);
     onState(next);
     // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);

@@ -8,10 +8,12 @@ import { speech } from "@/lib/speech";
 export function SystemBeat({
   title,
   line,
+  continueLabel = "CONTINUE ASSESSMENT",
   onContinue,
 }: {
   title: string;
   line: string;
+  continueLabel?: string;
   onContinue: () => void;
 }) {
   const [secondsLeft, setSecondsLeft] = useState(16);
@@ -49,7 +51,7 @@ export function SystemBeat({
   }, [armed, secondsLeft, safeContinue]);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-start justify-center overflow-hidden pt-[6%] sm:pt-[8%]">
+    <div className="absolute inset-0 z-50 flex max-w-full items-start justify-center overflow-hidden px-3 pt-[5%] sm:pt-[7%]">
       <motion.div
         className="pointer-events-none absolute inset-0"
         initial={{ backgroundColor: "rgba(255,255,255,0)" }}
@@ -64,12 +66,12 @@ export function SystemBeat({
         transition={{ duration: 1.2 }}
       />
       <motion.div
-        className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-white"
+        className="pointer-events-none absolute inset-x-0 top-0 h-1 origin-left bg-white"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
       />
       <motion.div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-white"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-1 origin-left bg-white"
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
       />
@@ -78,28 +80,29 @@ export function SystemBeat({
           key={top}
           className="pointer-events-none absolute left-[4%] right-[4%] h-px bg-white/70"
           style={{ top: `${top}%` }}
-          initial={{ x: i % 2 ? 40 : -40, opacity: 0 }}
-          animate={{ x: 0, opacity: 0.85 }}
-          transition={{ delay: 0.15 + i * 0.1, type: "spring", stiffness: 200, damping: 18 }}
+          // Opacity-only enter — x-slides were widening past the stage and reopening H-overflow.
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.85 }}
+          transition={{ delay: 0.15 + i * 0.1 }}
         />
       ))}
       <motion.div
-        className="system-beat-shell relative z-10 overflow-hidden border border-white/70 bg-black/90 px-3 py-4 shadow-[0_0_60px_rgba(255,255,255,0.25)] sm:px-5 sm:py-5"
-        initial={{ opacity: 0, y: -30, scale: 0.96 }}
+        className="system-beat-shell relative z-10 max-w-full overflow-hidden border border-white/70 bg-black/90 px-3 py-4 shadow-[0_0_60px_rgba(255,255,255,0.25)] sm:px-5 sm:py-5"
+        initial={{ opacity: 0, y: -24, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.25, type: "spring", stiffness: 160 }}
         role="alertdialog"
       >
-        <div className="max-w-full truncate font-mono text-[10px] tracking-[0.22em] text-system-warn sm:tracking-[0.3em]">
+        <div className="max-w-full font-mono text-[10px] tracking-[0.16em] text-system-warn break-words sm:tracking-[0.22em]">
           {title}
         </div>
         <div
-          className="mt-3 max-w-full break-words text-base leading-snug tracking-[0.04em] text-white sm:text-xl sm:tracking-[0.06em]"
+          className="mt-3 max-w-full break-words text-base leading-snug tracking-[0.02em] text-white sm:text-lg sm:tracking-[0.04em]"
           style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere", wordBreak: "break-word" }}
         >
           {line}
         </div>
-        <div className="mt-5 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 flex max-w-full flex-col items-stretch gap-2.5">
           <button
             type="button"
             onPointerDown={() => {
@@ -118,12 +121,12 @@ export function SystemBeat({
               interacting.current = false;
             }}
             onClick={safeContinue}
-            className="border border-white/80 bg-white/10 px-5 py-3 font-mono text-[12px] tracking-[0.22em] text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+            className="max-w-full border border-white/80 bg-white/10 px-4 py-3 font-mono text-[11px] tracking-[0.14em] text-white transition break-words hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan sm:text-[12px] sm:tracking-[0.18em]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            CONTINUE ASSESSMENT
+            {continueLabel}
           </button>
-          <div className="shrink-0 font-mono text-[10px] tracking-[0.14em] text-[#c5d3e4]">
+          <div className="font-mono text-[10px] tracking-[0.12em] text-[#c5d3e4]">
             {armed ? `AUTO-RESUME IN ${secondsLeft}s` : "AWAITING ACKNOWLEDGEMENT…"}
           </div>
         </div>

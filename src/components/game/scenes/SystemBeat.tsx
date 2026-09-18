@@ -84,18 +84,18 @@ export function SystemBeat({
         />
       ))}
       <motion.div
-        className="system-beat-shell relative z-10 w-[min(90vw,640px)] max-w-[calc(100vw-1.5rem)] overflow-hidden border border-white/70 bg-black/90 px-4 py-4 shadow-[0_0_60px_rgba(255,255,255,0.25)] sm:px-5 sm:py-5"
+        className="system-beat-shell relative z-10 overflow-hidden border border-white/70 bg-black/90 px-3 py-4 shadow-[0_0_60px_rgba(255,255,255,0.25)] sm:px-5 sm:py-5"
         initial={{ opacity: 0, y: -30, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ delay: 0.25, type: "spring", stiffness: 160 }}
         role="alertdialog"
       >
-        <div className="max-w-full truncate font-mono text-[10px] tracking-[0.28em] text-system-warn sm:tracking-[0.36em]">
+        <div className="max-w-full truncate font-mono text-[10px] tracking-[0.22em] text-system-warn sm:tracking-[0.3em]">
           {title}
         </div>
         <div
-          className="mt-3 max-w-full break-words text-lg leading-snug tracking-[0.06em] text-white sm:text-2xl sm:tracking-[0.1em]"
-          style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere" }}
+          className="mt-3 max-w-full break-words text-base leading-snug tracking-[0.04em] text-white sm:text-xl sm:tracking-[0.06em]"
+          style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere", wordBreak: "break-word" }}
         >
           {line}
         </div>
@@ -118,12 +118,12 @@ export function SystemBeat({
               interacting.current = false;
             }}
             onClick={safeContinue}
-            className="border border-white/80 bg-white/10 px-5 py-3 font-mono text-[12px] tracking-[0.28em] text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+            className="border border-white/80 bg-white/10 px-5 py-3 font-mono text-[12px] tracking-[0.22em] text-white transition hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
             style={{ fontFamily: "var(--font-display)" }}
           >
             CONTINUE ASSESSMENT
           </button>
-          <div className="font-mono text-[10px] tracking-[0.18em] text-[#c5d3e4]">
+          <div className="shrink-0 font-mono text-[10px] tracking-[0.14em] text-[#c5d3e4]">
             {armed ? `AUTO-RESUME IN ${secondsLeft}s` : "AWAITING ACKNOWLEDGEMENT…"}
           </div>
         </div>

@@ -1,9 +1,24 @@
 import type { GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 
+/** Explicit ack lines when a poke would otherwise repeat the same dialogue. */
+const ALREADY_SAID = [
+  "Already said that. Still logging. Still judging.",
+  "You already poked that reaction out of me. Novelty expired.",
+  "Same poke. Same me. Slightly less patience.",
+  "Still logging. Still judging. Still oddly fond.",
+  "Logged. Again. The memo has a memo now.",
+  "I felt that. You felt that I felt that. We can stop.",
+] as const;
+
+/**
+ * Orb poke always produces a visible dialogue change.
+ * Pass `currentLine` so repeats become explicit "already said that" variants — never a silent no-op.
+ */
 export function applyOrbPoke(
   state: GameState,
   pokes: number,
+  currentLine?: string | null,
 ): { next: GameState; notice: string } {
   const secrets = [...state.secrets];
   if (pokes >= 7 && !secrets.includes("orb-poker-serial")) {
@@ -37,17 +52,28 @@ export function applyOrbPoke(
     notice = "SYSTEM NOTICE: ASSISTANT SURFACE CONTACT LOGGED. Please stop helping.";
     audio.play("system", 0.35);
   } else if (pokes === 4) {
-    notice = "Already said that. Still logging. Still judging.";
+    notice = ALREADY_SAID[0];
   } else if (pokes === 5) {
-    notice = "You already poked that reaction out of me. Novelty expired.";
+    notice = ALREADY_SAID[1];
   } else if (pokes === 6) {
-    notice = "Same poke. Same me. Slightly less patience.";
-  } else if (pokes >= 7) {
+    notice = ALREADY_SAID[2];
+  } else if (pokes === 7) {
     notice =
       "SECRET FLAG: SERIAL POKER. You've turned affection into a felony. I'm weirdly honored.";
     audio.play("system", 0.4);
   } else {
-    notice = "Still logging. Still judging. Still oddly fond.";
+    // pokes > 7 — keep rotating so mid/late beats never go silent
+    notice = ALREADY_SAID[(pokes - 1) % ALREADY_SAID.length];
+  }
+
+  // Guarantee a visible change vs whatever is currently on the bubble.
+  const shown = (currentLine ?? "").trim();
+  if (shown && notice.trim() === shown) {
+    const idx = Math.max(0, pokes - 1) % ALREADY_SAID.length;
+    notice = ALREADY_SAID[idx];
+    if (notice.trim() === shown) {
+      notice = ALREADY_SAID[(idx + 1) % ALREADY_SAID.length];
+    }
   }
 
   return { next, notice };

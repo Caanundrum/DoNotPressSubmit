@@ -125,17 +125,17 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
       ) : null}
 
-      {/* Stage chrome — decorative, never intercepts clicks */}
-      <div className="pointer-events-none absolute inset-0 z-[5]">
-        <div className="absolute left-4 top-4 font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
+      {/* Stage chrome — decorative, never intercepts clicks; must never widen the stage. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex max-w-full items-start justify-between gap-3 px-3 pt-3 sm:px-4 sm:pt-4">
+        <div className="min-w-0 flex-1 break-words font-mono text-[9px] leading-snug tracking-[0.12em] text-[#b7c6d8] sm:text-[10px] sm:tracking-[0.16em]">
           {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
         </div>
-        <div className="absolute right-4 top-4 font-mono text-[10px] tracking-[0.22em] text-[#b7c6d8]">
+        <div className="shrink-0 text-right font-mono text-[9px] leading-snug tracking-[0.12em] text-[#b7c6d8] sm:text-[10px] sm:tracking-[0.16em]">
           {residue === "chaos"
-            ? "FACILITY STAGE // CONTAMINATED"
+            ? "STAGE // CONTAMINATED"
             : residue === "obedient"
-              ? "FACILITY STAGE // COMPLIANT"
-              : "FACILITY STAGE // LIVE"}
+              ? "STAGE // COMPLIANT"
+              : "STAGE // LIVE"}
         </div>
       </div>
 
@@ -164,9 +164,9 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         data-assistant-dock={dockLeft ? "left" : dockAbove ? "above" : "below"}
         animate={
           orbAnchor === "pace"
-            ? { x: [-16, 16, -8, 0] }
+            ? { x: [-10, 10, -5, 0] }
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 4, -3, 5, 0], y: [0, -3, 2, 0] }
+              ? { x: [0, 3, -2, 3, 0], y: [0, -2, 1, 0] }
               : spotlight
                 ? { x: 0, y: [0, -4, 0], scale: 1 }
                 : { x: 0, y: 0 }
@@ -208,12 +208,12 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           />
         </div>
         <motion.div
-          className={`pointer-events-none glass-panel shrink overflow-hidden px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
+          className={`pointer-events-none glass-panel shrink px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
             spotlight
-              ? "max-w-[min(260px,36vw)] max-h-[min(20vh,148px)]"
+              ? "max-w-[min(300px,42vw)]"
               : dockLeft
-                ? "max-w-[min(200px,30vw)] max-h-[min(18vh,136px)]"
-                : "max-w-[min(200px,32vw)] max-h-[min(16vh,128px)]"
+                ? "max-w-[min(240px,34vw)]"
+                : "max-w-[min(260px,40vw)]"
           }`}
           key={aiLine || "silent"}
           initial={{
@@ -224,12 +224,15 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           }}
           animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, x: 0, y: 0, scale: 1 }}
         >
-          <div className="mb-1 font-mono text-[9px] tracking-[0.22em] text-cyan/80">
+          <div className="mb-1 font-mono text-[9px] tracking-[0.18em] text-cyan/80">
             ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
             {buryAssistant ? " // UNDER PRESSURE" : ""}
             {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
           </div>
-          <div className={`overflow-hidden ${spotlight ? "text-[15px]" : "text-[13px]"}`}>
+          <div
+            className={`break-words ${spotlight ? "text-[14px] leading-snug" : "text-[12px] leading-snug sm:text-[13px]"}`}
+            style={{ overflowWrap: "anywhere" }}
+          >
             {systemLock ? "…" : aiLine || "…"}
           </div>
         </motion.div>
@@ -293,11 +296,14 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {!companion ? (
       <motion.div
-        className={`glass-panel assessment-panel absolute z-30 p-4 sm:p-6 ${panelLayoutClass(
+        className={`glass-panel assessment-panel absolute z-30 ${
+          scene.kind === "climax" ? "p-3 sm:p-4" : "p-4 sm:p-6"
+        } ${panelLayoutClass(
           panelMotion,
           spotlight && scene.kind !== "climax" && scene.kind !== "setpiece",
           {
             buryAssistant,
+            climax: scene.kind === "climax",
             safeSide:
               scene.kind === "climax" || scene.kind === "setpiece"
                 ? assistantSafeSide(orbAnchor as OrbAnchor, false)
@@ -332,13 +338,17 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           ) : null}
           {scene.title ? (
             <h2
-              className="text-xl tracking-[0.12em] text-white sm:text-3xl"
+              className={`tracking-[0.1em] text-white ${
+                scene.kind === "climax"
+                  ? "text-lg sm:text-2xl"
+                  : "text-xl sm:text-3xl"
+              }`}
               style={{ fontFamily: "var(--font-display)" }}
             >
               {scene.title}
             </h2>
           ) : null}
-          {scene.prompt ? (
+          {scene.prompt && scene.kind !== "climax" ? (
             <p className="max-w-3xl text-sm leading-snug text-[#d2dceb] sm:text-base">
               {scene.prompt}
             </p>
@@ -409,6 +419,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         <SystemBeat
           title={scene.systemTitle ?? "SYSTEM OVERRIDE"}
           line={scene.systemLine ?? "CONTINUE ASSESSMENT."}
+          continueLabel={scene.continueLabel ?? "CONTINUE ASSESSMENT"}
           onContinue={finishSystem}
         />
       ) : null}

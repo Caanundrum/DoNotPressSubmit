@@ -4,6 +4,7 @@ import { motion, type TargetAndTransition } from "framer-motion";
 import {
   assistantSafeSide,
   dialogueDocksAbove,
+  dialogueDocksLeft,
   panelLayoutClass,
   type AssistantSafeSide,
 } from "@/game/motion";
@@ -81,7 +82,14 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
   } = p;
 
   const dockAbove = dialogueDocksAbove(orbAnchor);
+  const dockLeft = dialogueDocksLeft(orbAnchor);
   const assistantZ = buryAssistant ? "z-[15]" : "z-[32]";
+  // Right-edge beats: row with bubble toward center. Low beats: column above. Else column below.
+  const assistantLayout = dockLeft
+    ? "flex-row-reverse"
+    : dockAbove
+      ? "flex-col-reverse"
+      : "flex-col";
 
   return (
     <div
@@ -138,22 +146,27 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         buryAssistant gag scenes keep the orb under/behind the form on purpose.
       */}
       <motion.div
-        className={`absolute ${assistantZ} flex items-center gap-2 pointer-events-none ${
-          dockAbove ? "flex-col-reverse" : "flex-col"
-        }`}
+        className={`absolute ${assistantZ} flex items-center gap-2 pointer-events-none ${assistantLayout}`}
         style={{
           left: orbStyle.left,
           top: orbStyle.top,
           transform: orbStyle.transform,
-          width: Math.max(orbStyle.size, spotlight ? 260 : 180),
-          maxWidth: "min(42vw, 300px)",
+          // Right-dock: width follows content so the bubble can sit left of the orb inside the frame.
+          width: dockLeft
+            ? "auto"
+            : Math.max(orbStyle.size, spotlight ? 248 : 168),
+          maxWidth: dockLeft
+            ? "min(46vw, 340px)"
+            : spotlight
+              ? "min(38vw, 280px)"
+              : "min(36vw, 260px)",
         }}
-        data-assistant-dock={dockAbove ? "above" : "below"}
+        data-assistant-dock={dockLeft ? "left" : dockAbove ? "above" : "below"}
         animate={
           orbAnchor === "pace"
-            ? { x: [-20, 20, -10, 0] }
+            ? { x: [-16, 16, -8, 0] }
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 6, -4, 8, 0], y: [0, -4, 3, 0] }
+              ? { x: [0, 4, -3, 5, 0], y: [0, -3, 2, 0] }
               : spotlight
                 ? { x: 0, y: [0, -4, 0], scale: 1 }
                 : { x: 0, y: 0 }
@@ -168,11 +181,10 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             : { type: "spring", stiffness: 90, damping: 18 }
         }
         initial={false}
-        layout
       >
         {spotlight ? (
           <motion.div
-            className="pointer-events-none absolute inset-[-30%] -z-10 rounded-full"
+            className="pointer-events-none absolute inset-[-24%] -z-10 rounded-full"
             style={{
               background:
                 "radial-gradient(circle, rgba(110,231,255,0.22) 0%, rgba(110,231,255,0.06) 45%, transparent 70%)",
@@ -181,23 +193,36 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             transition={{ duration: 3.2, repeat: Infinity }}
           />
         ) : null}
-        <AssistantOrb
-          mood={systemLock ? "nervous" : state.aiMood}
-          size={orbStyle.size}
-          pokeable={pokeable}
-          onPoke={onOrbPoke}
-          flinch={pokeFlinch}
-          glance={glance}
-        />
+        {/* Explicit poke hit layer — companion Hold + mid/late beats must never silently no-op. */}
+        <div
+          className={pokeable ? "pointer-events-auto relative z-[1] shrink-0" : "pointer-events-none relative shrink-0"}
+          style={{ width: orbStyle.size }}
+        >
+          <AssistantOrb
+            mood={systemLock ? "nervous" : state.aiMood}
+            size={orbStyle.size}
+            pokeable={pokeable}
+            onPoke={onOrbPoke}
+            flinch={pokeFlinch}
+            glance={glance}
+          />
+        </div>
         <motion.div
-          className={`pointer-events-none glass-panel overflow-hidden px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
+          className={`pointer-events-none glass-panel shrink overflow-hidden px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
             spotlight
-              ? "max-w-[min(280px,40vw)] max-h-[min(22vh,160px)]"
-              : "max-w-[min(210px,34vw)] max-h-[min(18vh,140px)]"
+              ? "max-w-[min(260px,36vw)] max-h-[min(20vh,148px)]"
+              : dockLeft
+                ? "max-w-[min(200px,30vw)] max-h-[min(18vh,136px)]"
+                : "max-w-[min(200px,32vw)] max-h-[min(16vh,128px)]"
           }`}
           key={aiLine || "silent"}
-          initial={{ opacity: 0, y: dockAbove ? -8 : 8, scale: 0.96 }}
-          animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, y: 0, scale: 1 }}
+          initial={{
+            opacity: 0,
+            x: dockLeft ? 8 : 0,
+            y: dockLeft ? 0 : dockAbove ? -8 : 8,
+            scale: 0.96,
+          }}
+          animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, x: 0, y: 0, scale: 1 }}
         >
           <div className="mb-1 font-mono text-[9px] tracking-[0.22em] text-cyan/80">
             ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
@@ -211,7 +236,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       </motion.div>
 
       {companion ? (
-        <div className="absolute inset-x-0 bottom-[5%] z-30 flex max-h-[38vh] flex-col items-center gap-2 overflow-hidden px-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-[4%] z-30 flex max-h-[34vh] flex-col items-center gap-2 overflow-hidden px-4">
           <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
             {scene.formId ?? "SIDE CHANNEL // NO FORM"}
           </div>
@@ -230,7 +255,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             <button
               type="button"
               disabled={!companionReady}
-              className="border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
+              className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
               style={{ fontFamily: "var(--font-display)" }}
               onClick={() => finishCompanion()}
             >
@@ -241,7 +266,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             <button
               type="button"
               disabled={!watchedPulse}
-              className="border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:opacity-40"
+              className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:opacity-40"
               style={{ fontFamily: "var(--font-display)" }}
               onClick={() => finishCompanion()}
             >
@@ -249,7 +274,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             </button>
           ) : null}
           {scene.companion === "respond" && scene.choices ? (
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-2">
               {scene.choices.map((opt) => (
                 <button
                   key={opt.id}
@@ -288,7 +313,13 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         }
         transition={
           panelMotion === "drift"
-            ? { duration: 9, repeat: Infinity, ease: "easeInOut" }
+            ? {
+                // Only x/y loop — never re-run opacity from 0 (that made private vote unreadable).
+                opacity: { duration: 0.45 },
+                x: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+                default: { type: "spring", stiffness: 120, damping: 18 },
+              }
             : { type: "spring", stiffness: 120, damping: 18 }
         }
         style={{ pointerEvents: "auto" }}

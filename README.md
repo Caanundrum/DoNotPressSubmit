@@ -37,11 +37,11 @@ npm start
 - Assistant orb as scene partner: expressive moods (tint / orbit / ring tightness / aperture / squash), glance toward choices, spotlight pitches, companion beats, poke escalation (1 → 3 → 7 + report flag)
 - Ambient facility life: visible egg pins (no ghost hover hitboxes), roamers, chaos vs obedient residue
 - Title remembers escape wave **and** ally/refuse residue (clickable gag)
-- Assistant safe zone + sticky orb poke dialogue (never re-reads beat opening after poke)
-- Choice / Allegiance / lobby panels stay high-contrast; HCOS splash dwells ~9.5s
+- Assistant safe zone + sticky orb poke dialogue (never re-reads beat opening after poke; mid/late pokes never silent)
+- Choice / Allegiance / private vote / lobby panels stay high-contrast; HCOS splash dwells ~9.5s
 - Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
 - Unmute + Web Speech preserved
-- Zero scrollbars — viewport-fit shell (System Directive included)
+- Zero scrollbars — viewport-fit shell (System Message / System Directive included; no 100vw gutters)
 - Firebase App Hosting `standalone` preserved
 
 ## Out of scope (later)

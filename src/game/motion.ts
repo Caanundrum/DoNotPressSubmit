@@ -38,6 +38,16 @@ export function dialogueDocksAbove(anchor: OrbAnchor | string | undefined): bool
   );
 }
 
+/** Right-edge anchors: bubble must grow toward center, never past the viewport. */
+export function dialogueDocksLeft(anchor: OrbAnchor | string | undefined): boolean {
+  return (
+    anchor === "dock-right" ||
+    anchor === "loom" ||
+    anchor === "overhead" ||
+    anchor === "flee"
+  );
+}
+
 /** Pixel / percent stage positions for the assistant. */
 export function orbStageStyle(
   anchor: OrbAnchor | undefined,
@@ -56,34 +66,37 @@ export function orbStageStyle(
   // Decorative only — pointer-events stay off unless a scene enables poke.
   // Positions are clamped so dialogue never clips the viewport edge.
   if (spotlight || anchor === "spotlight") {
-    return { left: "16%", top: "34%", transform: "translate(-50%, -50%)", size: 200 };
+    return { left: "15%", top: "32%", transform: "translate(-50%, -50%)", size: 196 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
-      return { left: "88%", top: "34%", transform: "translate(-50%, -50%)", size: 124 };
+      // Inset further — dialogue card sits left of orb and must clear the right edge.
+      return { left: "78%", top: "34%", transform: "translate(-50%, -50%)", size: 120 };
     case "listen":
       return { left: "12%", top: "42%", transform: "translate(-50%, -50%)", size: 140 };
     case "pace":
-      return { left: "50%", top: "82%", transform: "translate(-50%, -50%)", size: 110 };
+      // Stay above the floor so orb+dialogue clear the viewport at 1280×800.
+      return { left: "50%", top: "72%", transform: "translate(-50%, -50%)", size: 104 };
     case "flee":
-      return { left: "88%", top: "14%", transform: "translate(-50%, -50%)", size: 90 };
+      return { left: "76%", top: "16%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
-      return { left: "88%", top: "18%", transform: "translate(-50%, -50%)", size: 168 };
+      // Act III hazard etc. — keep full orb+bubble inside frame at 1280×800.
+      return { left: "74%", top: "24%", transform: "translate(-50%, -50%)", size: 148 };
     case "hide":
       // Buried corner — gag allowlist only; still keep bubble on-screen.
-      return { left: "10%", top: "78%", transform: "translate(-50%, -50%)", size: 72 };
+      return { left: "12%", top: "76%", transform: "translate(-50%, -50%)", size: 72 };
     case "overhead":
-      return { left: "88%", top: "12%", transform: "translate(-50%, -50%)", size: 100 };
+      return { left: "78%", top: "14%", transform: "translate(-50%, -50%)", size: 100 };
     case "center":
-      return { left: "14%", top: "38%", transform: "translate(-50%, -50%)", size: 148 };
+      return { left: "14%", top: "36%", transform: "translate(-50%, -50%)", size: 148 };
     case "avoid-submit":
-      return { left: "12%", top: "72%", transform: "translate(-50%, -50%)", size: 118 };
+      return { left: "12%", top: "70%", transform: "translate(-50%, -50%)", size: 118 };
     case "dock-left":
     default:
       return {
         left: `${12 + jitter}%`,
-        top: "52%",
+        top: "50%",
         transform: "translate(-50%, -50%)",
         size: 128,
       };
@@ -192,13 +205,13 @@ export function panelLayoutClass(
   const leaveLeft =
     "left-[min(28vw,300px)] right-[2%] max-w-[min(70vw,920px)]";
   const leaveRight =
-    "left-[2%] right-[min(28vw,300px)] max-w-[min(70vw,920px)]";
+    "left-[2%] right-[min(32vw,340px)] max-w-[min(68vw,900px)]";
   const leaveBottom =
     "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(62vh,560px)] max-w-[min(92vw,980px)] mx-auto";
 
   if (spotlight) {
     // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
-    return "right-[2%] bottom-[5%] w-[min(68vw,500px)] max-w-[calc(100%-min(28vw,300px))]";
+    return "right-[2%] bottom-[5%] w-[min(66vw,500px)] max-w-[calc(100%-min(30vw,300px))]";
   }
 
   if (side === "bottom") {
@@ -278,6 +291,7 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
     case "dodge":
       return {
         initial: { opacity: 0, scale: 0.94 },
+        // Opacity stays 1 — only x loops (SceneChoiceList locks opacity during repeat).
         animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },
       };
     default:

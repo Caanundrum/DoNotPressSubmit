@@ -76,12 +76,13 @@ export function orbStageStyle(
     case "listen":
       return { left: "12%", top: "42%", transform: "translate(-50%, -50%)", size: 140 };
     case "pace":
-      return { left: "50%", top: "80%", transform: "translate(-50%, -50%)", size: 110 };
+      // Stay above the floor so orb+dialogue clear the viewport at 1280×800.
+      return { left: "50%", top: "72%", transform: "translate(-50%, -50%)", size: 104 };
     case "flee":
-      return { left: "78%", top: "16%", transform: "translate(-50%, -50%)", size: 90 };
+      return { left: "76%", top: "16%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
       // Act III hazard etc. — keep full orb+bubble inside frame at 1280×800.
-      return { left: "76%", top: "22%", transform: "translate(-50%, -50%)", size: 156 };
+      return { left: "74%", top: "24%", transform: "translate(-50%, -50%)", size: 148 };
     case "hide":
       // Buried corner — gag allowlist only; still keep bubble on-screen.
       return { left: "12%", top: "76%", transform: "translate(-50%, -50%)", size: 72 };
@@ -290,6 +291,7 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
     case "dodge":
       return {
         initial: { opacity: 0, scale: 0.94 },
+        // Opacity stays 1 — only x loops (SceneChoiceList locks opacity during repeat).
         animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },
       };
     default:

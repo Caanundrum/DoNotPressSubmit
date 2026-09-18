@@ -125,8 +125,8 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
       ) : null}
 
-      {/* Stage chrome — decorative, never intercepts clicks; must never widen the stage. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex max-w-full items-start justify-between gap-3 px-3 pt-3 sm:px-4 sm:pt-4">
+      {/* Stage chrome — leave top-right clear for ENABLE SOUND (z-50). */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[5] flex max-w-full items-start justify-between gap-3 px-3 pt-3 pr-28 sm:px-4 sm:pt-4 sm:pr-32">
         <div className="min-w-0 flex-1 break-words font-mono text-[9px] leading-snug tracking-[0.12em] text-[#b7c6d8] sm:text-[10px] sm:tracking-[0.16em]">
           {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
         </div>

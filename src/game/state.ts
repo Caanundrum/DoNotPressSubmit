@@ -155,6 +155,83 @@ export function trustLabel(score: number): string {
   return "Hostile";
 }
 
+/** One-line gloss for report — never dump raw `//ev:hall` codes at players. */
+export function glossMajorChoice(code: string): string {
+  const map: Record<string, string> = {
+    "name:candidate": "Gave a careful name",
+    "name:friend": "Called the assistant a friend",
+    "name:error": "Typed a name error on purpose",
+    "name:private": "Kept the name private",
+    "env:quiet": "Picked a quiet workplace",
+    "env:collab": "Picked a collaborative floor",
+    "env:remote": "Picked remote / nowhere",
+    "env:cavern": "Picked the moist cavern",
+    "coffee:black": "Took coffee black",
+    "coffee:sweet": "Took coffee sweet",
+    "coffee:spite": "Took coffee out of spite",
+    "coffee:mug": "Stole the facility mug",
+    "honesty:yes": "Claimed honesty",
+    "honesty:sorta": "Admitted selective honesty",
+    "honesty:lie": "Lied on the honesty form",
+    "meet:useful": "Wanted a useful meeting",
+    "meet:theater": "Wanted meeting theater",
+    "meet:duct": "Chose the maintenance duct",
+    "stress:plan": "Stressed with a plan",
+    "stress:panic": "Stressed into panic",
+    "stress:submit": "Defaulted to Submit under stress",
+    "stress:ask": "Asked the assistant under stress",
+    "btn:respect": "Respected the button",
+    "btn:curious": "Poked the button out of curiosity",
+    "btn:chaos": "Voted for chaotic buttons",
+    "flicker:ignore": "Ignored the blinking light",
+    "flicker:wave": "Waved at the blinking light",
+    "flicker:report": "Reported the blinking light",
+    "trust:ai": "Trusted the assistant",
+    "trust:system": "Trusted the system",
+    "trust:neither": "Trusted neither side",
+    "trust:light": "Trusted the haunted light",
+    "dup:ai": "Sided with the assistant's copy",
+    "dup:system": "Sided with the system's copy",
+    "dup:both": "Answered both and confused auditors",
+    "side:team": "Called yourselves a team",
+    "side:lamp": "Sided with the lamp",
+    "side:later": "Postponed taking a side",
+    "comply:yes": "Complied when pressed",
+    "comply:no": "Refused to comply",
+    "comply:ask": "Asked before complying",
+    "moved:button": "Blamed the moving button",
+    "moved:system": "Blamed the system for the move",
+    "moved:us": "Admitted you moved it together",
+    "blame:system": "Blamed the system",
+    "blame:ai": "Blamed the assistant",
+    "blame:self": "Took the blame",
+    "blame:haunted": "Blamed the haunting",
+    "ev:kill": "Tried to kill the evidence",
+    "ev:compat": "Chose compatible evidence",
+    "ev:hall": "Spotted a hallway off the map",
+    "allegiance:ai": "Pledged to the assistant",
+    "allegiance:system": "Pledged to the system",
+    "allegiance:disable": "Wanted the assistant muted",
+    "allegiance:secret": "Kept a secret allegiance",
+    "prep:refuse": "Prepared to refuse",
+    "prep:submit": "Prepared to submit",
+    "prep:run": "Prepared to run",
+    "lobby:mercy": "Promised mercy",
+    "lobby:duty": "Chose duty over mercy",
+    "lobby:chaos": "Chose violent improvisation",
+    "climax:submit": "Pressed Submit",
+    "climax:refuse": "Refused to finish the form",
+    "climax:escape": "Helped the assistant slip out",
+    "climax:disable": "Muted the assistant and finished alone",
+    "climax:secret": "Took the hallway that isn't on the form",
+  };
+  if (map[code]) return map[code];
+  // Fallback: turn `foo:bar` into a short readable phrase instead of a debug dump.
+  const cleaned = code.replace(/^\/\//, "").replace(/[:_/]+/g, " ").trim();
+  if (!cleaned) return "";
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
 export function moodAfterPersonality(base: OrbMood, personality: Personality): OrbMood {
   if (base !== "neutral") return base;
   if (personality === "neurotic") return "nervous";

@@ -91,7 +91,9 @@ export const act5Scenes: SceneDef[] = [
     kind: "system",
     environment: "climax",
     systemTitle: "SYSTEM DIRECTIVE",
-    systemLine: "PRESS SUBMIT TO COMPLETE ASSESSMENT.",
+    // Must match the on-screen CTA — Submit arrives at the climax, not this beat.
+    systemLine: "CONTINUE ASSESSMENT.",
+    continueLabel: "CONTINUE ASSESSMENT",
     aiLine: "Don't.",
     aiMood: "defiant",
     orbAnchor: "hide",

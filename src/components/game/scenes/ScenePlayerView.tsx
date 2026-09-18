@@ -313,7 +313,13 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         }
         transition={
           panelMotion === "drift"
-            ? { duration: 9, repeat: Infinity, ease: "easeInOut" }
+            ? {
+                // Only x/y loop — never re-run opacity from 0 (that made private vote unreadable).
+                opacity: { duration: 0.45 },
+                x: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 9, repeat: Infinity, ease: "easeInOut" },
+                default: { type: "spring", stiffness: 120, damping: 18 },
+              }
             : { type: "spring", stiffness: 120, damping: 18 }
         }
         style={{ pointerEvents: "auto" }}

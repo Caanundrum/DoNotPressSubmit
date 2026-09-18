@@ -298,7 +298,7 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
     case "dodge":
       return {
         initial: { opacity: 0, scale: 0.94 },
-        // Opacity stays 1 — only x loops (ScenePlayerView locks opacity during repeat).
+        // Opacity stays 1 — only x loops (SceneChoiceList locks opacity during repeat).
         animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },
       };
     default:

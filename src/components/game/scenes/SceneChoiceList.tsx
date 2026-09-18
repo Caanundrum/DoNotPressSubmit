@@ -84,10 +84,15 @@ export function SceneChoiceList({
                       }
                     : opt.late
                       ? { opacity: 1, y: 0, scale: 1 }
-                      : enter.animate
+                      : {
+                          // Keep opacity locked at 1 during restless/dodge loops.
+                          ...enter.animate,
+                          opacity: 1,
+                        }
               }
               transition={{
                 delay: index * 0.04,
+                opacity: { duration: 0.35 },
                 duration:
                   choiceMotion === "restless" || choiceMotion === "dodge" ? 2.8 : 0.4,
                 repeat:
@@ -95,6 +100,7 @@ export function SceneChoiceList({
                   (choiceMotion === "restless" || choiceMotion === "dodge")
                     ? Infinity
                     : 0,
+                repeatType: "loop",
               }}
               whileHover={!selected ? { x: 3 } : undefined}
             >

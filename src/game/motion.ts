@@ -62,44 +62,44 @@ export function orbStageStyle(
   const jitter =
     mood === "nervous" || mood === "frightened" || mood === "glitching" ? 1 : 0;
 
-  // Safe zones: keep orb+dialogue clear of the primary form CTA column.
-  // Decorative only — pointer-events stay off unless a scene enables poke.
-  // Positions are clamped so dialogue never clips the viewport edge.
+  // Safe-zone dock: orb + dialogue fully on-screen after every non-gag advance.
+  // Inset aggressively so Act I Form 01 / listen and Act II right docks never clip.
   if (spotlight || anchor === "spotlight") {
-    return { left: "15%", top: "32%", transform: "translate(-50%, -50%)", size: 196 };
+    return { left: "16%", top: "30%", transform: "translate(-50%, -50%)", size: 188 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
-      // Inset further — dialogue card sits left of orb and must clear the right edge.
-      return { left: "78%", top: "34%", transform: "translate(-50%, -50%)", size: 120 };
+      // Dialogue docks left of orb — keep both inside the right safe column.
+      return { left: "84%", top: "36%", transform: "translate(-50%, -50%)", size: 118 };
     case "listen":
-      return { left: "12%", top: "42%", transform: "translate(-50%, -50%)", size: 140 };
+      // Form 01 etc. — left dock, clear of restless CTAs and stage header.
+      return { left: "14%", top: "40%", transform: "translate(-50%, -50%)", size: 136 };
     case "pace":
       // Stay above the floor so orb+dialogue clear the viewport at 1280×800.
       // Keep x travel small — wide pace loops were clipping dialogue off-stage.
-      return { left: "50%", top: "68%", transform: "translate(-50%, -50%)", size: 104 };
+      return { left: "50%", top: "66%", transform: "translate(-50%, -50%)", size: 108 };
     case "flee":
-      return { left: "76%", top: "16%", transform: "translate(-50%, -50%)", size: 90 };
+      return { left: "82%", top: "18%", transform: "translate(-50%, -50%)", size: 96 };
     case "loom":
       // Act III hazard etc. — keep full orb+bubble inside frame at 1280×800.
-      return { left: "74%", top: "24%", transform: "translate(-50%, -50%)", size: 148 };
+      return { left: "82%", top: "26%", transform: "translate(-50%, -50%)", size: 140 };
     case "hide":
       // Buried corner — gag allowlist only; still keep bubble on-screen.
-      return { left: "12%", top: "76%", transform: "translate(-50%, -50%)", size: 72 };
+      return { left: "14%", top: "74%", transform: "translate(-50%, -50%)", size: 78 };
     case "overhead":
-      return { left: "78%", top: "14%", transform: "translate(-50%, -50%)", size: 100 };
+      return { left: "82%", top: "16%", transform: "translate(-50%, -50%)", size: 104 };
     case "center":
-      return { left: "14%", top: "36%", transform: "translate(-50%, -50%)", size: 148 };
+      return { left: "15%", top: "34%", transform: "translate(-50%, -50%)", size: 148 };
     case "avoid-submit":
-      return { left: "12%", top: "70%", transform: "translate(-50%, -50%)", size: 118 };
+      return { left: "14%", top: "68%", transform: "translate(-50%, -50%)", size: 118 };
     case "dock-left":
     default:
       return {
-        left: `${12 + jitter}%`,
-        top: "50%",
+        left: `${14 + jitter}%`,
+        top: "46%",
         transform: "translate(-50%, -50%)",
-        size: 128,
+        size: 132,
       };
   }
 }
@@ -209,16 +209,17 @@ export function panelLayoutClass(
   }
 
   // Reserved assistant column / floor — form layouts cannot enter.
+  // Slightly wider left reserve so Form 00–03 never bury docked orb+dialogue.
   const leaveLeft =
-    "left-[min(28vw,300px)] right-[2%] max-w-[min(70vw,920px)]";
+    "left-[min(30vw,320px)] right-[2%] max-w-[min(68vw,900px)]";
   const leaveRight =
-    "left-[2%] right-[min(32vw,340px)] max-w-[min(68vw,900px)]";
+    "left-[2%] right-[min(34vw,360px)] max-w-[min(66vw,880px)]";
   const leaveBottom =
-    "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(62vh,560px)] max-w-[min(92vw,980px)] mx-auto";
+    "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(60vh,540px)] max-w-[min(92vw,980px)] mx-auto";
 
   if (spotlight) {
     // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
-    return "right-[2%] bottom-[5%] w-[min(66vw,500px)] max-w-[calc(100%-min(30vw,300px))]";
+    return "right-[2%] bottom-[5%] w-[min(64vw,480px)] max-w-[calc(100%-min(32vw,320px))]";
   }
 
   if (side === "bottom") {
@@ -239,14 +240,14 @@ export function panelLayoutClass(
   switch (motion) {
     case "edge":
       return side === "right"
-        ? "left-[2%] top-[10%] w-[min(68vw,680px)] right-[min(28vw,300px)]"
-        : "left-[min(28vw,300px)] top-[10%] w-[min(68vw,680px)]";
+        ? "left-[2%] top-[10%] w-[min(66vw,660px)] right-[min(30vw,320px)]"
+        : "left-[min(30vw,320px)] top-[10%] w-[min(66vw,660px)]";
     case "pressure":
       return `${band} top-[9%] w-auto`;
     case "reanchor":
       return side === "right"
-        ? "left-[2%] top-[10%] w-[min(68vw,700px)]"
-        : "right-[2%] top-[10%] w-[min(68vw,700px)] left-[min(28vw,300px)]";
+        ? "left-[2%] top-[10%] w-[min(66vw,680px)]"
+        : "right-[2%] top-[10%] w-[min(66vw,680px)] left-[min(30vw,320px)]";
     case "drift":
       return `${band} top-[10%] bottom-auto w-auto`;
     case "scatter":
@@ -254,12 +255,12 @@ export function panelLayoutClass(
     case "slide-right":
       // Prefer the free side even if the motion name says right.
       return side === "right"
-        ? "left-[2%] top-[10%] w-[min(66vw,720px)]"
-        : "right-[2%] top-[10%] w-[min(66vw,720px)] left-[min(28vw,300px)]";
+        ? "left-[2%] top-[10%] w-[min(64vw,700px)]"
+        : "right-[2%] top-[10%] w-[min(64vw,700px)] left-[min(30vw,320px)]";
     case "slide-left":
       return side === "left"
-        ? "left-[min(28vw,300px)] top-[10%] w-[min(66vw,720px)]"
-        : "left-[2%] top-[10%] w-[min(66vw,720px)] right-[min(28vw,300px)]";
+        ? "left-[min(30vw,320px)] top-[10%] w-[min(64vw,700px)]"
+        : "left-[2%] top-[10%] w-[min(64vw,700px)] right-[min(30vw,320px)]";
     case "drop":
       return `${band} top-[7%] w-auto`;
     case "rise":

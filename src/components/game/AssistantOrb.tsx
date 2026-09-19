@@ -1,10 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { expressiveMood } from "@/game/state";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
+
+export type ChoiceFlush = "ally" | "obey" | "chaos" | "neutral";
+
+const FLUSH_CORE: Record<ChoiceFlush, string | null> = {
+  ally: "#7dffd2",
+  obey: "#ff8fa8",
+  chaos: "#ffd27a",
+  neutral: null,
+};
 
 const MOOD: Record<
   OrbMood,
@@ -65,6 +74,9 @@ export function AssistantOrb({
   flinch = false,
   /** -1 lean left … +1 lean right (choice glance / submit recoil) */
   glance = 0,
+  /** Loud post-choice color read without dialogue */
+  choiceFlush = "neutral",
+  draggable = false,
 }: {
   mood: OrbMood;
   size?: number;
@@ -76,14 +88,24 @@ export function AssistantOrb({
   onPoke?: () => void;
   flinch?: boolean;
   glance?: number;
+  choiceFlush?: ChoiceFlush;
+  /** Optional mild drag resist/follow (P2) */
+  draggable?: boolean;
 }) {
   const m = MOOD[mood] ?? MOOD.neutral;
   const bucket = expressiveMood(mood);
   const ringTight = EXPRESSIVE_RING[bucket] ?? 1;
   const [localFlinch, setLocalFlinch] = useState(false);
+  const [nervousSpin, setNervousSpin] = useState(false);
+  const [drag, setDrag] = useState({ x: 0, y: 0 });
+  const dragOrigin = useRef<{ x: number; y: number } | null>(null);
   const showingFlinch = flinch || localFlinch;
-  const glanceX = Math.max(-1, Math.min(1, glance)) * 18;
-  const glanceRotate = Math.max(-1, Math.min(1, glance)) * 6;
+  const flushCore = FLUSH_CORE[choiceFlush];
+  const coreColor = flushCore ?? m.core;
+  const orbitBoost =
+    choiceFlush === "ally" ? 10 : choiceFlush === "obey" ? 16 : choiceFlush === "chaos" ? 12 : m.orbit;
+  const glanceX = Math.max(-1, Math.min(1, glance)) * (choiceFlush === "neutral" ? 18 : 26);
+  const glanceRotate = Math.max(-1, Math.min(1, glance)) * (choiceFlush === "neutral" ? 6 : 10);
 
   useEffect(() => {
     audio.playMood(mood);
@@ -97,7 +119,10 @@ export function AssistantOrb({
     window.setTimeout(() => setLocalFlinch(false), 520);
   };
 
-  const brightness = coreBrightness(m.flush) * (showingFlinch ? 1.35 : 1);
+  const brightness =
+    coreBrightness(m.flush) *
+    (showingFlinch ? 1.35 : 1) *
+    (choiceFlush === "ally" ? 1.2 : choiceFlush === "obey" ? 1.15 : choiceFlush === "chaos" ? 1.18 : 1);
   const irisOpen = showingFlinch ? 0.35 : bucket === "alarmed" ? 0.7 : bucket === "curious" ? 1.1 : 1;
   const squashY = m.squash;
   const squashX = 2 - m.squash;
@@ -108,73 +133,124 @@ export function AssistantOrb({
       style={{ width: size, pointerEvents: pokeable ? "auto" : "none" }}
       aria-hidden={!pokeable}
       data-expressive-mood={bucket}
+      data-choice-flush={choiceFlush}
     >
       <motion.div
         className="relative"
         style={{
           width: size,
           height: size,
-          cursor: pokeable ? "pointer" : "default",
+          cursor: pokeable ? (draggable ? "grab" : "pointer") : "default",
           pointerEvents: pokeable ? "auto" : "none",
         }}
         animate={
-          wave
+          nervousSpin
             ? {
-                y: [0, -10, 0, -8, 0],
-                x: [0, 18, -6, 22, 0],
-                rotate: [0, 8, -4, 10, 0],
-                scale: m.scale,
+                rotate: [0, 360, 720],
+                scale: m.scale * 1.08,
+                x: drag.x,
+                y: drag.y,
               }
-            : showingFlinch
+            : wave
               ? {
-                  y: [0, -14, 4, 0],
-                  x: [0, -16, 10, 0],
-                  scale: m.scale * 0.92,
-                  rotate: glanceRotate,
-                }
-              : {
-                  y: [0, -6 * squashY, 0],
-                  x: m.orbit
-                    ? [
-                        glanceX,
-                        glanceX + m.orbit,
-                        glanceX - m.orbit * 0.7,
-                        glanceX + (m.jitter ? m.jitter : 0),
-                        glanceX,
-                      ]
-                    : m.jitter
-                      ? [glanceX, glanceX + m.jitter, glanceX - m.jitter, glanceX]
-                      : glanceX,
-                  rotate: glanceRotate,
-                  scaleX: squashX,
-                  scaleY: squashY,
+                  y: [0, -10, 0, -8, 0],
+                  x: [0, 18, -6, 22, 0],
+                  rotate: [0, 8, -4, 10, 0],
                   scale: m.scale,
                 }
+              : showingFlinch
+                ? {
+                    y: [0, -14, 4, 0],
+                    x: [0, -16, 10, 0],
+                    scale: m.scale * 0.92,
+                    rotate: glanceRotate,
+                  }
+                : {
+                    y: [0, -6 * squashY, 0],
+                    x: orbitBoost
+                      ? [
+                          glanceX + drag.x,
+                          glanceX + drag.x + orbitBoost,
+                          glanceX + drag.x - orbitBoost * 0.7,
+                          glanceX + drag.x + (m.jitter ? m.jitter : 0),
+                          glanceX + drag.x,
+                        ]
+                      : m.jitter
+                        ? [glanceX + drag.x, glanceX + drag.x + m.jitter, glanceX + drag.x - m.jitter, glanceX + drag.x]
+                        : glanceX + drag.x,
+                    rotate: glanceRotate,
+                    scaleX: squashX,
+                    scaleY: squashY,
+                    scale: m.scale * (choiceFlush === "ally" ? 1.08 : choiceFlush === "obey" ? 0.94 : 1),
+                  }
         }
         transition={
-          wave
-            ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
-            : showingFlinch
-              ? { duration: 0.45 }
-              : {
-                  y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
-                  x: {
-                    duration:
-                      bucket === "nervous" || bucket === "alarmed"
-                        ? 0.55
-                        : glance !== 0
-                          ? 0.35
-                          : 1.4,
-                    repeat: glance !== 0 && !m.orbit && !m.jitter ? 0 : Infinity,
-                    ease: "easeInOut",
-                  },
-                  rotate: { duration: 0.35 },
-                  scale: { duration: 0.45 },
-                  scaleX: { duration: 0.5 },
-                  scaleY: { duration: 0.5 },
-                }
+          nervousSpin
+            ? { duration: 0.85, ease: "easeInOut" }
+            : wave
+              ? { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
+              : showingFlinch
+                ? { duration: 0.45 }
+                : {
+                    y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
+                    x: {
+                      duration:
+                        bucket === "nervous" || bucket === "alarmed" || choiceFlush === "obey"
+                          ? 0.45
+                          : glance !== 0 || choiceFlush !== "neutral"
+                            ? 0.3
+                            : 1.4,
+                      repeat: glance !== 0 && !orbitBoost && !m.jitter ? 0 : Infinity,
+                      ease: "easeInOut",
+                    },
+                    rotate: { duration: 0.35 },
+                    scale: { duration: 0.45 },
+                    scaleX: { duration: 0.5 },
+                    scaleY: { duration: 0.5 },
+                  }
         }
         onClick={handlePoke}
+        onDoubleClick={
+          pokeable
+            ? (e) => {
+                e.preventDefault();
+                setNervousSpin(true);
+                audio.playMoodCue("poke");
+                window.setTimeout(() => setNervousSpin(false), 900);
+              }
+            : undefined
+        }
+        onPointerDown={
+          pokeable && draggable
+            ? (e) => {
+                dragOrigin.current = { x: e.clientX - drag.x, y: e.clientY - drag.y };
+                (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+              }
+            : undefined
+        }
+        onPointerMove={
+          pokeable && draggable
+            ? (e) => {
+                if (!dragOrigin.current) return;
+                const rawX = e.clientX - dragOrigin.current.x;
+                const rawY = e.clientY - dragOrigin.current.y;
+                // Resist: follow at ~35%, clamp small.
+                setDrag({
+                  x: Math.max(-28, Math.min(28, rawX * 0.35)),
+                  y: Math.max(-20, Math.min(20, rawY * 0.35)),
+                });
+              }
+            : undefined
+        }
+        onPointerUp={
+          pokeable && draggable
+            ? () => {
+                dragOrigin.current = null;
+                // Spring home slowly
+                window.setTimeout(() => setDrag({ x: 0, y: 0 }), 80);
+              }
+            : undefined
+        }
         role={pokeable ? "button" : undefined}
         tabIndex={pokeable ? 0 : undefined}
         onKeyDown={
@@ -192,9 +268,9 @@ export function AssistantOrb({
         <motion.div
           className="absolute inset-[-18%] rounded-full"
           style={{
-            background: `radial-gradient(circle, ${m.core}33 0%, transparent 65%)`,
+            background: `radial-gradient(circle, ${coreColor}33 0%, transparent 65%)`,
             filter: "blur(8px)",
-            opacity: m.flush === 0 ? 0.35 : m.flush === 2 ? 0.85 : 0.55,
+            opacity: m.flush === 0 ? 0.35 : choiceFlush !== "neutral" ? 0.95 : m.flush === 2 ? 0.85 : 0.55,
           }}
           animate={{ opacity: m.flush === 0 ? [0.25, 0.4, 0.25] : [0.45, 0.9, 0.45] }}
           transition={{ duration: 2.8, repeat: Infinity }}
@@ -204,10 +280,11 @@ export function AssistantOrb({
           className="absolute rounded-full border"
           style={{
             inset: `${8 * ringTight}%`,
-            borderColor: m.ring,
+            borderColor: flushCore ? `${flushCore}99` : m.ring,
+            borderWidth: choiceFlush !== "neutral" ? 2 : 1,
           }}
           animate={{ rotate: 360 }}
-          transition={{ duration: m.speed * (bucket === "alarmed" ? 0.7 : 1), repeat: Infinity, ease: "linear" }}
+          transition={{ duration: m.speed * (bucket === "alarmed" || choiceFlush === "obey" ? 0.55 : 1), repeat: Infinity, ease: "linear" }}
         >
           <div className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan" />
           <div className="absolute bottom-[18%] right-[8%] h-1.5 w-1.5 rounded-full bg-white/70" />
@@ -223,13 +300,13 @@ export function AssistantOrb({
         <motion.div
           className="absolute inset-[28%] rounded-full"
           style={{
-            background: `radial-gradient(circle at 35% 30%, #ffffff 0%, ${m.core} 35%, ${m.core}55 70%, transparent 100%)`,
-            boxShadow: `0 0 30px ${m.core}88, inset 0 0 20px rgba(255,255,255,0.35)`,
+            background: `radial-gradient(circle at 35% 30%, #ffffff 0%, ${coreColor} 35%, ${coreColor}55 70%, transparent 100%)`,
+            boxShadow: `0 0 30px ${coreColor}88, inset 0 0 20px rgba(255,255,255,0.35)`,
             filter: `brightness(${brightness})`,
           }}
           animate={{
             filter:
-              bucket === "nervous" || bucket === "alarmed"
+              bucket === "nervous" || bucket === "alarmed" || choiceFlush === "obey"
                 ? [
                     `brightness(${brightness})`,
                     `brightness(${brightness * 1.25})`,
@@ -239,7 +316,7 @@ export function AssistantOrb({
                 : `brightness(${brightness})`,
           }}
           transition={{
-            duration: mood === "glitching" ? 0.35 : 0.55,
+            duration: mood === "glitching" || choiceFlush === "chaos" ? 0.35 : 0.55,
             repeat: Infinity,
           }}
         />
@@ -251,7 +328,7 @@ export function AssistantOrb({
             width: size * 0.12,
             height: size * 0.12,
             background: `radial-gradient(circle, rgba(4,10,18,0.92) 0%, rgba(4,10,18,0.55) 55%, transparent 70%)`,
-            boxShadow: `0 0 10px ${m.core}55`,
+            boxShadow: `0 0 10px ${coreColor}55`,
             // Glance shifts aperture toward attention without becoming a pupil-eye face
             x: glanceX * 0.35,
           }}
@@ -263,7 +340,7 @@ export function AssistantOrb({
         >
           <motion.div
             className="absolute left-1/2 top-1/2 h-[35%] w-[35%] -translate-x-1/2 -translate-y-1/2 rounded-full"
-            style={{ background: m.core }}
+            style={{ background: coreColor }}
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: m.iris * 0.7, repeat: Infinity }}
           />

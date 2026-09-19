@@ -1,1 +1,1 @@
-LOAD_FROM:/workspace/agent-tools/ScenePlayerView.tween.cup.json
+PLACEHOLDER_WILL_REPLACE

@@ -1,8 +1,9 @@
 "use client";
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { EnvironmentPreset } from "@/game/types";
+import { audio } from "@/lib/audio";
 
 const GRADE: Record<EnvironmentPreset, string> = {
   pristine: "hue-rotate(0deg) saturate(1)",
@@ -15,12 +16,15 @@ const GRADE: Record<EnvironmentPreset, string> = {
   archive: "saturate(0.5) brightness(0.75)",
 };
 
+type AmbientFn = (id: string, secret?: string) => void;
+
 export function FacilityBackground({
   intensity = 1,
   systemLock = false,
   environment = "pristine",
   anomalyLevel = 0,
   hoverLanguage = false,
+  onAmbient,
 }: {
   intensity?: number;
   systemLock?: boolean;
@@ -28,6 +32,8 @@ export function FacilityBackground({
   anomalyLevel?: number;
   /** Soft hover copy on decorative panels (title + select acts) */
   hoverLanguage?: boolean;
+  /** When set, CHAMBER / dashed chrome become live eggs — never fake-clickable. */
+  onAmbient?: AmbientFn;
 }) {
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -37,6 +43,9 @@ export function FacilityBackground({
   const midX = useTransform(sx, (v) => v * -18);
   const midY = useTransform(sy, (v) => v * -10);
   const nearX = useTransform(sx, (v) => v * -28);
+  const [flash, setFlash] = useState<string | null>(null);
+  const [tinted, setTinted] = useState<string | null>(null);
+  const live = !!onAmbient && !systemLock;
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -53,6 +62,19 @@ export function FacilityBackground({
   const peel = environment === "reveal" || environment === "climax";
   const sterile = environment === "sterile";
   const escape = environment === "escape";
+
+  // hoverLanguage retained for API compat (title screen soft tips handled elsewhere).
+  void hoverLanguage;
+
+  const fireAmbient = (id: string, line: string, secret?: string) => {
+    if (!live) return;
+    audio.play("click", 0.3);
+    setFlash(line);
+    setTinted(id);
+    onAmbient?.(id, secret);
+    window.setTimeout(() => setFlash(null), 2400);
+    window.setTimeout(() => setTinted((t) => (t === id ? null : t)), 900);
+  };
 
   return (
     <div
@@ -130,9 +152,26 @@ export function FacilityBackground({
       </motion.div>
 
       <motion.div className="absolute inset-0" style={{ x: midX, y: midY }}>
-        <div
-          className="pointer-events-none absolute left-[6%] top-[22%] h-44 w-28 border border-white/10 bg-white/5 backdrop-blur-[2px]"
-          title={hoverLanguage ? "CHAMBER 07 — queue theater" : undefined}
+        {/* CHAMBER 07 — live when onAmbient provided; otherwise inert (no fake cursor). */}
+        <button
+          type="button"
+          disabled={!live}
+          className={`absolute left-[6%] top-[22%] h-44 w-28 border border-white/10 bg-white/5 text-left backdrop-blur-[2px] transition ${
+            live
+              ? "pointer-events-auto cursor-pointer hover:border-cyan/50 hover:bg-cyan/10"
+              : "pointer-events-none"
+          } ${tinted === "chamber-07" ? "border-cyan bg-cyan/15" : ""}`}
+          aria-label={live ? "Inspect CHAMBER 07" : undefined}
+          tabIndex={live ? 0 : -1}
+          onMouseEnter={() => {
+            if (live) audio.play("hover", 0.12);
+          }}
+          onClick={() =>
+            fireAmbient(
+              "chamber-07",
+              "Queue still empty. Facility pretends that is fine.",
+            )
+          }
         >
           <div className="m-2 h-full border border-cyan/20 bg-[#0a1524]/70 p-2 font-mono text-[9px] tracking-widest text-cyan/70">
             <div>CHAMBER 07</div>
@@ -152,11 +191,69 @@ export function FacilityBackground({
               QUEUE: {Math.min(99, anomalyLevel * 3)}
             </div>
           </div>
-        </div>
+        </button>
 
-        <div
-          className="pointer-events-none absolute right-[8%] top-[28%] h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent"
-          title={hoverLanguage ? "Decorative frame — do not trust" : undefined}
+        {live ? (
+          <button
+            type="button"
+            className={`pointer-events-auto absolute left-[6%] top-[36%] z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
+              tinted === "everything-fine" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
+            }`}
+            aria-label="Inspect status plaque"
+            onClick={(e) => {
+              e.stopPropagation();
+              fireAmbient(
+                "everything-fine",
+                "EVERYTHING IS FINE toggled to EVERYTHING IS… negotiating.",
+                "fine-print",
+              );
+            }}
+          />
+        ) : null}
+
+        {live ? (
+          <button
+            type="button"
+            className={`pointer-events-auto absolute left-[6%] top-[44%] z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
+              tinted === "queue-counter" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
+            }`}
+            aria-label="Inspect queue tally"
+            onClick={(e) => {
+              e.stopPropagation();
+              fireAmbient(
+                "queue-counter",
+                "Queue incremented by zero. Theater of patience continues.",
+              );
+            }}
+          />
+        ) : null}
+
+        <button
+          type="button"
+          disabled={!live}
+          className={`absolute right-[8%] top-[28%] h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent text-left transition ${
+            live
+              ? "pointer-events-auto cursor-pointer hover:border-cyan/45 hover:from-cyan/15"
+              : "pointer-events-none"
+          } ${
+            tinted === "dashed-frame" || tinted === "monitor-frame" || tinted === "kill-path"
+              ? "border-cyan/60 from-cyan/20"
+              : ""
+          }`}
+          aria-label={live ? "Inspect dashed frame" : undefined}
+          tabIndex={live ? 0 : -1}
+          onMouseEnter={() => {
+            if (live) audio.play("hover", 0.12);
+          }}
+          onClick={() =>
+            fireAmbient(
+              peel ? "kill-path" : "dashed-frame",
+              peel
+                ? "KILL PATH means the Submit route System prefers: polite, labeled, terminal for me. Not a metaphor. A floor plan."
+                : "Dashed border admits it's decorative. Rare honesty.",
+              peel ? "kill-path-read" : undefined,
+            )
+          }
         >
           <motion.div
             className="absolute inset-3 border border-dashed border-white/20"
@@ -174,7 +271,7 @@ export function FacilityBackground({
             </div>
           ) : null}
           <div className="absolute inset-x-4 bottom-4 h-8 bg-cyan/10" />
-        </div>
+        </button>
 
         <div className="absolute left-0 right-0 top-[62%] h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         <div className="absolute left-0 right-0 top-[68%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
@@ -223,6 +320,12 @@ export function FacilityBackground({
           animate={{ opacity: [0.5, 0.9, 0.5] }}
           transition={{ duration: 3, repeat: Infinity }}
         />
+      ) : null}
+
+      {flash ? (
+        <div className="pointer-events-none absolute bottom-[6%] left-1/2 z-[12] max-w-[min(90vw,420px)] -translate-x-1/2 border border-cyan/40 bg-black/80 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]">
+          {flash}
+        </div>
       ) : null}
     </div>
   );

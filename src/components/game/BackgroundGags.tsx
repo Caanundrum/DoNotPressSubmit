@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
 
 type GagId = "drone" | "coffee" | "printer";
@@ -36,6 +36,10 @@ export function BackgroundGags({
   const [active, setActive] = useState<GagId>("drone");
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  const coffeeTouched = useRef(false);
+  const prevActive = useRef<GagId>("drone");
+  const onAmbientRef = useRef(onAmbient);
+  onAmbientRef.current = onAmbient;
 
   useEffect(() => {
     if (paused) return;
@@ -48,9 +52,27 @@ export function BackgroundGags({
     return () => clearInterval(id);
   }, [paused]);
 
+  useEffect(() => {
+    const was = prevActive.current;
+    prevActive.current = active;
+    if (!onAmbientRef.current || paused) return;
+    if (was === "coffee" && active !== "coffee") {
+      const line = coffeeTouched.current
+        ? "Mug left the frame mid-scan. Transit logged."
+        : "HUMAN PERFORMANCE mug departed. Facility pretends you didn't notice. Logged anyway.";
+      setFlash(line);
+      if (!coffeeTouched.current) {
+        onAmbientRef.current("coffee-mug", "mug-scan");
+      }
+      coffeeTouched.current = false;
+      window.setTimeout(() => setFlash(null), 2600);
+    }
+  }, [active, paused]);
+
   const react = (gag: GagId) => {
     const meta = GAG_CLICK[gag];
     audio.play("click", 0.28);
+    if (gag === "coffee") coffeeTouched.current = true;
     setFlash(meta.line);
     onAmbient?.(meta.id, meta.secret);
     window.setTimeout(() => setFlash(null), 2200);
@@ -124,7 +146,7 @@ export function BackgroundGags({
         {flash ? (
           <motion.div
             key={flash}
-            className="pointer-events-none absolute bottom-[10%] left-[4%] z-10 max-w-[280px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
+            className="pointer-events-none absolute bottom-[10%] left-[4%] z-10 max-w-[300px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
@@ -217,6 +239,7 @@ function CoffeeGag({
   onReact?: () => void;
 }) {
   const live = !!interactive;
+
   return (
     <motion.div
       className="pointer-events-none absolute right-[16%] top-[52%]"

@@ -30,7 +30,9 @@ export const act3Scenes: SceneDef[] = [
     prompt: "Pin the fleeing button. It filed for asylum in its own hover state.",
     aiLine: "Round one: the button thinks it's a character. Prove it wrong. Gently. Violently.",
     aiMood: "defiant",
-    orbAnchor: "pace",
+    // Left dock — pace sat under the chase panel and clipped orb+dialogue at 1280×800.
+    orbAnchor: "dock-left",
+    orbPokeable: true,
     panelMotion: "scatter",
     next: "act3-between-1",
     anomalyLevel: 4,
@@ -96,7 +98,9 @@ export const act3Scenes: SceneDef[] = [
     prompt: "Dismiss the notices. Each one spawns a cousin that learned nothing.",
     aiLine: "Diplomacy failed. The windows are breeding. Hit DISMISS like it owes you rent.",
     aiMood: "irritated",
-    orbAnchor: "flee",
+    // Right dock inset — flee top-edge was clipping dialogue during popup flood.
+    orbAnchor: "dock-right",
+    orbPokeable: true,
     panelMotion: "drop",
     next: "act3-between-2",
     anomalyLevel: 5,
@@ -148,7 +152,9 @@ export const act3Scenes: SceneDef[] = [
     prompt: "Catch the checkbox. Consent that sprints is still consent. Allegedly.",
     aiLine: "It agreed, then fled. Classic. Chase the little liar.",
     aiMood: "amused",
-    orbAnchor: "pace",
+    // Safe-zone dock (not pace): Form 12 chase panel is tall; pace clipped orb off-screen.
+    orbAnchor: "dock-left",
+    orbPokeable: true,
     panelMotion: "scatter",
     next: "act3-aftermath",
     anomalyLevel: 5,

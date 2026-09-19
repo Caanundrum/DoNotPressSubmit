@@ -109,6 +109,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         environment={scene.environment}
         anomalyLevel={scene.anomalyLevel ?? state.act}
         hoverLanguage={hoverLanguage}
+        onAmbient={systemLock ? undefined : onAmbient}
       />
       <BackgroundGags
         paused={systemLock || scene.environment === "sterile"}
@@ -120,9 +121,11 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         phase={
           glassPhase !== "idle"
             ? glassPhase
-            : state.flags.glassCracked && !state.flags.glassStitched
-              ? "crack"
-              : "idle"
+            : state.flags.glassStitched
+              ? "stitch"
+              : state.flags.glassCracked
+                ? "crack"
+                : "idle"
         }
         ticket={showTicket}
       />

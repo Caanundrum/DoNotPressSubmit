@@ -90,8 +90,8 @@ const TARGET_LINES: Record<
 };
 
 /**
- * Tiny visible egg pins aligned to facility chrome — never large invisible hitboxes.
- * Empty mid-stage space must not highlight or change cursor.
+ * Complementary egg pins — FacilityBackground owns CHAMBER 07 / dashed / kill-path.
+ * Pins sit in margins outside the form column so they stay hittable.
  */
 const HOTSPOTS: {
   id: AmbientTargetId;
@@ -101,77 +101,58 @@ const HOTSPOTS: {
   peelOnly?: boolean;
 }[] = [
   {
-    id: "chamber-07",
-    label: "CHAMBER 07",
-    style: { left: "9%", top: "28%" },
-    acts: [1, 2, 3, 4, 5],
-  },
-  {
-    id: "everything-fine",
-    label: "STATUS",
-    style: { left: "10%", top: "36%" },
-    acts: [1, 2, 3, 4, 5],
-  },
-  {
-    id: "queue-counter",
-    label: "QUEUE",
-    style: { left: "11%", top: "44%" },
-    acts: [1, 2, 3, 4, 5],
-  },
-  {
     id: "server-bars",
     label: "STACK",
-    style: { left: "24%", top: "64%" },
+    style: { left: "22%", top: "70%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "do-not-press",
     label: "PROPAGANDA",
-    style: { left: "47%", top: "74%" },
+    style: { left: "47%", top: "78%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "monitor-frame",
-    label: "FRAME",
-    style: { left: "84%", top: "32%" },
+    label: "FRAME EDGE",
+    style: { left: "92%", top: "48%" },
     acts: [1, 2, 3, 4, 5],
-  },
-  {
-    id: "dashed-frame",
-    label: "DASHED",
-    style: { left: "86%", top: "40%" },
-    acts: [2, 3, 4, 5],
   },
   {
     id: "replacement-failed",
     label: "DRONE",
-    style: { left: "16%", top: "58%" },
+    style: { left: "14%", top: "62%" },
     acts: [1, 2, 3],
   },
   {
     id: "coffee-mug",
     label: "MUG",
-    style: { left: "78%", top: "52%" },
+    style: { left: "78%", top: "58%" },
     acts: [1, 2, 3, 4],
   },
   {
     id: "printer-scissors",
     label: "PRINTER",
-    style: { left: "60%", top: "86%" },
+    style: { left: "62%", top: "88%" },
     acts: [2, 3, 4, 5],
   },
   {
     id: "rail-glow",
     label: "RAIL",
-    style: { left: "40%", top: "34%" },
+    style: { left: "38%", top: "30%" },
     acts: [1, 2, 3, 4],
   },
   {
-    id: "kill-path",
-    label: "KILL PATH",
-    style: { left: "84%", top: "24%" },
-    acts: [4, 5],
-    peelOnly: true,
+    id: "chamber-07",
+    label: "CHAMBER PIN",
+    style: { left: "4%", top: "26%" },
+    acts: [1, 2, 3, 4, 5],
+  },
+  {
+    id: "dashed-frame",
+    label: "DASH PIN",
+    style: { left: "96%", top: "36%" },
+    acts: [2, 3, 4, 5],
   },
 ];
 
@@ -200,7 +181,7 @@ export function AmbientChrome({
   });
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[8] overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 z-[12] overflow-hidden">
       {visible.map((spot) => {
         const meta = TARGET_LINES[spot.id];
         const hovering = hoverId === spot.id;

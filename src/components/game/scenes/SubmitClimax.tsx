@@ -19,38 +19,49 @@ export function SubmitClimax({
   const options = climaxOptions(state);
 
   return (
-    <div className="relative w-full">
+    <div className="relative flex w-full min-h-0 flex-col gap-2">
       <motion.div
-        className="relative mx-auto mb-4 flex h-36 w-full items-center justify-center sm:h-44"
-        initial={{ opacity: 0, scale: 0.9, y: 30 }}
+        className="relative mx-auto flex w-full shrink-0 items-center justify-center"
+        initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 120, damping: 16 }}
+        transition={{ type: "spring", stiffness: 140, damping: 18 }}
       >
         <motion.div
-          className="absolute inset-0 rounded-full bg-danger/20 blur-3xl"
-          animate={{ opacity: [0.35, 0.7, 0.35], scale: [0.9, 1.05, 0.9] }}
+          className="absolute inset-0 rounded-full bg-danger/20 blur-2xl"
+          animate={{ opacity: [0.3, 0.55, 0.3], scale: [0.95, 1.03, 0.95] }}
           transition={{ duration: 2.8, repeat: Infinity }}
         />
         <div
-          className="relative w-full max-w-3xl border border-danger/70 bg-gradient-to-b from-[#5a1824] via-[#2a0c12] to-[#12060a] px-6 py-6 text-center shadow-[0_0_80px_rgba(255,77,109,0.4)] sm:px-10 sm:py-8"
+          className="relative w-full max-w-2xl border border-danger/70 bg-gradient-to-b from-[#5a1824] via-[#2a0c12] to-[#12060a] px-4 py-2.5 text-center shadow-[0_0_48px_rgba(255,77,109,0.35)] sm:px-6 sm:py-3"
           style={{ fontFamily: "var(--font-display)" }}
         >
-          <div className="font-mono text-[10px] tracking-[0.35em] text-danger/90">FINAL CONTROL</div>
-          <div className="mt-2 text-4xl tracking-[0.2em] text-white sm:text-5xl">SUBMIT</div>
-          <div className="mt-3 font-mono text-[10px] tracking-[0.18em] text-[#ffc2cc]">
+          <div className="font-mono text-[9px] tracking-[0.28em] text-danger/90">FINAL CONTROL</div>
+          <div className="mt-0.5 text-2xl tracking-[0.16em] text-white sm:text-3xl">SUBMIT</div>
+          <div className="mt-1 font-mono text-[9px] tracking-[0.14em] text-[#ffc2cc]">
             BEAUTIFUL · TEMPTING · TERRIBLE
           </div>
         </div>
       </motion.div>
 
-      <p className="mb-5 text-center text-base text-[#d2dceb] sm:text-lg">{aiLine}</p>
+      {/* Orb already shows the pitch — keep a one-line reminder, never a second essay. */}
+      <p className="shrink-0 text-center text-[12px] leading-snug text-[#d2dceb] sm:text-sm">
+        {aiLine}
+      </p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div
+        className={`grid min-h-0 gap-1.5 ${
+          options.length <= 2
+            ? "grid-cols-1 sm:grid-cols-2"
+            : options.length === 3
+              ? "grid-cols-1 sm:grid-cols-3"
+              : "grid-cols-1 sm:grid-cols-2"
+        }`}
+      >
         {options.map((opt) => (
           <motion.button
             key={opt.id}
             type="button"
-            className="border px-4 py-4 text-left font-mono text-[12px] tracking-[0.22em] transition"
+            className="border px-3 py-2 text-left font-mono text-[10px] leading-snug tracking-[0.12em] transition sm:px-3.5 sm:py-2.5 sm:text-[11px] sm:tracking-[0.14em]"
             style={{
               borderColor:
                 opt.tone === "danger"
@@ -67,7 +78,7 @@ export function SubmitClimax({
               color: "#e8eef8",
               fontFamily: "var(--font-display)",
             }}
-            whileHover={{ x: 4, y: -2 }}
+            whileHover={{ x: 3, y: -1 }}
             whileTap={{ scale: 0.98 }}
             onHoverStart={() => {
               onHoverOption?.(opt.id);

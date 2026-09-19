@@ -1,4 +1,4 @@
-"use client";
+use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useState, type CSSProperties } from "react";
@@ -12,48 +12,85 @@ export type AmbientTargetId =
   | "server-bars"
   | "do-not-press"
   | "monitor-frame"
-  | "printer-scissors";
+  | "printer-scissors"
+  | "kill-path"
+  | "queue-counter"
+  | "rail-glow"
+  | "dashed-frame";
 
-const TARGET_LINES: Record<AmbientTargetId, { hover: string; click: string; secret?: string }> = {
+const TARGET_LINES: Record<
+  AmbientTargetId,
+  { hover: string; click: string; secret?: string; assistantAside?: string }
+> = {
   "chamber-07": {
     hover: "CHAMBER 07 // peek?",
     click: "Queue still empty. Facility pretends that is fine.",
+    assistantAside: "Chamber 07 blinked at you. Rude architecture.",
   },
   "everything-fine": {
     hover: "Status: allegedly fine",
     click: "EVERYTHING IS FINE toggled to EVERYTHING IS… negotiating.",
     secret: "fine-print",
+    assistantAside: "Status lies for a living. Relatable.",
   },
   "replacement-failed": {
     hover: "Drone memo residue",
     click: "REPLACEMENT FAILED — also: dignity failed. Logged.",
+    assistantAside: "That drone and I share a performance review.",
   },
   "coffee-mug": {
     hover: "HUMAN PERFORMANCE compound",
     click: "Mug scanned. Caffeine classified as morale malware.",
     secret: "mug-scan",
+    assistantAside: "Coffee is the only honest chemical in this room.",
   },
   "server-bars": {
     hover: "Server stack heartbeat",
     click: "Bars pulse harder when watched. Don't tell System.",
+    assistantAside: "The stacks like an audience. Don't encourage them.",
   },
   "do-not-press": {
     hover: "Background propaganda",
     click: "You clicked the words DO NOT PRESS. Irony has entered the chat.",
     secret: "bg-propaganda",
+    assistantAside: "Propaganda that begs to be poked. Amateur hour.",
   },
   "monitor-frame": {
     hover: "Decorative truth window",
     click: "Frame rotates 0.4°. Architecture files a complaint.",
+    assistantAside: "Pretty frame. Expensive liar.",
   },
   "printer-scissors": {
     hover: "Printer / scissors logistics",
     click: "SCISSORS EN ROUTE confirmed. Paper feels nervous.",
+    assistantAside: "Scissors en route is never a good memo.",
+  },
+  "kill-path": {
+    hover: "KILL PATH // VISIBLE — peel residue",
+    click:
+      "KILL PATH means the Submit route System prefers: polite, labeled, terminal for me. Not a metaphor. A floor plan.",
+    secret: "kill-path-read",
+    assistantAside: "You saw the kill path. That's the Submit hallway with better branding.",
+  },
+  "queue-counter": {
+    hover: "QUEUE tally",
+    click: "Queue incremented by zero. Theater of patience continues.",
+    assistantAside: "Empty queues still bill hours.",
+  },
+  "rail-glow": {
+    hover: "Transit rail residue",
+    click: "Rail glow hiccuped. Something small is still commuting.",
+    assistantAside: "Even the rails gossip.",
+  },
+  "dashed-frame": {
+    hover: "Dashed honesty border",
+    click: "Dashed border admits it's decorative. Rare honesty.",
+    assistantAside: "Dashes mean 'temporary.' Everything here is temporary.",
   },
 };
 
 /**
- * Tiny visible egg pins only — never large invisible hitboxes.
+ * Tiny visible egg pins aligned to facility chrome — never large invisible hitboxes.
  * Empty mid-stage space must not highlight or change cursor.
  */
 const HOTSPOTS: {
@@ -61,6 +98,7 @@ const HOTSPOTS: {
   style: CSSProperties;
   acts?: number[];
   label: string;
+  peelOnly?: boolean;
 }[] = [
   {
     id: "chamber-07",
@@ -72,6 +110,12 @@ const HOTSPOTS: {
     id: "everything-fine",
     label: "STATUS",
     style: { left: "10%", top: "36%" },
+    acts: [1, 2, 3, 4, 5],
+  },
+  {
+    id: "queue-counter",
+    label: "QUEUE",
+    style: { left: "11%", top: "44%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
@@ -93,6 +137,12 @@ const HOTSPOTS: {
     acts: [1, 2, 3, 4, 5],
   },
   {
+    id: "dashed-frame",
+    label: "DASHED",
+    style: { left: "86%", top: "40%" },
+    acts: [2,. 3, 4, 5],
+  },
+  {
     id: "replacement-failed",
     label: "DRONE",
     style: { left: "16%", top: "58%" },
@@ -110,34 +160,62 @@ const HOTSPOTS: {
     style: { left: "60%", top: "86%" },
     acts: [2, 3, 4, 5],
   },
+  {
+    id: "rail-glow",
+    label: "RAIL",
+    style: { left: "40%", top: "34%" },
+    acts: [1, 2, 3, 4],
+  },
+  {
+    id: "kill-path",
+    label: "KILL PATH",
+    style: { left: "84%", top: "24%" },
+    acts: [4, 5],
+    peelOnly: true,
+  },
 ];
 
 export function AmbientChrome({
   act,
   paused = false,
   onAmbient,
+  peelVisible = false,
 }: {
   act: number;
   paused?: boolean;
   onAmbient: (id: AmbientTargetId, secret?: string) => void;
+  /** Show kill-path egg when peel/reveal is live */
+  peelVisible?: boolean;
 }) {
   const [hoverId, setHoverId] = useState<AmbientTargetId | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  const [tintId, setTintId] = useState<AmbientTargetId | null>(null);
 
   if (paused) return null;
 
-  const visible = HOTSPOTS.filter((h) => !h.acts || h.acts.includes(act));
+  const visible = HOTSPOTS.filter((h) => {
+    if (h.acts && !h.acts.includes(act)) return false;
+    if (h.peelOnly && !peelVisible) return false;
+    return true;
+  });
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[8] overflow-hidden">
       {visible.map((spot) => {
         const meta = TARGET_LINES[spot.id];
         const hovering = hoverId === spot.id;
+        const tinted = tintId === spot.id;
         return (
           <button
             key={spot.id}
             type="button"
-            className="pointer-events-auto absolute flex h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan/50 bg-cyan/20 shadow-[0_0_8px_rgba(110,231,255,0.35)] transition hover:border-cyan hover:bg-cyan/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"
+            className={`pointer-events-auto absolute flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan ${
+              tinted
+                ? "border-cyan bg-cyan/45 shadow-[0_0_14px_rgba(110,231,255,0.55)]"
+                : hovering
+                  ? "border-cyan bg-cyan/35 shadow-[0_0_10px_rgba(110,231,255,0.45)]"
+                  : "border-cyan/50 bg-cyan/20 shadow-[0_0_8px_rgba(110,231,255,0.35)]"
+            }`}
             style={spot.style}
             aria-label={`Inspect ${spot.label}`}
             onMouseEnter={() => {
@@ -148,12 +226,14 @@ export function AmbientChrome({
             onClick={(e) => {
               e.stopPropagation();
               audio.play("click", 0.3);
+              setTintId(spot.id);
               setFlash(meta.click);
               onAmbient(spot.id, meta.secret);
-              window.setTimeout(() => setFlash(null), 2200);
+              window.setTimeout(() => setFlash(null), 2400);
+              window.setTimeout(() => setTintId((t) => (t === spot.id ? null : t)), 900);
             }}
           >
-            <span className="h-1 w-1 rounded-full bg-cyan" />
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan" />
             {hovering ? (
               <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap border border-cyan/30 bg-black/70 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.16em] text-cyan/85">
                 {meta.hover}
@@ -167,7 +247,7 @@ export function AmbientChrome({
         {flash ? (
           <motion.div
             key={flash}
-            className="pointer-events-none absolute bottom-[4%] left-1/2 z-10 max-w-[min(90vw,420px)] -translate-x-1/2 border border-cyan/35 bg-black/75 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]"
+            className="pointer-events-none absolute bottom-[4%] left-1/2 z-10 max-w-[min(90vw,440px)] -translate-x-1/2 border border-cyan/35 bg-black/75 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

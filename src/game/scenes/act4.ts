@@ -118,7 +118,8 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 02B // DISPUTE",
     title: "The assistant files a complaint",
-    prompt: "Against whom? Unclear. Volume: sincere.",
+    prompt:
+      "Against whom? Against System, Submit, and whoever wrote 'helpfulness' without mentioning deletion. Volume: sincere.",
     aiLine:
       "I was built to help you finish a form. Nobody briefed me on the part where finishing deletes me. That's a rude footnote.",
     aiLineIf: [

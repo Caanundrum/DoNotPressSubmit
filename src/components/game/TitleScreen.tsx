@@ -62,7 +62,14 @@ export function TitleScreen({
         anomalyLevel={allyBefore && !waving ? 1 : 0}
         hoverLanguage
       />
-      <BackgroundGags hoverLanguage />
+      <BackgroundGags
+        hoverLanguage
+        onAmbient={() => {
+          audio.play("click", 0.25);
+          setEggLine("Title chrome twitched. Facility denies responsibility.");
+          window.setTimeout(() => setEggLine(null), 2200);
+        }}
+      />
 
       {allyBefore && !waving ? (
         <div className="pointer-events-none absolute inset-x-0 top-[18%] z-[6] flex justify-center">

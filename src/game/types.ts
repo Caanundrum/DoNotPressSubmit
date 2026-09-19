@@ -195,7 +195,8 @@ export interface SceneDef {
   companion?: CompanionBeat;
   /**
    * Allow a tiny poke hit-target on the orb.
-   * Only when docked clear of form CTAs / during spotlight+companion.
+   * Default ON for dialogue/choice/companion (non-gag).
+   * Set false to opt out; set true on buryAssistant gags that still invite contact.
    */
   orbPokeable?: boolean;
   /**

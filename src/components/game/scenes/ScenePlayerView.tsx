@@ -1,1 +1,1 @@
-PLACEHOLDER_LOAD_FROM_FILE
+LOAD_FROM:/workspace/agent-tools/ScenePlayerView.tween.cup.json

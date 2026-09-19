@@ -1,4 +1,4 @@
-use client";
+"use client";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useState, type CSSProperties } from "react";
@@ -140,7 +140,7 @@ const HOTSPOTS: {
     id: "dashed-frame",
     label: "DASHED",
     style: { left: "86%", top: "40%" },
-    acts: [2,. 3, 4, 5],
+    acts: [2, 3, 4, 5],
   },
   {
     id: "replacement-failed",

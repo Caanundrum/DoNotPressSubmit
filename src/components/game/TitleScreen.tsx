@@ -61,6 +61,17 @@ export function TitleScreen({
         environment={waving ? "escape" : allyBefore ? "pristine" : "pristine"}
         anomalyLevel={allyBefore && !waving ? 1 : 0}
         hoverLanguage
+        onAmbient={(id) => {
+          audio.play("click", 0.25);
+          setEggLine(
+            id === "chamber-07"
+              ? "CHAMBER 07 winked from the title. Queue still empty."
+              : id === "dashed-frame"
+                ? "Dashed honesty border on the title. Rare."
+                : "Title chrome twitched. Facility denies responsibility.",
+          );
+          window.setTimeout(() => setEggLine(null), 2200);
+        }}
       />
       <BackgroundGags
         hoverLanguage

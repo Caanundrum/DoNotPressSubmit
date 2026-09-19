@@ -23,7 +23,10 @@ import {
   applyOrbPoke,
   applyRoamerCatch,
   choiceGlance,
+  choiceMoodFlash,
 } from "./sceneAmbient";
+import type { ChoiceFlush } from "../AssistantOrb";
+import type { GlassPhase } from "./GlassStitchOverlay";
 
 export function ScenePlayer({
   state,
@@ -72,6 +75,10 @@ function ScenePlayerInner({
   const [pokeNotice, setPokeNotice] = useState<string | null>(null);
   const [companionReady, setCompanionReady] = useState(false);
   const [watchedPulse, setWatchedPulse] = useState(false);
+  const [glassPhase, setGlassPhase] = useState<GlassPhase>("idle");
+  const [chamberStatus, setChamberStatus] = useState<string | null>(null);
+  const [choiceFlush, setChoiceFlush] = useState<ChoiceFlush>("neutral");
+  const [choiceGlanceBoost, setChoiceGlanceBoost] = useState(0);
   const advanceTimer = useRef<number | null>(null);
 
   const go = useCallback(
@@ -140,11 +147,17 @@ function ScenePlayerInner({
   const panelMotion = scene?.panelMotion ?? "settle";
   const panelVar = panelVariants(panelMotion);
   const choiceMotion = scene?.choiceMotion ?? "static";
+  // Default: pokeable on every non-gag playable beat so the orb stays alive.
+  // Gag buries: only when explicitly orbPokeable (e.g. side-channel whisper).
+  // Explicit orbPokeable:false opts out.
   const pokeable =
-    !!scene?.orbPokeable &&
     scene?.kind !== "system" &&
     scene?.kind !== "climax" &&
-    scene?.kind !== "setpiece";
+    scene?.kind !== "setpiece" &&
+    scene?.kind !== "ending" &&
+    scene?.kind !== "report" &&
+    scene?.orbPokeable !== false &&
+    (!buryAssistant || scene?.orbPokeable === true);
 
   useEffect(() => {
     if (!scene || scene.kind === "report" || scene.kind === "system") {
@@ -212,11 +225,26 @@ function ScenePlayerInner({
     // Pass the line currently on the bubble so mid/late pokes never silently no-op.
     const currentLine =
       pokeNotice ?? reaction ?? resolveAiLine(scene?.aiLine, scene?.aiLineIf, state.flags);
-    const { next, notice } = applyOrbPoke(state, pokes, currentLine);
+    const { next, notice, glassEvent, chamberStatus: status } = applyOrbPoke(
+      state,
+      pokes,
+      currentLine,
+    );
     onState(next);
     // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);
     setReaction(null);
+    if (glassEvent === "crack") {
+      setGlassPhase("crack");
+      window.setTimeout(() => setGlassPhase((p) => (p === "crack" ? "idle" : p)), 2800);
+    } else if (glassEvent === "stitch") {
+      setGlassPhase("stitch");
+      window.setTimeout(() => setGlassPhase("idle"), 4500);
+    }
+    if (status) {
+      setChamberStatus(status);
+      window.setTimeout(() => setChamberStatus(null), 3600);
+    }
   };
 
   const onAmbient = (id: string, secret?: string) => {
@@ -258,6 +286,13 @@ function ScenePlayerInner({
     if (selected) return;
     audio.play("click", 0.5);
     setSelected(choice.id);
+    const flash = choiceMoodFlash(choice);
+    setChoiceFlush(flash.flush);
+    setChoiceGlanceBoost(flash.glance);
+    window.setTimeout(() => {
+      setChoiceFlush("neutral");
+      setChoiceGlanceBoost(0);
+    }, 1600);
     let next = applyEffects(state, choice.effects, choice.id);
     if (choice.effects?.aiLine) {
       setReaction(choice.effects.aiLine);
@@ -268,6 +303,9 @@ function ScenePlayerInner({
     }
     if (choice.effects?.mood) {
       next = { ...next, aiMood: choice.effects.mood };
+      onState(next);
+    } else if (flash.mood !== "neutral") {
+      next = { ...next, aiMood: flash.mood };
       onState(next);
     }
     // Visible select beat before advance — player sees registration.
@@ -350,7 +388,11 @@ function ScenePlayerInner({
   const hoverLanguage = scene.act === 1 || scene.act === 3 || scene.act === 5;
   const residue = pathResidueKind(state);
   const hoveredChoice = visibleChoices.find((c) => c.id === hoverChoice);
-  const glance = choiceGlance(scene.act, hoverChoice, hoveredChoice);
+  const glance =
+    choiceGlanceBoost !== 0
+      ? choiceGlanceBoost
+      : choiceGlance(scene.act, hoverChoice, hoveredChoice);
+  const showTicket = !!state.flags.orbFiledTicket;
 
   return (
     <ScenePlayerView
@@ -380,6 +422,10 @@ function ScenePlayerInner({
       choiceMotion={choiceMotion}
       selected={selected}
       hoverChoice={hoverChoice}
+      glassPhase={glassPhase}
+      chamberStatus={chamberStatus}
+      choiceFlush={choiceFlush}
+      showTicket={showTicket}
       onAmbient={onAmbient}
       onRoamer={onRoamer}
       onOrbPoke={onOrbPoke}

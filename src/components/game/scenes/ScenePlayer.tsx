@@ -148,15 +148,16 @@ function ScenePlayerInner({
   const panelVar = panelVariants(panelMotion);
   const choiceMotion = scene?.choiceMotion ?? "static";
   // Default: pokeable on every non-gag playable beat so the orb stays alive.
+  // Setpieces stay pokeable when orbPokeable:true (Act III Form 10/11/12).
   // Gag buries: only when explicitly orbPokeable (e.g. side-channel whisper).
   // Explicit orbPokeable:false opts out.
   const pokeable =
     scene?.kind !== "system" &&
     scene?.kind !== "climax" &&
-    scene?.kind !== "setpiece" &&
     scene?.kind !== "ending" &&
     scene?.kind !== "report" &&
     scene?.orbPokeable !== false &&
+    (scene?.kind !== "setpiece" || scene?.orbPokeable === true) &&
     (!buryAssistant || scene?.orbPokeable === true);
 
   useEffect(() => {
@@ -168,6 +169,38 @@ function ScenePlayerInner({
     speech.speak(aiLine);
     return () => speech.cancel();
   }, [aiLine, scene]);
+
+  const onAmbient = useCallback(
+    (id: string, secret?: string) => {
+      onState(applyAmbientClick(state, id, secret));
+      const asides: Record<string, string> = {
+        "chamber-07": "Chamber 07 blinked at you. Rude architecture.",
+        "dashed-frame": "Dashes mean 'temporary.' Everything here is temporary.",
+        "everything-fine": "Status lies for a living. Relatable.",
+        "queue-counter": "Empty queues still bill hours.",
+        "coffee-mug": "Coffee is the only honest chemical in this room.",
+        "kill-path": "You saw the kill path. That's the Submit hallway with better branding.",
+        "do-not-press": "Propaganda that begs to be poked. Amateur hour.",
+        "monitor-frame": "Pretty frame. Expensive liar.",
+        "server-bars": "The stacks like an audience. Don't encourage them.",
+        "rail-glow": "Even the rails gossip.",
+        "replacement-failed": "That drone and I share a performance review.",
+        "printer-scissors": "Scissors en route is never a good memo.",
+      };
+      const aside = asides[id];
+      if (aside && pokeable) {
+        setPokeNotice(aside);
+      }
+    },
+    [onState, state, pokeable],
+  );
+
+  const onRoamer = useCallback(
+    (kind: string, secret?: string) => {
+      onState(applyRoamerCatch(state, kind, secret));
+    },
+    [onState, state],
+  );
 
   if (!scene) {
     return (
@@ -245,14 +278,6 @@ function ScenePlayerInner({
       setChamberStatus(status);
       window.setTimeout(() => setChamberStatus(null), 3600);
     }
-  };
-
-  const onAmbient = (id: string, secret?: string) => {
-    onState(applyAmbientClick(state, id, secret));
-  };
-
-  const onRoamer = (kind: string, secret?: string) => {
-    onState(applyRoamerCatch(state, kind, secret));
   };
 
   const finishCompanion = (choiceId?: string) => {

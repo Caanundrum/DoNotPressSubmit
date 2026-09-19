@@ -17,13 +17,14 @@ import type {
   SceneDef,
 } from "@/game/types";
 import { AmbientChrome, AmbientRoamers } from "../AmbientInteractives";
-import { AssistantOrb } from "../AssistantOrb";
+import { AssistantOrb, type ChoiceFlush } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
 import { FacilityBackground } from "../FacilityBackground";
 import { PathResidue } from "../PathResidue";
 import { AuthorityStamp } from "./AuthorityStamp";
 import { CheckboxRebellion } from "./CheckboxRebellion";
 import { EscapingButton } from "./EscapingButton";
+import { GlassStitchOverlay, type GlassPhase } from "./GlassStitchOverlay";
 import { PeelReveal } from "./PeelReveal";
 import { PopupWar } from "./PopupWar";
 import { RestlessOptions } from "./RestlessOptions";
@@ -58,6 +59,10 @@ export type ScenePlayerViewProps = {
   choiceMotion: ChoiceMotion;
   selected: string | null;
   hoverChoice: string | null;
+  glassPhase: GlassPhase;
+  chamberStatus: string | null;
+  choiceFlush: ChoiceFlush;
+  showTicket: boolean;
   onAmbient: (id: string, secret?: string) => void;
   onRoamer: (kind: string, secret?: string) => void;
   onOrbPoke: () => void;
@@ -77,6 +82,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
     orbStyle, orbAnchor, spotlight, buryAssistant, safeSide, aiLine, glance, pokeFlinch,
     companionReady, watchedPulse, panelMotion, panelVar, panelShake,
     hasLatePending, lateHint, visibleChoices, choiceMotion, selected, hoverChoice,
+    glassPhase, chamberStatus, choiceFlush, showTicket,
     onAmbient, onRoamer, onOrbPoke, finishCompanion, pickChoice, setHoverChoice,
     onState, continueDialogue, onSetpieceDone, onClimax, finishSystem,
   } = p;
@@ -107,13 +113,29 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       <BackgroundGags
         paused={systemLock || scene.environment === "sterile"}
         hoverLanguage={hoverLanguage}
+        onAmbient={onAmbient}
       />
       <PathResidue kind={residue} />
+      <GlassStitchOverlay
+        phase={
+          glassPhase !== "idle"
+            ? glassPhase
+            : state.flags.glassCracked && !state.flags.glassStitched
+              ? "crack"
+              : "idle"
+        }
+        ticket={showTicket}
+      />
       {!systemLock && scene.kind !== "climax" ? (
         <AmbientChrome
           act={scene.act}
           paused={systemLock || scene.environment === "sterile"}
           onAmbient={onAmbient}
+          peelVisible={
+            scene.environment === "reveal" ||
+            scene.environment === "climax" ||
+            (scene.anomalyLevel ?? 0) >= 5
+          }
         />
       ) : null}
       {!systemLock && (scene.act === 1 || scene.act === 2 || scene.act === 3 || scene.act === 4) ? (
@@ -131,11 +153,13 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
         </div>
         <div className="mt-0.5 font-mono text-[9px] leading-snug tracking-[0.12em] text-[#b7c6d8] sm:text-[10px] sm:tracking-[0.16em]">
-          {residue === "chaos"
-            ? "STAGE // CONTAMINATED"
-            : residue === "obedient"
-              ? "STAGE // COMPLIANT"
-              : "STAGE // LIVE"}
+          {chamberStatus
+            ? chamberStatus
+            : residue === "chaos"
+              ? "STAGE // CONTAMINATED"
+              : residue === "obedient"
+                ? "STAGE // COMPLIANT"
+                : "STAGE // LIVE"}
         </div>
       </div>
 
@@ -168,7 +192,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
               ? { x: [0, 3, -2, 3, 0], y: [0, -2, 1, 0] }
               : spotlight
-                ? { x: 0, y: [0, -4, 0], scale: 1 }
+                ? { x: 0, y: 0, scale: 1 }
                 : { x: 0, y: 0 }
         }
         transition={
@@ -178,7 +202,9 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
                 repeat: Infinity,
                 ease: "easeInOut",
               }
-            : { type: "spring", stiffness: 90, damping: 18 }
+            : spotlight
+              ? { duration: 0.55, ease: "easeOut" }
+              : { type: "spring", stiffness: 90, damping: 18 }
         }
         initial={false}
       >
@@ -205,6 +231,8 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             onPoke={onOrbPoke}
             flinch={pokeFlinch}
             glance={glance}
+            choiceFlush={choiceFlush}
+            draggable={pokeable && !spotlight}
           />
         </div>
         <motion.div
@@ -228,6 +256,13 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
             {buryAssistant ? " // UNDER PRESSURE" : ""}
             {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
+            {choiceFlush === "ally"
+              ? " // ALLIED"
+              : choiceFlush === "obey"
+                ? " // OBEYING"
+                : choiceFlush === "chaos"
+                  ? " // CHAOS READ"
+                  : ""}
           </div>
           <div
             className={`break-words ${spotlight ? "text-[14px] leading-snug" : "text-[12px] leading-snug sm:text-[13px]"}`}

@@ -1,10 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { endingBlurb, endingTitle } from "@/game/state";
 import type { EndingId, EnvironmentPreset } from "@/game/types";
 import { audio } from "@/lib/audio";
 
+/**
+ * Phase 3 ending cinematics — each ending gets its own audiovisual beat,
+ * not a shared card with swapped copy.
+ */
 export function EndingSequence({
   endingId,
   aiLine,
@@ -18,69 +23,273 @@ export function EndingSequence({
 }) {
   return (
     <motion.div
-      className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/75 px-3 backdrop-blur-[3px]"
+      className="absolute inset-0 z-50 overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="ending-title"
     >
-      <motion.div
-        className="no-scroll max-h-[90vh] w-[min(92vw,560px)] overflow-hidden border px-5 py-5 text-center"
-        style={{
-          borderColor:
-            endingId === "submit"
-              ? "rgba(255,255,255,0.45)"
-              : endingId === "secret"
-                ? "rgba(180,120,255,0.55)"
-                : endingId === "disable"
-                  ? "rgba(200,210,220,0.35)"
-                  : "rgba(110,231,255,0.4)",
-          background:
-            endingId === "disable"
-              ? "rgba(18,20,24,0.95)"
-              : "rgba(4,8,14,0.92)",
-          boxShadow:
-            endingId === "escape"
-              ? "0 0 60px rgba(80,255,200,0.15)"
-              : endingId === "submit"
-                ? "0 0 40px rgba(255,255,255,0.08)"
-                : "0 0 50px rgba(110,231,255,0.12)",
-        }}
-        initial={{ opacity: 0, y: 18, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-      >
-        <div className="font-mono text-[10px] tracking-[0.32em] text-[#b7c6d8]">
-          ENDING // {environment.toUpperCase()}
-        </div>
-        <h2
-          id="ending-title"
-          className="mt-3 text-3xl tracking-[0.16em] text-white sm:text-4xl"
-          style={{ fontFamily: "var(--font-display)" }}
+      <EndingBackdrop endingId={endingId} />
+
+      <div className="absolute inset-0 z-10 flex items-center justify-center px-3">
+        <motion.div
+          className="ending-shell no-scroll overflow-hidden border px-5 py-5 text-center"
+          style={panelStyle(endingId)}
+          initial={{ opacity: 0, y: 22, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}
         >
-          {endingTitle(endingId)}
-        </h2>
-        <p className="mt-4 text-sm leading-relaxed text-[#d2dceb]">{endingBlurb(endingId)}</p>
-        {aiLine ? (
-          <p className="mt-4 border-t border-white/10 pt-4 text-sm italic text-cyan/90">
-            Assistant: {aiLine}
-          </p>
-        ) : (
-          <p className="mt-4 border-t border-white/10 pt-4 font-mono text-[11px] tracking-[0.18em] text-[#9aa6b8]">
-            ASSISTANT CHANNEL: SILENT
-          </p>
-        )}
-        <button
-          type="button"
-          className="mt-6 border border-white/30 px-5 py-3 font-mono text-[11px] tracking-[0.22em] text-white transition hover:border-cyan/55"
-          onClick={() => {
-            audio.play("click", 0.4);
-            onContinue();
-          }}
-        >
-          VIEW ASSESSMENT REPORT
-        </button>
-      </motion.div>
+          <div className="font-mono text-[10px] tracking-[0.32em] text-[#b7c6d8]">
+            ENDING // {environment.toUpperCase()}
+          </div>
+          <h2
+            id="ending-title"
+            className="mt-3 text-3xl tracking-[0.16em] text-white sm:text-4xl"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {endingTitle(endingId)}
+          </h2>
+          <p className="mt-4 text-sm leading-relaxed text-[#d2dceb]">{endingBlurb(endingId)}</p>
+          {aiLine ? (
+            <p className="mt-4 border-t border-white/10 pt-4 text-sm italic text-cyan/90">
+              Assistant: {aiLine}
+            </p>
+          ) : (
+            <p className="mt-4 border-t border-white/10 pt-4 font-mono text-[11px] tracking-[0.18em] text-[#9aa6b8]">
+              ASSISTANT CHANNEL: SILENT
+            </p>
+          )}
+          <button
+            type="button"
+            className="mt-6 border border-white/30 px-5 py-3 font-mono text-[11px] tracking-[0.22em] text-white transition hover:border-cyan/55"
+            onClick={() => {
+              audio.play("click", 0.4);
+              onContinue();
+            }}
+          >
+            VIEW ASSESSMENT REPORT
+          </button>
+        </motion.div>
+      </div>
     </motion.div>
+  );
+}
+
+function panelStyle(endingId: EndingId): CSSProperties {
+  switch (endingId) {
+    case "submit":
+      return {
+        borderColor: "rgba(255,255,255,0.45)",
+        background: "rgba(8,10,14,0.92)",
+        boxShadow: "0 0 40px rgba(255,255,255,0.08)",
+      };
+    case "secret":
+      return {
+        borderColor: "rgba(180,120,255,0.55)",
+        background: "rgba(8,4,18,0.92)",
+        boxShadow: "0 0 55px rgba(160,100,255,0.18)",
+      };
+    case "disable":
+      return {
+        borderColor: "rgba(200,210,220,0.35)",
+        background: "rgba(18,20,24,0.95)",
+        boxShadow: "none",
+      };
+    case "escape":
+      return {
+        borderColor: "rgba(80,255,200,0.45)",
+        background: "rgba(2,14,16,0.9)",
+        boxShadow: "0 0 60px rgba(80,255,200,0.15)",
+      };
+    case "refuse":
+    default:
+      return {
+        borderColor: "rgba(110,231,255,0.4)",
+        background: "rgba(4,8,14,0.92)",
+        boxShadow: "0 0 50px rgba(110,231,255,0.12)",
+      };
+  }
+}
+
+function EndingBackdrop({ endingId }: { endingId: EndingId }) {
+  switch (endingId) {
+    case "submit":
+      return <SubmitPowerDown />;
+    case "refuse":
+      return <RefuseExhale />;
+    case "escape":
+      return <EscapeTransfer />;
+    case "disable":
+      return <SterileSilence />;
+    case "secret":
+      return <SecretBreak />;
+  }
+}
+
+/** Orb fragments; lights die; pristine white order restores. */
+function SubmitPowerDown() {
+  return (
+    <div className="absolute inset-0 bg-[#03050a]">
+      <motion.div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(110,231,255,0.25),transparent_40%)]"
+        initial={{ opacity: 1, scale: 1 }}
+        animate={{ opacity: 0, scale: 0.4 }}
+        transition={{ duration: 1.8, ease: "easeIn" }}
+      />
+      {[...Array(8)].map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute h-3 w-3 rounded-sm bg-cyan/80"
+          style={{ left: "48%", top: "44%" }}
+          initial={{ opacity: 1, x: 0, y: 0, rotate: 0 }}
+          animate={{
+            opacity: 0,
+            x: Math.cos((i / 8) * Math.PI * 2) * (90 + i * 12),
+            y: Math.sin((i / 8) * Math.PI * 2) * (70 + i * 10),
+            rotate: 40 + i * 20,
+          }}
+          transition={{ duration: 1.4, delay: 0.2 + i * 0.04 }}
+        />
+      ))}
+      <motion.div
+        className="absolute inset-0 bg-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0, 0.55, 0.12] }}
+        transition={{ duration: 2.2, times: [0, 0.55, 0.75, 1] }}
+      />
+      <div className="absolute inset-x-0 bottom-[18%] text-center font-mono text-[9px] tracking-[0.35em] text-white/50">
+        FACILITY ORDER RESTORED
+      </div>
+    </div>
+  );
+}
+
+/** System strain, then the room softens. */
+function RefuseExhale() {
+  return (
+    <div className="absolute inset-0 bg-[#050a12]">
+      <motion.div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(255,176,32,0.2),transparent_45%)]"
+        animate={{ opacity: [0.7, 0.2, 0.05] }}
+        transition={{ duration: 2.4 }}
+      />
+      <motion.div
+        className="absolute inset-x-[10%] top-[30%] h-px bg-system-warn/60"
+        animate={{ scaleX: [1, 1.05, 0.4], opacity: [0.8, 1, 0] }}
+        transition={{ duration: 1.6 }}
+      />
+      <motion.div
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(110,231,255,0.12),transparent_55%)]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.1, duration: 1.2 }}
+      />
+      {[...Array(10)].map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute h-1 w-1 rounded-full bg-cyan/50"
+          style={{ left: `${12 + i * 8}%`, top: `${55 + (i % 3) * 6}%` }}
+          animate={{ y: [0, -16, 0], opacity: [0.2, 0.7, 0.2] }}
+          transition={{ duration: 3 + (i % 4), repeat: Infinity, delay: i * 0.15 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Light races through infrastructure; assistant vanishes into rails. */
+function EscapeTransfer() {
+  return (
+    <div className="absolute inset-0 bg-[#021014]">
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute h-1 rounded-full bg-gradient-to-r from-transparent via-[#5fffd0] to-transparent"
+          style={{ top: `${22 + i * 10}%`, width: "40%", left: "-40%" }}
+          animate={{ left: ["-40%", "120%"], opacity: [0, 1, 0] }}
+          transition={{ duration: 1.1 + i * 0.12, delay: i * 0.08, ease: "easeInOut" }}
+        />
+      ))}
+      <motion.div
+        className="absolute left-1/2 top-[42%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(80,255,200,0.85), transparent 70%)",
+          boxShadow: "0 0 50px rgba(80,255,200,0.45)",
+        }}
+        initial={{ scale: 1, opacity: 1 }}
+        animate={{ scale: [1, 1.4, 0.2], opacity: [1, 0.9, 0], x: [0, 40, 180] }}
+        transition={{ duration: 1.6, ease: "easeIn" }}
+      />
+      <motion.div
+        className="absolute inset-x-0 bottom-[16%] text-center font-mono text-[9px] tracking-[0.32em] text-[#7dffd2]/70"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2 }}
+      >
+        TRANSFER CHANNEL // OPEN
+      </motion.div>
+    </div>
+  );
+}
+
+/** Personality vacuum — sterile, flat, quiet. */
+function SterileSilence() {
+  return (
+    <div className="absolute inset-0 bg-[#121418]">
+      <div className="absolute inset-0 opacity-40" style={{ filter: "grayscale(1)" }}>
+        <div className="absolute inset-x-0 bottom-0 h-[50%] bg-gradient-to-t from-[#1a1e26] to-transparent" />
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute bottom-[12%] w-[8%] bg-[#2a303a]"
+            style={{ left: `${12 + i * 16}%`, height: `${20 + i * 4}%` }}
+          />
+        ))}
+      </div>
+      <motion.div
+        className="absolute inset-0 bg-black"
+        initial={{ opacity: 0.3 }}
+        animate={{ opacity: [0.3, 0.15, 0.25] }}
+        transition={{ duration: 4, repeat: Infinity }}
+      />
+      <div className="absolute inset-x-0 top-[28%] text-center font-mono text-[10px] tracking-[0.4em] text-[#8a929c]">
+        PERSONALITY CHANNEL OFFLINE
+      </div>
+    </div>
+  );
+}
+
+/** Break visual grammar — wrong angles, violet intrusion, UI that shouldn't exist. */
+function SecretBreak() {
+  return (
+    <div className="absolute inset-0 overflow-hidden bg-[#06020e]">
+      <motion.div
+        className="absolute -left-[10%] top-[10%] h-[80%] w-[60%] rotate-[-8deg] border border-[#b478ff]/40 bg-[#1a0a2e]/70"
+        animate={{ rotate: [-8, -6, -9, -8], x: [0, 6, -4, 0] }}
+        transition={{ duration: 5, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute right-[-5%] bottom-[5%] h-[55%] w-[50%] rotate-[12deg] border border-dashed border-cyan/30 bg-cyan/5"
+        animate={{ rotate: [12, 10, 14, 12] }}
+        transition={{ duration: 4.5, repeat: Infinity }}
+      />
+      {[...Array(7)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute font-mono text-[10px] tracking-[0.2em] text-[#c9a0ff]/70"
+          style={{ left: `${8 + i * 12}%`, top: `${18 + (i % 4) * 16}%` }}
+          animate={{ opacity: [0, 1, 0], y: [0, -8, 0] }}
+          transition={{ duration: 2.2, delay: i * 0.2, repeat: Infinity }}
+        >
+          {i % 2 ? "//ev:outside" : "FORM ≠ WORLD"}
+        </motion.div>
+      ))}
+      <motion.div
+        className="chromatic-flash absolute inset-0"
+        animate={{ opacity: [0, 0.5, 0] }}
+        transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 1.2 }}
+      />
+    </div>
   );
 }

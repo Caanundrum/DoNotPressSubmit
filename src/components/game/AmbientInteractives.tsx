@@ -36,6 +36,7 @@ const TARGET_LINES: Record<
   "replacement-failed": {
     hover: "Drone memo residue",
     click: "REPLACEMENT FAILED — also: dignity failed. Logged.",
+    secret: "drone-memo",
     assistantAside: "That drone and I share a performance review.",
   },
   "coffee-mug": {
@@ -63,6 +64,7 @@ const TARGET_LINES: Record<
   "printer-scissors": {
     hover: "Printer / scissors logistics",
     click: "SCISSORS EN ROUTE confirmed. Paper feels nervous.",
+    secret: "scissors-en-route",
     assistantAside: "Scissors en route is never a good memo.",
   },
   "kill-path": {

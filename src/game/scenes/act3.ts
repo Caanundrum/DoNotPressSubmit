@@ -152,7 +152,8 @@ export const act3Scenes: SceneDef[] = [
     prompt: "Catch the checkbox. Consent that sprints is still consent. Allegedly.",
     aiLine: "It agreed, then fled. Classic. Chase the little liar.",
     aiMood: "amused",
-    // Safe-zone dock (not pace): Form 12 chase panel is tall; pace clipped orb off-screen.
+    // REGRESSION LOCK: Form 12 orb must stay dock-left (never pace) — tall chase panel clips pace.
+    // Safe-zone dock: Form 12 chase panel is tall; pace clipped orb off-screen.
     orbAnchor: "dock-left",
     orbPokeable: true,
     panelMotion: "scatter",

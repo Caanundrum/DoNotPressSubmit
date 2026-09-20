@@ -75,9 +75,17 @@ export function TitleScreen({
       />
       <BackgroundGags
         hoverLanguage
-        onAmbient={() => {
+        onAmbient={(id) => {
           audio.play("click", 0.25);
-          setEggLine("Title chrome twitched. Facility denies responsibility.");
+          setEggLine(
+            id === "replacement-failed"
+              ? "Title drone: REPLACEMENT FAILED. Also: HR failed."
+              : id === "printer-scissors"
+                ? "Title printer blushed. Scissors en route to the logo."
+                : id === "coffee-mug"
+                  ? "Title mug scanned. Morale malware confirmed."
+                  : "Title chrome twitched. Facility denies responsibility.",
+          );
           window.setTimeout(() => setEggLine(null), 2200);
         }}
       />

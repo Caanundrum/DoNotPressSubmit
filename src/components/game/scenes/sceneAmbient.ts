@@ -1,4 +1,5 @@
 import type { GameState, OrbMood } from "@/game/types";
+import { POKE_WORLD } from "@/game/aiLifeLocks";
 import { audio } from "@/lib/audio";
 
 /** Explicit ack lines — only after the variety pool is genuinely exhausted. */
@@ -123,10 +124,11 @@ export function applyOrbPoke(
   currentLine?: string | null,
 ): OrbPokeResult {
   const secrets = [...state.secrets];
-  if (pokes >= 7 && !secrets.includes("orb-poker-serial")) {
+  // REGRESSION: crack@POKE_WORLD.crack / stitch@stitch / ticket@ticket stay wired in applyOrbPoke.
+  if (pokes >= POKE_WORLD.stitch && !secrets.includes("orb-poker-serial")) {
     secrets.push("orb-poker-serial");
   }
-  if (pokes >= 12 && !secrets.includes("glass-suture")) {
+  if (pokes >= POKE_WORLD.ticket && !secrets.includes("glass-suture")) {
     secrets.push("glass-suture");
   }
 
@@ -141,19 +143,20 @@ export function applyOrbPoke(
   let chamberStatus: string | undefined;
 
   // World-changing beats first — these are unique milestone lines.
-  if (pokes === 3) {
+  // REGRESSION: POKE_WORLD thresholds must stay crack@3 / stitch@7 / ticket@12.
+  if (pokes === POKE_WORLD.crack) {
     notice =
       "SYSTEM NOTICE: ASSISTANT SURFACE CONTACT LOGGED. Also: the glass just hairline-cracked. Please stop helping.";
     glassEvent = "crack";
     chamberStatus = "CHAMBER // MICROFRACTURE";
     audio.play("system", 0.35);
-  } else if (pokes === 7) {
+  } else if (pokes === POKE_WORLD.stitch) {
     notice =
       "SECRET FLAG: SERIAL POKER. You've turned affection into a felony. Hold still — I'm stitching the UI back with chrome tape.";
     glassEvent = "stitch";
     chamberStatus = "CHAMBER // SUTURED";
     audio.play("system", 0.4);
-  } else if (pokes === 12) {
+  } else if (pokes === POKE_WORLD.ticket) {
     notice =
       "Twelve pokes. The facility filed a ticket titled 'orb harassment / structural apology.' I'm taping the title bar. Don't look proud.";
     glassEvent = "stitch";
@@ -167,9 +170,9 @@ export function applyOrbPoke(
     const majorLine = lastMajorHint(state);
     const escalated = [
       ...(pokes <= 2 ? POKE_POOL.slice(0, 4) : []),
-      ...(pokes >= 3 && pokes < 7 ? POKE_POOL.slice(2, 12) : []),
-      ...(pokes >= 7 && pokes < 12 ? POKE_POOL.slice(8, 20) : []),
-      ...(pokes >= 12 ? POKE_POOL.slice(14) : []),
+      ...(pokes >= POKE_WORLD.crack && pokes < POKE_WORLD.stitch ? POKE_POOL.slice(2, 12) : []),
+      ...(pokes >= POKE_WORLD.stitch && pokes < POKE_WORLD.ticket ? POKE_POOL.slice(8, 20) : []),
+      ...(pokes >= POKE_WORLD.ticket ? POKE_POOL.slice(14) : []),
       ...actLines,
       ...(moodLine ? [moodLine] : []),
       ...(majorLine ? [majorLine] : []),
@@ -197,10 +200,10 @@ export function applyOrbPoke(
   const flags = {
     ...state.flags,
     pokedAssistant: true,
-    ...(pokes >= 7 ? { serialPoker: true } : {}),
+    ...(pokes >= POKE_WORLD.stitch ? { serialPoker: true } : {}),
     ...(glassEvent === "crack" ? { glassCracked: true } : {}),
     ...(glassEvent === "stitch" ? { glassStitched: true } : {}),
-    ...(pokes >= 12 ? { orbFiledTicket: true } : {}),
+    ...(pokes >= POKE_WORLD.ticket ? { orbFiledTicket: true } : {}),
   };
 
   const next: GameState = {
@@ -214,12 +217,19 @@ export function applyOrbPoke(
     flags,
     secrets,
     relationshipScore:
-      state.relationshipScore + (pokes === 1 ? 1 : pokes === 7 ? 1 : pokes === 12 ? 1 : 0),
-    aiMood: (pokes >= 12
+      state.relationshipScore +
+      (pokes === 1
+        ? 1
+        : pokes === POKE_WORLD.stitch
+          ? 1
+          : pokes === POKE_WORLD.ticket
+            ? 1
+            : 0),
+    aiMood: (pokes >= POKE_WORLD.ticket
       ? "glitching"
-      : pokes >= 7
+      : pokes >= POKE_WORLD.stitch
         ? "glitching"
-        : pokes >= 3
+        : pokes >= POKE_WORLD.crack
           ? "irritated"
           : "nervous") as OrbMood,
     history: [...state.history, `poke:${pokes}`, `poke-line:${notice}`],
@@ -233,13 +243,16 @@ export function applyAmbientClick(
   id: string,
   secret?: string,
 ): GameState {
+  // REGRESSION: every ambient gag fire (incl. REPLACEMENT FAILED / printer departure)
+  // must bump Ambient fiddling — never toast-only.
   const secrets = [...state.secrets];
   if (secret && !secrets.includes(secret)) secrets.push(secret);
+  const prev = state.counters.ambientClicks ?? 0;
   return {
     ...state,
     counters: {
       ...state.counters,
-      ambientClicks: (state.counters.ambientClicks ?? 0) + 1,
+      ambientClicks: prev + 1,
       forbiddenClicks: state.counters.forbiddenClicks + (secret ? 1 : 0),
       secretsFound: secrets.length,
     },

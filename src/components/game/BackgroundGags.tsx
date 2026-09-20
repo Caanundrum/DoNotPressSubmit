@@ -10,6 +10,7 @@ const GAG_CLICK: Record<GagId, { id: string; line: string; secret?: string }> = 
   drone: {
     id: "replacement-failed",
     line: "Drone memo: REPLACEMENT FAILED. Also: dignity failed. Logged.",
+    secret: "drone-memo",
   },
   coffee: {
     id: "coffee-mug",
@@ -19,6 +20,35 @@ const GAG_CLICK: Record<GagId, { id: string; line: string; secret?: string }> = 
   printer: {
     id: "printer-scissors",
     line: "Printer blushed. SCISSORS EN ROUTE remains on schedule.",
+    secret: "scissors-en-route",
+  },
+};
+
+/** Departure toasts — distinct from click lines; still count as Ambient fiddling. */
+const GAG_DEPART: Record<
+  GagId,
+  { touched: string; missed: string; id: string; secret?: string }
+> = {
+  drone: {
+    id: "replacement-failed",
+    secret: "drone-memo",
+    touched: "Drone memo filed and left. REPLACEMENT FAILED still echoes.",
+    missed:
+      "REPLACEMENT FAILED scrolled off-frame. Dignity remained failed. Logged.",
+  },
+  coffee: {
+    id: "coffee-mug",
+    secret: "mug-scan",
+    touched: "Mug left the frame mid-scan. Transit logged.",
+    missed:
+      "HUMAN PERFORMANCE mug departed. Facility pretends you didn't notice. Logged anyway.",
+  },
+  printer: {
+    id: "printer-scissors",
+    secret: "scissors-en-route",
+    touched: "Printer exited stage left. Scissors still en route. Somewhere.",
+    missed:
+      "Paper trail left the frame. SCISSORS EN ROUTE memo persists. Logged.",
   },
 };
 
@@ -36,7 +66,11 @@ export function BackgroundGags({
   const [active, setActive] = useState<GagId>("drone");
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
-  const coffeeTouched = useRef(false);
+  const touched = useRef<Record<GagId, boolean>>({
+    drone: false,
+    coffee: false,
+    printer: false,
+  });
   const prevActive = useRef<GagId>("drone");
   const onAmbientRef = useRef(onAmbient);
   onAmbientRef.current = onAmbient;
@@ -52,27 +86,27 @@ export function BackgroundGags({
     return () => clearInterval(id);
   }, [paused]);
 
+  // P2: each rotating gag gets a dedicated departure ambient (toast + Ambient fiddling) —
+  // never silent when it leaves the frame. Click already counted → toast only.
   useEffect(() => {
     const was = prevActive.current;
     prevActive.current = active;
     if (!onAmbientRef.current || paused) return;
-    if (was === "coffee" && active !== "coffee") {
-      const line = coffeeTouched.current
-        ? "Mug left the frame mid-scan. Transit logged."
-        : "HUMAN PERFORMANCE mug departed. Facility pretends you didn't notice. Logged anyway.";
-      setFlash(line);
-      if (!coffeeTouched.current) {
-        onAmbientRef.current("coffee-mug", "mug-scan");
-      }
-      coffeeTouched.current = false;
-      window.setTimeout(() => setFlash(null), 2600);
+    if (was === active) return;
+    const depart = GAG_DEPART[was];
+    const wasTouched = touched.current[was];
+    setFlash(wasTouched ? depart.touched : depart.missed);
+    if (!wasTouched) {
+      onAmbientRef.current(depart.id, depart.secret);
     }
+    touched.current[was] = false;
+    window.setTimeout(() => setFlash(null), 2600);
   }, [active, paused]);
 
   const react = (gag: GagId) => {
     const meta = GAG_CLICK[gag];
     audio.play("click", 0.28);
-    if (gag === "coffee") coffeeTouched.current = true;
+    touched.current[gag] = true;
     setFlash(meta.line);
     onAmbient?.(meta.id, meta.secret);
     window.setTimeout(() => setFlash(null), 2200);
@@ -218,13 +252,26 @@ function DroneGag({
         }}
         transition={{ duration: 4.5, times: [0, 0.2, 0.45, 0.7, 1], repeat: Infinity }}
       />
-      <motion.div
-        className="mt-2 font-mono text-[9px] tracking-widest text-mist/70"
+      <motion.button
+        type="button"
+        className={`mt-2 border-0 bg-transparent p-0 font-mono text-[9px] tracking-widest text-mist/70 ${
+          live ? "pointer-events-auto cursor-pointer hover:text-cyan" : "pointer-events-none"
+        }`}
         animate={{ opacity: [0, 1, 1, 0] }}
         transition={{ duration: 5, repeat: Infinity }}
+        onClick={
+          interactive
+            ? (e) => {
+                e.stopPropagation();
+                onReact?.();
+              }
+            : undefined
+        }
+        aria-label={interactive ? "Inspect REPLACEMENT FAILED memo" : undefined}
+        tabIndex={interactive ? 0 : -1}
       >
         REPLACEMENT FAILED
-      </motion.div>
+      </motion.button>
     </motion.div>
   );
 }
@@ -337,13 +384,26 @@ function PrinterGag({
         animate={{ height: [8, 120] }}
         transition={{ duration: 6, ease: "easeInOut" }}
       />
-      <motion.div
-        className="mt-2 font-mono text-[9px] tracking-widest text-mist/70"
+      <motion.button
+        type="button"
+        className={`mt-2 border-0 bg-transparent p-0 font-mono text-[9px] tracking-widest text-mist/70 ${
+          live ? "pointer-events-auto cursor-pointer hover:text-cyan" : "pointer-events-none"
+        }`}
         animate={{ opacity: [0, 1, 0] }}
         transition={{ delay: 3.5, duration: 2.5 }}
+        onClick={
+          interactive
+            ? (e) => {
+                e.stopPropagation();
+                onReact?.();
+              }
+            : undefined
+        }
+        aria-label={interactive ? "Inspect SCISSORS EN ROUTE memo" : undefined}
+        tabIndex={interactive ? 0 : -1}
       >
         SCISSORS EN ROUTE
-      </motion.div>
+      </motion.button>
     </motion.div>
   );
 }

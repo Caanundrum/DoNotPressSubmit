@@ -75,9 +75,21 @@ export function TitleScreen({
       />
       <BackgroundGags
         hoverLanguage
-        onAmbient={() => {
+        onAmbient={(id) => {
           audio.play("click", 0.25);
-          setEggLine("Title chrome twitched. Facility denies responsibility.");
+          setEggLine(
+            id === "replacement-failed"
+              ? "Title drone: REPLACEMENT FAILED. Also: HR failed."
+              : id === "printer-scissors"
+                ? "Title printer blushed. Scissors en route to the logo."
+                : id === "coffee-mug"
+                  ? "Title mug scanned. Morale malware confirmed."
+                  : id === "corridor-etiquette"
+                    ? "Title corridor: after you, after you, after physics."
+                    : id === "containment-fine"
+                      ? "Bay 03 winked EVERYTHING IS FINE from the title. Unprompted."
+                      : "Title chrome twitched. Facility denies responsibility.",
+          );
           window.setTimeout(() => setEggLine(null), 2200);
         }}
       />

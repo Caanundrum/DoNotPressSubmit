@@ -21,6 +21,8 @@ export const AMBIENT_FIDDLE_IDS = [
   "coffee-mug",
   "chamber-07",
   "dashed-frame",
+  "corridor-etiquette",
+  "containment-fine",
 ] as const;
 
 export type AmbientFiddleId = (typeof AMBIENT_FIDDLE_IDS)[number];

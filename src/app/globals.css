@@ -225,9 +225,50 @@ button {
   }
 }
 
+/* Phase 3 — authored light / glitch accents */
+.light-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(110, 231, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(110, 231, 255, 0.08) 65%,
+    transparent 100%
+  );
+  filter: blur(8px);
+}
+
+.chromatic-flash {
+  background:
+    linear-gradient(90deg, rgba(255, 77, 109, 0.18), transparent 40%),
+    linear-gradient(270deg, rgba(110, 231, 255, 0.16), transparent 40%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.facility-rail {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(110, 231, 255, 0.35),
+    transparent
+  );
+}
+
+.vol-beam {
+  background: linear-gradient(
+    180deg,
+    rgba(110, 231, 255, 0.14),
+    transparent 70%
+  );
+  filter: blur(12px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scanlines,
-  .ambient-motion {
+  .ambient-motion,
+  .light-sweep,
+  .chromatic-flash {
     animation: none !important;
   }
 }

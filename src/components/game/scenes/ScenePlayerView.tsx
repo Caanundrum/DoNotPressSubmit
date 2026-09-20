@@ -19,6 +19,10 @@ import type {
 import { AmbientChrome, AmbientRoamers } from "../AmbientInteractives";
 import { AssistantOrb, type ChoiceFlush } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
+import {
+  SceneTransition,
+  transitionForEnvironment,
+} from "../effects/SceneTransition";
 import { FacilityBackground } from "../FacilityBackground";
 import { PathResidue } from "../PathResidue";
 import { AuthorityStamp } from "./AuthorityStamp";
@@ -103,6 +107,9 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       data-assistant-safe={buryAssistant ? "gag" : safeSide}
       data-bury-assistant={buryAssistant ? "true" : "false"}
     >
+      <SceneTransition
+        family={transitionForEnvironment(scene.environment, scene.kind)}
+      />
       <FacilityBackground
         intensity={systemLock ? 0.4 : 1}
         systemLock={systemLock}

@@ -276,6 +276,56 @@ export function FacilityBackground({
         <div className="absolute left-0 right-0 top-[62%] h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
         <div className="absolute left-0 right-0 top-[68%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
+        {/* Phase 3 — mechanical rails / environmental storytelling */}
+        <motion.div
+          className="facility-rail absolute left-[18%] top-[58%] h-px w-[28%]"
+          animate={{ opacity: sterile ? 0.15 : [0.25, 0.7, 0.25], scaleX: flicker ? [1, 1.04, 0.96, 1] : 1 }}
+          transition={{ duration: flicker ? 1.6 : 4.5, repeat: Infinity }}
+        />
+        <motion.div
+          className="facility-rail absolute right-[14%] top-[72%] h-px w-[22%]"
+          animate={{ opacity: sterile ? 0.1 : [0.2, 0.55, 0.2] }}
+          transition={{ duration: 5.2, repeat: Infinity, delay: 0.6 }}
+        />
+
+        {/* Volumetric-looking beams — intensify by act stress */}
+        <div
+          className="vol-beam absolute left-[42%] top-0 h-[55%] w-16 -translate-x-1/2"
+          style={{ opacity: sterile ? 0.08 : escape ? 0.35 : peel ? 0.28 : 0.16 }}
+        />
+        {environment === "conflict" || anomalyLevel >= 4 ? (
+          <div className="vol-beam absolute left-[68%] top-[8%] h-[40%] w-12 opacity-25" />
+        ) : null}
+
+        {/* Conflict: panels misalign / warn arcs */}
+        {(environment === "conflict" || anomalyLevel >= 5) && !sterile ? (
+          <>
+            <motion.div
+              className="absolute right-[30%] top-[36%] h-16 w-20 border border-danger/30 bg-danger/5"
+              animate={{ x: [0, 3, -4, 1, 0], rotate: [0, 0.8, -1.2, 0] }}
+              transition={{ duration: 3.4, repeat: Infinity }}
+            />
+            <motion.div
+              className="absolute left-[48%] top-[48%] h-10 w-px bg-gradient-to-b from-transparent via-danger/70 to-transparent"
+              animate={{ opacity: [0.2, 0.95, 0.2], scaleY: [0.7, 1.15, 0.7] }}
+              transition={{ duration: 1.4, repeat: Infinity }}
+            />
+          </>
+        ) : null}
+
+        {/* Reveal: infrastructure ghost behind glass */}
+        {peel ? (
+          <motion.div
+            className="absolute left-[36%] top-[26%] h-28 w-36 border border-white/10 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.04)_0_2px,transparent_2px_10px)]"
+            animate={{ opacity: [0.25, 0.55, 0.25] }}
+            transition={{ duration: 3.8, repeat: Infinity }}
+          >
+            <div className="absolute inset-2 font-mono text-[7px] tracking-[0.2em] text-danger/50">
+              SUBSTRATE // EXPOSED
+            </div>
+          </motion.div>
+        ) : null}
+
         {anomalyLevel >= 3 ? (
           <motion.div
             className="absolute left-[30%] top-[40%] h-24 w-px bg-gradient-to-b from-transparent via-system-warn to-transparent"

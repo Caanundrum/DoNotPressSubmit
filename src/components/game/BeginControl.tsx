@@ -81,6 +81,15 @@ export function BeginControl({
           animate={{ rotate: 360 }}
           transition={{ duration: hovering ? 2.5 : 6, repeat: Infinity, ease: "linear" }}
         />
+        {/* Phase 3 — energy ring wake on hover */}
+        {hovering ? (
+          <motion.span
+            className="pointer-events-none absolute inset-[-10px] rounded-full border border-cyan/30"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: [0.5, 0], scale: [1, 1.18] }}
+            transition={{ duration: 1.4, repeat: Infinity }}
+          />
+        ) : null}
         <span className="relative z-10">BEGIN ASSESSMENT</span>
         {hovering ? (
           <motion.span
@@ -90,6 +99,17 @@ export function BeginControl({
           />
         ) : null}
       </motion.button>
+
+      {/* Nearby systems wake when the human lurks */}
+      {hovering ? (
+        <motion.div
+          className="pointer-events-none absolute -inset-x-16 -top-10 h-8 overflow-hidden"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="light-sweep absolute inset-y-0 left-0 w-1/2 animate-[sweep_1.8s_linear_infinite]" />
+        </motion.div>
+      ) : null}
 
       <motion.div
         className="font-mono text-[10px] tracking-[0.24em] text-cyan/80"

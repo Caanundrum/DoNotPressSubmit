@@ -170,10 +170,10 @@ export function GameRoot() {
           <motion.div
             key="title"
             className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "brightness(1.4)" }}
-            transition={{ duration: 0.6 }}
+            initial={{ opacity: 0, filter: "brightness(0.6)" }}
+            animate={{ opacity: 1, filter: "brightness(1)" }}
+            exit={{ opacity: 0, filter: "brightness(1.45)", scale: 1.02 }}
+            transition={{ duration: 0.75 }}
           >
             <TitleScreen
               orbMood={orbMood}
@@ -191,9 +191,9 @@ export function GameRoot() {
           <motion.div
             key="playing"
             className="absolute inset-0"
-            initial={{ opacity: 0, scale: 1.02 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7 }}
+            initial={{ opacity: 0, scale: 1.04, filter: "brightness(1.3)" }}
+            animate={{ opacity: 1, scale: 1, filter: "brightness(1)" }}
+            transition={{ duration: 0.85 }}
           >
             <ScenePlayer
               state={game}

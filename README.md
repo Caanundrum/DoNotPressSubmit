@@ -2,7 +2,7 @@
 
 A short, highly visual browser comedy game from **Chaos Standard**. You fill out a mundane corporate assessment while an AI assistant slowly realizes it lives inside the app.
 
-This repository ships an **expanded Phase 2** scripted five-act game: longer play, full-viewport facility stage, moving assistant + kinetic assessment panels, richer branches, and human-rewritten dialogue. Live AI flavor is **not** required — all critical dialogue is authored.
+This repository ships the **Phase 2** scripted five-act game plus a **Phase 3 art/animation expansion**: authored scene transitions, denser title/facility gags (including dedicated REPLACEMENT FAILED + printer sequences), environmental storytelling, and per-ending cinematics. Live AI flavor is **not** required — all critical dialogue is authored.
 
 ## Run locally
 
@@ -45,11 +45,12 @@ npm start
 - System Directive CTA always matches its prompt (Continue vs later Submit climax)
 - Act V climax endings fit in one glance (including the off-map hallway)
 - End report in human language (no debug choice codes / session dump)
+- **Phase 3 art:** authored scene transitions (mechanical / glass / glitch / push / dissolve), expanded background gags (REPLACEMENT FAILED, printer+scissors, corridor etiquette, containment flash), facility rails/beams/conflict misalignment, per-ending cinematics
 - Firebase App Hosting `standalone` preserved
 
 ## Out of scope (later)
 
-Live AI provider, art/animation expansion pass, full adaptive soundtrack polish.
+Live AI provider (Phase 4), full adaptive soundtrack polish (Phase 5).
 
 ## Stack
 

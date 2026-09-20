@@ -102,7 +102,9 @@ export function BackgroundGags({
   });
   const prevActive = useRef<GagId>("drone");
   const onAmbientRef = useRef(onAmbient);
-  onAmbientRef.current = onAmbient;
+  useEffect(() => {
+    onAmbientRef.current = onAmbient;
+  }, [onAmbient]);
 
   useEffect(() => {
     if (paused) return;

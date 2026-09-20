@@ -12,6 +12,7 @@ import { getScene } from "@/game/scenes";
 import { applyEffects, pathResidueKind, resolveAiLine } from "@/game/state";
 import { rememberTitleAlly, rememberTitleWave } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
+import { requestAssistantFlavor, shouldAttemptFlavor } from "@/lib/ai";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
 import { FacilityBackground } from "../FacilityBackground";
@@ -67,6 +68,8 @@ function ScenePlayerInner({
   const scene = getScene(sceneId);
   const [selected, setSelected] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
+  /** Phase 4 live/mock flavor — never blocks; authored line remains until this arrives. */
+  const [liveLine, setLiveLine] = useState<string | null>(null);
   const [showLate, setShowLate] = useState(() => !scene?.choices?.some((c) => c.late));
   const [lateHint, setLateHint] = useState(false);
   const [panelShake, setPanelShake] = useState(false);
@@ -80,6 +83,15 @@ function ScenePlayerInner({
   const [choiceFlush, setChoiceFlush] = useState<ChoiceFlush>("neutral");
   const [choiceGlanceBoost, setChoiceGlanceBoost] = useState(0);
   const advanceTimer = useRef<number | null>(null);
+  const flavorGen = useRef(0);
+  const dialogueLockRef = useRef<{ poke: string | null; reaction: string | null }>({
+    poke: null,
+    reaction: null,
+  });
+
+  useEffect(() => {
+    dialogueLockRef.current = { poke: pokeNotice, reaction };
+  }, [pokeNotice, reaction]);
 
   const go = useCallback(
     (base: GameState, nextId: string, patch?: Partial<GameState>) => {
@@ -125,13 +137,72 @@ function ScenePlayerInner({
     };
   }, [scene]);
 
+  const scriptedLine = useMemo(() => {
+    if (!scene) return "";
+    return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
+  }, [scene, state.flags]);
+
   const aiLine = useMemo(() => {
     if (!scene) return "";
     // Poke reactions outrank beat openings so idle never re-reads the question-start copy.
     if (pokeNotice) return pokeNotice;
     if (reaction) return reaction;
-    return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
-  }, [scene, reaction, pokeNotice, state.flags]);
+    // Live/mock flavor may season the opening — never replaces poke/reaction.
+    return liveLine ?? scriptedLine;
+  }, [scene, reaction, pokeNotice, liveLine, scriptedLine]);
+
+  // Phase 4: non-blocking scene-open flavor. Authored line shows first; upgrade if flavor arrives.
+  useEffect(() => {
+    if (!scene) return;
+    if (
+      scene.kind === "system" ||
+      scene.kind === "report" ||
+      scene.kind === "ending" ||
+      scene.kind === "setpiece" ||
+      scene.kind === "climax"
+    ) {
+      return;
+    }
+    if (!scriptedLine) return;
+    if (
+      !shouldAttemptFlavor({
+        sceneId: scene.id,
+        act: scene.act,
+        fallbackLine: scriptedLine,
+        kind: "scene-open",
+      })
+    ) {
+      return;
+    }
+
+    const gen = ++flavorGen.current;
+    let cancelled = false;
+    void requestAssistantFlavor({
+      state,
+      sceneId: scene.id,
+      act: scene.act,
+      kind: "scene-open",
+      fallbackLine: scriptedLine,
+      formId: scene.formId,
+      title: scene.title,
+      prompt: scene.prompt,
+      timeoutMs: 2400,
+    }).then((res) => {
+      if (cancelled || gen !== flavorGen.current) return;
+      // Don't clobber poke/reaction that arrived while we waited.
+      if (dialogueLockRef.current.poke || dialogueLockRef.current.reaction) return;
+      if (!res.ok || !res.line) return;
+      if (res.source === "fallback") return;
+      if (res.line === scriptedLine) return;
+      setLiveLine(res.line);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // Only re-flavor when the beat identity changes — not on every state tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional scene-open once per beat
+  }, [scene?.id, scriptedLine]);
 
   const spotlight = !!scene?.spotlight || scene?.kind === "companion" || scene?.orbAnchor === "spotlight";
   const orbAnchor =
@@ -258,8 +329,7 @@ function ScenePlayerInner({
     window.setTimeout(() => setPokeFlinch(false), 520);
     const pokes = (state.counters.orbPokes ?? 0) + 1;
     // Pass the line currently on the bubble so mid/late pokes never silently no-op.
-    const currentLine =
-      pokeNotice ?? reaction ?? resolveAiLine(scene?.aiLine, scene?.aiLineIf, state.flags);
+    const currentLine = pokeNotice ?? reaction ?? liveLine ?? scriptedLine;
     const { next, notice, glassEvent, chamberStatus: status } = applyOrbPoke(
       state,
       pokes,
@@ -269,6 +339,7 @@ function ScenePlayerInner({
     // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);
     setReaction(null);
+    setLiveLine(null);
     if (glassEvent === "crack") {
       setGlassPhase("crack");
       window.setTimeout(() => setGlassPhase((p) => (p === "crack" ? "idle" : p)), 2800);
@@ -321,8 +392,10 @@ function ScenePlayerInner({
       setChoiceGlanceBoost(0);
     }, 1600);
     let next = applyEffects(state, choice.effects, choice.id);
-    if (choice.effects?.aiLine) {
-      setReaction(choice.effects.aiLine);
+    const authoredReaction = choice.effects?.aiLine ?? null;
+    if (authoredReaction) {
+      setReaction(authoredReaction);
+      setLiveLine(null);
     }
     if (choice.unauthorized || choice.danger) {
       setPanelShake(true);
@@ -335,8 +408,41 @@ function ScenePlayerInner({
       next = { ...next, aiMood: flash.mood };
       onState(next);
     }
-    // Visible select beat before advance — short enough not to feel blank.
-    const delay = choice.effects?.aiLine ? 1200 : 700;
+
+    // Phase 4: try to season the reaction during the visible select beat.
+    // Progression never waits on the network — authored reaction is already showing.
+    const delay = authoredReaction ? 1200 : 700;
+    if (authoredReaction) {
+      const gen = ++flavorGen.current;
+      if (
+        shouldAttemptFlavor({
+          sceneId: scene.id,
+          act: scene.act,
+          fallbackLine: authoredReaction,
+          kind: "choice-reaction",
+        })
+      ) {
+        void requestAssistantFlavor({
+          state: next,
+          sceneId: scene.id,
+          act: scene.act,
+          kind: "choice-reaction",
+          fallbackLine: authoredReaction,
+          formId: scene.formId,
+          title: scene.title,
+          prompt: scene.prompt,
+          choiceId: choice.id,
+          choiceLabel: choice.label,
+          timeoutMs: Math.min(1100, delay - 80),
+        }).then((res) => {
+          if (gen !== flavorGen.current) return;
+          if (!res.ok || res.source === "fallback") return;
+          if (!res.line || res.line === authoredReaction) return;
+          setReaction(res.line);
+        });
+      }
+    }
+
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
     advanceTimer.current = window.setTimeout(() => {
       go(next, choice.next, { aiMood: choice.effects?.mood ?? next.aiMood });

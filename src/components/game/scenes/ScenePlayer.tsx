@@ -186,6 +186,8 @@ function ScenePlayerInner({
         "rail-glow": "Even the rails gossip.",
         "replacement-failed": "That drone and I share a performance review.",
         "printer-scissors": "Scissors en route is never a good memo.",
+        "corridor-etiquette": "Corridor etiquette: infinite politeness, zero throughput.",
+        "containment-fine": "Unsolicited reassurance from Bay 03. Don't trust architecture.",
       };
       const aside = asides[id];
       if (aside && pokeable) {

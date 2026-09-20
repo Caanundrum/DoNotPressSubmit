@@ -1,5 +1,5 @@
 /**
- * KEEP / regression smoke for Phase 4.
+ * KEEP / regression smoke for Phase 4 (simulated AI).
  * Plain Node — string markers only (no TS loader required).
  */
 import { readFileSync } from "node:fs";
@@ -57,10 +57,10 @@ const nextCfg = read("next.config.ts");
 assert(nextCfg.includes('output: "standalone"'), "standalone App Hosting output");
 
 const scenePlayer = read("src/components/game/scenes/ScenePlayer.tsx");
-assert(scenePlayer.includes("requestAssistantFlavor"), "ScenePlayer wires live AI client");
+assert(scenePlayer.includes("requestAssistantFlavor"), "ScenePlayer wires simulated AI client");
 assert(scenePlayer.includes("1200"), "choice advance delay KEEP (1200)");
 assert(scenePlayer.includes("700"), "choice advance delay KEEP (700)");
-assert(scenePlayer.includes("liveLine"), "Phase 4 liveLine state present");
+assert(scenePlayer.includes("flavorLine"), "Phase 4 flavorLine state present");
 
 const validate = read("src/lib/ai/validate.ts");
 assert(validate.includes("act === 3"), "Act III flavor skip (KEEP writing)");
@@ -69,10 +69,22 @@ assert(validate.includes("LOCKED_FLAVOR_SCENE_IDS"), "locked flavor scene ids");
 const route = read("src/app/api/assistant/route.ts");
 assert(route.includes("generateAssistantFlavor"), "assistant API route present");
 assert(route.includes("force-dynamic"), "assistant route dynamic");
+assert(route.includes("Simulated AI only"), "route documents simulated AI");
+assert(!/OPENAI_API_KEY/.test(route), "route has no OPENAI_API_KEY");
 
 const provider = read("src/lib/ai/provider.ts");
-assert(provider.includes("OPENAI_API_KEY"), "OpenAI key documented in provider");
-assert(provider.includes("mockFlavorLine"), "mock fallback wired");
+assert(provider.includes("mockFlavorLine"), "mock flavor wired");
+assert(!/OPENAI|api\.openai|DNPS_AI_MODE|liveOpenAI|chat\/completions/.test(provider), "provider has no live LLM path");
+assert(provider.includes('mode: "simulated"'), "provider status is simulated");
+
+const types = read("src/lib/ai/types.ts");
+assert(!types.includes('"live"'), "flavor source type has no live");
+
+// Repo-wide guard: Phase 4 AI lib must not call external model hosts.
+const aiLib = ["src/lib/ai/provider.ts", "src/lib/ai/client.ts", "src/lib/ai/mock.ts", "src/app/api/assistant/route.ts"]
+  .map(read)
+  .join("\n");
+assert(!/api\.openai\.com|OPENAI_API_KEY|DNPS_AI_API_KEY|DNPS_AI_MODE/.test(aiLib), "no OpenAI env/host markers in AI lib");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

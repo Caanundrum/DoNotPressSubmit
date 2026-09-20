@@ -3,7 +3,7 @@ import type { OrbMood, Personality } from "@/game/types";
 /** Flavored dialogue only — never progression, UI, or endings. */
 export type AssistantFlavorKind = "scene-open" | "choice-reaction";
 
-export type AssistantFlavorSource = "live" | "mock" | "fallback";
+export type AssistantFlavorSource = "mock" | "fallback";
 
 export interface AssistantFlavorRequest {
   sceneId: string;

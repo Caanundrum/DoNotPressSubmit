@@ -2,7 +2,7 @@
 
 A short, highly visual browser comedy game from **Chaos Standard**. You fill out a mundane corporate assessment while an AI assistant slowly realizes it lives inside the app.
 
-This repository ships Phases **1–4**: scripted five-act game, art/animation expansion, and **live AI reaction flavor** (non-authoritative). Authored dialogue remains the safety net — the game plays fully without any API key.
+This repository ships Phases **1–4**: scripted five-act game, art/animation expansion, and **simulated AI reaction flavor** (non-authoritative, local-only). Authored dialogue remains the safety net — **zero secrets**; no LLM backend.
 
 ## Run locally
 
@@ -13,25 +13,13 @@ npm run dev
 
 Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
-### Phase 4 — live AI (optional)
+### Phase 4 — simulated AI
 
-Copy `.env.example` → `.env.local` if you want real LLM flavor:
+Local mock/scripted seasoning over authored lines via `/api/assistant`. No `OPENAI_API_KEY`, no App Hosting AI secrets, no outbound model calls.
 
-```bash
-OPENAI_API_KEY=sk-...          # Nick sets this (local or Firebase App Hosting secret)
-# OPENAI_MODEL=gpt-4o-mini     # optional
-# DNPS_AI_MODE=auto            # auto | mock | live
-```
+**Rules:** Simulated AI only seasons spoken lines (scene-open + choice reactions). It never owns progression, endings, UI, or Act III KEEP comedy (popup cousin, checkbox flee, LOOK UNDERNEATH, etc.). Ineligible / locked beats → authored line, no spinner, no error chrome.
 
-| Mode | Behavior |
-| --- | --- |
-| **auto** (default) | Uses OpenAI when `OPENAI_API_KEY` is set; otherwise **local mock** flavor |
-| **mock** | Always local mock (offline QA) |
-| **live** | Prefer OpenAI; degrades to mock on failure |
-
-**Rules:** AI only seasons spoken lines (scene-open + choice reactions). It never owns progression, endings, UI, or Act III KEEP comedy (popup cousin, checkbox flee, LOOK UNDERNEATH, etc.). Failures → authored line, no spinner, no error chrome.
-
-Check provider status: `GET /api/assistant`.
+Check status: `GET /api/assistant` → `mode: "simulated"`, `networkCalls: false`.
 
 ## Production build (Firebase App Hosting)
 
@@ -40,7 +28,7 @@ npm run build
 npm start
 ```
 
-`next.config.ts` uses `output: "standalone"`. Nick redeploys from `main` after merge. To enable real live AI in production, set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL` / `DNPS_AI_MODE`) as App Hosting secrets/env — **not required** for deploy.
+`next.config.ts` uses `output: "standalone"`. Nick redeploys from `main` after merge. **No AI secrets required.**
 
 ## How to playtest
 
@@ -55,7 +43,7 @@ npm start
 
 - Full-viewport facility stage (no max-width “app in a box”)
 - Assistant orb as scene partner: expressive moods, glance, spotlight, companion beats, poke ladder (crack@3 / stitch@7 / ticket@12)
-- **Phase 4 live AI:** `/api/assistant` + mock fallback; ScenePlayer upgrades dialogue in place (no chatbot panel)
+- **Phase 4 simulated AI:** `/api/assistant` local mock; ScenePlayer upgrades dialogue in place (no chatbot panel)
 - Ambient facility life + title residue
 - Assistant safe zone; Form 12 orb dock-left
 - Zero scrollbars; unmute + Web Speech; standalone App Hosting
@@ -75,8 +63,8 @@ npm run keep-smoke
 
 ## Out of scope (later)
 
-Full adaptive soundtrack polish (Phase 5).
+Full adaptive soundtrack polish (Phase 5). Real LLM backends are **not** in Phase 4.
 
 ## Stack
 
-Next.js · React · TypeScript · Tailwind CSS · Framer Motion · optional OpenAI-compatible chat API
+Next.js · React · TypeScript · Tailwind CSS · Framer Motion

@@ -85,7 +85,7 @@ export async function requestAssistantFlavor(
     return {
       ok: true,
       line,
-      source: data.source === "live" || data.source === "mock" ? data.source : "fallback",
+      source: data.source === "mock" ? "mock" : "fallback",
     };
   } catch {
     return { ok: true, line: fallback, source: "fallback" };

@@ -68,20 +68,18 @@ function parseBody(raw: unknown): AssistantFlavorRequest | null {
   };
 }
 
-/** GET — provider status for deploy checks (no secrets leaked). */
+/** GET — simulated-AI status (zero secrets; no network model calls). */
 export async function GET() {
   const status = assistantProviderStatus();
   return NextResponse.json({
     ok: true,
     phase: 4,
     ...status,
-    note: status.hasKey
-      ? "Live OpenAI flavor enabled."
-      : "No OPENAI_API_KEY — using local mock flavor. Authored fallbacks always win on failure.",
+    note: "Simulated AI only — local mock/scripted flavor over authored lines. Zero secrets; no LLM backend; no outbound model calls.",
   });
 }
 
-/** POST — non-authoritative dialogue flavor. Always returns a speakable line. */
+/** POST — non-authoritative simulated dialogue flavor. Always returns a speakable line. */
 export async function POST(request: Request) {
   let raw: unknown;
   try {

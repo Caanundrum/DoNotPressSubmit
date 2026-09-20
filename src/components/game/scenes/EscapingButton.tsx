@@ -28,8 +28,9 @@ export function EscapingButton({ onComplete }: { onComplete: () => void }) {
       <FairChaseTarget
         hits={hits}
         maxHits={3}
-        moveMs={1100}
-        hitPad={18}
+        moveMs={1450}
+        hitPad={26}
+        arenaPadding={12}
         className="absolute border border-danger/70 bg-gradient-to-b from-[#4a1520] to-[#1a080c] px-5 py-3 font-mono text-[11px] tracking-[0.24em] text-[#ffd0d8] shadow-[0_0_30px_rgba(255,77,109,0.35)]"
         style={{ fontFamily: "var(--font-display)" }}
         onHit={() => {

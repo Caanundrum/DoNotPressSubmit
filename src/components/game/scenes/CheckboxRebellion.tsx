@@ -25,8 +25,9 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
       <FairChaseTarget
         hits={checks}
         maxHits={needed}
-        moveMs={1200}
-        hitPad={16}
+        moveMs={1500}
+        hitPad={24}
+        arenaPadding={12}
         className="absolute flex items-center gap-3 border border-white/25 bg-[#0c1420]/92 px-3 py-2"
         onHit={() => {
           audio.play("click", 0.45);
@@ -39,7 +40,7 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
         }}
       >
         <span
-          className="relative flex h-5 w-5 shrink-0 items-center justify-center border"
+          className="relative flex h-6 w-6 shrink-0 items-center justify-center border"
           style={{
             borderColor: checks ? "rgba(110,231,255,0.8)" : "rgba(200,220,240,0.55)",
             background: checks ? "rgba(110,231,255,0.25)" : "transparent",

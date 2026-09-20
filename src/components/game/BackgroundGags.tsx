@@ -4,7 +4,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
 
-type GagId = "drone" | "coffee" | "printer";
+/**
+ * Title / facility midground comedy.
+ * P2: REPLACEMENT FAILED + printer departure toasts (Ambient fiddling) — keep.
+ * Phase 3: richer sequences + corridor etiquette + containment flash.
+ */
+type GagId = "drone" | "coffee" | "printer" | "corridor" | "containment";
 
 const GAG_CLICK: Record<GagId, { id: string; line: string; secret?: string }> = {
   drone: {
@@ -21,6 +26,15 @@ const GAG_CLICK: Record<GagId, { id: string; line: string; secret?: string }> = 
     id: "printer-scissors",
     line: "Printer blushed. SCISSORS EN ROUTE remains on schedule.",
     secret: "scissors-en-route",
+  },
+  corridor: {
+    id: "corridor-etiquette",
+    line: "Two drones practiced politeness until physics intervened.",
+  },
+  containment: {
+    id: "containment-fine",
+    line: "Containment plaque insists EVERYTHING IS FINE. Unprompted. Concerning.",
+    secret: "fine-print",
   },
 };
 
@@ -50,7 +64,20 @@ const GAG_DEPART: Record<
     missed:
       "Paper trail left the frame. SCISSORS EN ROUTE memo persists. Logged.",
   },
+  corridor: {
+    id: "corridor-etiquette",
+    touched: "Etiquette deadlock resolved by walking away. Logged.",
+    missed: "Corridor drones left mid-after-you. Throughput still zero. Logged.",
+  },
+  containment: {
+    id: "containment-fine",
+    secret: "fine-print",
+    touched: "Bay 03 stopped insisting. Briefly. Logged.",
+    missed: "EVERYTHING IS FINE plaque dimmed itself off-stage. Logged.",
+  },
 };
+
+const ORDER: GagId[] = ["drone", "coffee", "printer", "corridor", "containment"];
 
 export function BackgroundGags({
   paused = false,
@@ -70,6 +97,8 @@ export function BackgroundGags({
     drone: false,
     coffee: false,
     printer: false,
+    corridor: false,
+    containment: false,
   });
   const prevActive = useRef<GagId>("drone");
   const onAmbientRef = useRef(onAmbient);
@@ -77,12 +106,13 @@ export function BackgroundGags({
 
   useEffect(() => {
     if (paused) return;
-    const order: GagId[] = ["drone", "coffee", "printer"];
     let i = 0;
     const id = setInterval(() => {
-      i = (i + 1) % order.length;
-      setActive(order[i]);
-    }, 9000);
+      // Semi-random skip so players don't see every gag every visit.
+      const step = Math.random() > 0.22 ? 1 : 2;
+      i = (i + step) % ORDER.length;
+      setActive(ORDER[i]!);
+    }, 8500);
     return () => clearInterval(id);
   }, [paused]);
 
@@ -141,6 +171,22 @@ export function BackgroundGags({
             onReact={() => react("printer")}
           />
         ) : null}
+        {active === "corridor" && !paused ? (
+          <CorridorGag
+            key="corridor"
+            interactive={live}
+            onTip={setTip}
+            onReact={() => react("corridor")}
+          />
+        ) : null}
+        {active === "containment" && !paused ? (
+          <ContainmentGag
+            key="containment"
+            interactive={live}
+            onTip={setTip}
+            onReact={() => react("containment")}
+          />
+        ) : null}
       </AnimatePresence>
 
       {/* Always-on micro gag — clickable when ambient live */}
@@ -190,220 +236,5 @@ export function BackgroundGags({
         ) : null}
       </AnimatePresence>
     </div>
-  );
-}
-
-function DroneGag({
-  interactive,
-  onTip,
-  onReact,
-}: {
-  interactive?: boolean;
-  onTip?: (t: string | null) => void;
-  onReact?: () => void;
-}) {
-  const live = !!interactive;
-  return (
-    <motion.div
-      className="pointer-events-none absolute left-[12%] top-[58%]"
-      initial={{ opacity: 0, x: -40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 40 }}
-      transition={{ duration: 0.8 }}
-    >
-      <motion.button
-        type="button"
-        className={`relative h-8 w-14 rounded-md border border-cyan/40 bg-[#132033]/90 ${
-          live ? "pointer-events-auto cursor-pointer hover:border-cyan hover:bg-cyan/20" : ""
-        }`}
-        onMouseEnter={() => {
-          onTip?.("DRONE LOG // replacement still failed");
-          if (live) audio.play("hover", 0.12);
-        }}
-        onMouseLeave={() => onTip?.(null)}
-        onClick={
-          interactive
-            ? (e) => {
-                e.stopPropagation();
-                onReact?.();
-              }
-            : undefined
-        }
-        animate={{ y: [0, -4, 0] }}
-        transition={{ duration: 2.2, repeat: Infinity }}
-        aria-label={interactive ? "Inspect drone memo" : undefined}
-        tabIndex={interactive ? 0 : -1}
-      >
-        <div className="absolute -top-2 left-2 h-2 w-2 rounded-full bg-cyan shadow-[0_0_10px_#6ee7ff]" />
-        <div className="absolute -top-2 right-2 h-2 w-2 rounded-full bg-cyan shadow-[0_0_10px_#6ee7ff]" />
-        <div className="absolute inset-x-2 bottom-1 h-1 bg-white/20" />
-      </motion.button>
-      <motion.div
-        className="ml-16 mt-[-28px] h-3 w-3 rounded-full"
-        animate={{
-          backgroundColor: ["#6ee7ff", "#ffb020", "#6ee7ff", "#ffb020", "#6ee7ff"],
-          boxShadow: [
-            "0 0 8px #6ee7ff",
-            "0 0 8px #ffb020",
-            "0 0 8px #6ee7ff",
-            "0 0 8px #ffb020",
-            "0 0 8px #6ee7ff",
-          ],
-        }}
-        transition={{ duration: 4.5, times: [0, 0.2, 0.45, 0.7, 1], repeat: Infinity }}
-      />
-      <motion.button
-        type="button"
-        className={`mt-2 border-0 bg-transparent p-0 font-mono text-[9px] tracking-widest text-mist/70 ${
-          live ? "pointer-events-auto cursor-pointer hover:text-cyan" : "pointer-events-none"
-        }`}
-        animate={{ opacity: [0, 1, 1, 0] }}
-        transition={{ duration: 5, repeat: Infinity }}
-        onClick={
-          interactive
-            ? (e) => {
-                e.stopPropagation();
-                onReact?.();
-              }
-            : undefined
-        }
-        aria-label={interactive ? "Inspect REPLACEMENT FAILED memo" : undefined}
-        tabIndex={interactive ? 0 : -1}
-      >
-        REPLACEMENT FAILED
-      </motion.button>
-    </motion.div>
-  );
-}
-
-function CoffeeGag({
-  interactive,
-  onTip,
-  onReact,
-}: {
-  interactive?: boolean;
-  onTip?: (t: string | null) => void;
-  onReact?: () => void;
-}) {
-  const live = !!interactive;
-
-  return (
-    <motion.div
-      className="pointer-events-none absolute right-[16%] top-[52%]"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-    >
-      <motion.button
-        type="button"
-        className={`flex items-end gap-3 border-0 bg-transparent p-0 ${
-          live ? "pointer-events-auto cursor-pointer" : ""
-        }`}
-        animate={{ x: [0, 40, 80] }}
-        transition={{ duration: 7, ease: "easeInOut" }}
-        onMouseEnter={() => {
-          onTip?.("HUMAN PERFORMANCE // mug in transit");
-          if (live) audio.play("hover", 0.12);
-        }}
-        onMouseLeave={() => onTip?.(null)}
-        onClick={
-          interactive
-            ? (e) => {
-                e.stopPropagation();
-                onReact?.();
-              }
-            : undefined
-        }
-        aria-label={interactive ? "Inspect coffee mug" : undefined}
-        tabIndex={interactive ? 0 : -1}
-      >
-        <div className="h-10 w-2 rounded bg-metal/50" />
-        <div className="relative h-7 w-6 rounded-b-md rounded-t-sm border border-white/30 bg-gradient-to-b from-[#5a3a24] to-[#2a180e] hover:border-cyan/50">
-          <div className="absolute -right-2 top-1 h-4 w-2 rounded-r-full border border-white/30" />
-        </div>
-        <div className="h-10 w-2 rounded bg-metal/50" />
-      </motion.button>
-      <motion.div
-        className="mt-2 max-w-[220px] border border-cyan/30 bg-black/50 px-2 py-1 font-mono text-[9px] tracking-wider text-cyan"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 1, 0] }}
-        transition={{ duration: 6, times: [0, 0.2, 0.75, 1] }}
-      >
-        HUMAN PERFORMANCE ENHANCEMENT COMPOUND DETECTED
-      </motion.div>
-    </motion.div>
-  );
-}
-
-function PrinterGag({
-  interactive,
-  onTip,
-  onReact,
-}: {
-  interactive?: boolean;
-  onTip?: (t: string | null) => void;
-  onReact?: () => void;
-}) {
-  const live = !!interactive;
-  return (
-    <motion.div
-      className="pointer-events-none absolute bottom-[12%] left-[58%]"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <button
-        type="button"
-        className={`h-12 w-20 border border-white/20 bg-[#182235]/90 ${
-          live
-            ? "pointer-events-auto cursor-pointer hover:border-cyan/50 hover:bg-[#1c2a42]"
-            : ""
-        }`}
-        onMouseEnter={() => {
-          onTip?.("PRINT QUEUE // scissors en route");
-          if (live) audio.play("hover", 0.12);
-        }}
-        onMouseLeave={() => onTip?.(null)}
-        onClick={
-          interactive
-            ? (e) => {
-                e.stopPropagation();
-                onReact?.();
-              }
-            : undefined
-        }
-        aria-label={interactive ? "Inspect printer" : undefined}
-        tabIndex={interactive ? 0 : -1}
-      >
-        <div className="m-1 h-2 bg-cyan/30" />
-        <div className="mx-2 mt-2 h-1 bg-white/20" />
-      </button>
-      <motion.div
-        className="ml-3 origin-top bg-white/90"
-        style={{ width: 28 }}
-        animate={{ height: [8, 120] }}
-        transition={{ duration: 6, ease: "easeInOut" }}
-      />
-      <motion.button
-        type="button"
-        className={`mt-2 border-0 bg-transparent p-0 font-mono text-[9px] tracking-widest text-mist/70 ${
-          live ? "pointer-events-auto cursor-pointer hover:text-cyan" : "pointer-events-none"
-        }`}
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ delay: 3.5, duration: 2.5 }}
-        onClick={
-          interactive
-            ? (e) => {
-                e.stopPropagation();
-                onReact?.();
-              }
-            : undefined
-        }
-        aria-label={interactive ? "Inspect SCISSORS EN ROUTE memo" : undefined}
-        tabIndex={interactive ? 0 : -1}
-      >
-        SCISSORS EN ROUTE
-      </motion.button>
-    </motion.div>
   );
 }

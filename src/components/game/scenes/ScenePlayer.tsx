@@ -68,8 +68,8 @@ function ScenePlayerInner({
   const scene = getScene(sceneId);
   const [selected, setSelected] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
-  /** Phase 4 live/mock flavor — never blocks; authored line remains until this arrives. */
-  const [liveLine, setLiveLine] = useState<string | null>(null);
+  /** Phase 4 simulated flavor — never blocks; authored line remains until this arrives. */
+  const [flavorLine, setFlavorLine] = useState<string | null>(null);
   const [showLate, setShowLate] = useState(() => !scene?.choices?.some((c) => c.late));
   const [lateHint, setLateHint] = useState(false);
   const [panelShake, setPanelShake] = useState(false);
@@ -147,11 +147,11 @@ function ScenePlayerInner({
     // Poke reactions outrank beat openings so idle never re-reads the question-start copy.
     if (pokeNotice) return pokeNotice;
     if (reaction) return reaction;
-    // Live/mock flavor may season the opening — never replaces poke/reaction.
-    return liveLine ?? scriptedLine;
-  }, [scene, reaction, pokeNotice, liveLine, scriptedLine]);
+    // Simulated flavor may season the opening — never replaces poke/reaction.
+    return flavorLine ?? scriptedLine;
+  }, [scene, reaction, pokeNotice, flavorLine, scriptedLine]);
 
-  // Phase 4: non-blocking scene-open flavor. Authored line shows first; upgrade if flavor arrives.
+  // Phase 4: non-blocking simulated scene-open flavor. Authored line shows first; upgrade if seasoning arrives.
   useEffect(() => {
     if (!scene) return;
     if (
@@ -194,7 +194,7 @@ function ScenePlayerInner({
       if (!res.ok || !res.line) return;
       if (res.source === "fallback") return;
       if (res.line === scriptedLine) return;
-      setLiveLine(res.line);
+      setFlavorLine(res.line);
     });
 
     return () => {
@@ -329,7 +329,7 @@ function ScenePlayerInner({
     window.setTimeout(() => setPokeFlinch(false), 520);
     const pokes = (state.counters.orbPokes ?? 0) + 1;
     // Pass the line currently on the bubble so mid/late pokes never silently no-op.
-    const currentLine = pokeNotice ?? reaction ?? liveLine ?? scriptedLine;
+    const currentLine = pokeNotice ?? reaction ?? flavorLine ?? scriptedLine;
     const { next, notice, glassEvent, chamberStatus: status } = applyOrbPoke(
       state,
       pokes,
@@ -339,7 +339,7 @@ function ScenePlayerInner({
     // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);
     setReaction(null);
-    setLiveLine(null);
+    setFlavorLine(null);
     if (glassEvent === "crack") {
       setGlassPhase("crack");
       window.setTimeout(() => setGlassPhase((p) => (p === "crack" ? "idle" : p)), 2800);
@@ -395,7 +395,7 @@ function ScenePlayerInner({
     const authoredReaction = choice.effects?.aiLine ?? null;
     if (authoredReaction) {
       setReaction(authoredReaction);
-      setLiveLine(null);
+      setFlavorLine(null);
     }
     if (choice.unauthorized || choice.danger) {
       setPanelShake(true);
@@ -409,8 +409,8 @@ function ScenePlayerInner({
       onState(next);
     }
 
-    // Phase 4: try to season the reaction during the visible select beat.
-    // Progression never waits on the network — authored reaction is already showing.
+    // Phase 4: try to season the reaction during the visible select beat (simulated only).
+    // Progression never waits — authored reaction is already showing.
     const delay = authoredReaction ? 1200 : 700;
     if (authoredReaction) {
       const gen = ++flavorGen.current;

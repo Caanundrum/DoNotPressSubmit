@@ -335,8 +335,8 @@ function ScenePlayerInner({
       next = { ...next, aiMood: flash.mood };
       onState(next);
     }
-    // Visible select beat before advance — player sees registration.
-    const delay = choice.effects?.aiLine ? 1900 : 1100;
+    // Visible select beat before advance — short enough not to feel blank.
+    const delay = choice.effects?.aiLine ? 1200 : 700;
     if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
     advanceTimer.current = window.setTimeout(() => {
       go(next, choice.next, { aiMood: choice.effects?.mood ?? next.aiMood });

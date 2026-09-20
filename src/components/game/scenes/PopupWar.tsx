@@ -20,14 +20,14 @@ const LABELS = [
 
 /** Non-overlapping-ish grid slots so dismiss stays hittable. */
 const SLOTS: { x: number; y: number }[] = [
-  { x: 8, y: 18 },
-  { x: 38, y: 22 },
-  { x: 66, y: 18 },
-  { x: 14, y: 46 },
-  { x: 44, y: 50 },
-  { x: 70, y: 44 },
-  { x: 26, y: 68 },
-  { x: 56, y: 66 },
+  { x: 6, y: 14 },
+  { x: 36, y: 16 },
+  { x: 62, y: 14 },
+  { x: 10, y: 40 },
+  { x: 40, y: 44 },
+  { x: 64, y: 38 },
+  { x: 22, y: 62 },
+  { x: 50, y: 60 },
 ];
 
 export function PopupWar({ onComplete }: { onComplete: () => void }) {
@@ -38,6 +38,7 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
   const [closed, setClosed] = useState(0);
   const [topZ, setTopZ] = useState(3);
   const [focusId, setFocusId] = useState<number | null>(2);
+  const [hoverDismiss, setHoverDismiss] = useState<number | null>(null);
   const needed = 8;
 
   const progress = useMemo(() => Math.min(needed, closed), [closed]);
@@ -54,7 +55,6 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
         setTimeout(onComplete, 400);
         return next;
       }
-      // Spawn more — System escalation, but into free-ish slots
       const spawnCount = newlyClosed < 3 ? 1 : newlyClosed < 6 ? 2 : 1;
       const spawned: Popup[] = [];
       let z = topZ;
@@ -70,8 +70,7 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
         });
       }
       setTopZ(z);
-      const merged = [...next, ...spawned].slice(0, 6);
-      // Always keep one clear primary on top
+      const merged = [...next, ...spawned].slice(0, 5);
       const primary = merged[merged.length - 1];
       if (primary) setFocusId(primary.id);
       return merged;
@@ -95,10 +94,11 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
       <AnimatePresence>
         {popups.map((p) => {
           const isPrimary = p.id === focusId;
+          const dismissHot = hoverDismiss === p.id;
           return (
             <motion.div
               key={p.id}
-              className="absolute w-[min(200px,42%)] border bg-black/92 p-3 shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+              className="absolute w-[min(220px,46%)] border bg-black/92 p-3 shadow-[0_0_24px_rgba(255,255,255,0.12)]"
               style={{
                 left: `${p.x}%`,
                 top: `${p.y}%`,
@@ -111,8 +111,21 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
                   : undefined,
               }}
               initial={{ opacity: 0, scale: 0.9, y: -6 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
+              animate={{
+                opacity: 1,
+                scale: dismissHot ? 1.02 : 1,
+                x: dismissHot ? 0 : isPrimary ? [0, 3, -2, 0] : 0,
+                y: 0,
+              }}
               exit={{ opacity: 0, scale: 0.92 }}
+              transition={{
+                x: {
+                  duration: dismissHot ? 0.2 : 2.4,
+                  repeat: dismissHot || !isPrimary ? 0 : Infinity,
+                  ease: "easeInOut",
+                },
+                scale: { duration: 0.15 },
+              }}
               onPointerDown={() => bringForward(p.id)}
             >
               <div className="font-mono text-[9px] tracking-[0.2em] text-[#e8eef8]">
@@ -120,13 +133,18 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
               </div>
               <button
                 type="button"
-                className="mt-3 w-full border px-2 py-2 font-mono text-[10px] tracking-[0.18em] text-white transition hover:bg-white/15"
+                className="mt-3 w-full border px-3 py-3 font-mono text-[11px] tracking-[0.18em] text-white transition hover:bg-white/15"
                 style={{
                   borderColor: isPrimary
                     ? "rgba(255,255,255,0.85)"
                     : "rgba(255,255,255,0.4)",
                   background: isPrimary ? "rgba(255,255,255,0.12)" : "transparent",
+                  minHeight: 44,
                 }}
+                onMouseEnter={() => setHoverDismiss(p.id)}
+                onMouseLeave={() =>
+                  setHoverDismiss((cur) => (cur === p.id ? null : cur))
+                }
                 onClick={() => dismiss(p.id)}
               >
                 DISMISS

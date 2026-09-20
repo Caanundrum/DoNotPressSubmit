@@ -108,6 +108,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       data-bury-assistant={buryAssistant ? "true" : "false"}
     >
       <SceneTransition
+        key={scene.id}
         family={transitionForEnvironment(scene.environment, scene.kind)}
       />
       <FacilityBackground

@@ -2,7 +2,7 @@
 
 A short, highly visual browser comedy game from **Chaos Standard**. You fill out a mundane corporate assessment while an AI assistant slowly realizes it lives inside the app.
 
-This repository ships the **Phase 2** scripted five-act game plus a **Phase 3 art/animation expansion**: authored scene transitions, denser title/facility gags (including dedicated REPLACEMENT FAILED + printer sequences), environmental storytelling, and per-ending cinematics. Live AI flavor is **not** required — all critical dialogue is authored.
+This repository ships Phases **1–4**: scripted five-act game, art/animation expansion, and **live AI reaction flavor** (non-authoritative). Authored dialogue remains the safety net — the game plays fully without any API key.
 
 ## Run locally
 
@@ -13,6 +13,26 @@ npm run dev
 
 Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 
+### Phase 4 — live AI (optional)
+
+Copy `.env.example` → `.env.local` if you want real LLM flavor:
+
+```bash
+OPENAI_API_KEY=sk-...          # Nick sets this (local or Firebase App Hosting secret)
+# OPENAI_MODEL=gpt-4o-mini     # optional
+# DNPS_AI_MODE=auto            # auto | mock | live
+```
+
+| Mode | Behavior |
+| --- | --- |
+| **auto** (default) | Uses OpenAI when `OPENAI_API_KEY` is set; otherwise **local mock** flavor |
+| **mock** | Always local mock (offline QA) |
+| **live** | Prefer OpenAI; degrades to mock on failure |
+
+**Rules:** AI only seasons spoken lines (scene-open + choice reactions). It never owns progression, endings, UI, or Act III KEEP comedy (popup cousin, checkbox flee, LOOK UNDERNEATH, etc.). Failures → authored line, no spinner, no error chrome.
+
+Check provider status: `GET /api/assistant`.
+
 ## Production build (Firebase App Hosting)
 
 ```bash
@@ -20,7 +40,7 @@ npm run build
 npm start
 ```
 
-`next.config.ts` uses `output: "standalone"` for Firebase App Hosting. Nick redeploys from `main` after merge — no Firebase secrets are stored in this repo.
+`next.config.ts` uses `output: "standalone"`. Nick redeploys from `main` after merge. To enable real live AI in production, set `OPENAI_API_KEY` (and optionally `OPENAI_MODEL` / `DNPS_AI_MODE`) as App Hosting secrets/env — **not required** for deploy.
 
 ## How to playtest
 
@@ -34,24 +54,29 @@ npm start
 ## What’s in this build
 
 - Full-viewport facility stage (no max-width “app in a box”)
-- Assistant orb as scene partner: expressive moods (tint / orbit / ring tightness / aperture / squash), glance toward choices, spotlight pitches, companion beats, poke escalation (1 → 3 → 7 + report flag)
-- Ambient facility life: visible egg pins (no ghost hover hitboxes), roamers, chaos vs obedient residue
-- Title remembers escape wave **and** ally/refuse residue (clickable gag)
-- Assistant safe zone + sticky orb poke dialogue (never re-reads beat opening after poke; mid/late pokes never silent)
-- Choice / Allegiance / private vote / lobby panels stay high-contrast; HCOS splash dwells ~9.5s
-- Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
-- Unmute + Web Speech preserved
-- Zero scrollbars — viewport-fit shell (System Message / System Directive included; no 100vw gutters)
-- System Directive CTA always matches its prompt (Continue vs later Submit climax)
-- Act V climax endings fit in one glance (including the off-map hallway)
-- End report in human language (no debug choice codes / session dump)
-- **Phase 3 art:** authored scene transitions (mechanical / glass / glitch / push / dissolve), expanded background gags (REPLACEMENT FAILED, printer+scissors, corridor etiquette, containment flash), facility rails/beams/conflict misalignment, per-ending cinematics
-- Firebase App Hosting `standalone` preserved
+- Assistant orb as scene partner: expressive moods, glance, spotlight, companion beats, poke ladder (crack@3 / stitch@7 / ticket@12)
+- **Phase 4 live AI:** `/api/assistant` + mock fallback; ScenePlayer upgrades dialogue in place (no chatbot panel)
+- Ambient facility life + title residue
+- Assistant safe zone; Form 12 orb dock-left
+- Zero scrollbars; unmute + Web Speech; standalone App Hosting
+- End report in human language
+
+## Regression locks (do not break)
+
+- Act III minigames mouse-fair (hover-slow / hit pads as shipped)
+- Poke crack@3, stitch@7, ticket@12
+- Zero scrollbars; orb not buried on Form 12; human report language
+- Act III writing, popup cousin, “agreed then fled,” LOOK UNDERNEATH, ambient eggs, mug steal
+- standalone / unmute / Web Speech
+
+```bash
+npm run keep-smoke
+```
 
 ## Out of scope (later)
 
-Live AI provider (Phase 4), full adaptive soundtrack polish (Phase 5).
+Full adaptive soundtrack polish (Phase 5).
 
 ## Stack
 
-Next.js · React · TypeScript · Tailwind CSS · Framer Motion
+Next.js · React · TypeScript · Tailwind CSS · Framer Motion · optional OpenAI-compatible chat API

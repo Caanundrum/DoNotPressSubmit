@@ -23,12 +23,19 @@ export function ChaosSplash({
   }, [reducedMotion]);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black">
+    <div className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-black">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(30,70,100,0.35),transparent_55%)]" />
       <motion.div
         className="absolute h-px w-[min(52vw,420px)] bg-gradient-to-r from-transparent via-cyan/80 to-transparent"
         initial={{ scaleX: 0, opacity: 0 }}
         animate={{ scaleX: 1, opacity: [0, 1, 1, 0] }}
         transition={{ duration: reducedMotion ? 0.4 : 1.2, times: [0, 0.2, 0.8, 1] }}
+      />
+      <motion.div
+        className="absolute h-[min(52vw,420px)] w-px bg-gradient-to-b from-transparent via-cyan/35 to-transparent"
+        initial={{ scaleY: 0, opacity: 0 }}
+        animate={{ scaleY: 1, opacity: [0, 0.8, 0.8, 0] }}
+        transition={{ duration: reducedMotion ? 0.4 : 1.4, delay: 0.15, times: [0, 0.2, 0.8, 1] }}
       />
 
       <div className="relative flex flex-col items-center gap-6">
@@ -70,6 +77,11 @@ export function ChaosSplash({
             className="absolute inset-0 rounded-full border border-cyan/20"
             animate={{ rotate: 360 }}
             transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute inset-[-8px] rounded-full border border-cyan/10"
+            animate={{ rotate: -360, opacity: [0.2, 0.55, 0.2] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
           />
         </div>
 

@@ -4,11 +4,33 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
 
-import { DroneGag } from "./gags/DroneGag";
-import { CoffeeGag } from "./gags/CoffeeGag";
-import { PrinterGag } from "./gags/PrinterGag";
-import { CorridorGag } from "./gags/CorridorGag";
-import { ContainmentGag } from "./gags/ContainmentGag";
+import { DroneGag as DroneGagImpl } from "./gags/DroneGag";
+import { CoffeeGag as CoffeeGagImpl } from "./gags/CoffeeGag";
+import { PrinterGag as PrinterGagImpl } from "./gags/PrinterGag";
+import { CorridorGag as CorridorGagImpl } from "./gags/CorridorGag";
+import { ContainmentGag as ContainmentGagImpl } from "./gags/ContainmentGag";
+
+type GagProps = {
+  interactive?: boolean;
+  onTip?: (t: string | null) => void;
+  onReact?: () => void;
+};
+
+function DroneGag(props: GagProps) {
+  return <DroneGagImpl {...props} />;
+}
+function CoffeeGag(props: GagProps) {
+  return <CoffeeGagImpl {...props} />;
+}
+function PrinterGag(props: GagProps) {
+  return <PrinterGagImpl {...props} />;
+}
+function CorridorGag(props: GagProps) {
+  return <CorridorGagImpl {...props} />;
+}
+function ContainmentGag(props: GagProps) {
+  return <ContainmentGagImpl {...props} />;
+}
 
 
 /**

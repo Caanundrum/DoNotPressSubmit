@@ -2,6 +2,14 @@
 
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
+import {
+  CHAMBER_SLOTS,
+  DASHED_SLOTS,
+  pickSlot,
+  roamIntervalMs,
+  STATUS_SLOTS,
+  type RoamSlot,
+} from "@/game/ambientRoam";
 import type { EnvironmentPreset } from "@/game/types";
 import { audio } from "@/lib/audio";
 
@@ -45,6 +53,9 @@ export function FacilityBackground({
   const nearX = useTransform(sx, (v) => v * -28);
   const [flash, setFlash] = useState<string | null>(null);
   const [tinted, setTinted] = useState<string | null>(null);
+  const [chamberSlot, setChamberSlot] = useState<RoamSlot>(CHAMBER_SLOTS[0]!);
+  const [statusSlot, setStatusSlot] = useState<RoamSlot>(STATUS_SLOTS[0]!);
+  const [dashedSlot, setDashedSlot] = useState<RoamSlot>(DASHED_SLOTS[0]!);
   const live = !!onAmbient && !systemLock;
 
   useEffect(() => {
@@ -62,6 +73,24 @@ export function FacilityBackground({
   const peel = environment === "reveal" || environment === "climax";
   const sterile = environment === "sterile";
   const escape = environment === "escape";
+
+  // CHAMBER 07 / status / dashed frame relocate — linger discovers new positions.
+  useEffect(() => {
+    if (systemLock || sterile) return;
+    let timer: number;
+    const tick = () => {
+      setChamberSlot((prev) => pickSlot(CHAMBER_SLOTS, prev));
+      if (Math.random() > 0.35) {
+        setStatusSlot((prev) => pickSlot(STATUS_SLOTS, prev));
+      }
+      if (Math.random() > 0.45) {
+        setDashedSlot((prev) => pickSlot(DASHED_SLOTS, prev));
+      }
+      timer = window.setTimeout(tick, roamIntervalMs(12000, 20000));
+    };
+    timer = window.setTimeout(tick, roamIntervalMs(10000, 16000));
+    return () => clearTimeout(timer);
+  }, [systemLock, sterile]);
 
   // hoverLanguage retained for API compat (title screen soft tips handled elsewhere).
   void hoverLanguage;
@@ -151,16 +180,18 @@ export function FacilityBackground({
         />
       </motion.div>
 
-      <motion.div className="absolute inset-0" style={{ x: midX, y: midY }}>
-        {/* CHAMBER 07 — live when onAmbient provided; otherwise inert (no fake cursor). */}
+      <motion.div className="absolute inset-0" style={{ x: midX, y: midY }} data-ambient-roam="facility">
+        {/* CHAMBER 07 — relocates on semi-random timings when live. */}
         <button
           type="button"
           disabled={!live}
-          className={`absolute left-[6%] top-[22%] h-44 w-28 border border-white/10 bg-white/5 text-left backdrop-blur-[2px] transition ${
+          className={`absolute h-44 w-28 border border-white/10 bg-white/5 text-left backdrop-blur-[2px] transition ${
             live
               ? "pointer-events-auto cursor-pointer hover:border-cyan/50 hover:bg-cyan/10"
               : "pointer-events-none"
           } ${tinted === "chamber-07" ? "border-cyan bg-cyan/15" : ""}`}
+          style={{ left: chamberSlot.left, top: chamberSlot.top }}
+          data-roam-egg="chamber-07"
           aria-label={live ? "Inspect CHAMBER 07" : undefined}
           tabIndex={live ? 0 : -1}
           onMouseEnter={() => {
@@ -196,9 +227,11 @@ export function FacilityBackground({
         {live ? (
           <button
             type="button"
-            className={`pointer-events-auto absolute left-[6%] top-[36%] z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
+            className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
               tinted === "everything-fine" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
             }`}
+            style={{ left: statusSlot.left, top: statusSlot.top }}
+            data-roam-egg="everything-fine"
             aria-label="Inspect status plaque"
             onClick={(e) => {
               e.stopPropagation();
@@ -214,9 +247,14 @@ export function FacilityBackground({
         {live ? (
           <button
             type="button"
-            className={`pointer-events-auto absolute left-[6%] top-[44%] z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
+            className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
               tinted === "queue-counter" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
             }`}
+            style={{
+              left: statusSlot.left,
+              top: `calc(${statusSlot.top} + 2rem)`,
+            }}
+            data-roam-egg="queue-counter"
             aria-label="Inspect queue tally"
             onClick={(e) => {
               e.stopPropagation();
@@ -231,7 +269,7 @@ export function FacilityBackground({
         <button
           type="button"
           disabled={!live}
-          className={`absolute right-[8%] top-[28%] h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent text-left transition ${
+          className={`absolute h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent text-left transition ${
             live
               ? "pointer-events-auto cursor-pointer hover:border-cyan/45 hover:from-cyan/15"
               : "pointer-events-none"
@@ -240,6 +278,8 @@ export function FacilityBackground({
               ? "border-cyan/60 from-cyan/20"
               : ""
           }`}
+          style={{ left: dashedSlot.left, top: dashedSlot.top }}
+          data-roam-egg="dashed-frame"
           aria-label={live ? "Inspect dashed frame" : undefined}
           tabIndex={live ? 0 : -1}
           onMouseEnter={() => {

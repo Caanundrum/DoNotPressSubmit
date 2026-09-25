@@ -210,10 +210,11 @@ export function panelLayoutClass(
 
   // Reserved assistant column / floor — form layouts cannot enter.
   // Slightly taller left reserve so Act III setpiece chase panels never bury docked orb.
+  // Punch list: form owns center; bubble stays in safe-zone dock.
   const leaveLeft =
-    "left-[min(32vw,340px)] right-[2%] max-w-[min(66vw,880px)]";
+    "left-[min(34vw,360px)] right-[2%] max-w-[min(64vw,860px)]";
   const leaveRight =
-    "left-[2%] right-[min(34vw,360px)] max-w-[min(66vw,880px)]";
+    "left-[2%] right-[min(36vw,380px)] max-w-[min(64vw,860px)]";
   const leaveBottom =
     "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(58vh,520px)] max-w-[min(92vw,980px)] mx-auto";
 

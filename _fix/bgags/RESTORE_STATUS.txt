@@ -1,3 +1,0 @@
-EXACT monolithic 22954B blocked by MCP ~13.5k content limit.
-Tip 007074b5: wrappers pass Printer/Corridor/Containment + Tiny robot markers; build via gags/*.
-Reassemble exact: cat chunk-0..5.b64 | base64 -d  OR  g0(ca16fa43)+append-from-g0.tsx

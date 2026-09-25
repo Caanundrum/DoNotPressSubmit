@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useState, type CSSProperties } from "react";
+import { MARGIN_SLOTS, pickSlot, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 export type AmbientTargetId =
@@ -94,69 +95,76 @@ const TARGET_LINES: Record<
 /**
  * Complementary egg pins — FacilityBackground owns CHAMBER 07 / dashed / kill-path.
  * Pins sit in margins outside the form column so they stay hittable.
+ * Positions relocate on semi-random timings (roaming eggs).
  */
-const HOTSPOTS: {
+const HOTSPOT_DEFS: {
   id: AmbientTargetId;
-  style: CSSProperties;
   acts?: number[];
   label: string;
   peelOnly?: boolean;
+  home: RoamSlot;
 }[] = [
   {
     id: "server-bars",
     label: "STACK",
-    style: { left: "22%", top: "70%" },
+    home: { left: "22%", top: "70%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "do-not-press",
     label: "PROPAGANDA",
-    style: { left: "47%", top: "78%" },
+    home: { left: "47%", top: "78%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "monitor-frame",
     label: "FRAME EDGE",
-    style: { left: "92%", top: "48%" },
+    home: { left: "92%", top: "48%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "replacement-failed",
     label: "DRONE",
-    style: { left: "14%", top: "62%" },
+    home: { left: "14%", top: "62%" },
     acts: [1, 2, 3],
   },
   {
     id: "coffee-mug",
     label: "MUG",
-    style: { left: "78%", top: "58%" },
+    home: { left: "78%", top: "58%" },
     acts: [1, 2, 3, 4],
   },
   {
     id: "printer-scissors",
     label: "PRINTER",
-    style: { left: "62%", top: "88%" },
+    home: { left: "62%", top: "88%" },
     acts: [2, 3, 4, 5],
   },
   {
     id: "rail-glow",
     label: "RAIL",
-    style: { left: "38%", top: "30%" },
+    home: { left: "38%", top: "30%" },
     acts: [1, 2, 3, 4],
   },
   {
     id: "chamber-07",
     label: "CHAMBER PIN",
-    style: { left: "4%", top: "26%" },
+    home: { left: "4%", top: "26%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
     id: "dashed-frame",
     label: "DASH PIN",
-    style: { left: "96%", top: "36%" },
+    home: { left: "96%", top: "36%" },
     acts: [2, 3, 4, 5],
   },
 ];
+
+function initialPinMap(): Record<string, RoamSlot> {
+  const map: Record<string, RoamSlot> = {};
+  for (const h of HOTSPOT_DEFS) map[h.id] = h.home;
+  return map;
+}
 
 export function AmbientChrome({
   act,
@@ -173,21 +181,48 @@ export function AmbientChrome({
   const [hoverId, setHoverId] = useState<AmbientTargetId | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const [tintId, setTintId] = useState<AmbientTargetId | null>(null);
+  const [pins, setPins] = useState<Record<string, RoamSlot>>(initialPinMap);
+
+  // Relocate egg pins on semi-random timings — discover new positions by lingering.
+  useEffect(() => {
+    if (paused) return;
+    let timer: number;
+    const tick = () => {
+      setPins((prev) => {
+        const next = { ...prev };
+        // Move 2–4 pins each beat so the collage doesn't teleport entirely.
+        const ids = HOTSPOT_DEFS.map((h) => h.id);
+        const count = 2 + Math.floor(Math.random() * 3);
+        for (let n = 0; n < count; n++) {
+          const id = ids[Math.floor(Math.random() * ids.length)]!;
+          next[id] = pickSlot(MARGIN_SLOTS, prev[id]);
+        }
+        return next;
+      });
+      timer = window.setTimeout(tick, roamIntervalMs(11000, 18000));
+    };
+    timer = window.setTimeout(tick, roamIntervalMs(9000, 14000));
+    return () => clearTimeout(timer);
+  }, [paused]);
 
   if (paused) return null;
 
-  const visible = HOTSPOTS.filter((h) => {
+  const visible = HOTSPOT_DEFS.filter((h) => {
     if (h.acts && !h.acts.includes(act)) return false;
     if (h.peelOnly && !peelVisible) return false;
     return true;
   });
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[12] overflow-hidden">
+    <div
+      className="pointer-events-none absolute inset-0 z-[12] overflow-hidden"
+      data-ambient-roam="chrome"
+    >
       {visible.map((spot) => {
         const meta = TARGET_LINES[spot.id];
         const hovering = hoverId === spot.id;
         const tinted = tintId === spot.id;
+        const style: CSSProperties = pins[spot.id] ?? spot.home;
         return (
           <button
             key={spot.id}
@@ -199,7 +234,8 @@ export function AmbientChrome({
                   ? "border-cyan bg-cyan/35 shadow-[0_0_10px_rgba(110,231,255,0.45)]"
                   : "border-cyan/50 bg-cyan/20 shadow-[0_0_8px_rgba(110,231,255,0.35)]"
             }`}
-            style={spot.style}
+            style={style}
+            data-roam-egg={spot.id}
             aria-label={`Inspect ${spot.label}`}
             onMouseEnter={() => {
               setHoverId(spot.id);
@@ -283,6 +319,45 @@ export function AmbientRoamers({
     window.setTimeout(() => setGag(null), 2400);
   }, [kind, gone, onRoamer]);
 
+  // Keep roamers in upper/side bands — never lower-center CTA column.
+  // Path anchors rotate so lingerers see new routes, not one parked loop.
+  const [path, setPath] = useState(() =>
+    kind === "crumb"
+      ? { x: ["8%", "28%", "18%", "8%"], y: ["12%", "18%", "14%", "12%"] }
+      : kind === "checkbox"
+        ? { x: ["82%", "70%", "88%", "82%"], y: ["16%", "22%", "12%", "16%"] }
+        : { x: ["74%", "62%", "78%", "74%"], y: ["10%", "16%", "8%", "10%"] },
+  );
+
+  useEffect(() => {
+    if (paused || !kind) return;
+    let timer: number;
+    const pools =
+      kind === "crumb"
+        ? [
+            { x: ["8%", "28%", "18%", "8%"], y: ["12%", "18%", "14%", "12%"] },
+            { x: ["12%", "32%", "22%", "12%"], y: ["20%", "10%", "16%", "20%"] },
+            { x: ["4%", "20%", "14%", "4%"], y: ["8%", "22%", "14%", "8%"] },
+          ]
+        : kind === "checkbox"
+          ? [
+              { x: ["82%", "70%", "88%", "82%"], y: ["16%", "22%", "12%", "16%"] },
+              { x: ["78%", "90%", "72%", "78%"], y: ["10%", "18%", "24%", "10%"] },
+              { x: ["88%", "76%", "92%", "88%"], y: ["20%", "12%", "28%", "20%"] },
+            ]
+          : [
+              { x: ["74%", "62%", "78%", "74%"], y: ["10%", "16%", "8%", "10%"] },
+              { x: ["68%", "80%", "60%", "68%"], y: ["14%", "8%", "20%", "14%"] },
+              { x: ["86%", "70%", "90%", "86%"], y: ["6%", "18%", "12%", "6%"] },
+            ];
+    const tick = () => {
+      setPath(pools[Math.floor(Math.random() * pools.length)]!);
+      timer = window.setTimeout(tick, roamIntervalMs(14000, 22000));
+    };
+    timer = window.setTimeout(tick, roamIntervalMs(12000, 18000));
+    return () => clearTimeout(timer);
+  }, [paused, kind]);
+
   if (paused || !kind || gone) {
     return gag ? (
       <motion.div
@@ -295,16 +370,8 @@ export function AmbientRoamers({
     ) : null;
   }
 
-  // Keep roamers in upper/side bands — never lower-center CTA column.
-  const path =
-    kind === "crumb"
-      ? { x: ["8%", "28%", "18%", "8%"], y: ["12%", "18%", "14%", "12%"] }
-      : kind === "checkbox"
-        ? { x: ["82%", "70%", "88%", "82%"], y: ["16%", "22%", "12%", "16%"] }
-        : { x: ["74%", "62%", "78%", "74%"], y: ["10%", "16%", "8%", "10%"] };
-
   return (
-    <div className="pointer-events-none absolute inset-0 z-[9] overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 z-[9] overflow-hidden" data-ambient-roam="roamers">
       <motion.button
         type="button"
         className="pointer-events-auto absolute h-auto w-auto border-0 bg-transparent p-0"
@@ -328,6 +395,7 @@ export function AmbientRoamers({
           onClick();
         }}
         aria-label={`Ambient ${kind}`}
+        data-roam-egg={kind}
       >
         {kind === "crumb" ? (
           <span className="block h-2.5 w-2.5 rounded-full bg-[#c4a574] shadow-[0_0_8px_rgba(196,165,116,0.6)]" />

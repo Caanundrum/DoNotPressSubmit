@@ -93,13 +93,22 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
   const dockAbove = dialogueDocksAbove(orbAnchor);
   const dockLeft = dialogueDocksLeft(orbAnchor);
-  const assistantZ = buryAssistant ? "z-[15]" : "z-[32]";
+  // Safe layering: form owns center (higher z). Bubble yields under form chrome on collision.
+  // buryAssistant / Act III popup chaos keeps the gag stack (orb under / chaotic).
+  const assistantZ = buryAssistant ? "z-[15]" : "z-[28]";
+  const panelZ = buryAssistant || scene.kind === "setpiece" ? "z-30" : "z-[34]";
   // Right-edge beats: row with bubble toward center. Low beats: column above. Else column below.
   const assistantLayout = dockLeft
     ? "flex-row-reverse"
     : dockAbove
       ? "flex-col-reverse"
       : "flex-col";
+  // Long lines shorten into the safe column so Q/A never hides under the bubble.
+  const bubbleMax = spotlight
+    ? "min(280px, 36vw)"
+    : dockLeft
+      ? "min(220px, 30vw)"
+      : "min(236px, 32vw)";
 
   return (
     <div
@@ -176,6 +185,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {/*
         Assistant orb + dialogue — reserved safe zone on non-gag forms.
+        Layout rules: safe-zone dock, form owns center, bubble yields.
         Default: pointer-events none so form CTAs stay mouse-hittable.
         Pokeable scenes enable a tiny hit target on the orb only.
         buryAssistant gag scenes keep the orb under/behind the form on purpose.
@@ -191,12 +201,13 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             ? "auto"
             : Math.max(orbStyle.size, spotlight ? 248 : 168),
           maxWidth: dockLeft
-            ? "min(46vw, 340px)"
+            ? "min(40vw, 300px)"
             : spotlight
-              ? "min(38vw, 280px)"
-              : "min(36vw, 260px)",
+              ? "min(34vw, 260px)"
+              : "min(32vw, 240px)",
         }}
         data-assistant-dock={dockLeft ? "left" : dockAbove ? "above" : "below"}
+        data-assistant-yield={buryAssistant ? "gag" : "safe-zone"}
         animate={
           orbAnchor === "pace"
             ? { x: [-10, 10, -5, 0] }
@@ -247,13 +258,8 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           />
         </div>
         <motion.div
-          className={`pointer-events-none glass-panel shrink px-3 py-2 text-sm leading-relaxed text-[#d7e6f5] ${
-            spotlight
-              ? "max-w-[min(300px,42vw)]"
-              : dockLeft
-                ? "max-w-[min(240px,34vw)]"
-                : "max-w-[min(260px,40vw)]"
-          }`}
+          className="pointer-events-none glass-panel assistant-bubble shrink px-3 py-2 text-sm leading-relaxed text-[#d7e6f5]"
+          style={{ maxWidth: bubbleMax }}
           key={aiLine || "silent"}
           initial={{
             opacity: 0,
@@ -342,7 +348,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {!companion ? (
       <motion.div
-        className={`glass-panel assessment-panel absolute z-30 ${
+        className={`glass-panel assessment-panel facility-hud absolute ${panelZ} ${
           scene.kind === "climax" ? "p-3 sm:p-4" : "p-4 sm:p-6"
         } ${panelLayoutClass(
           panelMotion,
@@ -357,6 +363,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           },
         )}`}
         data-panel-safe={buryAssistant ? "gag-overlap" : "respects-assistant"}
+        data-form-owns-center={buryAssistant ? "false" : "true"}
         initial={panelVar.initial}
         animate={
           panelShake

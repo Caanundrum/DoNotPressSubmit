@@ -1,25 +1,30 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { audio } from "@/lib/audio";
 
 export function CoffeeGag({
   interactive,
   onTip,
   onReact,
+  slot,
 }: {
   interactive?: boolean;
   onTip?: (t: string | null) => void;
   onReact?: () => void;
+  slot?: CSSProperties;
 }) {
   const live = !!interactive;
 
   return (
     <motion.div
-      className="pointer-events-none absolute right-[14%] top-[50%]"
+      className="pointer-events-none absolute"
+      style={slot ?? { left: "86%", top: "50%" }}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
+      data-roam-egg="coffee"
     >
       <motion.button
         type="button"

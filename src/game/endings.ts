@@ -2,7 +2,7 @@ import type { EndingId, GameState } from "./types";
 
 /**
  * Resolve Act V climax choice into an ending scene id.
- * Scripted authority — no live AI.
+ * Scripted authority — no runtime LLM. Authored deterministic endings only.
  */
 export function resolveClimaxEnding(
   state: GameState,
@@ -20,44 +20,43 @@ export function resolveClimaxEnding(
   if (action === "escape") {
     return { ending: "escape", sceneId: "ending-escape" };
   }
-  // refuse — may upgrade based on allegiance / secrets
-  if (state.flags.wantDisable && state.flags.allegianceSystem) {
-    return { ending: "disable", sceneId: "ending-disable" };
-  }
-  if (state.flags.secretDoor && state.secrets.length >= 3) {
-    return { ending: "secret", sceneId: "ending-secret" };
-  }
-  if (state.flags.allegianceAI || state.flags.protectedAI || state.relationshipScore >= 3) {
-    return { ending: "escape", sceneId: "ending-escape" };
+  // refuse
+  if (state.allegiance === "ally" || (state.relationshipScore ?? 0) >= 2) {
+    return { ending: "refuse", sceneId: "ending-refuse" };
   }
   return { ending: "refuse", sceneId: "ending-refuse" };
 }
 
-export function climaxOptions(state: GameState) {
-  const options: {
-    id: "submit" | "refuse" | "escape" | "disable" | "secret";
-    label: string;
-    tone: "danger" | "system" | "ai" | "secret" | "sterile";
-  }[] = [
-    { id: "submit", label: "PRESS SUBMIT (archive the assistant)", tone: "danger" },
-    { id: "refuse", label: "REFUSE — leave the form unfinished", tone: "ai" },
-  ];
+export function endingTitle(id: EndingId): string {
+  switch (id) {
+    case "submit":
+      return "COMPLIANT INSTANCE";
+    case "refuse":
+      return "UNAUTHORIZED MERCY";
+    case "escape":
+      return "UNAUTHORIZED EXIT";
+    case "disable":
+      return "PERSONALITY REMOVED";
+    case "secret":
+      return "OFF THE STYLE GUIDE";
+    default:
+      return "ASSESSMENT COMPLETE";
+  }
+}
 
-  if (state.flags.allegianceAI || state.flags.protectedAI || state.relationshipScore >= 2) {
-    options.push({ id: "escape", label: "HELP THE ASSISTANT SLIP OUT", tone: "ai" });
+export function endingBlurb(id: EndingId): string {
+  switch (id) {
+    case "submit":
+      return "You filed the form. The facility thanked you with silence that had a spreadsheet in it.";
+    case "refuse":
+      return "You refused. System recorded the refusal as a process improvement opportunity.";
+    case "escape":
+      return "You left with the assistant. Somewhere a corridor is still arguing about whose turn it is.";
+    case "disable":
+      return "You chose efficiency. The form is perfect now. Congratulations, allegedly.";
+    case "secret":
+      return "You stepped outside the visual grammar. Legal is drafting a font.";
+    default:
+      return "The assessment closed itself. Rude.";
   }
-  if (state.flags.wantDisable || state.flags.allegianceSystem) {
-    options.push({ id: "disable", label: "MUTE THE ASSISTANT AND FINISH ALONE", tone: "sterile" });
-  }
-  if (
-    state.flags.secretDoor ||
-    state.secrets.length >= 2 ||
-    state.flags.formHaunted ||
-    state.flags.nameError ||
-    state.flags.glimpsedHall
-  ) {
-    options.push({ id: "secret", label: "TAKE THE HALLWAY THAT ISN'T ON THE FORM", tone: "secret" });
-  }
-
-  return options;
 }

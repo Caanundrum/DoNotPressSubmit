@@ -1,24 +1,29 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { audio } from "@/lib/audio";
 
 export function ContainmentGag({
   interactive,
   onTip,
   onReact,
+  slot,
 }: {
   interactive?: boolean;
   onTip?: (t: string | null) => void;
   onReact?: () => void;
+  slot?: CSSProperties;
 }) {
   const live = !!interactive;
   return (
     <motion.div
-      className="pointer-events-none absolute right-[22%] top-[24%]"
+      className="pointer-events-none absolute"
+      style={slot ?? { left: "78%", top: "24%" }}
       initial={{ opacity: 0, scale: 0.92 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
+      data-roam-egg="containment"
     >
       <motion.button
         type="button"

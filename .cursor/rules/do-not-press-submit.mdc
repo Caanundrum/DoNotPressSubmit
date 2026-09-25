@@ -1,0 +1,38 @@
+---
+description: DO NOT PRESS SUBMIT project boundaries — always apply
+alwaysApply: true
+---
+
+# DO NOT PRESS SUBMIT — Project Boundaries
+
+This repository is **DO NOT PRESS SUBMIT**, a Chaos Standard browser comedy game.
+It is **not** Hallucinated Dungeons. Never import HD requirements, terminology, architecture, prompts, auth, combat, campaigns, DMs, dice, SRD rules, or multiplayer patterns.
+
+## No runtime LLM / generative AI
+
+Do **not** implement or reintroduce:
+- OpenAI / Anthropic / Gemini / xAI / any LLM provider
+- AI provider abstraction, prompt construction/storage, completion or chat endpoints
+- `/api/assistant` model paths, streaming model responses, generative UI
+- API keys for AI providers, runtime AI decision-making
+
+The Assistant is a **fictional AI character**. Intelligence is an illusion built from:
+authored dialogue + variants + personality pools + behavior tracking + counters/flags +
+hover/idle/repeat detection + scene state + UI/animation/sound.
+
+Seeded random among authored variants is allowed. Story progression stays deterministic.
+
+## Product identity
+
+- Small mechanical scope, huge presentation (~20–30 min)
+- No authentication, accounts, multiplayer, cloud saves, combat, campaigns, RPG engines
+- No speculative infrastructure for hypothetical future features
+- Visual quality is a primary feature (Grade-A bar) — not a late polish pass
+- Prefer: deterministic state + authored content + excellent presentation
+
+## Authoritative sources
+
+- Master Build Blueprint v1.1 (visuals, acts, endings, scope) — **live-LLM sections are deleted/superseded**
+- Project reset directive / this rule — no runtime LLM; HD boundaries
+
+When stuck: preserve visual quality → keep mechanics simple → keep state deterministic → refuse scope expansion.

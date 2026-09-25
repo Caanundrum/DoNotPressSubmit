@@ -2,7 +2,7 @@ import type { EndingId, GameState } from "./types";
 
 /**
  * Resolve Act V climax choice into an ending scene id.
- * Scripted authority — no live AI.
+ * Scripted authority — no runtime LLM. Authored deterministic endings only.
  */
 export function resolveClimaxEnding(
   state: GameState,

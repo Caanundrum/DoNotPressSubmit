@@ -1,1 +1,298 @@
-PLACEHOLDER
+@import "tailwindcss";
+
+:root {
+  --void: #05070c;
+  --graphite: #12161f;
+  --steel: #1c2433;
+  --mist: #c5d3e4;
+  --glass: rgba(180, 205, 235, 0.08);
+  --cyan: #6ee7ff;
+  --cyan-dim: #3aa9c4;
+  --assistant: #9ef2ff;
+  --system: #f4f1e8;
+  --system-warn: #ffb020;
+  --danger: #ff4d6d;
+  --metal: #9aa6b8;
+  --panel: rgba(12, 16, 26, 0.72);
+  --glow: 0 0 40px rgba(110, 231, 255, 0.25);
+  --font-display: var(--font-display);
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-graphite: var(--graphite);
+  --color-steel: var(--steel);
+  --color-mist: var(--mist);
+  --color-cyan: var(--cyan);
+  --color-assistant: var(--assistant);
+  --color-system: var(--system);
+  --color-system-warn: var(--system-warn);
+  --color-danger: var(--danger);
+  --color-metal: var(--metal);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Absolute ban on scrollbars — game must fit the viewport by design. */
+*,
+*::before,
+*::after {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  background: var(--void);
+  color: #e8eef8;
+  font-family: var(--font-ui), system-ui, sans-serif;
+  overflow: hidden;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  min-height: 100%;
+  max-height: 100dvh;
+  position: relative;
+}
+
+button {
+  font: inherit;
+}
+
+.game-shell {
+  position: fixed;
+  inset: 0;
+  /* Prefer % over 100vw — vw includes scrollbar gutter and re-opens H-scroll. */
+  width: 100%;
+  height: 100dvh;
+  max-width: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(40, 70, 110, 0.35), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 70% 80%, rgba(20, 40, 70, 0.4), transparent 55%),
+    linear-gradient(180deg, #070b14 0%, #05070c 55%, #03050a 100%);
+}
+
+.no-scroll {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+/* Compact assessment panel: scale to fit, never scroll */
+.assessment-panel {
+  overflow: hidden;
+  max-height: min(78vh, 100%);
+  max-width: 100%;
+}
+
+.assessment-panel[data-panel-safe="gag-overlap"] {
+  /* Climax / bury forms may use more vertical room so endings stay in-frame. */
+  max-height: min(90dvh, 100%);
+}
+
+.assessment-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* System / report overlays must never introduce scrollbars */
+.system-beat-shell,
+.ending-shell,
+.report-shell {
+  overflow: hidden !important;
+  max-width: min(calc(100% - 1.5rem), 560px);
+  width: min(88%, 560px);
+  max-height: min(88dvh, 100%);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+/* Assessment stage owns the viewport — no letterboxed card chrome */
+.facility-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.45) 3px
+  );
+  mix-blend-mode: multiply;
+  z-index: 40;
+}
+
+.vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.65) 100%);
+  z-index: 35;
+}
+
+.glass-panel {
+  background: linear-gradient(
+    155deg,
+    rgba(30, 42, 62, 0.82) 0%,
+    rgba(10, 14, 22, 0.94) 55%,
+    rgba(16, 22, 34, 0.9) 100%
+  );
+  border: 1px solid rgba(200, 220, 240, 0.38);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5) inset,
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    var(--glow);
+  backdrop-filter: blur(18px);
+}
+
+/* Facility-HUD panels — angular system chrome, not SaaS cards */
+.facility-hud,
+.assessment-panel.facility-hud {
+  border-radius: 2px;
+  border-color: rgba(110, 231, 255, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55) inset,
+    inset 0 1px 0 rgba(110, 231, 255, 0.12),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+  background:
+    linear-gradient(180deg, rgba(110, 231, 255, 0.06) 0 1px, transparent 1px),
+    linear-gradient(
+      155deg,
+      rgba(22, 32, 48, 0.9) 0%,
+      rgba(8, 12, 20, 0.96) 55%,
+      rgba(12, 18, 28, 0.92) 100%
+    );
+}
+
+.assistant-bubble {
+  border-radius: 2px;
+  border-color: rgba(110, 231, 255, 0.32);
+}
+
+.text-glow {
+  text-shadow: 0 0 18px rgba(110, 231, 255, 0.45);
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  70% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+/* Phase 3 — authored light / glitch accents */
+.light-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(110, 231, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(110, 231, 255, 0.08) 65%,
+    transparent 100%
+  );
+  filter: blur(8px);
+}
+
+.chromatic-flash {
+  background:
+    linear-gradient(90deg, rgba(255, 77, 109, 0.18), transparent 40%),
+    linear-gradient(270deg, rgba(110, 231, 255, 0.16), transparent 40%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.facility-rail {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(110, 231, 255, 0.35),
+    transparent
+  );
+}
+
+.vol-beam {
+  background: linear-gradient(
+    180deg,
+    rgba(110, 231, 255, 0.14),
+    transparent 70%
+  );
+  filter: blur(12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanlines,
+  .ambient-motion,
+  .light-sweep,
+  .chromatic-flash {
+    animation: none !important;
+  }
+}

@@ -8,6 +8,14 @@ alwaysApply: true
 This repository is **DO NOT PRESS SUBMIT**, a Chaos Standard browser comedy game.
 It is **not** Hallucinated Dungeons. Never import HD requirements, terminology, architecture, prompts, auth, combat, campaigns, DMs, dice, SRD rules, or multiplayer patterns.
 
+## Product boundaries (punch list / reset — hard)
+
+1. Project name is **DO NOT PRESS SUBMIT** — never import Hallucinated Dungeons requirements or architecture.
+2. **No runtime LLM / generative AI** — no provider APIs, prompts, chat completions, streaming models, or generative UI.
+3. Assistant “intelligence” = **authored dialogue pools** + deterministic player-state (counters, flags, hover/idle/repeat-click, history). Seeded pick among authored variants is allowed.
+4. **No auth, multiplayer, accounts**, combat, campaign/RPG engine, or speculative infra.
+5. **Visual Vertical Slice + Grade-A presentation** remain top priority over backend.
+
 ## No runtime LLM / generative AI
 
 Do **not** implement or reintroduce:
@@ -29,6 +37,11 @@ Seeded random among authored variants is allowed. Story progression stays determ
 - No speculative infrastructure for hypothetical future features
 - Visual quality is a primary feature (Grade-A bar) — not a late polish pass
 - Prefer: deterministic state + authored content + excellent presentation
+
+## Layout / ambient (player QA)
+
+- Safe layering: form owns center; Assistant bubbles yield (never cover Q/A/choices except intentional Act III gag chaos).
+- Ambient eggs must **relocate** on semi-random timings (not opacity-only on fixed anchors).
 
 ## Authoritative sources
 

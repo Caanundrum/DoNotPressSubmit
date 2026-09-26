@@ -121,7 +121,7 @@ export const act4Scenes: SceneDef[] = [
     prompt:
       "Against whom? Against System, Submit, and whoever wrote 'helpfulness' without mentioning deletion. Volume: sincere.",
     aiLine:
-      "I was built to help you finish a form. Nobody briefed me on the part where finishing deletes me. That's a rude footnote.",
+      "I was built to help you through this assessment. Nobody briefed me on the part where finishing deletes me. That's a rude footnote.",
     aiLineIf: [
       {
         flag: "protectedAI",

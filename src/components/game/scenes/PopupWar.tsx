@@ -55,7 +55,8 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
         setTimeout(onComplete, 400);
         return next;
       }
-      const spawnCount = newlyClosed < 3 ? 1 : newlyClosed < 6 ? 2 : 1;
+      // Keep the gag, ease the flood: usually one spawn; only spike once mid-cascade.
+      const spawnCount = newlyClosed === 4 ? 2 : 1;
       const spawned: Popup[] = [];
       let z = topZ;
       for (let i = 0; i < spawnCount; i++) {
@@ -70,7 +71,8 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
         });
       }
       setTopZ(z);
-      const merged = [...next, ...spawned].slice(0, 5);
+      // Cap stack so the primary readable beat isn't buried.
+      const merged = [...next, ...spawned].slice(0, 3);
       const primary = merged[merged.length - 1];
       if (primary) setFocusId(primary.id);
       return merged;

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { GAG_SLOTS, pickSlot, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
+import { GAG_SLOTS, pickSlotDistant, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 import { DroneGag as DroneGagImpl } from "./gags/DroneGag";
@@ -122,7 +122,7 @@ export function BackgroundGags({
   onAmbient?: (id: string, secret?: string) => void;
 }) {
   const [active, setActive] = useState<GagId>("drone");
-  const [slot, setSlot] = useState<RoamSlot>(() => pickSlot(GAG_SLOTS.drone!));
+  const [slot, setSlot] = useState<RoamSlot>(() => pickSlotDistant(GAG_SLOTS.drone!));
   const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "42%", top: "72%" });
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
@@ -140,7 +140,7 @@ export function BackgroundGags({
     onAmbientRef.current = onAmbient;
   }, [onAmbient]);
 
-  // Rotate gag identity AND relocate to a fresh anchor (not opacity-only on fixed pins).
+  // Rotate gag identity AND relocate to a fresh distant anchor (not opacity-only).
   useEffect(() => {
     if (paused) return;
     let i = 0;
@@ -149,19 +149,21 @@ export function BackgroundGags({
       const step = Math.random() > 0.22 ? 1 : 2;
       i = (i + step) % ORDER.length;
       const next = ORDER[i]!;
-      const nextSlot = pickSlot(GAG_SLOTS[next] ?? GAG_SLOTS.drone!, slotRef.current);
+      const nextSlot = pickSlotDistant(GAG_SLOTS[next] ?? GAG_SLOTS.drone!, slotRef.current);
       slotRef.current = nextSlot;
       setSlot(nextSlot);
       setActive(next);
       // Tiny DO NOT PRESS robot also relocates on its own cadence.
-      if (Math.random() > 0.4) {
+      if (Math.random() > 0.35) {
         setTinySlot((prev) =>
-          pickSlot(
+          pickSlotDistant(
             [
               { left: "42%", top: "72%" },
               { left: "18%", top: "68%" },
               { left: "64%", top: "74%" },
               { left: "50%", top: "58%" },
+              { left: "78%", top: "66%" },
+              { left: "8%", top: "74%" },
             ],
             prev,
           ),
@@ -258,7 +260,11 @@ export function BackgroundGags({
       {!paused ? (
         <div
           className="pointer-events-none absolute h-16 w-40"
-          style={{ left: tinySlot.left, top: tinySlot.top }}
+          style={{
+            left: tinySlot.left,
+            top: tinySlot.top,
+            transition: "left 1s ease-in-out, top 1s ease-in-out",
+          }}
           data-roam-egg="do-not-press-bot"
         >
           <motion.div

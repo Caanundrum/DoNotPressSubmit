@@ -3,11 +3,14 @@
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
+  BAR_LAYOUTS,
   CHAMBER_SLOTS,
   DASHED_SLOTS,
-  pickSlot,
+  pickBarLayout,
+  pickSlotDistant,
   roamIntervalMs,
   STATUS_SLOTS,
+  type FacilityBar,
   type RoamSlot,
 } from "@/game/ambientRoam";
 import type { EnvironmentPreset } from "@/game/types";
@@ -56,6 +59,8 @@ export function FacilityBackground({
   const [chamberSlot, setChamberSlot] = useState<RoamSlot>(CHAMBER_SLOTS[0]!);
   const [statusSlot, setStatusSlot] = useState<RoamSlot>(STATUS_SLOTS[0]!);
   const [dashedSlot, setDashedSlot] = useState<RoamSlot>(DASHED_SLOTS[0]!);
+  const [barLayoutIndex, setBarLayoutIndex] = useState(0);
+  const [bars, setBars] = useState<FacilityBar[]>(() => BAR_LAYOUTS[0]!);
   const live = !!onAmbient && !systemLock;
 
   useEffect(() => {
@@ -74,21 +79,24 @@ export function FacilityBackground({
   const sterile = environment === "sterile";
   const escape = environment === "escape";
 
-  // CHAMBER 07 / status / dashed frame relocate — linger discovers new positions.
+  // CHAMBER 07 / status / dashed / tall bars relocate — same behavior title + in-game.
+  // Distant picks so 45–90s idle shots show clear re-anchors (not opacity-only).
   useEffect(() => {
     if (systemLock || sterile) return;
     let timer: number;
     const tick = () => {
-      setChamberSlot((prev) => pickSlot(CHAMBER_SLOTS, prev));
-      if (Math.random() > 0.35) {
-        setStatusSlot((prev) => pickSlot(STATUS_SLOTS, prev));
-      }
-      if (Math.random() > 0.45) {
-        setDashedSlot((prev) => pickSlot(DASHED_SLOTS, prev));
-      }
-      timer = window.setTimeout(tick, roamIntervalMs(12000, 20000));
+      setChamberSlot((prev) => pickSlotDistant(CHAMBER_SLOTS, prev));
+      setStatusSlot((prev) => pickSlotDistant(STATUS_SLOTS, prev));
+      setDashedSlot((prev) => pickSlotDistant(DASHED_SLOTS, prev));
+      setBarLayoutIndex((prevIdx) => {
+        const next = pickBarLayout(prevIdx);
+        setBars(next.bars);
+        return next.index;
+      });
+      timer = window.setTimeout(tick, roamIntervalMs(9000, 15000));
     };
-    timer = window.setTimeout(tick, roamIntervalMs(10000, 16000));
+    // First re-anchor within ~8–12s so a 60s title linger always catches ≥2 moves.
+    timer = window.setTimeout(tick, roamIntervalMs(8000, 12000));
     return () => clearTimeout(timer);
   }, [systemLock, sterile]);
 
@@ -121,18 +129,21 @@ export function FacilityBackground({
                 : "linear-gradient(to top, #0a1220, #0b1524cc 80%, transparent)",
           }}
         />
-        {[...Array(7)].map((_, i) => (
+        {[...bars].map((bar, i) => (
           <div
-            key={i}
+            key={`bar-${i}`}
             className="absolute bottom-[18%] w-[7%] rounded-t-md"
+            data-roam-egg={`facility-bar-${i}`}
+            data-bar-layout={barLayoutIndex}
             style={{
-              left: `${8 + i * 12}%`,
-              height: `${28 + ((i * 17) % 33)}%`,
+              left: bar.left,
+              height: `${bar.heightPct}%`,
               opacity: sterile ? 0.35 : 0.55 + (i % 3) * 0.1,
               background: sterile
                 ? "linear-gradient(to top, #222833, #3a4252)"
                 : "linear-gradient(to top, #152033, #2a3d5cb3)",
               boxShadow: sterile ? "none" : "inset 0 0 20px rgba(110,231,255,0.08)",
+              transition: "left 1.1s ease-in-out, height 1.1s ease-in-out, opacity 0.6s ease",
               transform:
                 peel && i % 2 === 0
                   ? `translateY(${6 + i}px) rotate(${(i - 3) * 0.4}deg)`
@@ -190,7 +201,11 @@ export function FacilityBackground({
               ? "pointer-events-auto cursor-pointer hover:border-cyan/50 hover:bg-cyan/10"
               : "pointer-events-none"
           } ${tinted === "chamber-07" ? "border-cyan bg-cyan/15" : ""}`}
-          style={{ left: chamberSlot.left, top: chamberSlot.top }}
+          style={{
+            left: chamberSlot.left,
+            top: chamberSlot.top,
+            transition: "left 1s ease-in-out, top 1s ease-in-out",
+          }}
           data-roam-egg="chamber-07"
           aria-label={live ? "Inspect CHAMBER 07" : undefined}
           tabIndex={live ? 0 : -1}
@@ -230,7 +245,11 @@ export function FacilityBackground({
             className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
               tinted === "everything-fine" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
             }`}
-            style={{ left: statusSlot.left, top: statusSlot.top }}
+            style={{
+              left: statusSlot.left,
+              top: statusSlot.top,
+              transition: "left 1s ease-in-out, top 1s ease-in-out",
+            }}
             data-roam-egg="everything-fine"
             aria-label="Inspect status plaque"
             onClick={(e) => {
@@ -253,6 +272,7 @@ export function FacilityBackground({
             style={{
               left: statusSlot.left,
               top: `calc(${statusSlot.top} + 2rem)`,
+              transition: "left 1s ease-in-out, top 1s ease-in-out",
             }}
             data-roam-egg="queue-counter"
             aria-label="Inspect queue tally"
@@ -278,7 +298,11 @@ export function FacilityBackground({
               ? "border-cyan/60 from-cyan/20"
               : ""
           }`}
-          style={{ left: dashedSlot.left, top: dashedSlot.top }}
+          style={{
+            left: dashedSlot.left,
+            top: dashedSlot.top,
+            transition: "left 1s ease-in-out, top 1s ease-in-out",
+          }}
           data-roam-egg="dashed-frame"
           aria-label={live ? "Inspect dashed frame" : undefined}
           tabIndex={live ? 0 : -1}

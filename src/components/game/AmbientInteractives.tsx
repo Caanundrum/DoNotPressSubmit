@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
-import { MARGIN_SLOTS, pickSlot, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
+import { MARGIN_SLOTS, pickSlotDistant, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 export type AmbientTargetId =
@@ -195,7 +195,7 @@ export function AmbientChrome({
         const count = 2 + Math.floor(Math.random() * 3);
         for (let n = 0; n < count; n++) {
           const id = ids[Math.floor(Math.random() * ids.length)]!;
-          next[id] = pickSlot(MARGIN_SLOTS, prev[id]);
+          next[id] = pickSlotDistant(MARGIN_SLOTS, prev[id]);
         }
         return next;
       });

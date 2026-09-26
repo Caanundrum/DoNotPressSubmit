@@ -115,12 +115,19 @@ assert(/z-\[34\]|z-\[28\]/.test(view), "safe layering z-index stack");
 
 const roam = read("src/game/ambientRoam.ts");
 assert(/pickSlot|GAG_SLOTS|CHAMBER_SLOTS/.test(roam), "ambient roam slot pools");
+assert(/BAR_LAYOUTS|pickBarLayout|pickSlotDistant/.test(roam), "facility bar layouts + distant picks");
 
 const bg = read("src/components/game/BackgroundGags.tsx");
-assert(/data-ambient-roam|pickSlot|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
+assert(/data-ambient-roam|pickSlotDistant|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
 assert(/chamberSlot|data-roam-egg="chamber-07"/.test(fac), "CHAMBER 07 relocates");
+assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
+assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
+
+const title = read("src/components/game/TitleScreen.tsx");
+assert(/FacilityBackground|BackgroundGags/.test(title), "title mounts facility + gag eggs");
+assert(/onAmbient/.test(title), "title ambient eggs are live");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

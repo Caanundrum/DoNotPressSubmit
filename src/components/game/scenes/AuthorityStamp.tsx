@@ -30,6 +30,7 @@ export function AuthorityStamp({ onComplete }: { onComplete: () => void }) {
         maxHits={3}
         moveMs={1000}
         hitPad={20}
+        arenaPadding={16}
         className="absolute flex h-24 w-24 items-center justify-center rounded-full border-2 border-white/80 bg-black/80 font-mono text-[10px] tracking-[0.18em] text-white shadow-[0_0_28px_rgba(255,176,32,0.35)]"
         style={{ fontFamily: "var(--font-display)" }}
         onHit={() => {

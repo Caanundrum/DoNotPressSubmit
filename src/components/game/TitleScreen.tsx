@@ -139,9 +139,13 @@ export function TitleScreen({
         </div>
       ) : null}
 
-      <div className="relative z-10 flex h-full flex-col items-center justify-between px-6 py-10 sm:py-14">
+      {/*
+        Compact vertical stack — footer microcopy must clear the viewport at 1280×800.
+        shrink-0 chrome + min-h-0 middle so justify never pushes labels past the bottom edge.
+      */}
+      <div className="relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-4 sm:px-6 sm:pb-4 sm:pt-6">
         <motion.div
-          className="font-mono text-[10px] tracking-[0.35em] text-[#b7c6d8]"
+          className="shrink-0 font-mono text-[9px] tracking-[0.28em] text-[#d0dcec] sm:text-[10px] sm:tracking-[0.35em]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -151,20 +155,21 @@ export function TitleScreen({
           {allyBefore && !waving ? " // MERCY TRACE DETECTED" : ""}
         </motion.div>
 
-        <div className="flex w-full max-w-5xl flex-col items-center gap-8">
+        <div className="flex min-h-0 w-full max-w-5xl flex-1 flex-col items-center justify-center gap-3 overflow-hidden py-2 sm:gap-5">
           <motion.div
+            className="shrink-0"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.7 }}
           >
-            <TitleLogo reactive />
+            <TitleLogo reactive compact />
           </motion.div>
 
           <AudioEnableControl placement="title" />
 
-          <div className="flex w-full flex-col items-center justify-center gap-8 lg:flex-row lg:gap-16">
+          <div className="flex w-full min-h-0 flex-col items-center justify-center gap-4 sm:gap-6 lg:flex-row lg:gap-12">
             <motion.div
-              className={remembered ? "cursor-pointer" : "pointer-events-none"}
+              className={`shrink-0 ${remembered ? "cursor-pointer" : "pointer-events-none"}`}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.45 }}
@@ -184,6 +189,7 @@ export function TitleScreen({
               }
             >
               <AssistantOrb
+                size={118}
                 mood={waving ? "excited" : allyBefore ? "amused" : orbMood}
                 wave={waving}
                 label={
@@ -196,7 +202,7 @@ export function TitleScreen({
               />
               {waving ? (
                 <motion.div
-                  className="mt-2 max-w-[240px] text-center font-mono text-[9px] tracking-[0.16em] text-cyan/80"
+                  className="mt-1.5 max-w-[220px] text-center font-mono text-[8px] tracking-[0.14em] text-cyan/85 sm:text-[9px]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2.8, repeat: Infinity }}
@@ -206,7 +212,7 @@ export function TitleScreen({
               ) : null}
               {allyBefore && !waving ? (
                 <motion.div
-                  className="mt-2 max-w-[240px] text-center font-mono text-[9px] tracking-[0.16em] text-cyan/70"
+                  className="mt-1.5 max-w-[220px] text-center font-mono text-[8px] tracking-[0.14em] text-cyan/80 sm:text-[9px]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: [0.45, 1, 0.45] }}
                   transition={{ duration: 3.2, repeat: Infinity }}
@@ -216,7 +222,7 @@ export function TitleScreen({
               ) : null}
               {eggLine ? (
                 <motion.div
-                  className="mt-2 max-w-[260px] border border-cyan/35 bg-black/60 px-2 py-1.5 text-center font-mono text-[9px] tracking-[0.12em] text-[#d2dceb]"
+                  className="mt-1.5 max-w-[240px] border border-cyan/35 bg-black/60 px-2 py-1 text-center font-mono text-[8px] tracking-[0.12em] text-[#e0eaf6] sm:text-[9px]"
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
@@ -226,7 +232,7 @@ export function TitleScreen({
             </motion.div>
 
             <motion.div
-              className="flex flex-col items-center gap-4"
+              className="flex shrink-0 flex-col items-center gap-3"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.55 }}
@@ -249,10 +255,11 @@ export function TitleScreen({
         </div>
 
         <motion.div
-          className="flex flex-wrap items-center justify-center gap-4 font-mono text-[10px] tracking-[0.2em] text-[#c5d3e4]"
+          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[8px] tracking-[0.16em] text-[#d8e4f2] sm:text-[9px] sm:tracking-[0.2em]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
+          data-title-footer="true"
         >
           <span
             className="transition hover:text-cyan"
@@ -260,9 +267,9 @@ export function TitleScreen({
           >
             CHAOS STANDARD
           </span>
-          <span className="text-cyan/70">/</span>
+          <span className="text-cyan/80">/</span>
           <span title="Facility chamber">HCOS // CHAMBER 07</span>
-          <span className="text-cyan/70">/</span>
+          <span className="text-cyan/80">/</span>
           <span title="Facility residue">
             {waving ? "ASSISTANT WAVING // BADLY // HAPPILY" : "FACILITY RESIDUE"}
           </span>

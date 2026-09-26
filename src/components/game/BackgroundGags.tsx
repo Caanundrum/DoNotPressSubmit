@@ -37,7 +37,7 @@ function ContainmentGag(props: GagProps) {
 
 /**
  * Title / facility midground comedy.
- * P2: REPLACEMENT FAILED + printer departure toasts (Ambient fiddling) — keep.
+ * Ambient banners (REPLACEMENT FAILED etc.) are rare comedy with long cooldown — not wallpaper.
  * Phase 3: richer sequences + corridor etiquette + containment flash.
  */
 type GagId = "drone" | "coffee" | "printer" | "corridor" | "containment";
@@ -113,11 +113,14 @@ const ORDER: GagId[] = ["drone", "coffee", "printer", "corridor", "containment"]
 export function BackgroundGags({
   paused = false,
   hoverLanguage = false,
+  /** Form-focus moments: keep roaming visuals, mute departure banner spam. */
+  suppressToasts = false,
   onAmbient,
 }: {
   paused?: boolean;
   /** Soft hover copy on decorative gag frames (title + early acts) */
   hoverLanguage?: boolean;
+  suppressToasts?: boolean;
   /** When set, gags are clickable eggs — not fake hover-only chrome */
   onAmbient?: (id: string, secret?: string) => void;
 }) {
@@ -136,11 +139,17 @@ export function BackgroundGags({
   const prevActive = useRef<GagId>("drone");
   const slotRef = useRef<RoamSlot>(slot);
   const onAmbientRef = useRef(onAmbient);
+  const lastBannerAt = useRef(0);
+  const suppressRef = useRef(suppressToasts);
   useEffect(() => {
     onAmbientRef.current = onAmbient;
   }, [onAmbient]);
+  useEffect(() => {
+    suppressRef.current = suppressToasts;
+  }, [suppressToasts]);
 
   // Rotate gag identity AND relocate to a fresh distant anchor (not opacity-only).
+  // Longer cadence — ambient banners should feel rare, not wallpaper.
   useEffect(() => {
     if (paused) return;
     let i = 0;
@@ -169,26 +178,31 @@ export function BackgroundGags({
           ),
         );
       }
-      timer = window.setTimeout(tick, roamIntervalMs(7500, 13000));
+      timer = window.setTimeout(tick, roamIntervalMs(14000, 24000));
     };
-    timer = window.setTimeout(tick, roamIntervalMs(6500, 10000));
+    timer = window.setTimeout(tick, roamIntervalMs(11000, 18000));
     return () => clearTimeout(timer);
   }, [paused]);
 
-  // P2: each rotating gag gets a dedicated departure ambient (toast + Ambient fiddling) —
-  // never silent when it leaves the frame. Click already counted → toast only.
+  // Rare departure comedy — long cooldown so REPLACEMENT FAILED isn't wallpaper.
+  // When a toast does fire, Ambient fiddling still bumps (never toast-only).
   useEffect(() => {
     const was = prevActive.current;
     prevActive.current = active;
-    if (!onAmbientRef.current || paused) return;
+    if (!onAmbientRef.current || paused || suppressRef.current) return;
     if (was === active) return;
     const depart = GAG_DEPART[was];
     const wasTouched = touched.current[was];
-    setFlash(wasTouched ? depart.touched : depart.missed);
-    if (!wasTouched) {
-      onAmbientRef.current(depart.id, depart.secret);
-    }
     touched.current[was] = false;
+    // Player-clicked gags already toasted on click — skip auto spam.
+    if (wasTouched) return;
+    const now = Date.now();
+    const cooled = now - lastBannerAt.current >= 28000;
+    // ~22% of cooled departures speak; otherwise silent relocate.
+    if (!cooled || Math.random() > 0.22) return;
+    lastBannerAt.current = now;
+    setFlash(depart.missed);
+    onAmbientRef.current(depart.id, depart.secret);
     window.setTimeout(() => setFlash(null), 2600);
   }, [active, paused]);
 
@@ -196,9 +210,12 @@ export function BackgroundGags({
     const meta = GAG_CLICK[gag];
     audio.play("click", 0.28);
     touched.current[gag] = true;
-    setFlash(meta.line);
+    if (!suppressRef.current) {
+      lastBannerAt.current = Date.now();
+      setFlash(meta.line);
+      window.setTimeout(() => setFlash(null), 2200);
+    }
     onAmbient?.(meta.id, meta.secret);
-    window.setTimeout(() => setFlash(null), 2200);
   };
 
   const live = !!onAmbient;

@@ -131,6 +131,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       <BackgroundGags
         paused={systemLock || scene.environment === "sterile"}
         hoverLanguage={hoverLanguage}
+        suppressToasts={scene.kind === "setpiece" || scene.kind === "climax"}
         onAmbient={onAmbient}
       />
       <PathResidue kind={residue} />
@@ -149,7 +150,11 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       {!systemLock && scene.kind !== "climax" ? (
         <AmbientChrome
           act={scene.act}
-          paused={systemLock || scene.environment === "sterile"}
+          paused={
+            systemLock ||
+            scene.environment === "sterile" ||
+            scene.kind === "setpiece"
+          }
           onAmbient={onAmbient}
           peelVisible={
             scene.environment === "reveal" ||
@@ -169,10 +174,10 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {/* Stage chrome — both labels on the left so ENABLE SOUND never covers them. */}
       <div className="pointer-events-none absolute left-3 top-3 z-[5] max-w-[min(70%,720px)] sm:left-4 sm:top-4">
-        <div className="break-words font-mono text-[9px] leading-snug tracking-[0.12em] text-[#b7c6d8] sm:text-[10px] sm:tracking-[0.16em]">
+        <div className="break-words font-mono text-[9px] leading-snug tracking-[0.12em] text-[#d8e4f2] sm:text-[10px] sm:tracking-[0.16em]">
           {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
         </div>
-        <div className="mt-0.5 font-mono text-[9px] leading-snug tracking-[0.12em] text-[#b7c6d8] sm:text-[10px] sm:tracking-[0.16em]">
+        <div className="mt-0.5 font-mono text-[9px] leading-snug tracking-[0.12em] text-[#d0dcec] sm:text-[10px] sm:tracking-[0.16em]">
           {chamberStatus
             ? chamberStatus
             : residue === "chaos"
@@ -292,7 +297,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {companion ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-[4%] z-30 flex max-h-[34vh] flex-col items-center gap-2 overflow-hidden px-4">
-          <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#b7c6d8]">
+          <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#d8e4f2]">
             {scene.formId ?? "SIDE CHANNEL // NO FORM"}
           </div>
           {scene.title ? (

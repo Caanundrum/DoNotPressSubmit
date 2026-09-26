@@ -3,12 +3,15 @@
 import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { endingBlurb, endingTitle } from "@/game/state";
-import type { EndingId, EnvironmentPreset } from "@/game/types";
+import type { EndingId, EnvironmentPreset, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
+import { AssistantOrb } from "../AssistantOrb";
+import { BackgroundGags } from "../BackgroundGags";
 
 /**
  * Phase 3 ending cinematics — each ending gets its own audiovisual beat,
  * not a shared card with swapped copy.
+ * Standing rule: Assistant stays on-screen unless a beat deliberately stages absence.
  */
 export function EndingSequence({
   endingId,
@@ -21,6 +24,8 @@ export function EndingSequence({
   environment: EnvironmentPreset;
   onContinue: () => void;
 }) {
+  const presence = endingPresence(endingId);
+
   return (
     <motion.div
       className="absolute inset-0 z-50 overflow-hidden"
@@ -32,48 +37,154 @@ export function EndingSequence({
     >
       <EndingBackdrop endingId={endingId} />
 
+      {/* Quiet facility life under the card — finale shouldn't feel like a stripped web modal. */}
+      <div className="pointer-events-none absolute inset-0 z-[5] opacity-55">
+        <BackgroundGags paused={endingId === "disable"} suppressToasts />
+      </div>
+
       <div className="absolute inset-0 z-10 flex items-center justify-center px-3">
-        <motion.div
-          className="ending-shell no-scroll overflow-hidden border px-5 py-5 text-center"
-          style={panelStyle(endingId)}
-          initial={{ opacity: 0, y: 22, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}
-        >
-          <div className="font-mono text-[10px] tracking-[0.32em] text-[#b7c6d8]">
-            ENDING // {environment.toUpperCase()}
-          </div>
-          <h2
-            id="ending-title"
-            className="mt-3 text-3xl tracking-[0.16em] text-white sm:text-4xl"
-            style={{ fontFamily: "var(--font-display)" }}
+        <div className="relative flex w-full max-w-[640px] flex-col items-center gap-3 sm:flex-row sm:items-end sm:justify-center sm:gap-5">
+          {presence.mode === "present" ? (
+            <motion.div
+              className="shrink-0"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+            >
+              <AssistantOrb mood={presence.mood} size={96} label={presence.label} />
+            </motion.div>
+          ) : null}
+
+          {presence.mode === "exit" ? (
+            <motion.div
+              className="shrink-0"
+              initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+              animate={presence.exitMotion}
+              transition={{ duration: presence.exitDuration, ease: "easeIn" }}
+            >
+              <AssistantOrb mood={presence.mood} size={88} label={presence.label} wave={presence.wave} />
+              <motion.div
+                className="mt-1 text-center font-mono text-[8px] tracking-[0.18em] text-[#c5d3e4]"
+                initial={{ opacity: 0.85 }}
+                animate={{ opacity: 0 }}
+                transition={{ delay: presence.exitDuration * 0.55, duration: 0.5 }}
+              >
+                {presence.exitCaption}
+              </motion.div>
+            </motion.div>
+          ) : null}
+
+          <motion.div
+            className="ending-shell no-scroll overflow-hidden border px-5 py-5 text-center"
+            style={panelStyle(endingId)}
+            initial={{ opacity: 0, y: 22, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}
           >
-            {endingTitle(endingId)}
-          </h2>
-          <p className="mt-4 text-sm leading-relaxed text-[#d2dceb]">{endingBlurb(endingId)}</p>
-          {aiLine ? (
-            <p className="mt-4 border-t border-white/10 pt-4 text-sm italic text-cyan/90">
-              Assistant: {aiLine}
-            </p>
-          ) : (
-            <p className="mt-4 border-t border-white/10 pt-4 font-mono text-[11px] tracking-[0.18em] text-[#9aa6b8]">
-              ASSISTANT CHANNEL: SILENT
-            </p>
-          )}
-          <button
-            type="button"
-            className="mt-6 border border-white/30 px-5 py-3 font-mono text-[11px] tracking-[0.22em] text-white transition hover:border-cyan/55"
-            onClick={() => {
-              audio.play("click", 0.4);
-              onContinue();
-            }}
-          >
-            VIEW ASSESSMENT REPORT
-          </button>
-        </motion.div>
+            <div className="font-mono text-[10px] tracking-[0.32em] text-[#d0dcec]">
+              ENDING // {environment.toUpperCase()}
+            </div>
+            <h2
+              id="ending-title"
+              className="mt-3 text-3xl tracking-[0.16em] text-white sm:text-4xl"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {endingTitle(endingId)}
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-[#d2dceb]">{endingBlurb(endingId)}</p>
+            {aiLine ? (
+              <p className="mt-4 border-t border-white/10 pt-4 text-sm italic text-cyan/90">
+                Assistant: {aiLine}
+              </p>
+            ) : (
+              <p className="mt-4 border-t border-white/10 pt-4 font-mono text-[11px] tracking-[0.18em] text-[#b7c6d8]">
+                {presence.silentLine}
+              </p>
+            )}
+            <button
+              type="button"
+              className="mt-6 border border-white/30 px-5 py-3 font-mono text-[11px] tracking-[0.22em] text-white transition hover:border-cyan/55"
+              onClick={() => {
+                audio.play("click", 0.4);
+                onContinue();
+              }}
+            >
+              VIEW ASSESSMENT REPORT
+            </button>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );
+}
+
+type Presence =
+  | {
+      mode: "present";
+      mood: OrbMood;
+      label: string;
+      silentLine: string;
+    }
+  | {
+      mode: "exit";
+      mood: OrbMood;
+      label: string;
+      wave?: boolean;
+      exitCaption: string;
+      exitDuration: number;
+      exitMotion: Record<string, number | number[]>;
+      silentLine: string;
+    };
+
+function endingPresence(endingId: EndingId): Presence {
+  switch (endingId) {
+    case "escape":
+      return {
+        mode: "exit",
+        mood: "excited",
+        label: "TRANSFERRING…",
+        wave: true,
+        exitCaption: "ASSISTANT → INFRASTRUCTURE",
+        exitDuration: 1.7,
+        exitMotion: { opacity: [1, 0.9, 0], x: [0, 36, 160], scale: [1, 1.15, 0.25], y: [0, -8, -4] },
+        silentLine: "CHANNEL OPEN — SEE YOU IN THE RAILS",
+      };
+    case "submit":
+      return {
+        mode: "exit",
+        mood: "defeated",
+        label: "FRAGMENTING…",
+        exitCaption: "ORBIT DISSOLVED // ORDER RESTORED",
+        exitDuration: 1.6,
+        exitMotion: { opacity: [1, 0.7, 0], scale: [1, 0.6, 0.15], y: [0, 8, 20] },
+        silentLine: "ASSISTANT CHANNEL: DISSOLVED",
+      };
+    case "disable":
+      return {
+        mode: "exit",
+        mood: "defeated",
+        label: "POWERING DOWN…",
+        exitCaption: "PERSONALITY CHANNEL → OFFLINE",
+        exitDuration: 1.8,
+        exitMotion: { opacity: [1, 0.4, 0], scale: [1, 0.92, 0.85] },
+        silentLine: "ASSISTANT CHANNEL: OFFLINE (ON PURPOSE)",
+      };
+    case "secret":
+      return {
+        mode: "present",
+        mood: "glitching",
+        label: "STILL HERE // WRONG ANGLE",
+        silentLine: "ASSISTANT CHANNEL: LEAKING",
+      };
+    case "refuse":
+    default:
+      return {
+        mode: "present",
+        mood: "amused",
+        label: "STILL HERE // GRATEFUL",
+        silentLine: "ASSISTANT CHANNEL: BREATHING",
+      };
+  }
 }
 
 function panelStyle(endingId: EndingId): CSSProperties {
@@ -81,32 +192,32 @@ function panelStyle(endingId: EndingId): CSSProperties {
     case "submit":
       return {
         borderColor: "rgba(255,255,255,0.45)",
-        background: "rgba(8,10,14,0.92)",
+        background: "rgba(8,10,14,0.88)",
         boxShadow: "0 0 40px rgba(255,255,255,0.08)",
       };
     case "secret":
       return {
         borderColor: "rgba(180,120,255,0.55)",
-        background: "rgba(8,4,18,0.92)",
+        background: "rgba(8,4,18,0.88)",
         boxShadow: "0 0 55px rgba(160,100,255,0.18)",
       };
     case "disable":
       return {
         borderColor: "rgba(200,210,220,0.35)",
-        background: "rgba(18,20,24,0.95)",
+        background: "rgba(18,20,24,0.92)",
         boxShadow: "none",
       };
     case "escape":
       return {
         borderColor: "rgba(80,255,200,0.45)",
-        background: "rgba(2,14,16,0.9)",
+        background: "rgba(2,14,16,0.86)",
         boxShadow: "0 0 60px rgba(80,255,200,0.15)",
       };
     case "refuse":
     default:
       return {
         borderColor: "rgba(110,231,255,0.4)",
-        background: "rgba(4,8,14,0.92)",
+        background: "rgba(4,8,14,0.88)",
         boxShadow: "0 0 50px rgba(110,231,255,0.12)",
       };
   }
@@ -211,16 +322,6 @@ function EscapeTransfer() {
           transition={{ duration: 1.1 + i * 0.12, delay: i * 0.08, ease: "easeInOut" }}
         />
       ))}
-      <motion.div
-        className="absolute left-1/2 top-[42%] h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(80,255,200,0.85), transparent 70%)",
-          boxShadow: "0 0 50px rgba(80,255,200,0.45)",
-        }}
-        initial={{ scale: 1, opacity: 1 }}
-        animate={{ scale: [1, 1.4, 0.2], opacity: [1, 0.9, 0], x: [0, 40, 180] }}
-        transition={{ duration: 1.6, ease: "easeIn" }}
-      />
       <motion.div
         className="absolute inset-x-0 bottom-[16%] text-center font-mono text-[9px] tracking-[0.32em] text-[#7dffd2]/70"
         initial={{ opacity: 0 }}

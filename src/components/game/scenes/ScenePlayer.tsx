@@ -80,6 +80,8 @@ function ScenePlayerInner({
   const [choiceFlush, setChoiceFlush] = useState<ChoiceFlush>("neutral");
   const [choiceGlanceBoost, setChoiceGlanceBoost] = useState(0);
   const advanceTimer = useRef<number | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const go = useCallback(
     (base: GameState, nextId: string, patch?: Partial<GameState>) => {
@@ -172,7 +174,10 @@ function ScenePlayerInner({
 
   const onAmbient = useCallback(
     (id: string, secret?: string) => {
-      onState(applyAmbientClick(state, id, secret));
+      const current = stateRef.current;
+      const next = applyAmbientClick(current, id, secret);
+      stateRef.current = next;
+      onState(next);
       const asides: Record<string, string> = {
         "chamber-07": "Chamber 07 blinked at you. Rude architecture.",
         "dashed-frame": "Dashes mean 'temporary.' Everything here is temporary.",
@@ -194,14 +199,17 @@ function ScenePlayerInner({
         setPokeNotice(aside);
       }
     },
-    [onState, state, pokeable],
+    [onState, pokeable],
   );
 
   const onRoamer = useCallback(
     (kind: string, secret?: string) => {
-      onState(applyRoamerCatch(state, kind, secret));
+      const current = stateRef.current;
+      const next = applyRoamerCatch(current, kind, secret);
+      stateRef.current = next;
+      onState(next);
     },
-    [onState, state],
+    [onState],
   );
 
   if (!scene) {
@@ -256,15 +264,17 @@ function ScenePlayerInner({
     if (!pokeable) return;
     setPokeFlinch(true);
     window.setTimeout(() => setPokeFlinch(false), 520);
-    const pokes = (state.counters.orbPokes ?? 0) + 1;
-    // Pass the line currently on the bubble so mid/late pokes never silently no-op.
+    // Always read latest counters — rapid pokes must not undercount via stale closure.
+    const current = stateRef.current;
+    const pokes = (current.counters.orbPokes ?? 0) + 1;
     const currentLine =
-      pokeNotice ?? reaction ?? resolveAiLine(scene?.aiLine, scene?.aiLineIf, state.flags);
+      pokeNotice ?? reaction ?? resolveAiLine(scene?.aiLine, scene?.aiLineIf, current.flags);
     const { next, notice, glassEvent, chamberStatus: status } = applyOrbPoke(
-      state,
+      current,
       pokes,
       currentLine,
     );
+    stateRef.current = next;
     onState(next);
     // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);

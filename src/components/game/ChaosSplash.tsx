@@ -103,7 +103,7 @@ export function ChaosSplash({
             animate={{ opacity: [0, 1, 1, 0] }}
             transition={{ delay: 2.4, duration: 2.2, times: [0, 0.15, 0.75, 1] }}
           >
-            VISUAL INTEGRITY: ACCEPTABLE
+            WRONG PIECE DOCKED // FACILITY APPLAUDS ITSELF
           </motion.div>
         </motion.div>
       </div>

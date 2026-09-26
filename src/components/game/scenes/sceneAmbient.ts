@@ -243,8 +243,8 @@ export function applyAmbientClick(
   id: string,
   secret?: string,
 ): GameState {
-  // REGRESSION: every ambient gag fire (incl. REPLACEMENT FAILED / printer departure)
-  // must bump Ambient fiddling — never toast-only.
+  // REGRESSION: when an ambient gag toast fires (incl. rare REPLACEMENT FAILED),
+  // Ambient fiddling must bump — never toast-only. Silent relocates may skip both.
   const secrets = [...state.secrets];
   if (secret && !secrets.includes(secret)) secrets.push(secret);
   const prev = state.counters.ambientClicks ?? 0;

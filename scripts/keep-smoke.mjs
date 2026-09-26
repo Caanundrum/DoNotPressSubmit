@@ -111,7 +111,7 @@ assert(/Visual Vertical Slice|Grade-A/i.test(rule), "Cursor rule: VVS / Grade-A 
 
 const view = read("src/components/game/scenes/ScenePlayerView.tsx");
 assert(/data-form-owns-center|form owns center|assistant-yield/i.test(view), "safe layering: form owns center");
-assert(/z-\[34\]|z-\[28\]/.test(view), "safe layering z-index stack");
+assert(/z-\[38\]|z-\[26\]|z-\[34\]|z-\[28\]/.test(view), "safe layering z-index stack");
 
 const roam = read("src/game/ambientRoam.ts");
 assert(/pickSlot|GAG_SLOTS|CHAMBER_SLOTS/.test(roam), "ambient roam slot pools");
@@ -121,17 +121,19 @@ const bg = read("src/components/game/BackgroundGags.tsx");
 assert(/data-ambient-roam|pickSlotDistant|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
-assert(/chamberSlot|data-roam-egg="chamber-07"/.test(fac), "CHAMBER 07 relocates");
+assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocates");
 assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
 assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
 
 const title = read("src/components/game/TitleScreen.tsx");
-assert(!/FacilityBackground|BackgroundGags/.test(title), "title has no facility / gag eggs");
-assert(!/AssistantOrb/.test(title), "title has no Assistant orb");
-assert(/data-title-clean/.test(title), "title marks clean void card");
+assert(/FacilityBackground/.test(title), "title restores facility depth");
+assert(/BackgroundGags/.test(title), "title restores ambient gag eggs");
+assert(/AssistantOrb/.test(title), "title restores Assistant orb");
+assert(/data-title-cinematic|data-title-footer/.test(title), "title marks cinematic + footer");
 assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
+assert(!/data-title-clean/.test(title), "title is not the clean void card");
 
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");
@@ -142,6 +144,15 @@ assert(/What are you not supposed to do/.test(titleLogo), "title SUBMIT gag keep
 assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
 assert(/BackgroundGags/.test(view), "in-assessment ambient gags present");
+
+const glass = read("src/components/game/scenes/GlassStitchOverlay.tsx");
+assert(/spiderweb|fracture|impact/i.test(glass), "crack FX reads as glass fracture");
+assert(/data-glass-behind-form|z-\[22\]/.test(glass), "crack stays behind form chrome");
+assert(/data-glass-stitch|stitching UI/.test(glass), "stitch tier present");
+assert(/phase === "stitch"/.test(glass) && /ticket/.test(glass), "ticket only on stitch ladder");
+
+assert(/data-assistant-safe-dock|data-form-above-glass/.test(view), "bubble safe dock hardened");
+assert(/z-\[38\]|z-\[26\]/.test(view), "safe layering z-index stack (form above assistant)");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

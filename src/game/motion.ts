@@ -65,41 +65,41 @@ export function orbStageStyle(
   // Safe-zone dock: orb + dialogue fully on-screen after every non-gag advance.
   // Inset aggressively so Act I Form 01 / listen and Act II right docks never clip.
   if (spotlight || anchor === "spotlight") {
-    return { left: "16%", top: "30%", transform: "translate(-50%, -50%)", size: 188 };
+    return { left: "12%", top: "28%", transform: "translate(-50%, -50%)", size: 176 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
       // Dialogue docks left of orb — keep both inside the right safe column.
-      return { left: "84%", top: "36%", transform: "translate(-50%, -50%)", size: 118 };
+      return { left: "88%", top: "34%", transform: "translate(-50%, -50%)", size: 110 };
     case "listen":
       // Form 01 etc. — left dock, clear of restless CTAs and stage header.
-      return { left: "14%", top: "40%", transform: "translate(-50%, -50%)", size: 136 };
+      return { left: "11%", top: "38%", transform: "translate(-50%, -50%)", size: 128 };
     case "pace":
       // Stay above the floor so orb+dialogue clear the viewport at 1280×800.
       // Keep x travel small — wide pace loops were clipping dialogue off-stage.
-      return { left: "50%", top: "66%", transform: "translate(-50%, -50%)", size: 108 };
+      return { left: "50%", top: "70%", transform: "translate(-50%, -50%)", size: 100 };
     case "flee":
-      return { left: "82%", top: "18%", transform: "translate(-50%, -50%)", size: 96 };
+      return { left: "88%", top: "16%", transform: "translate(-50%, -50%)", size: 90 };
     case "loom":
       // Act III hazard etc. — keep full orb+bubble inside frame at 1280×800.
-      return { left: "82%", top: "26%", transform: "translate(-50%, -50%)", size: 140 };
+      return { left: "88%", top: "24%", transform: "translate(-50%, -50%)", size: 128 };
     case "hide":
       // Buried corner — gag allowlist only; still keep bubble on-screen.
-      return { left: "14%", top: "74%", transform: "translate(-50%, -50%)", size: 78 };
+      return { left: "12%", top: "76%", transform: "translate(-50%, -50%)", size: 74 };
     case "overhead":
-      return { left: "82%", top: "16%", transform: "translate(-50%, -50%)", size: 104 };
+      return { left: "88%", top: "14%", transform: "translate(-50%, -50%)", size: 96 };
     case "center":
-      return { left: "15%", top: "34%", transform: "translate(-50%, -50%)", size: 148 };
+      return { left: "12%", top: "32%", transform: "translate(-50%, -50%)", size: 140 };
     case "avoid-submit":
-      return { left: "14%", top: "68%", transform: "translate(-50%, -50%)", size: 118 };
+      return { left: "11%", top: "70%", transform: "translate(-50%, -50%)", size: 110 };
     case "dock-left":
     default:
       return {
-        left: `${14 + jitter}%`,
-        top: "46%",
+        left: `${11 + jitter}%`,
+        top: "44%",
         transform: "translate(-50%, -50%)",
-        size: 132,
+        size: 124,
       };
   }
 }
@@ -209,18 +209,17 @@ export function panelLayoutClass(
   }
 
   // Reserved assistant column / floor — form layouts cannot enter.
-  // Slightly taller left reserve so Act III setpiece chase panels never bury docked orb.
-  // Punch list: form owns center; bubble stays in safe-zone dock.
+  // Wider left/right reserve so poke-stress bubbles never cover Q/A.
   const leaveLeft =
-    "left-[min(34vw,360px)] right-[2%] max-w-[min(64vw,860px)]";
+    "left-[min(36vw,380px)] right-[2%] max-w-[min(62vw,840px)]";
   const leaveRight =
-    "left-[2%] right-[min(36vw,380px)] max-w-[min(64vw,860px)]";
+    "left-[2%] right-[min(38vw,400px)] max-w-[min(62vw,840px)]";
   const leaveBottom =
-    "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(58vh,520px)] max-w-[min(92vw,980px)] mx-auto";
+    "left-[2%] right-[2%] top-[6%] bottom-auto max-h-[min(56vh,500px)] max-w-[min(92vw,980px)] mx-auto";
 
   if (spotlight) {
     // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
-    return "right-[2%] bottom-[5%] w-[min(64vw,480px)] max-w-[calc(100%-min(32vw,320px))]";
+    return "right-[2%] bottom-[5%] w-[min(60vw,460px)] max-w-[calc(100%-min(34vw,340px))]";
   }
 
   if (side === "bottom") {
@@ -241,14 +240,14 @@ export function panelLayoutClass(
   switch (motion) {
     case "edge":
       return side === "right"
-        ? "left-[2%] top-[10%] w-[min(66vw,660px)] right-[min(30vw,320px)]"
-        : "left-[min(30vw,320px)] top-[10%] w-[min(66vw,660px)]";
+        ? "left-[2%] top-[10%] w-[min(62vw,640px)] right-[min(32vw,340px)]"
+        : "left-[min(32vw,340px)] top-[10%] w-[min(62vw,640px)]";
     case "pressure":
       return `${band} top-[9%] w-auto`;
     case "reanchor":
       return side === "right"
-        ? "left-[2%] top-[10%] w-[min(66vw,680px)]"
-        : "right-[2%] top-[10%] w-[min(66vw,680px)] left-[min(30vw,320px)]";
+        ? "left-[2%] top-[10%] w-[min(62vw,660px)]"
+        : "right-[2%] top-[10%] w-[min(62vw,660px)] left-[min(32vw,340px)]";
     case "drift":
       return `${band} top-[10%] bottom-auto w-auto`;
     case "scatter":
@@ -256,12 +255,12 @@ export function panelLayoutClass(
     case "slide-right":
       // Prefer the free side even if the motion name says right.
       return side === "right"
-        ? "left-[2%] top-[10%] w-[min(64vw,700px)]"
-        : "right-[2%] top-[10%] w-[min(64vw,700px)] left-[min(30vw,320px)]";
+        ? "left-[2%] top-[10%] w-[min(60vw,680px)]"
+        : "right-[2%] top-[10%] w-[min(60vw,680px)] left-[min(32vw,340px)]";
     case "slide-left":
       return side === "left"
-        ? "left-[min(30vw,320px)] top-[10%] w-[min(64vw,700px)]"
-        : "left-[2%] top-[10%] w-[min(64vw,700px)] right-[min(30vw,320px)]";
+        ? "left-[min(32vw,340px)] top-[10%] w-[min(60vw,680px)]"
+        : "left-[2%] top-[10%] w-[min(60vw,680px)] right-[min(32vw,340px)]";
     case "drop":
       return `${band} top-[7%] w-auto`;
     case "rise":

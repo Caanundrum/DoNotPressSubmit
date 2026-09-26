@@ -281,10 +281,12 @@ function ScenePlayerInner({
     setReaction(null);
     if (glassEvent === "crack") {
       setGlassPhase("crack");
-      window.setTimeout(() => setGlassPhase((p) => (p === "crack" ? "idle" : p)), 2800);
+      // Readable shatter beat, then fade clear — never leave lines across waits.
+      window.setTimeout(() => setGlassPhase((p) => (p === "crack" ? "idle" : p)), 2400);
     } else if (glassEvent === "stitch") {
+      // Ladder: residual crack → tape stitch → clear (ticket shows during stitch only).
       setGlassPhase("stitch");
-      window.setTimeout(() => setGlassPhase("idle"), 4500);
+      window.setTimeout(() => setGlassPhase("idle"), 4200);
     }
     if (status) {
       setChamberStatus(status);

@@ -126,8 +126,16 @@ assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
 assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
 
 const title = read("src/components/game/TitleScreen.tsx");
-assert(/FacilityBackground|BackgroundGags/.test(title), "title mounts facility + gag eggs");
-assert(/onAmbient/.test(title), "title ambient eggs are live");
+assert(!/FacilityBackground|BackgroundGags/.test(title), "title has no facility / gag eggs");
+assert(!/AssistantOrb/.test(title), "title has no Assistant orb");
+assert(/data-title-clean/.test(title), "title marks clean void card");
+assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
+assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
+assert(/TitleLogo/.test(title), "title keeps brand logo");
+
+assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
+assert(/FacilityBackground/.test(view), "in-assessment facility background present");
+assert(/BackgroundGags/.test(view), "in-assessment ambient gags present");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

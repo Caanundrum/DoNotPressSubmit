@@ -179,7 +179,7 @@ button {
 }
 
 /* Facility-HUD panels — angular system chrome, not SaaS cards.
-   Near-opaque fill so Assistant bubbles / glass FX cannot ghost through Q/A. */
+   Fully opaque fill so Assistant bubbles / glass FX cannot ghost through Q/A. */
 .facility-hud,
 .assessment-panel.facility-hud {
   border-radius: 2px;
@@ -189,14 +189,14 @@ button {
     inset 0 1px 0 rgba(110, 231, 255, 0.12),
     0 18px 48px rgba(0, 0, 0, 0.55);
   background:
-    linear-gradient(180deg, rgba(110, 231, 255, 0.06) 0 1px, transparent 1px),
+    linear-gradient(180deg, rgba(110, 231, 255, 0.08) 0 1px, transparent 1px),
     linear-gradient(
       155deg,
-      rgba(18, 26, 40, 0.97) 0%,
-      rgba(6, 10, 16, 0.99) 55%,
-      rgba(10, 14, 22, 0.98) 100%
+      rgb(16, 24, 38) 0%,
+      rgb(6, 10, 16) 55%,
+      rgb(8, 12, 20) 100%
     );
-  backdrop-filter: blur(22px) saturate(1.05);
+  backdrop-filter: none;
   isolation: isolate;
 }
 

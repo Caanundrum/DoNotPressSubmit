@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { roamIntervalMs } from "@/game/ambientRoam";
 import { AssistantOrb } from "./AssistantOrb";
 import { AudioEnableControl } from "./AudioEnableControl";
 import { BackgroundGags } from "./BackgroundGags";
@@ -10,6 +11,17 @@ import { FacilityBackground } from "./FacilityBackground";
 import { TitleLogo } from "./TitleLogo";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
+
+const TITLE_IDLE_COMEDY = [
+  "Bay 03 insists EVERYTHING IS FINE without being asked.",
+  "A drone memo drifts: REPLACEMENT FAILED. Also: benefits.",
+  "Printer queue: SCISSORS EN ROUTE. Paper files anxiety.",
+  "CHAMBER 07 relocates itself. Architecture has opinions.",
+  "Two corridor drones deadlock on after-you etiquette.",
+  "Facility status ticker: morale malware patch deferred.",
+  "Tiny robot eyes the DO NOT PRESS plaque. Again.",
+  "HUMAN PERFORMANCE mug is late for its own meeting.",
+];
 
 export function TitleScreen({
   orbMood,
@@ -34,6 +46,31 @@ export function TitleScreen({
   const remembered = waving || allyBefore;
   const [eggLine, setEggLine] = useState<string | null>(null);
   const [eggClicks, setEggClicks] = useState(0);
+
+  // Independent timed comedy — idle watching stays rewarding (separate from gag rotation).
+  useEffect(() => {
+    let timer: number;
+    let clearLine: number | undefined;
+    let idx = 0;
+    const tick = () => {
+      idx = (idx + 1 + Math.floor(Math.random() * 3)) % TITLE_IDLE_COMEDY.length;
+      const line = TITLE_IDLE_COMEDY[idx]!;
+      setEggLine((prev) => {
+        if (prev && !TITLE_IDLE_COMEDY.includes(prev)) return prev;
+        return line;
+      });
+      if (clearLine) window.clearTimeout(clearLine);
+      clearLine = window.setTimeout(() => {
+        setEggLine((cur) => (TITLE_IDLE_COMEDY.includes(cur ?? "") ? null : cur));
+      }, 2800);
+      timer = window.setTimeout(tick, roamIntervalMs(9000, 16000));
+    };
+    timer = window.setTimeout(tick, roamIntervalMs(7000, 11000));
+    return () => {
+      clearTimeout(timer);
+      if (clearLine) clearTimeout(clearLine);
+    };
+  }, []);
 
   const onResidueClick = () => {
     if (!remembered) return;

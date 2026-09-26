@@ -178,6 +178,30 @@ button {
   backdrop-filter: blur(18px);
 }
 
+/* Facility-HUD panels — angular system chrome, not SaaS cards */
+.facility-hud,
+.assessment-panel.facility-hud {
+  border-radius: 2px;
+  border-color: rgba(110, 231, 255, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55) inset,
+    inset 0 1px 0 rgba(110, 231, 255, 0.12),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+  background:
+    linear-gradient(180deg, rgba(110, 231, 255, 0.06) 0 1px, transparent 1px),
+    linear-gradient(
+      155deg,
+      rgba(22, 32, 48, 0.9) 0%,
+      rgba(8, 12, 20, 0.96) 55%,
+      rgba(12, 18, 28, 0.92) 100%
+    );
+}
+
+.assistant-bubble {
+  border-radius: 2px;
+  border-color: rgba(110, 231, 255, 0.32);
+}
+
 .text-glow {
   text-shadow: 0 0 18px rgba(110, 231, 255, 0.45);
 }

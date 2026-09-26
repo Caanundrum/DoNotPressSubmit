@@ -105,6 +105,22 @@ const rule = read(".cursor/rules/do-not-press-submit.mdc");
 assert(rule.includes("alwaysApply: true"), "Cursor rule alwaysApply");
 assert(/No runtime LLM/i.test(rule), "Cursor rule bans runtime LLM");
 assert(/Hallucinated Dungeons/i.test(rule), "Cursor rule bans HD contamination");
+assert(/authored dialogue/i.test(rule), "Cursor rule: authored Assistant");
+assert(/No auth|no auth|multiplayer/i.test(rule), "Cursor rule: no auth/multiplayer");
+assert(/Visual Vertical Slice|Grade-A/i.test(rule), "Cursor rule: VVS / Grade-A priority");
+
+const view = read("src/components/game/scenes/ScenePlayerView.tsx");
+assert(/data-form-owns-center|form owns center|assistant-yield/i.test(view), "safe layering: form owns center");
+assert(/z-\[34\]|z-\[28\]/.test(view), "safe layering z-index stack");
+
+const roam = read("src/game/ambientRoam.ts");
+assert(/pickSlot|GAG_SLOTS|CHAMBER_SLOTS/.test(roam), "ambient roam slot pools");
+
+const bg = read("src/components/game/BackgroundGags.tsx");
+assert(/data-ambient-roam|pickSlot|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
+
+const fac = read("src/components/game/FacilityBackground.tsx");
+assert(/chamberSlot|data-roam-egg="chamber-07"/.test(fac), "CHAMBER 07 relocates");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

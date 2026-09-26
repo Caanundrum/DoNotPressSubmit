@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { audio } from "@/lib/audio";
 
 /** Printer — Phase 3 paper cascade + scissors drone; P2 clickable SCISSORS label. */
@@ -8,18 +9,22 @@ export function PrinterGag({
   interactive,
   onTip,
   onReact,
+  slot,
 }: {
   interactive?: boolean;
   onTip?: (t: string | null) => void;
   onReact?: () => void;
+  slot?: CSSProperties;
 }) {
   const live = !!interactive;
   return (
     <motion.div
-      className="pointer-events-none absolute bottom-[10%] left-[54%]"
+      className="pointer-events-none absolute"
+      style={slot ?? { left: "54%", top: "78%" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      data-roam-egg="printer"
     >
       <button
         type="button"

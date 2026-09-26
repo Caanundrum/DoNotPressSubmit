@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import type { CSSProperties } from "react";
 import { audio } from "@/lib/audio";
 
 /** REPLACEMENT FAILED — Phase 3 richer motion; P2 clickable memo label. */
@@ -8,19 +9,24 @@ export function DroneGag({
   interactive,
   onTip,
   onReact,
+  slot,
 }: {
   interactive?: boolean;
   onTip?: (t: string | null) => void;
   onReact?: () => void;
+  /** Roaming anchor — relocates between appearances (not opacity-only). */
+  slot?: CSSProperties;
 }) {
   const live = !!interactive;
   return (
     <motion.div
-      className="pointer-events-none absolute left-[10%] top-[54%]"
+      className="pointer-events-none absolute"
+      style={slot ?? { left: "10%", top: "54%" }}
       initial={{ opacity: 0, x: -48 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 48 }}
       transition={{ duration: 0.8 }}
+      data-roam-egg="drone"
     >
       <motion.button
         type="button"

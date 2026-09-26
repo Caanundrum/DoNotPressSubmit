@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { GAG_SLOTS, pickSlot, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 import { DroneGag as DroneGagImpl } from "./gags/DroneGag";
@@ -14,6 +15,7 @@ type GagProps = {
   interactive?: boolean;
   onTip?: (t: string | null) => void;
   onReact?: () => void;
+  slot?: CSSProperties;
 };
 
 function DroneGag(props: GagProps) {
@@ -120,6 +122,8 @@ export function BackgroundGags({
   onAmbient?: (id: string, secret?: string) => void;
 }) {
   const [active, setActive] = useState<GagId>("drone");
+  const [slot, setSlot] = useState<RoamSlot>(() => pickSlot(GAG_SLOTS.drone!));
+  const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "42%", top: "72%" });
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const touched = useRef<Record<GagId, boolean>>({
@@ -130,21 +134,43 @@ export function BackgroundGags({
     containment: false,
   });
   const prevActive = useRef<GagId>("drone");
+  const slotRef = useRef<RoamSlot>(slot);
   const onAmbientRef = useRef(onAmbient);
   useEffect(() => {
     onAmbientRef.current = onAmbient;
   }, [onAmbient]);
 
+  // Rotate gag identity AND relocate to a fresh anchor (not opacity-only on fixed pins).
   useEffect(() => {
     if (paused) return;
     let i = 0;
-    const id = setInterval(() => {
-      // Semi-random skip so players don't see every gag every visit.
+    let timer: number;
+    const tick = () => {
       const step = Math.random() > 0.22 ? 1 : 2;
       i = (i + step) % ORDER.length;
-      setActive(ORDER[i]!);
-    }, 8500);
-    return () => clearInterval(id);
+      const next = ORDER[i]!;
+      const nextSlot = pickSlot(GAG_SLOTS[next] ?? GAG_SLOTS.drone!, slotRef.current);
+      slotRef.current = nextSlot;
+      setSlot(nextSlot);
+      setActive(next);
+      // Tiny DO NOT PRESS robot also relocates on its own cadence.
+      if (Math.random() > 0.4) {
+        setTinySlot((prev) =>
+          pickSlot(
+            [
+              { left: "42%", top: "72%" },
+              { left: "18%", top: "68%" },
+              { left: "64%", top: "74%" },
+              { left: "50%", top: "58%" },
+            ],
+            prev,
+          ),
+        );
+      }
+      timer = window.setTimeout(tick, roamIntervalMs(7500, 13000));
+    };
+    timer = window.setTimeout(tick, roamIntervalMs(6500, 10000));
+    return () => clearTimeout(timer);
   }, [paused]);
 
   // P2: each rotating gag gets a dedicated departure ambient (toast + Ambient fiddling) —
@@ -176,53 +202,65 @@ export function BackgroundGags({
   const live = !!onAmbient;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
+    <div
+      className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+      data-ambient-roam="true"
+    >
       <AnimatePresence mode="wait">
         {active === "drone" && !paused ? (
           <DroneGag
-            key="drone"
+            key={`drone-${slot.left}-${slot.top}`}
             interactive={live}
             onTip={setTip}
             onReact={() => react("drone")}
+            slot={slot}
           />
         ) : null}
         {active === "coffee" && !paused ? (
           <CoffeeGag
-            key="coffee"
+            key={`coffee-${slot.left}-${slot.top}`}
             interactive={live}
             onTip={setTip}
             onReact={() => react("coffee")}
+            slot={slot}
           />
         ) : null}
         {active === "printer" && !paused ? (
           <PrinterGag
-            key="printer"
+            key={`printer-${slot.left}-${slot.top}`}
             interactive={live}
             onTip={setTip}
             onReact={() => react("printer")}
+            slot={slot}
           />
         ) : null}
         {active === "corridor" && !paused ? (
           <CorridorGag
-            key="corridor"
+            key={`corridor-${slot.left}-${slot.top}`}
             interactive={live}
             onTip={setTip}
             onReact={() => react("corridor")}
+            slot={slot}
           />
         ) : null}
         {active === "containment" && !paused ? (
           <ContainmentGag
-            key="containment"
+            key={`containment-${slot.left}-${slot.top}`}
             interactive={live}
             onTip={setTip}
             onReact={() => react("containment")}
+            slot={slot}
           />
         ) : null}
       </AnimatePresence>
 
-      {/* Always-on micro gag — tiny robot secretly presses DO NOT PRESS */}
+      {/* Always-on micro gag — tiny robot secretly presses DO NOT PRESS (roams). */}
       {!paused ? (
-        <div className="pointer-events-none absolute bottom-[18%] left-[42%] h-16 w-40">
+        <div
+          className="pointer-events-none absolute h-16 w-40"
+          style={{ left: tinySlot.left, top: tinySlot.top }}
+          data-roam-egg="do-not-press-bot"
+        >
           <motion.div
             className="absolute bottom-0 left-0 h-3 w-4 rounded-sm border border-metal/50 bg-[#1a2230]"
             animate={{ x: [0, 72, 72, 0], opacity: [0, 1, 1, 0] }}

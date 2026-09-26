@@ -178,7 +178,8 @@ button {
   backdrop-filter: blur(18px);
 }
 
-/* Facility-HUD panels — angular system chrome, not SaaS cards */
+/* Facility-HUD panels — angular system chrome, not SaaS cards.
+   Near-opaque fill so Assistant bubbles / glass FX cannot ghost through Q/A. */
 .facility-hud,
 .assessment-panel.facility-hud {
   border-radius: 2px;
@@ -191,15 +192,28 @@ button {
     linear-gradient(180deg, rgba(110, 231, 255, 0.06) 0 1px, transparent 1px),
     linear-gradient(
       155deg,
-      rgba(22, 32, 48, 0.9) 0%,
-      rgba(8, 12, 20, 0.96) 55%,
-      rgba(12, 18, 28, 0.92) 100%
+      rgba(18, 26, 40, 0.97) 0%,
+      rgba(6, 10, 16, 0.99) 55%,
+      rgba(10, 14, 22, 0.98) 100%
     );
+  backdrop-filter: blur(22px) saturate(1.05);
+  isolation: isolate;
+}
+
+.assessment-panel[data-form-above-glass="true"] {
+  /* Form chrome owns readable surface above fracture FX. */
+  z-index: 38;
 }
 
 .assistant-bubble {
   border-radius: 2px;
   border-color: rgba(110, 231, 255, 0.32);
+  /* Dense fill — never translucent over form if z-order races. */
+  background: linear-gradient(
+    155deg,
+    rgba(10, 16, 26, 0.94) 0%,
+    rgba(6, 10, 18, 0.98) 100%
+  );
 }
 
 .text-glow {

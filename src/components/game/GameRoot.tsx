@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { createInitialState } from "@/game/state";
-import { clearSave, loadSave, loadTitleAlly, loadTitleWave, writeSave } from "@/game/storage";
-import type { GameState, OrbMood, ShellPhase } from "@/game/types";
+import { clearSave, loadSave, writeSave } from "@/game/storage";
+import type { GameState, ShellPhase } from "@/game/types";
 import { SKIP_INTRO_KEY } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
@@ -16,19 +16,10 @@ import { ScenePlayer } from "./scenes/ScenePlayer";
 
 export function GameRoot() {
   const [phase, setPhase] = useState<ShellPhase>("chaos");
-  const [orbMood, setOrbMood] = useState<OrbMood>("neutral");
   const [game, setGame] = useState<GameState | null>(null);
   const [hasContinue, setHasContinue] = useState(() => {
     if (typeof window === "undefined") return false;
     return !!loadSave();
-  });
-  const [titleWave, setTitleWave] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return loadTitleWave().waved;
-  });
-  const [titleAlly, setTitleAlly] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return loadTitleAlly().ally;
   });
   const [reducedMotion, setReducedMotion] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -63,17 +54,10 @@ export function GameRoot() {
       audio.play("ambience", 0.22);
     }
     setHasContinue(!!loadSave());
-    setTitleWave(loadTitleWave().waved);
-    setTitleAlly(loadTitleAlly().ally);
   }, []);
 
-  const onHoverChange = useCallback((hovering: boolean, ms: number) => {
-    if (!hovering) {
-      setOrbMood("neutral");
-      return;
-    }
-    setOrbMood(ms > 4500 ? "amused" : "listening");
-  }, []);
+  /** BeginControl still reports hover; title no longer drives an orb mood. */
+  const onHoverChange = useCallback((_hovering: boolean, _ms: number) => {}, []);
 
   const beginNew = useCallback(() => {
     warmAudio();
@@ -83,7 +67,6 @@ export function GameRoot() {
     setGame(next);
     writeSave(next);
     setHasContinue(true);
-    setOrbMood("neutral");
     setPhase("playing");
   }, [warmAudio]);
 
@@ -97,7 +80,6 @@ export function GameRoot() {
     }
     setGame(saved);
     setHasContinue(true);
-    setOrbMood(saved.aiMood);
     setPhase("playing");
   }, [warmAudio, beginNew]);
 
@@ -108,16 +90,12 @@ export function GameRoot() {
 
   const updateGame = useCallback((next: GameState) => {
     setGame(next);
-    setOrbMood(next.aiMood);
   }, []);
 
   const returnTitle = useCallback(() => {
     speech.cancel();
     setPhase("title");
     setHasContinue(!!loadSave());
-    setTitleWave(loadTitleWave().waved);
-    setTitleAlly(loadTitleAlly().ally);
-    setOrbMood(loadTitleWave().waved ? "excited" : loadTitleAlly().ally ? "amused" : "neutral");
   }, []);
 
   const replay = useCallback(() => {
@@ -127,7 +105,6 @@ export function GameRoot() {
     setGame(next);
     writeSave(next);
     setHasContinue(true);
-    setOrbMood("neutral");
     setPhase("playing");
   }, []);
 
@@ -176,13 +153,9 @@ export function GameRoot() {
             transition={{ duration: 0.75 }}
           >
             <TitleScreen
-              orbMood={orbMood}
               onBegin={beginNew}
               onContinue={hasContinue ? continueAssessment : undefined}
               onHoverChange={onHoverChange}
-              escapedBefore={!!loadSave()?.ending && loadSave()?.ending === "escape"}
-              assistantWaving={titleWave}
-              allyBefore={titleAlly}
             />
           </motion.div>
         ) : null}
@@ -205,8 +178,13 @@ export function GameRoot() {
         ) : null}
       </AnimatePresence>
 
-      <div className="vignette" />
-      <div className="scanlines" />
+      {/* Title is a clean void card — vignette/scanlines resume in-assessment. */}
+      {phase !== "title" ? (
+        <>
+          <div className="vignette" />
+          <div className="scanlines" />
+        </>
+      ) : null}
     </div>
   );
 }

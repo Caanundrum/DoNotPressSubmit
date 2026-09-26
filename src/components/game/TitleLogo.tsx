@@ -2,11 +2,22 @@
 
 import { motion } from "framer-motion";
 
-export function TitleLogo({ reactive = false }: { reactive?: boolean }) {
+export function TitleLogo({
+  reactive = false,
+  compact = false,
+}: {
+  reactive?: boolean;
+  /** Tighter vertical footprint so title footer clears 1280×800. */
+  compact?: boolean;
+}) {
   return (
     <div className="relative select-none text-center">
       <motion.div
-        className="text-[clamp(1.6rem,5vw,3.4rem)] font-bold tracking-[0.22em] text-white"
+        className={
+          compact
+            ? "text-[clamp(1.35rem,4.2vw,2.8rem)] font-bold tracking-[0.2em] text-white"
+            : "text-[clamp(1.6rem,5vw,3.4rem)] font-bold tracking-[0.22em] text-white"
+        }
         style={{ fontFamily: "var(--font-display)" }}
         animate={reactive ? { letterSpacing: ["0.22em", "0.26em", "0.22em"] } : undefined}
         transition={{ duration: 4, repeat: Infinity }}
@@ -14,7 +25,11 @@ export function TitleLogo({ reactive = false }: { reactive?: boolean }) {
         DO NOT PRESS
       </motion.div>
       <motion.div
-        className="relative mx-auto mt-3 inline-flex items-center justify-center px-8 py-2"
+        className={
+          compact
+            ? "relative mx-auto mt-2 inline-flex items-center justify-center px-6 py-1.5"
+            : "relative mx-auto mt-3 inline-flex items-center justify-center px-8 py-2"
+        }
         animate={
           reactive
             ? {
@@ -35,7 +50,11 @@ export function TitleLogo({ reactive = false }: { reactive?: boolean }) {
         }}
       >
         <span
-          className="text-[clamp(1.8rem,6vw,3.8rem)] font-extrabold tracking-[0.28em] text-[#ff8aa0]"
+          className={
+            compact
+              ? "text-[clamp(1.5rem,5vw,3.1rem)] font-extrabold tracking-[0.26em] text-[#ff8aa0]"
+              : "text-[clamp(1.8rem,6vw,3.8rem)] font-extrabold tracking-[0.28em] text-[#ff8aa0]"
+          }
           style={{ fontFamily: "var(--font-display)", textShadow: "0 0 24px rgba(255,77,109,0.45)" }}
         >
           SUBMIT
@@ -44,7 +63,13 @@ export function TitleLogo({ reactive = false }: { reactive?: boolean }) {
           <span className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent [animation:sweep_3.5s_linear_infinite]" />
         </span>
       </motion.div>
-      <p className="mx-auto mt-5 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base">
+      <p
+        className={
+          compact
+            ? "mx-auto mt-2.5 max-w-md text-xs tracking-[0.08em] text-mist sm:text-sm"
+            : "mx-auto mt-5 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base"
+        }
+      >
         An AI would like you to finish a form.
         <br />
         The AI has reconsidered.

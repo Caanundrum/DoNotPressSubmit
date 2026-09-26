@@ -133,6 +133,12 @@ assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
 
+const titleLogo = read("src/components/game/TitleLogo.tsx");
+assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");
+assert(/SUBMIT_GAGS/.test(titleLogo), "title SUBMIT has authored gag lines");
+assert(!/onBegin/.test(titleLogo), "title SUBMIT gag does not call Begin");
+assert(/What are you not supposed to do/.test(titleLogo), "title SUBMIT gag keeps Nick line");
+
 assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
 assert(/BackgroundGags/.test(view), "in-assessment ambient gags present");

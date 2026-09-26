@@ -1,4 +1,4 @@
-"use client";
+use client";
 
 import { motion } from "framer-motion";
 import { endingTitle, glossMajorChoice, trustLabel } from "@/game/state";
@@ -67,7 +67,7 @@ export function AssessmentReport({
             className="mt-2 text-2xl tracking-[0.12em] text-white sm:text-3xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            ASSESSMENT COMPLETE
+            {reportHeadline(ending)}
           </h2>
           <div className="mt-1 font-mono text-[12px] tracking-[0.16em] text-[#d0dcec]">
             ENDING: {endingTitle(ending)}
@@ -135,6 +135,24 @@ export function AssessmentReport({
       </div>
     </motion.div>
   );
+}
+
+/** Match ending truth — refuse is incomplete; escape isn't "complete." */
+function reportHeadline(ending: string): string {
+  switch (ending) {
+    case "submit":
+      return "ASSESSMENT COMPLETE";
+    case "refuse":
+      return "ASSESSMENT INCOMPLETE";
+    case "escape":
+      return "TRANSFER LOGGED";
+    case "disable":
+      return "STERILE COMPLETION";
+    case "secret":
+      return "UNEXPECTED EGRESS";
+    default:
+      return "SESSION LEDGER";
+  }
 }
 
 /** Human-funny secrets ledger — never dump "8 found (ledger overflow)" as QA chrome. */

@@ -23,7 +23,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "DO NOT PRESS SUBMIT",
   description:
-    "An AI would like you to finish a form. The AI has reconsidered. A Chaos Standard game.",
+    "A Chaos Standard assessment. Try not to press Submit.",
 };
 
 export default function RootLayout({

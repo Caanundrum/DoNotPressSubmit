@@ -95,20 +95,21 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
   const dockLeft = dialogueDocksLeft(orbAnchor);
   // Safe layering: form owns center (higher z). Bubble yields under form chrome on collision.
   // buryAssistant / Act III popup chaos keeps the gag stack (orb under / chaotic).
-  const assistantZ = buryAssistant ? "z-[15]" : "z-[28]";
-  const panelZ = buryAssistant || scene.kind === "setpiece" ? "z-30" : "z-[34]";
+  // Form always above assistant chrome on non-gag beats (opaque panel kills see-through cover).
+  const assistantZ = buryAssistant ? "z-[15]" : "z-[26]";
+  const panelZ = buryAssistant || scene.kind === "setpiece" ? "z-30" : "z-[38]";
   // Right-edge beats: row with bubble toward center. Low beats: column above. Else column below.
   const assistantLayout = dockLeft
-    ? "flex-row-reverse"
+    ? "flex-row-reverse items-start"
     : dockAbove
-      ? "flex-col-reverse"
-      : "flex-col";
+      ? "flex-col-reverse items-center"
+      : "flex-col items-center";
   // Long lines shorten into the safe column so Q/A never hides under the bubble.
   const bubbleMax = spotlight
-    ? "min(280px, 36vw)"
+    ? "min(240px, 32vw)"
     : dockLeft
-      ? "min(220px, 30vw)"
-      : "min(236px, 32vw)";
+      ? "min(196px, 26vw)"
+      : "min(210px, 28vw)";
 
   return (
     <div
@@ -135,18 +136,8 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         onAmbient={onAmbient}
       />
       <PathResidue kind={residue} />
-      <GlassStitchOverlay
-        phase={
-          glassPhase !== "idle"
-            ? glassPhase
-            : state.flags.glassStitched
-              ? "stitch"
-              : state.flags.glassCracked
-                ? "crack"
-                : "idle"
-        }
-        ticket={showTicket}
-      />
+      {/* Phase-only: idle clears fracture. Flags must not re-paint crack across waits. */}
+      <GlassStitchOverlay phase={glassPhase} ticket={showTicket} />
       {!systemLock && scene.kind !== "climax" ? (
         <AmbientChrome
           act={scene.act}
@@ -196,7 +187,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         buryAssistant gag scenes keep the orb under/behind the form on purpose.
       */}
       <motion.div
-        className={`absolute ${assistantZ} flex items-center gap-2 pointer-events-none ${assistantLayout}`}
+        className={`absolute ${assistantZ} flex gap-1.5 pointer-events-none ${assistantLayout}`}
         style={{
           left: orbStyle.left,
           top: orbStyle.top,
@@ -204,20 +195,21 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           // Right-dock: width follows content so the bubble can sit left of the orb inside the frame.
           width: dockLeft
             ? "auto"
-            : Math.max(orbStyle.size, spotlight ? 248 : 168),
+            : Math.max(orbStyle.size, spotlight ? 220 : 152),
           maxWidth: dockLeft
-            ? "min(40vw, 300px)"
+            ? "min(34vw, 260px)"
             : spotlight
-              ? "min(34vw, 260px)"
-              : "min(32vw, 240px)",
+              ? "min(30vw, 230px)"
+              : "min(28vw, 210px)",
         }}
         data-assistant-dock={dockLeft ? "left" : dockAbove ? "above" : "below"}
         data-assistant-yield={buryAssistant ? "gag" : "safe-zone"}
+        data-assistant-safe-dock="true"
         animate={
           orbAnchor === "pace"
-            ? { x: [-10, 10, -5, 0] }
+            ? { x: [-6, 6, -3, 0] }
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 3, -2, 3, 0], y: [0, -2, 1, 0] }
+              ? { x: [0, 2, -1, 2, 0], y: [0, -1, 1, 0] }
               : spotlight
                 ? { x: 0, y: 0, scale: 1 }
                 : { x: 0, y: 0 }
@@ -263,9 +255,14 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           />
         </div>
         <motion.div
-          className="pointer-events-none glass-panel assistant-bubble shrink px-3 py-2 text-sm leading-relaxed text-[#d7e6f5]"
-          style={{ maxWidth: bubbleMax }}
+          className="pointer-events-none glass-panel assistant-bubble shrink px-2.5 py-1.5 text-sm leading-relaxed text-[#d7e6f5]"
+          style={{
+            maxWidth: bubbleMax,
+            maxHeight: spotlight ? "min(28vh, 180px)" : "min(24vh, 150px)",
+            overflow: "hidden",
+          }}
           key={aiLine || "silent"}
+          data-assistant-bubble="true"
           initial={{
             opacity: 0,
             x: dockLeft ? 8 : 0,
@@ -274,7 +271,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           }}
           animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, x: 0, y: 0, scale: 1 }}
         >
-          <div className="mb-1 font-mono text-[9px] tracking-[0.18em] text-cyan/80">
+          <div className="mb-1 font-mono text-[8px] tracking-[0.16em] text-cyan/80 sm:text-[9px]">
             ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
             {buryAssistant ? " // UNDER PRESSURE" : ""}
             {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
@@ -287,7 +284,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
                   : ""}
           </div>
           <div
-            className={`break-words ${spotlight ? "text-[14px] leading-snug" : "text-[12px] leading-snug sm:text-[13px]"}`}
+            className={`break-words ${spotlight ? "text-[13px] leading-snug" : "text-[11px] leading-snug sm:text-[12px]"}`}
             style={{ overflowWrap: "anywhere" }}
           >
             {systemLock ? "…" : aiLine || "…"}
@@ -369,6 +366,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         )}`}
         data-panel-safe={buryAssistant ? "gag-overlap" : "respects-assistant"}
         data-form-owns-center={buryAssistant ? "false" : "true"}
+        data-form-above-glass="true"
         initial={panelVar.initial}
         animate={
           panelShake

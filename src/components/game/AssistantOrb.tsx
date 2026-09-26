@@ -234,10 +234,10 @@ export function AssistantOrb({
                 if (!dragOrigin.current) return;
                 const rawX = e.clientX - dragOrigin.current.x;
                 const rawY = e.clientY - dragOrigin.current.y;
-                // Resist: follow at ~35%, clamp small.
+                // Resist: follow at ~28%, clamp tight so poke-drag never covers form Q/A.
                 setDrag({
-                  x: Math.max(-28, Math.min(28, rawX * 0.35)),
-                  y: Math.max(-20, Math.min(20, rawY * 0.35)),
+                  x: Math.max(-14, Math.min(14, rawX * 0.28)),
+                  y: Math.max(-10, Math.min(10, rawY * 0.28)),
                 });
               }
             : undefined

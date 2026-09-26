@@ -361,12 +361,12 @@ export function AssistantOrb({
       </motion.div>
 
       {label ? (
-        <div className="pointer-events-none max-w-[240px] text-center font-mono text-[10px] tracking-[0.18em] text-[#c5d3e4]">
+        <div className="pointer-events-none max-w-[240px] text-center font-mono text-[10px] tracking-[0.18em] text-[#e2ebf6]">
           {label}
         </div>
       ) : null}
       {pokeable ? (
-        <div className="pointer-events-none font-mono text-[8px] tracking-[0.2em] text-cyan/55">
+        <div className="pointer-events-none font-mono text-[8px] tracking-[0.2em] text-cyan/80">
           UNAUTHORIZED CONTACT?
         </div>
       ) : null}

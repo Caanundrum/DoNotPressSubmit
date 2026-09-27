@@ -162,5 +162,93 @@ export function FacilityBackground({
                 ? "linear-gradient(to top, #222833, #3a4252)"
                 : "linear-gradient(to top, #152033, #2a3d5cb3)",
               boxShadow: "none",
+              transition: "left 1.8s ease-in-out, height 1.8s ease-in-out, opacity 0.9s ease",
+              transform:
+                peel && i % 2 === 0
+                  ? `translateY(${3 + i * 0.5}px) rotate(${(i - 3) * 0.2}deg)`
+                  : undefined,
+            }}
+          >
+            <motion.div
+              className="absolute inset-x-2 top-4 h-1 rounded"
+              style={{
+                background: sterile ? "rgba(255,255,255,0.2)" : "rgba(110,231,255,0.28)",
+              }}
+              animate={{
+                opacity: systemLock ? 0.7 : flicker ? [0.12, 0.55, 0.18, 0.5, 0.12] : [0.15, 0.45, 0.15],
+              }}
+              transition={{
+                duration: flicker ? 2.4 + i * 0.15 : 4.5 + i * 0.35,
+                repeat: Infinity,
+              }}
+            />
+            <div className="absolute inset-x-3 bottom-6 space-y-1">
+              {[...Array(4)].map((__, r) => (
+                <div key={r} className="h-px bg-white/10" />
+              ))}
+            </div>
+          </div>
+        ))}
+        <motion.div
+          className="absolute top-[34%] h-2 w-28 rounded-full bg-cyan/10"
+          animate={{ x: sterile ? "40%" : ["-10%", "110%"] }}
+          transition={{
+            duration: sterile ? 0 : 58 / Math.max(0.35, intensity),
+            repeat: sterile ? 0 : Infinity,
+            ease: "linear",
+          }}
+          style={{ left: 0 }}
+        />
+        <motion.div
+          className="absolute top-[48%] h-1.5 w-20 rounded-full bg-white/8"
+          animate={{ x: sterile ? "55%" : ["110%", "-20%"] }}
+          transition={{
+            duration: sterile ? 0 : 74 / Math.max(0.35, intensity),
+            repeat: sterile ? 0 : Infinity,
+            ease: "linear",
+          }}
+        />
+      </motion.div>
 
-/* partial upload 0 */
+      <motion.div className="absolute inset-0" style={{ x: midX, y: midY }} data-ambient-roam="facility">
+        {/* CHAMBER 07 — relocates on semi-random timings when live. Title calm: one panel at a time. */}
+        {(!calm || panelFocus === "chamber") ? (
+        <button
+          type="button"
+          disabled={!live}
+          className={`absolute h-44 w-28 border border-white/10 bg-white/5 text-left backdrop-blur-[2px] transition ${
+            live
+              ? "pointer-events-auto cursor-pointer hover:border-cyan/50 hover:bg-cyan/10"
+              : "pointer-events-none"
+          } ${tinted === "chamber-07" ? "border-cyan bg-cyan/15" : ""}`}
+          style={{
+            left: chamberSlot.left,
+            top: chamberSlot.top,
+            transition: "left 1.8s ease-in-out, top 1.8s ease-in-out, opacity 0.9s ease",
+            opacity: calm ? 0.55 : 0.72,
+          }}
+          data-roam-egg="chamber-07"
+          aria-label={live ? "Inspect CHAMBER 07" : undefined}
+          tabIndex={live ? 0 : -1}
+          onMouseEnter={() => {
+            if (live) audio.play("hover", 0.12);
+          }}
+          onClick={() =>
+            fireAmbient(
+              "chamber-07",
+              "Queue still empty. Facility pretends that is fine.",
+            )
+          }
+        >
+          <div className="m-2 h-full border border-cyan/20 bg-[#0a1524]/70 p-2 font-mono text-[9px] tracking-widest text-cyan/70">
+            <div>CHAMBER 07</div>
+            <motion.div
+              className="mt-3"
+              style={{ color: anomalyLevel >= 4 ? "#ff4d6d" : "#ffb020" }}
+              animate={{ opacity: [0.25, 0.7, 0.25] }}
+              transition={{ duration: anomalyLevel >= 4 ? 2.4 : 5.5, repeat: Infinity }}
+            >
+              {anomalyLevel >= 6
+                ? "STRUCTURE EXPOSED"
+                : anomalyLevel >= 3
+                  ? "EVERYTHING IS FINE?"

@@ -130,25 +130,26 @@ export const BAR_LAYOUTS: FacilityBar[][] = [
 /**
  * Title medium-density skyline — fewer, quieter bars so the brand + CTA column
  * stays the composition (not a 7-bar HUD dump). Still relocates as a set.
+ * Keep bars in side margins only (avoid ~30–70% behind the CTA stack).
  */
 export const TITLE_BAR_LAYOUTS: FacilityBar[][] = [
   [
-    { left: "10%", heightPct: 26 },
-    { left: "28%", heightPct: 38 },
-    { left: "72%", heightPct: 32 },
-    { left: "86%", heightPct: 24 },
+    { left: "6%", heightPct: 26 },
+    { left: "14%", heightPct: 38 },
+    { left: "78%", heightPct: 32 },
+    { left: "88%", heightPct: 24 },
   ],
   [
-    { left: "6%", heightPct: 34 },
-    { left: "18%", heightPct: 22 },
-    { left: "78%", heightPct: 40 },
+    { left: "4%", heightPct: 34 },
+    { left: "12%", heightPct: 22 },
+    { left: "80%", heightPct: 40 },
     { left: "90%", heightPct: 28 },
   ],
   [
     { left: "8%", heightPct: 30 },
-    { left: "22%", heightPct: 42 },
-    { left: "74%", heightPct: 26 },
-    { left: "84%", heightPct: 36 },
+    { left: "16%", heightPct: 42 },
+    { left: "76%", heightPct: 26 },
+    { left: "86%", heightPct: 36 },
   ],
 ];
 

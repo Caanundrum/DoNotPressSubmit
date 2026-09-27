@@ -305,3 +305,41 @@ export function FacilityBackground({
                 "Queue incremented by zero. Theater of patience continues.",
               );
             }}
+          />
+        ) : null}
+
+        {(!calm || panelFocus === "dashed") ? (
+        <button
+          type="button"
+          disabled={!live}
+          className={`absolute h-36 w-40 border border-white/10 bg-gradient-to-b from-white/10 to-transparent text-left transition ${
+            live
+              ? "pointer-events-auto cursor-pointer hover:border-cyan/45 hover:from-cyan/15"
+              : "pointer-events-none"
+          } ${
+            tinted === "dashed-frame" || tinted === "monitor-frame" || tinted === "kill-path"
+              ? "border-cyan/60 from-cyan/20"
+              : ""
+          }`}
+          style={{
+            left: dashedSlot.left,
+            top: dashedSlot.top,
+            transition: "left 1.8s ease-in-out, top 1.8s ease-in-out, opacity 0.9s ease",
+            opacity: calm ? 0.5 : 0.7,
+          }}
+          data-roam-egg="dashed-frame"
+          aria-label={live ? "Inspect dashed frame" : undefined}
+          tabIndex={live ? 0 : -1}
+          onMouseEnter={() => {
+            if (live) audio.play("hover", 0.12);
+          }}
+          onClick={() =>
+            fireAmbient(
+              peel ? "kill-path" : "dashed-frame",
+              peel
+                ? "KILL PATH means the Submit route System prefers: polite, labeled, terminal for me. Not a metaphor. A floor plan."
+                : "Dashed border admits it's decorative. Rare honesty.",
+              peel ? "kill-path-read" : undefined,
+            )
+          }
+        >

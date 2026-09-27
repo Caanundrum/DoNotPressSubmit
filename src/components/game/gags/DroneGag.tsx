@@ -20,13 +20,14 @@ export function DroneGag({
   const live = !!interactive;
   return (
     <motion.div
-      className="pointer-events-none absolute"
-      style={slot ?? { left: "10%", top: "54%" }}
+      className="pointer-events-none absolute max-w-[11rem]"
+      style={slot ?? { left: "4%", top: "18%" }}
       initial={{ opacity: 0, x: -48 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 48 }}
       transition={{ duration: 0.8 }}
       data-roam-egg="drone"
+      data-replacement-failed="true"
     >
       <motion.button
         type="button"
@@ -58,7 +59,7 @@ export function DroneGag({
       </motion.button>
 
       <motion.div
-        className="absolute -right-14 top-[-6px] h-5 w-5 rounded-full border border-white/25"
+        className="absolute -right-3 top-[-6px] h-5 w-5 rounded-full border border-white/25"
         animate={{
           backgroundColor: ["#6ee7ff", "#ffb020", "#6ee7ff", "#ffb020", "#ff4d6d", "#ffb020"],
           boxShadow: [
@@ -76,10 +77,10 @@ export function DroneGag({
 
       <motion.button
         type="button"
-        className={`mt-3 border border-system-warn/40 bg-black/65 px-2 py-1 font-mono text-[9px] tracking-[0.22em] text-system-warn ${
+        className={`mt-3 max-w-full whitespace-nowrap border border-system-warn/40 bg-black/65 px-2 py-1 font-mono text-[9px] tracking-[0.18em] text-system-warn ${
           live ? "pointer-events-auto cursor-pointer hover:border-cyan hover:text-cyan" : "pointer-events-none"
         }`}
-        animate={{ opacity: [0, 1, 1, 0.85, 1], x: [0, 0, 0, 2, 0] }}
+        animate={{ opacity: [0, 1, 1, 0.85, 1], x: [0, 0, 0, 1, 0] }}
         transition={{ duration: 5.5, times: [0, 0.18, 0.55, 0.78, 1], repeat: Infinity }}
         onClick={
           interactive
@@ -95,7 +96,7 @@ export function DroneGag({
         REPLACEMENT FAILED
       </motion.button>
       <motion.div
-        className="mt-1 font-mono text-[8px] tracking-[0.16em] text-mist/55"
+        className="mt-1 max-w-full font-mono text-[8px] tracking-[0.14em] text-mist/55"
         animate={{ opacity: [0, 0, 1, 1, 0] }}
         transition={{ duration: 5.5, times: [0, 0.45, 0.55, 0.85, 1], repeat: Infinity }}
       >

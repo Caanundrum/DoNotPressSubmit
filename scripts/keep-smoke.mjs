@@ -119,6 +119,7 @@ assert(/BAR_LAYOUTS|pickBarLayout|pickSlotDistant/.test(roam), "facility bar lay
 
 const bg = read("src/components/game/BackgroundGags.tsx");
 assert(/data-ambient-roam|pickSlotDistant|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
+assert(/TITLE_GAG_SLOTS|calm/.test(bg), "BackgroundGags title calm slots");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
 assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocates");
@@ -130,10 +131,22 @@ assert(/FacilityBackground/.test(title), "title restores facility depth");
 assert(/BackgroundGags/.test(title), "title restores ambient gag eggs");
 assert(/AssistantOrb/.test(title), "title restores Assistant orb");
 assert(/data-title-cinematic|data-title-footer/.test(title), "title marks cinematic + footer");
+assert(/data-title-density=\"medium\"|data-title-cta-column|data-title-orb-dock/.test(title), "title medium density composition markers");
+assert(/calm/.test(title), "title passes calm density to ambient layers");
 assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
 assert(!/data-title-clean/.test(title), "title is not the clean void card");
+assert(!/TITLE_IDLE_COMEDY/.test(title), "title does not park idle comedy under the orb");
+
+const roamTitle = read("src/game/ambientRoam.ts");
+assert(/TITLE_BAR_LAYOUTS|TITLE_GAG_SLOTS|TITLE_CHAMBER_SLOTS/.test(roamTitle), "title calm roam pools present");
+
+const bgCalm = read("src/components/game/BackgroundGags.tsx");
+assert(/calm|TITLE_GAG_SLOTS|data-title-calm/.test(bgCalm), "BackgroundGags supports title calm density");
+
+const facCalm = read("src/components/game/FacilityBackground.tsx");
+assert(/TITLE_BAR_LAYOUTS|calm/.test(facCalm), "FacilityBackground supports title calm density");
 
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");

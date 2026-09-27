@@ -212,11 +212,12 @@ export function TitleScreen({
         />
         {waving ? (
           <motion.div
-            className="mt-1 max-w-[180px] text-center font-mono text-[8px] tracking-[0.12em] text-cyan/80"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
+            className="mt-1 max-w-[180px] text-center font-mono text-[9px] tracking-[0.12em] text-[#b7d0e4]"
+            style={{ textShadow: "0 1px 3px rgba(0,0,0,0.95), 0 0 1px rgba(0,0,0,0.8)" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.55, 0.95, 0.55] }}
+            animate={{ opacity: [0.72, 0.92, 0.72] }}
             transition={{ duration: 2.8, repeat: Infinity }}
+            data-residue-hint="true"
           >
             {"// residue — click me"}
           </motion.div>

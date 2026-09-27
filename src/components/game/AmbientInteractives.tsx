@@ -2,7 +2,13 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
-import { MARGIN_SLOTS, pickSlotDistant, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
+import {
+  MARGIN_SLOTS,
+  ORB_CLEAR_SLOTS,
+  pickSlotDistant,
+  roamIntervalMs,
+  type RoamSlot,
+} from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 export type AmbientTargetId =
@@ -148,9 +154,10 @@ const HOTSPOT_DEFS: {
     acts: [1, 2, 3, 4],
   },
   {
+    // Keep clear of left spotlight / dock-left orb (Forms 00 / 00C / 04).
     id: "chamber-07",
     label: "CHAMBER PIN",
-    home: { left: "4%", top: "26%" },
+    home: { left: "78%", top: "22%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
@@ -196,7 +203,9 @@ export function AmbientChrome({
         const count = 2 + Math.floor(Math.random() * 3);
         for (let n = 0; n < count; n++) {
           const id = ids[Math.floor(Math.random() * ids.length)]!;
-          next[id] = pickSlotDistant(MARGIN_SLOTS, prev[id]);
+          // CHAMBER pin stays out of left orb band (Forms 00 / 00C / 04 spotlight).
+          const pool = id === "chamber-07" ? ORB_CLEAR_SLOTS : MARGIN_SLOTS;
+          next[id] = pickSlotDistant(pool, prev[id]);
         }
         return next;
       });

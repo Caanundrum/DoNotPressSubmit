@@ -28,8 +28,8 @@ export function SceneChoiceList({
     <div
       className={
         choiceMotion === "scatter"
-          ? "relative grid min-h-[140px] gap-2 sm:grid-cols-2"
-          : "grid gap-2"
+          ? "relative grid min-h-[140px] gap-2 overflow-visible sm:grid-cols-2"
+          : "grid gap-2 overflow-visible pb-1"
       }
     >
       <AnimatePresence>
@@ -54,7 +54,7 @@ export function SceneChoiceList({
                 }
               }}
               onHoverEnd={() => onHover(null)}
-              className="group relative overflow-hidden border px-4 py-3 text-left transition disabled:cursor-default sm:py-3.5"
+              className="group relative overflow-visible border px-4 py-3 text-left transition disabled:cursor-default sm:py-3.5"
               style={{
                 borderColor: isSelected
                   ? "rgba(110,231,255,0.9)"
@@ -71,7 +71,7 @@ export function SceneChoiceList({
                   : "0 0 0 1px rgba(0,0,0,0.5) inset, 0 10px 28px rgba(0,0,0,0.45)",
                 color: "#f4f7fb",
               }}
-              initial={opt.late ? { opacity: 0, y: 14, scale: 0.97 } : enter.initial}
+              initial={opt.late ? { opacity: 0, y: 8, scale: 0.98 } : enter.initial}
               animate={
                 isSelected
                   ? { opacity: 1, x: 0, y: 0, scale: 1.01 }

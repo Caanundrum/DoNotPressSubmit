@@ -25,13 +25,18 @@ export const MARGIN_SLOTS: RoamSlot[] = [
   { left: "4%", top: "48%" },
 ];
 
+/** Slots clear of left spotlight / dock-left orb — for CHAMBER-like props. */
+export const ORB_CLEAR_SLOTS: RoamSlot[] = MARGIN_SLOTS.filter(
+  (s) => Number.parseFloat(s.left) >= 55,
+);
+
 export const GAG_SLOTS: Record<string, RoamSlot[]> = {
-  // REPLACEMENT FAILED — far corners only; never mid-form / under panels / across orb.
+  // REPLACEMENT FAILED — bottom-right only, below form bands; never under panels / across orb.
   drone: [
-    { left: "2%", top: "12%" },
-    { left: "90%", top: "12%" },
-    { left: "91%", top: "72%" },
-    { left: "2%", top: "72%" },
+    { left: "78%", top: "78%" },
+    { left: "84%", top: "72%" },
+    { left: "72%", top: "82%" },
+    { left: "88%", top: "76%" },
   ],
   coffee: [
     { left: "86%", top: "50%" },
@@ -60,12 +65,13 @@ export const GAG_SLOTS: Record<string, RoamSlot[]> = {
 };
 
 export const CHAMBER_SLOTS: RoamSlot[] = [
-  { left: "6%", top: "22%" },
+  // Keep clear of left spotlight / dock-left orb so prop text never reads through the orb.
   { left: "78%", top: "18%" },
-  { left: "4%", top: "48%" },
   { left: "70%", top: "52%" },
-  { left: "10%", top: "66%" },
   { left: "84%", top: "42%" },
+  { left: "74%", top: "28%" },
+  { left: "88%", top: "58%" },
+  { left: "66%", top: "16%" },
 ];
 
 export const STATUS_SLOTS: RoamSlot[] = [
@@ -156,10 +162,10 @@ export const TITLE_BAR_LAYOUTS: FacilityBar[][] = [
 /** Title gag anchors — stay in side margins, clear of the centered CTA stack. */
 export const TITLE_GAG_SLOTS: Record<string, RoamSlot[]> = {
   drone: [
-    { left: "6%", top: "48%" },
     { left: "78%", top: "36%" },
-    { left: "4%", top: "30%" },
     { left: "82%", top: "58%" },
+    { left: "74%", top: "48%" },
+    { left: "86%", top: "28%" },
   ],
   coffee: [
     { left: "84%", top: "44%" },

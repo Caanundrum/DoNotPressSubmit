@@ -265,6 +265,15 @@ export function AssistantOrb({
         }
         aria-label={pokeable ? "Poke the assistant (unauthorized)" : undefined}
       >
+        {/* Opaque disc — ambient prop text (CHAMBER 07 etc.) must never read through the orb. */}
+        <div
+          className="absolute inset-[-6%] rounded-full"
+          style={{
+            background:
+              "radial-gradient(circle, rgb(6,10,16) 0%, rgb(6,10,16) 58%, rgba(6,10,16,0.92) 78%, transparent 100%)",
+          }}
+          aria-hidden
+        />
         <motion.div
           className="absolute inset-[-18%] rounded-full"
           style={{
@@ -361,7 +370,11 @@ export function AssistantOrb({
       </motion.div>
 
       {label ? (
-        <div className="pointer-events-none max-w-[240px] text-center font-mono text-[10px] tracking-[0.18em] text-[#e2ebf6]">
+        <div
+          className="pointer-events-none max-w-[240px] text-center font-mono text-[9px] tracking-[0.16em] text-[#d8e6f4] sm:text-[10px] sm:tracking-[0.18em]"
+          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.95)" }}
+          data-orb-status-label="true"
+        >
           {label}
         </div>
       ) : null}

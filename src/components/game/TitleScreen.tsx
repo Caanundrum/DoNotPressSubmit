@@ -4,15 +4,17 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { AssistantOrb } from "./AssistantOrb";
 import { AudioEnableControl } from "./AudioEnableControl";
+import { BackgroundGags } from "./BackgroundGags";
 import { BeginControl } from "./BeginControl";
+import { FacilityBackground } from "./FacilityBackground";
 import { TitleLogo } from "./TitleLogo";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 
 /**
- * Void title: brand + SUBMIT gag + tagline + Unmute/Begin/Continue + orb.
- * No facility bars, chamber panels, ambient eggs, particles, or rails.
- * SUBMIT gag lives on TitleLogo (never Begin). Microcopy must clear 1280×800.
+ * Calm cinematic title: dim facility life + sparse roaming eggs + orb.
+ * Not a black void, not a busy collage. SUBMIT gag on TitleLogo (never Begin).
+ * Microcopy must clear 1280×800 — no footer clip.
  */
 export function TitleScreen({
   orbMood,
@@ -37,6 +39,7 @@ export function TitleScreen({
   const remembered = waving || allyBefore;
   const [eggClicks, setEggClicks] = useState(0);
   const [residueLine, setResidueLine] = useState<string | null>(null);
+  const [gagReact, setGagReact] = useState(false);
 
   const onResidueClick = () => {
     if (!remembered) return;
@@ -58,15 +61,35 @@ export function TitleScreen({
     window.setTimeout(() => setResidueLine(null), 2600);
   };
 
+  const onSubmitGag = () => {
+    setGagReact(true);
+    window.setTimeout(() => setGagReact(false), 700);
+  };
+
   return (
     <div
-      className="absolute inset-0 z-20 overflow-hidden bg-black"
+      className="absolute inset-0 z-20 overflow-hidden"
       data-title-cinematic="true"
-      data-title-void="true"
+      data-title-density="medium"
       data-title-cta-column-host="true"
     >
-      {/* Near-void wash — no facility chrome */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(18,36,54,0.22),transparent_55%)]" />
+      <FacilityBackground
+        calm
+        environment={waving ? "escape" : allyBefore ? "pristine" : "pristine"}
+        anomalyLevel={allyBefore && !waving ? 1 : 0}
+        hoverLanguage
+        onAmbient={() => {
+          // Live eggs for secret/ledger bumps — no idle comedy parked under the orb.
+          audio.play("click", 0.22);
+        }}
+      />
+      <BackgroundGags
+        calm
+        hoverLanguage
+        onAmbient={() => {
+          audio.play("click", 0.22);
+        }}
+      />
 
       {allyBefore && !waving ? (
         <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
@@ -76,9 +99,14 @@ export function TitleScreen({
         </div>
       ) : null}
 
+      {/*
+        Composition: brand stack + one vertical CTA column.
+        Orb docks bottom-left (few px off edge) — present, not fighting CTAs.
+        shrink-0 chrome + min-h-0 middle so footer clears 1280×800.
+      */}
       <div className="relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7">
         <motion.div
-          className="shrink-0 font-mono text-[9px] tracking-[0.28em] text-[#d0dcec]/55 sm:text-[10px] sm:tracking-[0.35em]"
+          className="shrink-0 font-mono text-[9px] tracking-[0.28em] text-[#d0dcec]/70 sm:text-[10px] sm:tracking-[0.35em]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -95,7 +123,7 @@ export function TitleScreen({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.7 }}
           >
-            <TitleLogo reactive compact />
+            <TitleLogo reactive compact onSubmitGag={onSubmitGag} />
           </motion.div>
 
           <motion.div
@@ -122,21 +150,24 @@ export function TitleScreen({
           </motion.div>
         </div>
 
+        {/* Footer: readable vs BEGIN (BEGIN stays brighter); must clear 1280×800 */}
         <motion.div
-          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[8px] tracking-[0.16em] text-[#d8e4f2]/45 sm:text-[9px] sm:tracking-[0.2em]"
+          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[8px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[9px] sm:tracking-[0.2em]"
+          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.85)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           data-title-footer="true"
         >
           <span title="Chaos Standard production mark">CHAOS STANDARD</span>
-          <span className="text-cyan/40">/</span>
+          <span className="text-cyan/65">/</span>
           <span title="Facility chamber">HCOS // CHAMBER 07</span>
         </motion.div>
       </div>
 
+      {/* Orb: present, clear of CTA column, a few px off the bottom edge */}
       <motion.div
-        className={`absolute bottom-3 left-4 z-20 sm:bottom-4 sm:left-6 ${
+        className={`absolute bottom-4 left-5 z-20 sm:bottom-5 sm:left-7 ${
           remembered ? "cursor-pointer" : "pointer-events-none"
         }`}
         data-title-orb-dock="true"
@@ -160,8 +191,17 @@ export function TitleScreen({
       >
         <AssistantOrb
           size={96}
-          mood={waving ? "excited" : allyBefore ? "amused" : orbMood}
+          mood={
+            gagReact
+              ? "amused"
+              : waving
+                ? "excited"
+                : allyBefore
+                  ? "amused"
+                  : orbMood
+          }
           wave={waving}
+          flinch={gagReact}
           label={
             waving
               ? "ASSISTANT WAVING"
@@ -172,9 +212,10 @@ export function TitleScreen({
         />
         {waving ? (
           <motion.div
-            className="mt-1 max-w-[180px] text-center font-mono text-[8px] tracking-[0.12em] text-cyan/70"
+            className="mt-1 max-w-[180px] text-center font-mono text-[8px] tracking-[0.12em] text-cyan/80"
+            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.4, 0.85, 0.4] }}
+            animate={{ opacity: [0.55, 0.95, 0.55] }}
             transition={{ duration: 2.8, repeat: Infinity }}
           >
             {"// residue — click me"}
@@ -182,9 +223,10 @@ export function TitleScreen({
         ) : null}
         {allyBefore && !waving ? (
           <motion.div
-            className="mt-1 max-w-[180px] text-center font-mono text-[8px] tracking-[0.12em] text-cyan/65"
+            className="mt-1 max-w-[180px] text-center font-mono text-[8px] tracking-[0.12em] text-cyan/75"
+            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.35, 0.8, 0.35] }}
+            animate={{ opacity: [0.5, 0.9, 0.5] }}
             transition={{ duration: 3.2, repeat: Infinity }}
           >
             {"// ally channel — click"}

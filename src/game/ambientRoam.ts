@@ -26,12 +26,12 @@ export const MARGIN_SLOTS: RoamSlot[] = [
 ];
 
 export const GAG_SLOTS: Record<string, RoamSlot[]> = {
+  // REPLACEMENT FAILED — far corners only; never mid-form / under panels / across orb.
   drone: [
-    { left: "10%", top: "54%" },
-    { left: "72%", top: "42%" },
-    { left: "8%", top: "28%" },
-    { left: "58%", top: "62%" },
-    { left: "80%", top: "58%" },
+    { left: "2%", top: "12%" },
+    { left: "90%", top: "12%" },
+    { left: "91%", top: "72%" },
+    { left: "2%", top: "72%" },
   ],
   coffee: [
     { left: "86%", top: "50%" },

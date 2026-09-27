@@ -15,10 +15,13 @@ const SUBMIT_GAGS = [
 export function TitleLogo({
   reactive = false,
   compact = false,
+  onSubmitGag,
 }: {
   reactive?: boolean;
   /** Tighter vertical footprint so title footer clears 1280×800. */
   compact?: boolean;
+  /** Optional orb / shell reaction — never advances the assessment. */
+  onSubmitGag?: () => void;
 }) {
   const [gag, setGag] = useState<string | null>(null);
   const [shakeKey, setShakeKey] = useState(0);
@@ -35,12 +38,13 @@ export function TitleLogo({
     lastIdx.current = next;
     setGag(SUBMIT_GAGS[next]!);
     setShakeKey((k) => k + 1);
+    onSubmitGag?.();
     if (clearTimer.current) window.clearTimeout(clearTimer.current);
     clearTimer.current = window.setTimeout(() => setGag(null), 3200);
   };
 
   return (
-    <div className="relative select-none text-center">
+    <div className="relative select-none text-center" data-title-logo="true">
       <motion.div
         className={
           compact
@@ -116,14 +120,20 @@ export function TitleLogo({
         Try not to press Submit.
       </p>
 
+      {/*
+        Absolute overlay — no in-flow height, so CTA column never jumps ~30px.
+        Sits over the tagline band; never covers BEGIN (siblings below TitleLogo).
+      */}
       <AnimatePresence>
         {gag ? (
           <motion.div
             key={gag}
             role="status"
             aria-live="polite"
-            className="mx-auto mt-3 max-w-sm border border-danger/40 bg-black/70 px-3 py-2 font-mono text-[11px] leading-snug tracking-[0.06em] text-[#ffb0be]"
-            initial={{ opacity: 0, y: 6 }}
+            data-title-submit-toast="true"
+            className="pointer-events-none absolute left-1/2 z-20 w-[min(100%,22rem)] -translate-x-1/2 border border-danger/40 bg-black/80 px-3 py-2 font-mono text-[11px] leading-snug tracking-[0.06em] text-[#ffb0be] shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+            style={{ top: compact ? "58%" : "56%" }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.22 }}

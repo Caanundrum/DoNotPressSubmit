@@ -111,9 +111,10 @@ const HOTSPOT_DEFS: {
     acts: [1, 2, 3, 4, 5],
   },
   {
+    // Keep clear of left/bottom orb + "UNAUTHORIZED CONTACT?" label.
     id: "do-not-press",
     label: "PROPAGANDA",
-    home: { left: "47%", top: "78%" },
+    home: { left: "62%", top: "84%" },
     acts: [1, 2, 3, 4, 5],
   },
   {
@@ -125,7 +126,7 @@ const HOTSPOT_DEFS: {
   {
     id: "replacement-failed",
     label: "DRONE",
-    home: { left: "14%", top: "62%" },
+    home: { left: "78%", top: "14%" },
     acts: [1, 2, 3],
   },
   {

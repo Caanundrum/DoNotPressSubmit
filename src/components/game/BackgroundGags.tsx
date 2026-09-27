@@ -132,7 +132,7 @@ export function BackgroundGags({
   const [slot, setSlot] = useState<RoamSlot>(() =>
     pickSlotDistant((calm ? TITLE_GAG_SLOTS : GAG_SLOTS).drone!),
   );
-  const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "8%", top: "74%" });
+  const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "72%", top: "70%" });
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const touched = useRef<Record<GagId, boolean>>({
@@ -171,22 +171,23 @@ export function BackgroundGags({
       setActive(next);
       // Tiny DO NOT PRESS robot also relocates on its own cadence.
       if (Math.random() > (calm ? 0.55 : 0.35)) {
+        // Never park "DO NOT PRESS" over the orb / UNAUTHORIZED CONTACT? band.
         setTinySlot((prev) =>
           pickSlotDistant(
             calm
               ? [
-                  { left: "6%", top: "72%" },
-                  { left: "82%", top: "70%" },
-                  { left: "10%", top: "64%" },
-                  { left: "86%", top: "60%" },
+                  { left: "78%", top: "72%" },
+                  { left: "84%", top: "58%" },
+                  { left: "72%", top: "66%" },
+                  { left: "88%", top: "48%" },
                 ]
               : [
-                  { left: "42%", top: "72%" },
-                  { left: "18%", top: "68%" },
-                  { left: "64%", top: "74%" },
-                  { left: "50%", top: "58%" },
-                  { left: "78%", top: "66%" },
-                  { left: "8%", top: "74%" },
+                  { left: "64%", top: "78%" },
+                  { left: "72%", top: "70%" },
+                  { left: "54%", top: "82%" },
+                  { left: "80%", top: "60%" },
+                  { left: "58%", top: "74%" },
+                  { left: "86%", top: "52%" },
                 ],
             prev,
           ),
@@ -367,10 +368,12 @@ export function BackgroundGags({
         {flash ? (
           <motion.div
             key={flash}
+            data-ambient-toast="true"
             className={
               calm
-                ? "pointer-events-none absolute bottom-[12%] right-[3%] z-10 max-w-[240px] border border-cyan/20 bg-black/45 px-2 py-1 font-mono text-[8px] tracking-[0.12em] text-cyan/70"
-                : "pointer-events-none absolute bottom-[10%] left-[4%] z-10 max-w-[300px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
+                ? "pointer-events-none absolute bottom-[14%] right-[3%] z-10 max-w-[240px] border border-cyan/20 bg-black/45 px-2 py-1 font-mono text-[8px] tracking-[0.12em] text-cyan/70"
+                : // Top-right band — clear of left orb docks and form panels.
+                  "pointer-events-none absolute right-[3%] top-[12%] z-10 max-w-[280px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
             }
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: calm ? 0.75 : 1, y: 0 }}

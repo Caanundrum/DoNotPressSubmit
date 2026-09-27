@@ -111,29 +111,34 @@ assert(/Visual Vertical Slice|Grade-A/i.test(rule), "Cursor rule: VVS / Grade-A 
 
 const view = read("src/components/game/scenes/ScenePlayerView.tsx");
 assert(/data-form-owns-center|form owns center|assistant-yield/i.test(view), "safe layering: form owns center");
-assert(/z-\[38\]|z-\[26\]|z-\[34\]|z-\[28\]/.test(view), "safe layering z-index stack");
+assert(/z-\[42\]|z-\[28\]|z-\[15\]|z-30/.test(view), "safe layering z-index stack (bubble above form)");
+assert(/data-assistant-above-form/.test(view), "assistant paints above non-gag forms");
 
 const roam = read("src/game/ambientRoam.ts");
 assert(/pickSlot|GAG_SLOTS|CHAMBER_SLOTS/.test(roam), "ambient roam slot pools");
 assert(/BAR_LAYOUTS|pickBarLayout|pickSlotDistant/.test(roam), "facility bar layouts + distant picks");
+assert(/TITLE_BAR_LAYOUTS|TITLE_GAG_SLOTS|TITLE_CHAMBER_SLOTS/.test(roam), "title calm roam pools present");
 
 const bg = read("src/components/game/BackgroundGags.tsx");
 assert(/data-ambient-roam|pickSlotDistant|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
 assert(/data-ambient-subtle|22000|36000/.test(bg), "BackgroundGags quieter roam cadence");
+assert(/TITLE_GAG_SLOTS|calm|data-title-calm/.test(bg), "BackgroundGags supports title calm density");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
 assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocates");
 assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
 assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
 assert(/stiffness:\s*22|v \* -3|v \* -7/.test(fac), "facility parallax/motion quieted");
+assert(/TITLE_BAR_LAYOUTS|calm/.test(fac), "FacilityBackground supports title calm density");
 
 const title = read("src/components/game/TitleScreen.tsx");
-assert(!/FacilityBackground/.test(title), "title has no facility background");
-assert(!/BackgroundGags/.test(title), "title has no ambient gag eggs");
+assert(/FacilityBackground/.test(title), "title restores facility depth");
+assert(/BackgroundGags/.test(title), "title restores ambient gag eggs");
 assert(/AssistantOrb/.test(title), "title keeps Assistant orb");
 assert(/data-title-cinematic|data-title-footer/.test(title), "title marks cinematic + footer");
-assert(/data-title-void=\"true\"/.test(title), "title is void (no facility collage)");
-assert(/data-title-cta-column|data-title-orb-dock/.test(title), "title keeps CTA column + orb dock");
+assert(/data-title-density=\"medium\"|data-title-cta-column|data-title-orb-dock/.test(title), "title medium density composition markers");
+assert(/calm/.test(title), "title passes calm density to ambient layers");
+assert(!/data-title-void/.test(title), "title is not the empty void card");
 assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
@@ -144,6 +149,13 @@ assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");
 assert(/SUBMIT_GAGS/.test(titleLogo), "title SUBMIT has authored gag lines");
 assert(!/onBegin/.test(titleLogo), "title SUBMIT gag does not call Begin");
 assert(/What are you not supposed to do/.test(titleLogo), "title SUBMIT gag keeps Nick line");
+assert(/data-title-submit-toast|absolute/.test(titleLogo), "SUBMIT gag toast is absolute (no column jump)");
+
+const motion = read("src/game/motion.ts");
+assert(/max-h-\[min\(40vh,340px\)\]|leaveBottom/.test(motion), "bottom forms leave room for bubble above");
+assert(/top-\[12%\]/.test(motion), "form panels clear SOUND ON corner");
+assert(/right:\s*"1\.5%"/.test(motion), "right-side orb docks pin with right margin");
+assert(/transform:\s*"none"/.test(motion), "orb stage avoids translate centering (FM-safe)");
 
 assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
@@ -156,7 +168,11 @@ assert(/data-glass-stitch|stitching UI/.test(glass), "stitch tier present");
 assert(/phase === "stitch"/.test(glass) && /ticket/.test(glass), "ticket only on stitch ladder");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(view), "bubble safe dock hardened");
-assert(/z-\[38\]|z-\[26\]/.test(view), "safe layering z-index stack (form above assistant)");
+assert(/data-bubble-dock/.test(view), "bubble dock side marked");
+assert(/z-\[42\]|z-\[28\]/.test(view), "safe layering z-index stack (assistant above form)");
+
+const globals = read("src/app/globals.css");
+assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

@@ -201,8 +201,9 @@ button {
 }
 
 .assessment-panel[data-form-above-glass="true"] {
-  /* Form chrome owns readable surface above fracture FX. */
-  z-index: 38;
+  /* Form chrome above fracture FX (z-22). Assistant dock is z-42 so bubbles
+     never paint under the panel (Form 01C). Spatial leave* zones keep Q/A clear. */
+  z-index: 28;
 }
 
 .assistant-bubble {

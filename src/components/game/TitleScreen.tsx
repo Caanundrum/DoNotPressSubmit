@@ -4,17 +4,14 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { AssistantOrb } from "./AssistantOrb";
 import { AudioEnableControl } from "./AudioEnableControl";
-import { BackgroundGags } from "./BackgroundGags";
 import { BeginControl } from "./BeginControl";
-import { FacilityBackground } from "./FacilityBackground";
 import { TitleLogo } from "./TitleLogo";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 
 /**
- * Medium-density cinematic title:
- * brand + headline + one vertical CTA column + orb.
- * Ambient life stays sparse (1–2 beats), away from the CTA stack.
+ * Void title: brand + SUBMIT gag + tagline + Unmute/Begin/Continue + orb.
+ * No facility bars, chamber panels, ambient eggs, particles, or rails.
  * SUBMIT gag lives on TitleLogo (never Begin). Microcopy must clear 1280×800.
  */
 export function TitleScreen({
@@ -63,27 +60,13 @@ export function TitleScreen({
 
   return (
     <div
-      className="absolute inset-0 z-20 overflow-hidden"
+      className="absolute inset-0 z-20 overflow-hidden bg-black"
       data-title-cinematic="true"
-      data-title-density="medium"
+      data-title-void="true"
+      data-title-cta-column-host="true"
     >
-      <FacilityBackground
-        calm
-        environment={waving ? "escape" : allyBefore ? "pristine" : "pristine"}
-        anomalyLevel={allyBefore && !waving ? 1 : 0}
-        hoverLanguage
-        onAmbient={() => {
-          // Keep eggs live for secret/ledger bumps; do not park comedy copy under the orb.
-          audio.play("click", 0.22);
-        }}
-      />
-      <BackgroundGags
-        calm
-        hoverLanguage
-        onAmbient={() => {
-          audio.play("click", 0.22);
-        }}
-      />
+      {/* Near-void wash — no facility chrome */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(18,36,54,0.22),transparent_55%)]" />
 
       {allyBefore && !waving ? (
         <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
@@ -93,14 +76,9 @@ export function TitleScreen({
         </div>
       ) : null}
 
-      {/*
-        Composition: brand stack + one vertical CTA column.
-        Orb docks bottom-left (few px off edge) — present, not fighting CTAs.
-        shrink-0 chrome + min-h-0 middle so footer clears 1280×800.
-      */}
       <div className="relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7">
         <motion.div
-          className="shrink-0 font-mono text-[9px] tracking-[0.28em] text-[#d0dcec]/70 sm:text-[10px] sm:tracking-[0.35em]"
+          className="shrink-0 font-mono text-[9px] tracking-[0.28em] text-[#d0dcec]/55 sm:text-[10px] sm:tracking-[0.35em]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -120,7 +98,6 @@ export function TitleScreen({
             <TitleLogo reactive compact />
           </motion.div>
 
-          {/* One clear vertical CTA column: Unmute → Begin → Continue */}
           <motion.div
             className="flex shrink-0 flex-col items-center gap-5 sm:gap-6"
             data-title-cta-column="true"
@@ -146,19 +123,18 @@ export function TitleScreen({
         </div>
 
         <motion.div
-          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[8px] tracking-[0.16em] text-[#d8e4f2]/55 sm:text-[9px] sm:tracking-[0.2em]"
+          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[8px] tracking-[0.16em] text-[#d8e4f2]/45 sm:text-[9px] sm:tracking-[0.2em]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           data-title-footer="true"
         >
           <span title="Chaos Standard production mark">CHAOS STANDARD</span>
-          <span className="text-cyan/50">/</span>
+          <span className="text-cyan/40">/</span>
           <span title="Facility chamber">HCOS // CHAMBER 07</span>
         </motion.div>
       </div>
 
-      {/* Orb: present, clear of CTA column, a few px off the bottom edge */}
       <motion.div
         className={`absolute bottom-3 left-4 z-20 sm:bottom-4 sm:left-6 ${
           remembered ? "cursor-pointer" : "pointer-events-none"

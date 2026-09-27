@@ -343,3 +343,35 @@ export function FacilityBackground({
             )
           }
         >
+          <motion.div
+            className="absolute inset-3 border border-dashed border-white/20"
+            animate={{
+              rotate: systemLock || sterile ? 0 : peel ? [0, 1.5, -2, 0.5, 0] : [0, 0.6, -0.6, 0],
+            }}
+            transition={{ duration: peel ? 7 : 14, repeat: Infinity }}
+          />
+          {peel ? (
+            <div className="absolute inset-x-4 top-4 space-y-1 font-mono text-[8px] tracking-widest text-danger/80">
+              <div>KILL PATH // VISIBLE</div>
+              <div className="text-[7px] tracking-[0.14em] text-danger/60">
+                = Submit route System prefers // terminal for assistant
+              </div>
+            </div>
+          ) : null}
+          <div className="absolute inset-x-4 bottom-4 h-8 bg-cyan/10" />
+        </button>
+        ) : null}
+
+        <div
+          className="absolute left-0 right-0 top-[62%] h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent"
+          style={{ opacity: 0.35 }}
+        />
+        <div
+          className="absolute left-0 right-0 top-[68%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
+          style={{ opacity: 0.22 }}
+        />
+
+        {/* Phase 3 — mechanical rails / environmental storytelling */}
+        <motion.div
+          className="facility-rail absolute left-[18%] top-[58%] h-px w-[28%]"
+          animate={{ opacity: sterile ? 0.08 : [0.1, 0.28, 0.1], scaleX: flicker ? [1, 1.02, 0.98, 1] : 1 }}

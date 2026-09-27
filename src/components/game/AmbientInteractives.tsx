@@ -199,9 +199,9 @@ export function AmbientChrome({
         }
         return next;
       });
-      timer = window.setTimeout(tick, roamIntervalMs(11000, 18000));
+      timer = window.setTimeout(tick, roamIntervalMs(20000, 34000));
     };
-    timer = window.setTimeout(tick, roamIntervalMs(9000, 14000));
+    timer = window.setTimeout(tick, roamIntervalMs(16000, 24000));
     return () => clearTimeout(timer);
   }, [paused]);
 
@@ -352,9 +352,9 @@ export function AmbientRoamers({
             ];
     const tick = () => {
       setPath(pools[Math.floor(Math.random() * pools.length)]!);
-      timer = window.setTimeout(tick, roamIntervalMs(14000, 22000));
+      timer = window.setTimeout(tick, roamIntervalMs(24000, 38000));
     };
-    timer = window.setTimeout(tick, roamIntervalMs(12000, 18000));
+    timer = window.setTimeout(tick, roamIntervalMs(18000, 28000));
     return () => clearTimeout(timer);
   }, [paused, kind]);
 

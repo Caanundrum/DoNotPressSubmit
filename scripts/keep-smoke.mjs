@@ -119,21 +119,25 @@ assert(/BAR_LAYOUTS|pickBarLayout|pickSlotDistant/.test(roam), "facility bar lay
 
 const bg = read("src/components/game/BackgroundGags.tsx");
 assert(/data-ambient-roam|pickSlotDistant|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
+assert(/data-ambient-subtle|22000|36000/.test(bg), "BackgroundGags quieter roam cadence");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
 assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocates");
 assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
 assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
+assert(/stiffness:\s*22|v \* -3|v \* -7/.test(fac), "facility parallax/motion quieted");
 
 const title = read("src/components/game/TitleScreen.tsx");
-assert(/FacilityBackground/.test(title), "title restores facility depth");
-assert(/BackgroundGags/.test(title), "title restores ambient gag eggs");
-assert(/AssistantOrb/.test(title), "title restores Assistant orb");
+assert(!/FacilityBackground/.test(title), "title has no facility background");
+assert(!/BackgroundGags/.test(title), "title has no ambient gag eggs");
+assert(/AssistantOrb/.test(title), "title keeps Assistant orb");
 assert(/data-title-cinematic|data-title-footer/.test(title), "title marks cinematic + footer");
+assert(/data-title-void=\"true\"/.test(title), "title is void (no facility collage)");
+assert(/data-title-cta-column|data-title-orb-dock/.test(title), "title keeps CTA column + orb dock");
 assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
-assert(!/data-title-clean/.test(title), "title is not the clean void card");
+assert(!/TITLE_IDLE_COMEDY/.test(title), "title does not park idle comedy under the orb");
 
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");

@@ -127,6 +127,81 @@ export const BAR_LAYOUTS: FacilityBar[][] = [
   ],
 ];
 
+/**
+ * Title medium-density skyline — fewer, quieter bars so the brand + CTA column
+ * stays the composition (not a 7-bar HUD dump). Still relocates as a set.
+ * Keep bars in side margins only (avoid ~30–70% behind the CTA stack).
+ */
+export const TITLE_BAR_LAYOUTS: FacilityBar[][] = [
+  [
+    { left: "6%", heightPct: 26 },
+    { left: "14%", heightPct: 38 },
+    { left: "78%", heightPct: 32 },
+    { left: "88%", heightPct: 24 },
+  ],
+  [
+    { left: "4%", heightPct: 34 },
+    { left: "12%", heightPct: 22 },
+    { left: "80%", heightPct: 40 },
+    { left: "90%", heightPct: 28 },
+  ],
+  [
+    { left: "8%", heightPct: 30 },
+    { left: "16%", heightPct: 42 },
+    { left: "76%", heightPct: 26 },
+    { left: "86%", heightPct: 36 },
+  ],
+];
+
+/** Title gag anchors — stay in side margins, clear of the centered CTA stack. */
+export const TITLE_GAG_SLOTS: Record<string, RoamSlot[]> = {
+  drone: [
+    { left: "6%", top: "48%" },
+    { left: "78%", top: "36%" },
+    { left: "4%", top: "30%" },
+    { left: "82%", top: "58%" },
+  ],
+  coffee: [
+    { left: "84%", top: "44%" },
+    { left: "8%", top: "52%" },
+    { left: "76%", top: "28%" },
+    { left: "10%", top: "66%" },
+  ],
+  printer: [
+    { left: "80%", top: "68%" },
+    { left: "6%", top: "70%" },
+    { left: "86%", top: "62%" },
+    { left: "12%", top: "74%" },
+  ],
+  corridor: [
+    { left: "8%", top: "58%" },
+    { left: "78%", top: "50%" },
+    { left: "4%", top: "42%" },
+    { left: "84%", top: "40%" },
+  ],
+  containment: [
+    { left: "80%", top: "20%" },
+    { left: "8%", top: "18%" },
+    { left: "86%", top: "32%" },
+    { left: "4%", top: "26%" },
+  ],
+};
+
+/** Title chamber / dashed — one panel at a time, far from center title stack. */
+export const TITLE_CHAMBER_SLOTS: RoamSlot[] = [
+  { left: "4%", top: "20%" },
+  { left: "82%", top: "18%" },
+  { left: "6%", top: "54%" },
+  { left: "78%", top: "48%" },
+];
+
+export const TITLE_DASHED_SLOTS: RoamSlot[] = [
+  { left: "78%", top: "24%" },
+  { left: "6%", top: "28%" },
+  { left: "84%", top: "50%" },
+  { left: "4%", top: "56%" },
+];
+
 export function pickSlot(slots: RoamSlot[], avoid?: RoamSlot | null): RoamSlot {
   if (slots.length === 0) return { left: "10%", top: "40%" };
   if (slots.length === 1) return slots[0]!;
@@ -153,15 +228,19 @@ export function pickSlotDistant(slots: RoamSlot[], avoid?: RoamSlot | null): Roa
   return pickSlot(distant.length > 0 ? distant : slots, avoid);
 }
 
-export function pickBarLayout(avoidIndex?: number): { index: number; bars: FacilityBar[] } {
-  const n = BAR_LAYOUTS.length;
+export function pickBarLayout(
+  avoidIndex?: number,
+  layouts: FacilityBar[][] = BAR_LAYOUTS,
+): { index: number; bars: FacilityBar[] } {
+  const pool = layouts.length > 0 ? layouts : BAR_LAYOUTS;
+  const n = pool.length;
   if (n === 0) return { index: 0, bars: [] };
   let index = Math.floor(Math.random() * n);
   let guard = 0;
   while (avoidIndex !== undefined && index === avoidIndex && guard++ < 6) {
     index = Math.floor(Math.random() * n);
   }
-  return { index, bars: BAR_LAYOUTS[index]! };
+  return { index, bars: pool[index]! };
 }
 
 /** Semi-random linger: ~7–14s between gag/slot changes. */

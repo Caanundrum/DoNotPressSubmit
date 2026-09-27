@@ -10,6 +10,9 @@ import {
   pickSlotDistant,
   roamIntervalMs,
   STATUS_SLOTS,
+  TITLE_BAR_LAYOUTS,
+  TITLE_CHAMBER_SLOTS,
+  TITLE_DASHED_SLOTS,
   type FacilityBar,
   type RoamSlot,
 } from "@/game/ambientRoam";
@@ -35,6 +38,8 @@ export function FacilityBackground({
   environment = "pristine",
   anomalyLevel = 0,
   hoverLanguage = false,
+  /** Title medium density — fewer bars, one panel, softer chrome. In-game unchanged. */
+  calm = false,
   onAmbient,
 }: {
   intensity?: number;
@@ -43,24 +48,31 @@ export function FacilityBackground({
   anomalyLevel?: number;
   /** Soft hover copy on decorative panels (title + select acts) */
   hoverLanguage?: boolean;
+  calm?: boolean;
   /** When set, CHAMBER / dashed chrome become live eggs — never fake-clickable. */
   onAmbient?: AmbientFn;
 }) {
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 40, damping: 20 });
-  const sy = useSpring(my, { stiffness: 40, damping: 20 });
-  const farX = useTransform(sx, (v) => v * -8);
-  const midX = useTransform(sx, (v) => v * -18);
-  const midY = useTransform(sy, (v) => v * -10);
-  const nearX = useTransform(sx, (v) => v * -28);
+  // Quieter parallax — still alive, not jarring.
+  const sx = useSpring(mx, { stiffness: 22, damping: 28 });
+  const sy = useSpring(my, { stiffness: 22, damping: 28 });
+  const farX = useTransform(sx, (v) => v * -3);
+  const midX = useTransform(sx, (v) => v * -7);
+  const midY = useTransform(sy, (v) => v * -4);
+  const nearX = useTransform(sx, (v) => v * -11);
   const [flash, setFlash] = useState<string | null>(null);
   const [tinted, setTinted] = useState<string | null>(null);
-  const [chamberSlot, setChamberSlot] = useState<RoamSlot>(CHAMBER_SLOTS[0]!);
+  const chamberPool = calm ? TITLE_CHAMBER_SLOTS : CHAMBER_SLOTS;
+  const dashedPool = calm ? TITLE_DASHED_SLOTS : DASHED_SLOTS;
+  const barPool = calm ? TITLE_BAR_LAYOUTS : BAR_LAYOUTS;
+  const [chamberSlot, setChamberSlot] = useState<RoamSlot>(chamberPool[0]!);
   const [statusSlot, setStatusSlot] = useState<RoamSlot>(STATUS_SLOTS[0]!);
-  const [dashedSlot, setDashedSlot] = useState<RoamSlot>(DASHED_SLOTS[0]!);
+  const [dashedSlot, setDashedSlot] = useState<RoamSlot>(dashedPool[0]!);
   const [barLayoutIndex, setBarLayoutIndex] = useState(0);
-  const [bars, setBars] = useState<FacilityBar[]>(() => BAR_LAYOUTS[0]!);
+  const [bars, setBars] = useState<FacilityBar[]>(() => barPool[0]!);
+  /** Title calm: only one midground panel visible at a time. */
+  const [panelFocus, setPanelFocus] = useState<"chamber" | "dashed">("chamber");
   const live = !!onAmbient && !systemLock;
 
   useEffect(() => {
@@ -85,20 +97,23 @@ export function FacilityBackground({
     if (systemLock || sterile) return;
     let timer: number;
     const tick = () => {
-      setChamberSlot((prev) => pickSlotDistant(CHAMBER_SLOTS, prev));
+      setChamberSlot((prev) => pickSlotDistant(chamberPool, prev));
       setStatusSlot((prev) => pickSlotDistant(STATUS_SLOTS, prev));
-      setDashedSlot((prev) => pickSlotDistant(DASHED_SLOTS, prev));
+      setDashedSlot((prev) => pickSlotDistant(dashedPool, prev));
       setBarLayoutIndex((prevIdx) => {
-        const next = pickBarLayout(prevIdx);
+        const next = pickBarLayout(prevIdx, barPool);
         setBars(next.bars);
         return next.index;
       });
-      timer = window.setTimeout(tick, roamIntervalMs(9000, 15000));
+      if (calm) {
+        setPanelFocus((prev) => (prev === "chamber" ? "dashed" : "chamber"));
+      }
+      // Slower roam — still relocates, less frantic.
+      timer = window.setTimeout(tick, roamIntervalMs(calm ? 18000 : 18000, calm ? 30000 : 32000));
     };
-    // First re-anchor within ~8–12s so a 60s title linger always catches ≥2 moves.
-    timer = window.setTimeout(tick, roamIntervalMs(8000, 12000));
+    timer = window.setTimeout(tick, roamIntervalMs(calm ? 14000 : 14000, calm ? 22000 : 22000));
     return () => clearTimeout(timer);
-  }, [systemLock, sterile]);
+  }, [systemLock, sterile, calm, chamberPool, dashedPool, barPool]);
 
   // hoverLanguage retained for API compat (title screen soft tips handled elsewhere).
   void hoverLanguage;
@@ -138,28 +153,32 @@ export function FacilityBackground({
             style={{
               left: bar.left,
               height: `${bar.heightPct}%`,
-              opacity: sterile ? 0.35 : 0.55 + (i % 3) * 0.1,
+              opacity: sterile
+                ? 0.28
+                : calm
+                  ? 0.2 + (i % 2) * 0.05
+                  : 0.28 + (i % 3) * 0.05,
               background: sterile
                 ? "linear-gradient(to top, #222833, #3a4252)"
                 : "linear-gradient(to top, #152033, #2a3d5cb3)",
-              boxShadow: sterile ? "none" : "inset 0 0 20px rgba(110,231,255,0.08)",
-              transition: "left 1.1s ease-in-out, height 1.1s ease-in-out, opacity 0.6s ease",
+              boxShadow: "none",
+              transition: "left 1.8s ease-in-out, height 1.8s ease-in-out, opacity 0.9s ease",
               transform:
                 peel && i % 2 === 0
-                  ? `translateY(${6 + i}px) rotate(${(i - 3) * 0.4}deg)`
+                  ? `translateY(${3 + i * 0.5}px) rotate(${(i - 3) * 0.2}deg)`
                   : undefined,
             }}
           >
             <motion.div
               className="absolute inset-x-2 top-4 h-1 rounded"
               style={{
-                background: sterile ? "rgba(255,255,255,0.25)" : "rgba(110,231,255,0.4)",
+                background: sterile ? "rgba(255,255,255,0.2)" : "rgba(110,231,255,0.28)",
               }}
               animate={{
-                opacity: systemLock ? 1 : flicker ? [0.15, 1, 0.2, 0.9, 0.15] : [0.2, 0.9, 0.2],
+                opacity: systemLock ? 0.7 : flicker ? [0.12, 0.55, 0.18, 0.5, 0.12] : [0.15, 0.45, 0.15],
               }}
               transition={{
-                duration: flicker ? 1.2 + i * 0.1 : 2 + i * 0.3,
+                duration: flicker ? 2.4 + i * 0.15 : 4.5 + i * 0.35,
                 repeat: Infinity,
               }}
             />
@@ -171,20 +190,20 @@ export function FacilityBackground({
           </div>
         ))}
         <motion.div
-          className="absolute top-[34%] h-2 w-28 rounded-full bg-cyan/20"
+          className="absolute top-[34%] h-2 w-28 rounded-full bg-cyan/10"
           animate={{ x: sterile ? "40%" : ["-10%", "110%"] }}
           transition={{
-            duration: sterile ? 0 : 28 / intensity,
+            duration: sterile ? 0 : 58 / Math.max(0.35, intensity),
             repeat: sterile ? 0 : Infinity,
             ease: "linear",
           }}
           style={{ left: 0 }}
         />
         <motion.div
-          className="absolute top-[48%] h-1.5 w-20 rounded-full bg-white/15"
+          className="absolute top-[48%] h-1.5 w-20 rounded-full bg-white/8"
           animate={{ x: sterile ? "55%" : ["110%", "-20%"] }}
           transition={{
-            duration: sterile ? 0 : 36 / intensity,
+            duration: sterile ? 0 : 74 / Math.max(0.35, intensity),
             repeat: sterile ? 0 : Infinity,
             ease: "linear",
           }}
@@ -192,7 +211,8 @@ export function FacilityBackground({
       </motion.div>
 
       <motion.div className="absolute inset-0" style={{ x: midX, y: midY }} data-ambient-roam="facility">
-        {/* CHAMBER 07 — relocates on semi-random timings when live. */}
+        {/* CHAMBER 07 — relocates on semi-random timings when live. Title calm: one panel at a time. */}
+        {(!calm || panelFocus === "chamber") ? (
         <button
           type="button"
           disabled={!live}
@@ -204,7 +224,8 @@ export function FacilityBackground({
           style={{
             left: chamberSlot.left,
             top: chamberSlot.top,
-            transition: "left 1s ease-in-out, top 1s ease-in-out",
+            transition: "left 1.8s ease-in-out, top 1.8s ease-in-out, opacity 0.9s ease",
+            opacity: calm ? 0.55 : 0.72,
           }}
           data-roam-egg="chamber-07"
           aria-label={live ? "Inspect CHAMBER 07" : undefined}
@@ -224,8 +245,8 @@ export function FacilityBackground({
             <motion.div
               className="mt-3"
               style={{ color: anomalyLevel >= 4 ? "#ff4d6d" : "#ffb020" }}
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: anomalyLevel >= 4 ? 1.2 : 3.5, repeat: Infinity }}
+              animate={{ opacity: [0.25, 0.7, 0.25] }}
+              transition={{ duration: anomalyLevel >= 4 ? 2.4 : 5.5, repeat: Infinity }}
             >
               {anomalyLevel >= 6
                 ? "STRUCTURE EXPOSED"
@@ -238,8 +259,9 @@ export function FacilityBackground({
             </div>
           </div>
         </button>
+        ) : null}
 
-        {live ? (
+        {live && !calm ? (
           <button
             type="button"
             className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
@@ -248,7 +270,7 @@ export function FacilityBackground({
             style={{
               left: statusSlot.left,
               top: statusSlot.top,
-              transition: "left 1s ease-in-out, top 1s ease-in-out",
+              transition: "left 1.8s ease-in-out, top 1.8s ease-in-out",
             }}
             data-roam-egg="everything-fine"
             aria-label="Inspect status plaque"
@@ -263,7 +285,7 @@ export function FacilityBackground({
           />
         ) : null}
 
-        {live ? (
+        {live && !calm ? (
           <button
             type="button"
             className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
@@ -272,7 +294,7 @@ export function FacilityBackground({
             style={{
               left: statusSlot.left,
               top: `calc(${statusSlot.top} + 2rem)`,
-              transition: "left 1s ease-in-out, top 1s ease-in-out",
+              transition: "left 1.8s ease-in-out, top 1.8s ease-in-out",
             }}
             data-roam-egg="queue-counter"
             aria-label="Inspect queue tally"
@@ -286,6 +308,7 @@ export function FacilityBackground({
           />
         ) : null}
 
+        {(!calm || panelFocus === "dashed") ? (
         <button
           type="button"
           disabled={!live}
@@ -301,7 +324,8 @@ export function FacilityBackground({
           style={{
             left: dashedSlot.left,
             top: dashedSlot.top,
-            transition: "left 1s ease-in-out, top 1s ease-in-out",
+            transition: "left 1.8s ease-in-out, top 1.8s ease-in-out, opacity 0.9s ease",
+            opacity: calm ? 0.5 : 0.7,
           }}
           data-roam-egg="dashed-frame"
           aria-label={live ? "Inspect dashed frame" : undefined}
@@ -322,9 +346,9 @@ export function FacilityBackground({
           <motion.div
             className="absolute inset-3 border border-dashed border-white/20"
             animate={{
-              rotate: systemLock || sterile ? 0 : peel ? [0, 3, -4, 1, 0] : [0, 1.5, -1.5, 0],
+              rotate: systemLock || sterile ? 0 : peel ? [0, 1.5, -2, 0.5, 0] : [0, 0.6, -0.6, 0],
             }}
-            transition={{ duration: peel ? 4 : 8, repeat: Infinity }}
+            transition={{ duration: peel ? 7 : 14, repeat: Infinity }}
           />
           {peel ? (
             <div className="absolute inset-x-4 top-4 space-y-1 font-mono text-[8px] tracking-widest text-danger/80">
@@ -336,29 +360,36 @@ export function FacilityBackground({
           ) : null}
           <div className="absolute inset-x-4 bottom-4 h-8 bg-cyan/10" />
         </button>
+        ) : null}
 
-        <div className="absolute left-0 right-0 top-[62%] h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent" />
-        <div className="absolute left-0 right-0 top-[68%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+        <div
+          className="absolute left-0 right-0 top-[62%] h-px bg-gradient-to-r from-transparent via-cyan/30 to-transparent"
+          style={{ opacity: 0.35 }}
+        />
+        <div
+          className="absolute left-0 right-0 top-[68%] h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
+          style={{ opacity: 0.22 }}
+        />
 
         {/* Phase 3 — mechanical rails / environmental storytelling */}
         <motion.div
           className="facility-rail absolute left-[18%] top-[58%] h-px w-[28%]"
-          animate={{ opacity: sterile ? 0.15 : [0.25, 0.7, 0.25], scaleX: flicker ? [1, 1.04, 0.96, 1] : 1 }}
-          transition={{ duration: flicker ? 1.6 : 4.5, repeat: Infinity }}
+          animate={{ opacity: sterile ? 0.08 : [0.1, 0.28, 0.1], scaleX: flicker ? [1, 1.02, 0.98, 1] : 1 }}
+          transition={{ duration: flicker ? 3.2 : 8.5, repeat: Infinity }}
         />
         <motion.div
           className="facility-rail absolute right-[14%] top-[72%] h-px w-[22%]"
-          animate={{ opacity: sterile ? 0.1 : [0.2, 0.55, 0.2] }}
-          transition={{ duration: 5.2, repeat: Infinity, delay: 0.6 }}
+          animate={{ opacity: sterile ? 0.06 : [0.08, 0.22, 0.08] }}
+          transition={{ duration: 9.5, repeat: Infinity, delay: 0.8 }}
         />
 
         {/* Volumetric-looking beams — intensify by act stress */}
         <div
           className="vol-beam absolute left-[42%] top-0 h-[55%] w-16 -translate-x-1/2"
-          style={{ opacity: sterile ? 0.08 : escape ? 0.35 : peel ? 0.28 : 0.16 }}
+          style={{ opacity: sterile ? 0.05 : escape ? 0.22 : peel ? 0.16 : 0.08 }}
         />
         {environment === "conflict" || anomalyLevel >= 4 ? (
-          <div className="vol-beam absolute left-[68%] top-[8%] h-[40%] w-12 opacity-25" />
+          <div className="vol-beam absolute left-[68%] top-[8%] h-[40%] w-12 opacity-14" />
         ) : null}
 
         {/* Conflict: panels misalign / warn arcs */}
@@ -366,13 +397,13 @@ export function FacilityBackground({
           <>
             <motion.div
               className="absolute right-[30%] top-[36%] h-16 w-20 border border-danger/30 bg-danger/5"
-              animate={{ x: [0, 3, -4, 1, 0], rotate: [0, 0.8, -1.2, 0] }}
-              transition={{ duration: 3.4, repeat: Infinity }}
+              animate={{ x: [0, 1.5, -2, 0.5, 0], rotate: [0, 0.4, -0.6, 0] }}
+              transition={{ duration: 6.5, repeat: Infinity }}
             />
             <motion.div
               className="absolute left-[48%] top-[48%] h-10 w-px bg-gradient-to-b from-transparent via-danger/70 to-transparent"
-              animate={{ opacity: [0.2, 0.95, 0.2], scaleY: [0.7, 1.15, 0.7] }}
-              transition={{ duration: 1.4, repeat: Infinity }}
+              animate={{ opacity: [0.12, 0.45, 0.12], scaleY: [0.85, 1.05, 0.85] }}
+              transition={{ duration: 2.8, repeat: Infinity }}
             />
           </>
         ) : null}
@@ -381,8 +412,8 @@ export function FacilityBackground({
         {peel ? (
           <motion.div
             className="absolute left-[36%] top-[26%] h-28 w-36 border border-white/10 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.04)_0_2px,transparent_2px_10px)]"
-            animate={{ opacity: [0.25, 0.55, 0.25] }}
-            transition={{ duration: 3.8, repeat: Infinity }}
+            animate={{ opacity: [0.15, 0.35, 0.15] }}
+            transition={{ duration: 6.5, repeat: Infinity }}
           >
             <div className="absolute inset-2 font-mono text-[7px] tracking-[0.2em] text-danger/50">
               SUBSTRATE // EXPOSED
@@ -393,23 +424,23 @@ export function FacilityBackground({
         {anomalyLevel >= 3 ? (
           <motion.div
             className="absolute left-[30%] top-[40%] h-24 w-px bg-gradient-to-b from-transparent via-system-warn to-transparent"
-            animate={{ opacity: [0.2, 0.9, 0.2], scaleY: [0.8, 1.1, 0.8] }}
-            transition={{ duration: 2.2, repeat: Infinity }}
+            animate={{ opacity: [0.12, 0.45, 0.12], scaleY: [0.85, 1.05, 0.85] }}
+            transition={{ duration: 4.2, repeat: Infinity }}
           />
         ) : null}
       </motion.div>
 
       <motion.div className="absolute inset-0" style={{ x: nearX }}>
-        {[...Array(sterile ? 4 : 18)].map((_, i) => (
+        {[...Array(sterile ? 3 : 8)].map((_, i) => (
           <motion.span
             key={i}
-            className="absolute h-1 w-1 rounded-full bg-white/40"
+            className="absolute h-1 w-1 rounded-full bg-white/30"
             style={{ left: `${(i * 17) % 100}%`, top: `${(i * 29) % 90}%` }}
             animate={{
-              y: sterile ? 0 : [0, -30, 0],
-              opacity: sterile ? 0.08 : [0.1, 0.55, 0.1],
+              y: sterile ? 0 : [0, -14, 0],
+              opacity: sterile ? 0.05 : [0.04, 0.18, 0.04],
             }}
-            transition={{ duration: 6 + (i % 5), repeat: Infinity, delay: i * 0.2 }}
+            transition={{ duration: 11 + (i % 5), repeat: Infinity, delay: i * 0.35 }}
           />
         ))}
         <div
@@ -417,27 +448,33 @@ export function FacilityBackground({
           style={{
             background:
               environment === "climax"
-                ? "rgba(255,77,109,0.12)"
+                ? "rgba(255,77,109,0.08)"
                 : escape
-                  ? "rgba(80,255,200,0.12)"
-                  : "rgba(110,231,255,0.05)",
+                  ? "rgba(80,255,200,0.08)"
+                  : "rgba(110,231,255,0.03)",
           }}
         />
       </motion.div>
 
-      <div className="absolute left-[20%] top-0 h-full w-24 rotate-6 bg-gradient-to-b from-cyan/10 via-transparent to-transparent blur-2xl" />
-      <div className="absolute right-[28%] top-0 h-full w-16 -rotate-3 bg-gradient-to-b from-white/8 via-transparent to-transparent blur-2xl" />
+      <div
+        className="absolute left-[20%] top-0 h-full w-24 rotate-6 bg-gradient-to-b from-cyan/10 via-transparent to-transparent blur-2xl"
+        style={{ opacity: 0.35 }}
+      />
+      <div
+        className="absolute right-[28%] top-0 h-full w-16 -rotate-3 bg-gradient-to-b from-white/8 via-transparent to-transparent blur-2xl"
+        style={{ opacity: 0.28 }}
+      />
 
       {environment === "climax" ? (
         <motion.div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(255,77,109,0.18),transparent_45%)]"
-          animate={{ opacity: [0.5, 0.9, 0.5] }}
-          transition={{ duration: 3, repeat: Infinity }}
+          className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(255,77,109,0.12),transparent_45%)]"
+          animate={{ opacity: [0.3, 0.55, 0.3] }}
+          transition={{ duration: 5.5, repeat: Infinity }}
         />
       ) : null}
 
       {flash ? (
-        <div className="pointer-events-none absolute bottom-[6%] left-1/2 z-[12] max-w-[min(90vw,420px)] -translate-x-1/2 border border-cyan/40 bg-black/80 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]">
+        <div className="pointer-events-none absolute bottom-[6%] left-1/2 z-[12] max-w-[min(90vw,420px)] -translate-x-1/2 border border-cyan/30 bg-black/70 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]/90">
           {flash}
         </div>
       ) : null}

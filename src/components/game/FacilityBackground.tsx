@@ -252,3 +252,56 @@ export function FacilityBackground({
                 ? "STRUCTURE EXPOSED"
                 : anomalyLevel >= 3
                   ? "EVERYTHING IS FINE?"
+                  : "EVERYTHING IS FINE"}
+            </motion.div>
+            <div className="mt-auto pt-16 text-mist/60">
+              QUEUE: {Math.min(99, anomalyLevel * 3)}
+            </div>
+          </div>
+        </button>
+        ) : null}
+
+        {live && !calm ? (
+          <button
+            type="button"
+            className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
+              tinted === "everything-fine" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
+            }`}
+            style={{
+              left: statusSlot.left,
+              top: statusSlot.top,
+              transition: "left 1.8s ease-in-out, top 1.8s ease-in-out",
+            }}
+            data-roam-egg="everything-fine"
+            aria-label="Inspect status plaque"
+            onClick={(e) => {
+              e.stopPropagation();
+              fireAmbient(
+                "everything-fine",
+                "EVERYTHING IS FINE toggled to EVERYTHING IS… negotiating.",
+                "fine-print",
+              );
+            }}
+          />
+        ) : null}
+
+        {live && !calm ? (
+          <button
+            type="button"
+            className={`pointer-events-auto absolute z-[1] h-8 w-28 cursor-pointer border border-transparent bg-transparent ${
+              tinted === "queue-counter" ? "border-cyan/40 bg-cyan/10" : "hover:border-cyan/30 hover:bg-black/20"
+            }`}
+            style={{
+              left: statusSlot.left,
+              top: `calc(${statusSlot.top} + 2rem)`,
+              transition: "left 1.8s ease-in-out, top 1.8s ease-in-out",
+            }}
+            data-roam-egg="queue-counter"
+            aria-label="Inspect queue tally"
+            onClick={(e) => {
+              e.stopPropagation();
+              fireAmbient(
+                "queue-counter",
+                "Queue incremented by zero. Theater of patience continues.",
+              );
+            }}

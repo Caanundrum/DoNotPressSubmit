@@ -194,12 +194,12 @@ export function BackgroundGags({
       }
       timer = window.setTimeout(
         tick,
-        roamIntervalMs(calm ? 18000 : 14000, calm ? 28000 : 24000),
+        roamIntervalMs(22000, 36000),
       );
     };
     timer = window.setTimeout(
       tick,
-      roamIntervalMs(calm ? 12000 : 11000, calm ? 20000 : 18000),
+      roamIntervalMs(16000, 26000),
     );
     return () => clearTimeout(timer);
   }, [paused, calm, slotPools]);
@@ -217,14 +217,14 @@ export function BackgroundGags({
     // Player-clicked gags already toasted on click — skip auto spam.
     if (wasTouched) return;
     const now = Date.now();
-    const cooldown = calm ? 42000 : 28000;
+    const cooldown = 40000;
     const cooled = now - lastBannerAt.current >= cooldown;
-    // Title calm: ~12% of cooled departures speak; in-game ~22%.
-    if (!cooled || Math.random() > (calm ? 0.12 : 0.22)) return;
+    // Quieter: ~12% of cooled departures speak.
+    if (!cooled || Math.random() > 0.12) return;
     lastBannerAt.current = now;
     setFlash(depart.missed);
     onAmbientRef.current(depart.id, depart.secret);
-    window.setTimeout(() => setFlash(null), calm ? 2000 : 2600);
+    window.setTimeout(() => setFlash(null), 2200);
   }, [active, paused, calm]);
 
   const react = (gag: GagId) => {
@@ -243,8 +243,9 @@ export function BackgroundGags({
 
   return (
     <div
-      className={`pointer-events-none absolute inset-0 z-[5] overflow-hidden ${calm ? "opacity-[0.72]" : ""}`}
+      className="pointer-events-none absolute inset-0 z-[5] overflow-hidden opacity-[0.78]"
       data-ambient-roam="true"
+      data-ambient-subtle="true"
       data-title-calm={calm ? "true" : undefined}
     >
       <AnimatePresence mode="wait">

@@ -20,11 +20,15 @@ export function DroneGag({
   const live = !!interactive;
   return (
     <motion.div
-      className="pointer-events-none absolute max-w-[11rem]"
-      style={slot ?? { left: "4%", top: "18%" }}
-      initial={{ opacity: 0, x: -48 }}
+      className="pointer-events-none absolute max-w-[10.5rem]"
+      style={{
+        ...(slot ?? { left: "2%", top: "12%" }),
+        // Keep memo label inside the viewport when pinned near the right edge.
+        transformOrigin: "left top",
+      }}
+      initial={{ opacity: 0, x: -24 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 48 }}
+      exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.8 }}
       data-roam-egg="drone"
       data-replacement-failed="true"

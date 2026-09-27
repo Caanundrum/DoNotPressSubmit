@@ -375,3 +375,109 @@ export function FacilityBackground({
         <motion.div
           className="facility-rail absolute left-[18%] top-[58%] h-px w-[28%]"
           animate={{ opacity: sterile ? 0.08 : [0.1, 0.28, 0.1], scaleX: flicker ? [1, 1.02, 0.98, 1] : 1 }}
+          transition={{ duration: flicker ? 3.2 : 8.5, repeat: Infinity }}
+        />
+        <motion.div
+          className="facility-rail absolute right-[14%] top-[72%] h-px w-[22%]"
+          animate={{ opacity: sterile ? 0.06 : [0.08, 0.22, 0.08] }}
+          transition={{ duration: 9.5, repeat: Infinity, delay: 0.8 }}
+        />
+
+        {/* Volumetric-looking beams — intensify by act stress */}
+        <div
+          className="vol-beam absolute left-[42%] top-0 h-[55%] w-16 -translate-x-1/2"
+          style={{ opacity: sterile ? 0.05 : escape ? 0.22 : peel ? 0.16 : 0.08 }}
+        />
+        {environment === "conflict" || anomalyLevel >= 4 ? (
+          <div className="vol-beam absolute left-[68%] top-[8%] h-[40%] w-12 opacity-14" />
+        ) : null}
+
+        {/* Conflict: panels misalign / warn arcs */}
+        {(environment === "conflict" || anomalyLevel >= 5) && !sterile ? (
+          <>
+            <motion.div
+              className="absolute right-[30%] top-[36%] h-16 w-20 border border-danger/30 bg-danger/5"
+              animate={{ x: [0, 1.5, -2, 0.5, 0], rotate: [0, 0.4, -0.6, 0] }}
+              transition={{ duration: 6.5, repeat: Infinity }}
+            />
+            <motion.div
+              className="absolute left-[48%] top-[48%] h-10 w-px bg-gradient-to-b from-transparent via-danger/70 to-transparent"
+              animate={{ opacity: [0.12, 0.45, 0.12], scaleY: [0.85, 1.05, 0.85] }}
+              transition={{ duration: 2.8, repeat: Infinity }}
+            />
+          </>
+        ) : null}
+
+        {/* Reveal: infrastructure ghost behind glass */}
+        {peel ? (
+          <motion.div
+            className="absolute left-[36%] top-[26%] h-28 w-36 border border-white/10 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.04)_0_2px,transparent_2px_10px)]"
+            animate={{ opacity: [0.15, 0.35, 0.15] }}
+            transition={{ duration: 6.5, repeat: Infinity }}
+          >
+            <div className="absolute inset-2 font-mono text-[7px] tracking-[0.2em] text-danger/50">
+              SUBSTRATE // EXPOSED
+            </div>
+          </motion.div>
+        ) : null}
+
+        {anomalyLevel >= 3 ? (
+          <motion.div
+            className="absolute left-[30%] top-[40%] h-24 w-px bg-gradient-to-b from-transparent via-system-warn to-transparent"
+            animate={{ opacity: [0.12, 0.45, 0.12], scaleY: [0.85, 1.05, 0.85] }}
+            transition={{ duration: 4.2, repeat: Infinity }}
+          />
+        ) : null}
+      </motion.div>
+
+      <motion.div className="absolute inset-0" style={{ x: nearX }}>
+        {[...Array(sterile ? 3 : 8)].map((_, i) => (
+          <motion.span
+            key={i}
+            className="absolute h-1 w-1 rounded-full bg-white/30"
+            style={{ left: `${(i * 17) % 100}%`, top: `${(i * 29) % 90}%` }}
+            animate={{
+              y: sterile ? 0 : [0, -14, 0],
+              opacity: sterile ? 0.05 : [0.04, 0.18, 0.04],
+            }}
+            transition={{ duration: 11 + (i % 5), repeat: Infinity, delay: i * 0.35 }}
+          />
+        ))}
+        <div
+          className="absolute inset-x-[10%] top-[12%] h-24 rounded-[40%] blur-3xl"
+          style={{
+            background:
+              environment === "climax"
+                ? "rgba(255,77,109,0.08)"
+                : escape
+                  ? "rgba(80,255,200,0.08)"
+                  : "rgba(110,231,255,0.03)",
+          }}
+        />
+      </motion.div>
+
+      <div
+        className="absolute left-[20%] top-0 h-full w-24 rotate-6 bg-gradient-to-b from-cyan/10 via-transparent to-transparent blur-2xl"
+        style={{ opacity: 0.35 }}
+      />
+      <div
+        className="absolute right-[28%] top-0 h-full w-16 -rotate-3 bg-gradient-to-b from-white/8 via-transparent to-transparent blur-2xl"
+        style={{ opacity: 0.28 }}
+      />
+
+      {environment === "climax" ? (
+        <motion.div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(255,77,109,0.12),transparent_45%)]"
+          animate={{ opacity: [0.3, 0.55, 0.3] }}
+          transition={{ duration: 5.5, repeat: Infinity }}
+        />
+      ) : null}
+
+      {flash ? (
+        <div className="pointer-events-none absolute bottom-[6%] left-1/2 z-[12] max-w-[min(90vw,420px)] -translate-x-1/2 border border-cyan/30 bg-black/70 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]/90">
+          {flash}
+        </div>
+      ) : null}
+    </div>
+  );
+}

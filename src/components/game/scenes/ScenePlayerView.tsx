@@ -44,7 +44,13 @@ export type ScenePlayerViewProps = {
   hoverLanguage: boolean;
   residue: "chaos" | "obedient" | "neutral";
   pokeable: boolean;
-  orbStyle: { left: string; top: string; transform: string; size: number };
+  orbStyle: {
+    left?: string;
+    right?: string;
+    top: string;
+    transform: string;
+    size: number;
+  };
   orbAnchor: OrbAnchor | string;
   spotlight: boolean;
   buryAssistant: boolean;
@@ -193,9 +199,11 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       <motion.div
         className={`absolute ${assistantZ} flex gap-1.5 pointer-events-none ${assistantLayout}`}
         style={{
-          left: orbStyle.left,
+          left: orbStyle.right ? "auto" : (orbStyle.left ?? "2.5%"),
+          right: orbStyle.right ?? "auto",
           top: orbStyle.top,
-          transform: orbStyle.transform,
+          // FM animate x/y owns transform — do not rely on translate(-50%) for edge safety.
+          transform: "none",
           // Right-dock: width follows content so the bubble can sit left of the orb inside the frame.
           width: dockLeft
             ? "auto"

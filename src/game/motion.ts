@@ -1,1 +1,1 @@
-PLACEHOLDER_LOAD_FROM_DISK
+<<FILE:/tmp/DoNotPressSubmit/src/game/motion.ts>>

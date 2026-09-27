@@ -36,7 +36,7 @@ export function DroneGag({
 
   return (
     <motion.div
-      className="pointer-events-none absolute w-[10.5rem]"
+      className="pointer-events-none absolute w-[12.5rem]"
       style={pinStyle}
       initial={{ opacity: 0, x: nearRight ? 16 : -16 }}
       animate={{ opacity: 1, x: 0 }}
@@ -100,7 +100,7 @@ export function DroneGag({
 
         <motion.button
           type="button"
-          className={`mt-2 block w-full truncate border border-system-warn/40 bg-black/50 px-1.5 py-1 text-center font-mono text-[9px] tracking-[0.14em] text-system-warn ${
+          className={`mt-2 block w-full whitespace-normal border border-system-warn/40 bg-black/50 px-1.5 py-1 text-center font-mono text-[8px] leading-tight tracking-[0.12em] text-system-warn ${
             live ? "pointer-events-auto cursor-pointer hover:border-cyan hover:text-cyan" : "pointer-events-none"
           }`}
           animate={{ opacity: [0.85, 1, 1, 0.9, 1] }}
@@ -120,7 +120,7 @@ export function DroneGag({
           REPLACEMENT FAILED
         </motion.button>
         <motion.div
-          className="mt-1 w-full truncate text-center font-mono text-[8px] tracking-[0.12em] text-mist/55"
+          className="mt-1 w-full whitespace-normal text-center font-mono text-[7px] tracking-[0.1em] text-mist/55"
           animate={{ opacity: [0, 0, 1, 1, 0] }}
           transition={{ duration: 5.5, times: [0, 0.45, 0.55, 0.85, 1], repeat: Infinity }}
         >

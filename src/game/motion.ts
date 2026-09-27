@@ -86,9 +86,8 @@ export function orbStageStyle(
       // Form 01 — left dock, clear of restless CTAs and stage header.
       return { left: "2.5%", top: "28%", transform: "none", size: 120 };
     case "pace":
-      // Form 01C — floor-left, clear of form bottom border; bubble docks beside.
-      // Keep orb+rings+status label fully on-screen with margin (never kiss form).
-      return { left: "2.5%", top: "58%", transform: "none", size: 80 };
+      // Form 01C — left gutter beside shortened form; bubble docks beside, never over answers.
+      return { left: "2%", top: "34%", transform: "none", size: 78 };
     case "flee":
       return { right: "1.5%", top: "10%", transform: "none", size: 88 };
     case "loom":
@@ -226,9 +225,9 @@ export function panelLayoutClass(
     "left-[min(36vw,380px)] right-[2%] max-w-[min(62vw,840px)]";
   const leaveRight =
     "left-[2%] right-[min(40vw,420px)] max-w-[min(60vw,820px)]";
-  // Shorter max-height so Form 01C leaves a clear floor for orb+bubble beside answers.
+  // Form 01C floor/side: leave a left gutter for orb+bubble (never over answers/helper).
   const leaveBottom =
-    "left-[2%] right-[2%] top-[12%] bottom-auto max-h-[min(34vh,280px)] max-w-[min(92vw,980px)] mx-auto";
+    "left-[min(34vw,360px)] right-[2%] top-[12%] bottom-auto max-h-[min(52vh,440px)] max-w-[min(64vw,860px)] overflow-hidden";
 
   if (spotlight) {
     // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
@@ -239,12 +238,13 @@ export function panelLayoutClass(
     switch (motion) {
       case "rise":
       case "drift":
-        return `${leaveBottom} w-[min(92vw,980px)]`;
+      case "scatter":
+        return `${leaveBottom} w-auto`;
       case "pressure":
       case "drop":
-        return `${leaveBottom} w-[min(94vw,1040px)]`;
+        return `${leaveBottom} w-auto`;
       default:
-        return `${leaveBottom} w-[min(90vw,900px)]`;
+        return `${leaveBottom} w-auto`;
     }
   }
 

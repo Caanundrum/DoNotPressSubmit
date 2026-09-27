@@ -31,13 +31,12 @@ export const ORB_CLEAR_SLOTS: RoamSlot[] = MARGIN_SLOTS.filter(
 );
 
 export const GAG_SLOTS: Record<string, RoamSlot[]> = {
-  // REPLACEMENT FAILED — right margin only, inset from edge.
-  // Avoid top form band, left orb docks, and Form 01C floor-left pace zone.
+  // REPLACEMENT FAILED — bottom-right only, below form bands; never under panels / across orb.
   drone: [
-    { left: "78%", top: "76%" },
-    { left: "84%", top: "68%" },
-    { left: "72%", top: "80%" },
-    { left: "86%", top: "18%" },
+    { left: "78%", top: "78%" },
+    { left: "84%", top: "72%" },
+    { left: "72%", top: "82%" },
+    { left: "88%", top: "76%" },
   ],
   coffee: [
     { left: "86%", top: "50%" },

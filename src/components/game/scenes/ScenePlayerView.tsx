@@ -123,7 +123,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
     : dockLeft
       ? "min(180px, 24vw)"
       : dockBeside
-        ? "min(280px, 42vw)"
+        ? "min(220px, 28vw)"
         : dockAbove
           ? "min(240px, 36vw)"
           : "min(200px, 26vw)";
@@ -224,7 +224,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           maxWidth: dockLeft
             ? "min(32vw, 248px)"
             : dockBeside
-              ? "min(52vw, 420px)"
+              ? "min(34vw, 280px)"
               : spotlight
                 ? "min(28vw, 220px)"
                 : dockAbove

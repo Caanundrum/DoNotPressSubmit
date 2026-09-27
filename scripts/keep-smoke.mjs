@@ -154,7 +154,8 @@ assert(/data-title-submit-toast|absolute/.test(titleLogo), "SUBMIT gag toast is 
 const motion = read("src/game/motion.ts");
 assert(/max-h-\[min\(44vh,380px\)\]|leaveBottom/.test(motion), "bottom forms leave room for bubble above");
 assert(/top-\[12%\]/.test(motion), "form panels clear SOUND ON corner");
-assert(/84%/.test(motion) && /76%/.test(motion), "orb docks inset from right/bottom edges");
+assert(/right:\s*"1\.5%"/.test(motion), "right-side orb docks pin with right margin");
+assert(/transform:\s*"none"/.test(motion), "orb stage avoids translate centering (FM-safe)");
 
 assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
@@ -169,6 +170,9 @@ assert(/phase === "stitch"/.test(glass) && /ticket/.test(glass), "ticket only on
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(view), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(view), "bubble dock side marked");
 assert(/z-\[42\]|z-\[28\]/.test(view), "safe layering z-index stack (assistant above form)");
+
+const globals = read("src/app/globals.css");
+assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

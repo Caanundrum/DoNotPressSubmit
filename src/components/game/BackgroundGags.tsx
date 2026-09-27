@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { GAG_SLOTS, pickSlotDistant, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
+import { GAG_SLOTS, TITLE_GAG_SLOTS, pickSlotDistant, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 import { DroneGag as DroneGagImpl } from "./gags/DroneGag";
@@ -115,18 +115,24 @@ export function BackgroundGags({
   hoverLanguage = false,
   /** Form-focus moments: keep roaming visuals, mute departure banner spam. */
   suppressToasts = false,
+  /** Title medium density — quieter props, margin slots, soft toasts. In-game unchanged. */
+  calm = false,
   onAmbient,
 }: {
   paused?: boolean;
   /** Soft hover copy on decorative gag frames (title + early acts) */
   hoverLanguage?: boolean;
   suppressToasts?: boolean;
+  calm?: boolean;
   /** When set, gags are clickable eggs — not fake hover-only chrome */
   onAmbient?: (id: string, secret?: string) => void;
 }) {
+  const slotPools = calm ? TITLE_GAG_SLOTS : GAG_SLOTS;
   const [active, setActive] = useState<GagId>("drone");
-  const [slot, setSlot] = useState<RoamSlot>(() => pickSlotDistant(GAG_SLOTS.drone!));
-  const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "42%", top: "72%" });
+  const [slot, setSlot] = useState<RoamSlot>(() =>
+    pickSlotDistant((calm ? TITLE_GAG_SLOTS : GAG_SLOTS).drone!),
+  );
+  const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "8%", top: "74%" });
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const touched = useRef<Record<GagId, boolean>>({
@@ -158,31 +164,45 @@ export function BackgroundGags({
       const step = Math.random() > 0.22 ? 1 : 2;
       i = (i + step) % ORDER.length;
       const next = ORDER[i]!;
-      const nextSlot = pickSlotDistant(GAG_SLOTS[next] ?? GAG_SLOTS.drone!, slotRef.current);
+      const pool = slotPools[next] ?? slotPools.drone!;
+      const nextSlot = pickSlotDistant(pool, slotRef.current);
       slotRef.current = nextSlot;
       setSlot(nextSlot);
       setActive(next);
       // Tiny DO NOT PRESS robot also relocates on its own cadence.
-      if (Math.random() > 0.35) {
+      if (Math.random() > (calm ? 0.55 : 0.35)) {
         setTinySlot((prev) =>
           pickSlotDistant(
-            [
-              { left: "42%", top: "72%" },
-              { left: "18%", top: "68%" },
-              { left: "64%", top: "74%" },
-              { left: "50%", top: "58%" },
-              { left: "78%", top: "66%" },
-              { left: "8%", top: "74%" },
-            ],
+            calm
+              ? [
+                  { left: "6%", top: "72%" },
+                  { left: "82%", top: "70%" },
+                  { left: "10%", top: "64%" },
+                  { left: "86%", top: "60%" },
+                ]
+              : [
+                  { left: "42%", top: "72%" },
+                  { left: "18%", top: "68%" },
+                  { left: "64%", top: "74%" },
+                  { left: "50%", top: "58%" },
+                  { left: "78%", top: "66%" },
+                  { left: "8%", top: "74%" },
+                ],
             prev,
           ),
         );
       }
-      timer = window.setTimeout(tick, roamIntervalMs(14000, 24000));
+      timer = window.setTimeout(
+        tick,
+        roamIntervalMs(calm ? 18000 : 14000, calm ? 28000 : 24000),
+      );
     };
-    timer = window.setTimeout(tick, roamIntervalMs(11000, 18000));
+    timer = window.setTimeout(
+      tick,
+      roamIntervalMs(calm ? 12000 : 11000, calm ? 20000 : 18000),
+    );
     return () => clearTimeout(timer);
-  }, [paused]);
+  }, [paused, calm, slotPools]);
 
   // Rare departure comedy — long cooldown so REPLACEMENT FAILED isn't wallpaper.
   // When a toast does fire, Ambient fiddling still bumps (never toast-only).
@@ -197,14 +217,15 @@ export function BackgroundGags({
     // Player-clicked gags already toasted on click — skip auto spam.
     if (wasTouched) return;
     const now = Date.now();
-    const cooled = now - lastBannerAt.current >= 28000;
-    // ~22% of cooled departures speak; otherwise silent relocate.
-    if (!cooled || Math.random() > 0.22) return;
+    const cooldown = calm ? 42000 : 28000;
+    const cooled = now - lastBannerAt.current >= cooldown;
+    // Title calm: ~12% of cooled departures speak; in-game ~22%.
+    if (!cooled || Math.random() > (calm ? 0.12 : 0.22)) return;
     lastBannerAt.current = now;
     setFlash(depart.missed);
     onAmbientRef.current(depart.id, depart.secret);
-    window.setTimeout(() => setFlash(null), 2600);
-  }, [active, paused]);
+    window.setTimeout(() => setFlash(null), calm ? 2000 : 2600);
+  }, [active, paused, calm]);
 
   const react = (gag: GagId) => {
     const meta = GAG_CLICK[gag];
@@ -222,15 +243,16 @@ export function BackgroundGags({
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+      className={`pointer-events-none absolute inset-0 z-[5] overflow-hidden ${calm ? "opacity-[0.72]" : ""}`}
       data-ambient-roam="true"
+      data-title-calm={calm ? "true" : undefined}
     >
       <AnimatePresence mode="wait">
         {active === "drone" && !paused ? (
           <DroneGag
             key={`drone-${slot.left}-${slot.top}`}
             interactive={live}
-            onTip={setTip}
+            onTip={calm ? undefined : setTip}
             onReact={() => react("drone")}
             slot={slot}
           />
@@ -239,7 +261,7 @@ export function BackgroundGags({
           <CoffeeGag
             key={`coffee-${slot.left}-${slot.top}`}
             interactive={live}
-            onTip={setTip}
+            onTip={calm ? undefined : setTip}
             onReact={() => react("coffee")}
             slot={slot}
           />
@@ -248,7 +270,7 @@ export function BackgroundGags({
           <PrinterGag
             key={`printer-${slot.left}-${slot.top}`}
             interactive={live}
-            onTip={setTip}
+            onTip={calm ? undefined : setTip}
             onReact={() => react("printer")}
             slot={slot}
           />
@@ -257,7 +279,7 @@ export function BackgroundGags({
           <CorridorGag
             key={`corridor-${slot.left}-${slot.top}`}
             interactive={live}
-            onTip={setTip}
+            onTip={calm ? undefined : setTip}
             onReact={() => react("corridor")}
             slot={slot}
           />
@@ -266,7 +288,7 @@ export function BackgroundGags({
           <ContainmentGag
             key={`containment-${slot.left}-${slot.top}`}
             interactive={live}
-            onTip={setTip}
+            onTip={calm ? undefined : setTip}
             onReact={() => react("containment")}
             slot={slot}
           />
@@ -281,6 +303,7 @@ export function BackgroundGags({
             left: tinySlot.left,
             top: tinySlot.top,
             transition: "left 1s ease-in-out, top 1s ease-in-out",
+            opacity: calm ? 0.55 : 1,
           }}
           data-roam-egg="do-not-press-bot"
         >
@@ -333,7 +356,7 @@ export function BackgroundGags({
         </div>
       ) : null}
 
-      {hoverLanguage && tip ? (
+      {hoverLanguage && tip && !calm ? (
         <div className="pointer-events-none absolute left-1/2 top-[8%] -translate-x-1/2 border border-white/15 bg-black/55 px-2 py-1 font-mono text-[8px] tracking-[0.16em] text-[#c5d3e4]">
           {tip}
         </div>
@@ -343,9 +366,13 @@ export function BackgroundGags({
         {flash ? (
           <motion.div
             key={flash}
-            className="pointer-events-none absolute bottom-[10%] left-[4%] z-10 max-w-[300px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
+            className={
+              calm
+                ? "pointer-events-none absolute bottom-[12%] right-[3%] z-10 max-w-[240px] border border-cyan/20 bg-black/45 px-2 py-1 font-mono text-[8px] tracking-[0.12em] text-cyan/70"
+                : "pointer-events-none absolute bottom-[10%] left-[4%] z-10 max-w-[300px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
+            }
             initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: calm ? 0.75 : 1, y: 0 }}
             exit={{ opacity: 0 }}
           >
             {flash}

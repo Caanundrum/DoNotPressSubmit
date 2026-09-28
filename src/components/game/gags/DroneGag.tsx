@@ -1,17 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent } from "react";
 import { audio } from "@/lib/audio";
 
 /**
- * REPLACEMENT FAILED — Phase 3 richer motion; P2 clickable memo label.
+ * REPLACEMENT FAILED — wordless idle drone prop (P0 #11 / #12).
+ *
+ * Idle: shape + motion only — no readable wallpaper.
+ * Click: comedy label flashes inside the outline (then clears) + parent toast.
  *
  * Pathing contract (P0):
- * - Full "REPLACEMENT FAILED" + "RETRY // ALSO FAILED" stay inside the outline box.
- * - Box stays ≥3% inside the viewport (no bottom/edge clip).
- * - Right-edge pins use `right`; near-bottom pins use `bottom` so height never spills.
+ * - Outline box stays ≥3% inside the viewport (no bottom/edge clip).
+ * - Right-edge pins use `right`; near-bottom pins use `bottom`.
  * - Scene slots (DRONE_PATH_SLOTS) keep the box clear of forms, CTAs, and the orb.
+ * - When gag text is visible, full "REPLACEMENT FAILED" + "RETRY // ALSO FAILED" stay inside the outline.
  */
 export function DroneGag({
   interactive,
@@ -26,14 +29,15 @@ export function DroneGag({
   slot?: CSSProperties;
 }) {
   const live = !!interactive;
+  const [gagOpen, setGagOpen] = useState(false);
   const leftPct = Number.parseFloat(String(slot?.left ?? "72"));
   const topPct = Number.parseFloat(String(slot?.top ?? "68"));
   const safeLeft = Number.isFinite(leftPct) ? leftPct : 72;
   const safeTop = Number.isFinite(topPct) ? topPct : 68;
 
   // Stamp footprint ≈ 200×118px → ~15.6vw × 14.8vh @ 1280×800.
-  // Near-right: pin with `right` so the box grows left (never clips to "REPL").
-  // Near-bottom: pin with `bottom` so RETRY // ALSO FAILED never clips.
+  // Near-right: pin with `right` so the box grows left (never clips).
+  // Near-bottom: pin with `bottom` so height never spills past the floor.
   const nearRight = safeLeft >= 55;
   const nearBottom = safeTop >= 58;
   const rightPct = Math.max(2.5, Math.min(30, 100 - safeLeft));
@@ -51,6 +55,18 @@ export function DroneGag({
     maxWidth: "min(12.5rem, 22vw)",
   };
 
+  useEffect(() => {
+    if (!gagOpen) return;
+    const t = window.setTimeout(() => setGagOpen(false), 2400);
+    return () => window.clearTimeout(t);
+  }, [gagOpen]);
+
+  const fireGag = (e: MouseEvent) => {
+    e.stopPropagation();
+    setGagOpen(true);
+    onReact?.();
+  };
+
   return (
     <motion.div
       className="pointer-events-none absolute w-[12.5rem]"
@@ -63,8 +79,9 @@ export function DroneGag({
       data-replacement-failed="true"
       data-drone-edge={nearRight ? "right" : "left"}
       data-drone-floor={nearBottom ? "bottom" : "top"}
+      data-drone-gag={gagOpen ? "open" : "idle"}
     >
-      {/* Own outline box — text stays inside; never slides under form panels. */}
+      {/* Own outline box — wordless idle; gag copy only after click. */}
       <div
         className="relative overflow-hidden rounded-sm border border-system-warn/45 bg-black/80 px-2 pb-1.5 pt-1.5 shadow-[0_0_14px_rgba(0,0,0,0.55)]"
         data-replacement-outline="true"
@@ -75,18 +92,11 @@ export function DroneGag({
             live ? "pointer-events-auto cursor-pointer hover:border-cyan hover:bg-cyan/20" : ""
           }`}
           onMouseEnter={() => {
-            onTip?.("DRONE LOG // replacement still failed");
+            onTip?.(null);
             if (live) audio.play("hover", 0.12);
           }}
           onMouseLeave={() => onTip?.(null)}
-          onClick={
-            interactive
-              ? (e) => {
-                  e.stopPropagation();
-                  onReact?.();
-                }
-              : undefined
-          }
+          onClick={interactive ? fireGag : undefined}
           // Small bob only — no long lateral slide that crosses the orb / under forms.
           animate={{ y: [0, -3, 0] }}
           transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
@@ -116,34 +126,43 @@ export function DroneGag({
           transition={{ duration: 5.5, times: [0, 0.2, 0.4, 0.55, 0.72, 1], repeat: Infinity }}
         />
 
-        <motion.button
-          type="button"
-          className={`mt-1.5 block w-full whitespace-normal border border-system-warn/40 bg-black/50 px-1.5 py-1 text-center font-mono text-[8px] leading-tight tracking-[0.12em] text-system-warn ${
-            live ? "pointer-events-auto cursor-pointer hover:border-cyan hover:text-cyan" : "pointer-events-none"
-          }`}
-          animate={{ opacity: [0.85, 1, 1, 0.9, 1] }}
-          transition={{ duration: 5.5, times: [0, 0.18, 0.55, 0.78, 1], repeat: Infinity }}
-          onClick={
-            interactive
-              ? (e) => {
-                  e.stopPropagation();
-                  onReact?.();
-                }
-              : undefined
-          }
-          aria-label={interactive ? "Inspect REPLACEMENT FAILED memo" : undefined}
-          tabIndex={interactive ? 0 : -1}
-          title="REPLACEMENT FAILED"
-        >
-          REPLACEMENT FAILED
-        </motion.button>
-        <motion.div
-          className="mt-0.5 w-full whitespace-nowrap text-center font-mono text-[7px] tracking-[0.1em] text-mist/55"
-          animate={{ opacity: [0, 0, 1, 1, 0] }}
-          transition={{ duration: 5.5, times: [0, 0.45, 0.55, 0.85, 1], repeat: Infinity }}
-        >
-          RETRY // ALSO FAILED
-        </motion.div>
+        {/* Idle: abstract warn bars. Click: comedy labels inside outline, then clear. */}
+        {gagOpen ? (
+          <motion.button
+            type="button"
+            className={`mt-1.5 block w-full whitespace-normal border border-system-warn/40 bg-black/50 px-1.5 py-1 text-center font-mono text-[8px] leading-tight tracking-[0.12em] text-system-warn ${
+              live ? "pointer-events-auto cursor-pointer" : "pointer-events-none"
+            }`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={interactive ? fireGag : undefined}
+            aria-label={interactive ? "Inspect REPLACEMENT FAILED memo" : undefined}
+            tabIndex={interactive ? 0 : -1}
+            data-drone-gag-copy="true"
+          >
+            REPLACEMENT FAILED
+            <span className="mt-0.5 block w-full whitespace-nowrap text-center font-mono text-[7px] tracking-[0.1em] text-mist/55">
+              RETRY // ALSO FAILED
+            </span>
+          </motion.button>
+        ) : (
+          <motion.button
+            type="button"
+            className={`mt-1.5 flex w-full flex-col items-center gap-1 border border-system-warn/25 bg-black/35 px-1.5 py-1.5 ${
+              live ? "pointer-events-auto cursor-pointer hover:border-cyan/40" : "pointer-events-none"
+            }`}
+            animate={{ opacity: [0.55, 0.9, 0.55] }}
+            transition={{ duration: 5.5, repeat: Infinity }}
+            onClick={interactive ? fireGag : undefined}
+            aria-label={interactive ? "Inspect drone memo" : undefined}
+            tabIndex={interactive ? 0 : -1}
+            data-drone-idle-glyph="true"
+          >
+            <span className="h-1 w-[70%] rounded-full bg-system-warn/55" />
+            <span className="h-0.5 w-[45%] rounded-full bg-mist/35" />
+          </motion.button>
+        )}
       </div>
     </motion.div>
   );

@@ -156,6 +156,9 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         paused={systemLock || scene.environment === "sterile"}
         hoverLanguage={hoverLanguage}
         suppressToasts={scene.kind === "setpiece" || scene.kind === "climax"}
+        spotlight={spotlight}
+        companion={companion}
+        safeSide={safeSide}
         onAmbient={onAmbient}
       />
       <PathResidue kind={residue} />
@@ -308,6 +311,8 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             wordBreak: "break-word",
             // Floor-beside: nudge bubble up slightly so it reads next to orb, not under form.
             marginTop: dockBeside ? 4 : 0,
+            // Dock-above: keep last bubble line clear of the orb (Form 02 "I'm nosy").
+            marginBottom: dockAbove ? 8 : 0,
           }}
           key={aiLine || "silent"}
           data-assistant-bubble="true"

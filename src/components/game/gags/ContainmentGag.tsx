@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { CSSProperties } from "react";
 import { audio } from "@/lib/audio";
 
+/** Containment plaque — wordless idle; comedy copy only via parent toast on click. */
 export function ContainmentGag({
   interactive,
   onTip,
@@ -31,7 +32,7 @@ export function ContainmentGag({
           live ? "pointer-events-auto cursor-pointer hover:border-system-warn/50" : ""
         }`}
         onMouseEnter={() => {
-          onTip?.("CONTAINMENT // unsolicited reassurance");
+          onTip?.(null);
           if (live) audio.play("hover", 0.12);
         }}
         onMouseLeave={() => onTip?.(null)}
@@ -54,14 +55,13 @@ export function ContainmentGag({
         aria-label={interactive ? "Inspect containment plaque" : undefined}
         tabIndex={interactive ? 0 : -1}
       >
-        <div className="font-mono text-[8px] tracking-[0.2em] text-mist/50">BAY 03</div>
+        <div className="h-1 w-8 rounded-full bg-mist/35" />
         <motion.div
-          className="mt-3 font-mono text-[9px] tracking-[0.16em] text-system-warn"
+          className="mt-4 h-2 w-full rounded-sm bg-system-warn/45"
           animate={{ opacity: [0.25, 1, 1, 0.25] }}
           transition={{ duration: 4.5, times: [0, 0.15, 0.7, 1], repeat: Infinity }}
-        >
-          EVERYTHING IS FINE
-        </motion.div>
+        />
+        <div className="mt-2 h-0.5 w-2/3 rounded-full bg-mist/25" />
       </motion.button>
     </motion.div>
   );

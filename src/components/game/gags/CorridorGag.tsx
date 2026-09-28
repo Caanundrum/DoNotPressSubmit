@@ -59,11 +59,13 @@ export function CorridorGag({
         />
       </motion.button>
       <motion.div
-        className="mt-1 text-center font-mono text-[8px] tracking-[0.18em] text-mist/60"
+        className="mx-auto mt-1 flex h-1.5 w-16 justify-center gap-1"
         animate={{ opacity: [0.3, 0.9, 0.3] }}
         transition={{ duration: 3, repeat: Infinity }}
+        aria-hidden
       >
-        AFTER YOU // AFTER YOU
+        <span className="h-full w-5 rounded-full bg-mist/45" />
+        <span className="h-full w-5 rounded-full bg-mist/45" />
       </motion.div>
     </motion.div>
   );

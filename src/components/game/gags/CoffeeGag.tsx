@@ -68,14 +68,14 @@ export function CoffeeGag({
           transition={{ duration: 2.4, repeat: Infinity }}
         />
       </motion.button>
+      {/* Wordless steam/scan blip — comedy copy only on click toast (#12). */}
       <motion.div
-        className="mt-2 max-w-[240px] border border-cyan/35 bg-black/55 px-2 py-1 font-mono text-[9px] tracking-wider text-cyan"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 1, 1, 0] }}
+        className="mt-2 h-2 max-w-[120px] rounded-sm border border-cyan/30 bg-cyan/15"
+        initial={{ opacity: 0, scaleX: 0.4 }}
+        animate={{ opacity: [0, 0.85, 0.85, 0], scaleX: [0.4, 1, 1, 0.6] }}
         transition={{ duration: 6, times: [0, 0.2, 0.75, 1] }}
-      >
-        HUMAN PERFORMANCE ENHANCEMENT COMPOUND DETECTED
-      </motion.div>
+        aria-hidden
+      />
     </motion.div>
   );
 }

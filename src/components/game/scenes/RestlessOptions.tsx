@@ -9,8 +9,8 @@ type Slot = { id: string; label: string; x: number; row: number };
 /** Keep chips inside the craft box (account for ~42%/220px chip width). */
 const X_MIN = 4;
 const X_MAX = 50;
-/** Fixed vertical rows (%) — answers never share a band, so they can't fully hide each other. */
-const ROWS = [28, 52, 76];
+/** Fixed vertical rows (%) — answers never share a band; leave floor clear for helper line. */
+const ROWS = [24, 44, 64];
 
 function clampX(x: number) {
   return Math.min(X_MAX, Math.max(X_MIN, x));
@@ -110,7 +110,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
           </motion.button>
         );
       })}
-      <div className="pointer-events-none absolute bottom-2 left-3 right-3 z-[3] font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
+      <div className="pointer-events-none absolute bottom-2 left-3 right-3 z-[3] border-t border-white/5 bg-black/55 px-0 pt-1.5 font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
         Click each drifting answer until the form admits it has a preference.
       </div>
     </div>

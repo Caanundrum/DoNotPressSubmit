@@ -15,13 +15,16 @@ export function AudioEnableControl({
   useEffect(() => {
     return audio.subscribe((s) => {
       setMuted(s.muted);
-      speech.setEnabled(!s.muted);
+      // P1 #19: unmute arms SFX/ambience only — never live speechSynthesis.
+      speech.setEnabled(false);
+      if (s.muted) speech.cancel();
     });
   }, []);
 
   const enable = () => {
     audio.enableSound();
-    speech.setEnabled(true);
+    // Keep robotic TTS gated; baked VO/hybrid speech lands in a follow-up.
+    speech.setEnabled(false);
   };
 
   const mute = () => {

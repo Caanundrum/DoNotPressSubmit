@@ -132,7 +132,8 @@ export function TitleLogo({
             aria-live="polite"
             data-title-submit-toast="true"
             className="pointer-events-none absolute left-1/2 z-20 w-[min(100%,22rem)] -translate-x-1/2 border border-danger/40 bg-black/80 px-3 py-2 font-mono text-[11px] leading-snug tracking-[0.06em] text-[#ffb0be] shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
-            style={{ top: compact ? "58%" : "56%" }}
+            // Sit in the tagline band below SUBMIT lettering — never cover the lower half of SUBMIT.
+            style={{ top: compact ? "72%" : "70%" }}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}

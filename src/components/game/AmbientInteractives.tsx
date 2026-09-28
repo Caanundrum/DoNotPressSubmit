@@ -132,7 +132,8 @@ const HOTSPOT_DEFS: {
   {
     id: "replacement-failed",
     label: "DRONE",
-    home: { left: "78%", top: "14%" },
+    // Home clear of spotlight forms / Settle CTA — left gutter under stage header.
+    home: { left: "10%", top: "14%" },
     acts: [1, 2, 3],
   },
   {
@@ -204,7 +205,19 @@ export function AmbientChrome({
         for (let n = 0; n < count; n++) {
           const id = ids[Math.floor(Math.random() * ids.length)]!;
           // CHAMBER pin stays out of left orb band (Forms 00 / 00C / 04 spotlight).
-          const pool = id === "chamber-07" ? ORB_CLEAR_SLOTS : MARGIN_SLOTS;
+          // REPLACEMENT FAILED pin stays in left gutter / top margin — never under forms.
+          const pool =
+            id === "chamber-07"
+              ? ORB_CLEAR_SLOTS
+              : id === "replacement-failed"
+                ? [
+                    { left: "8%", top: "14%" },
+                    { left: "12%", top: "16%" },
+                    { left: "10%", top: "12%" },
+                    { left: "14%", top: "18%" },
+                    { left: "6%", top: "20%" },
+                  ]
+                : MARGIN_SLOTS;
           next[id] = pickSlotDistant(pool, prev[id]);
         }
         return next;

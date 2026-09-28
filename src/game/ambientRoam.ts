@@ -30,14 +30,59 @@ export const ORB_CLEAR_SLOTS: RoamSlot[] = MARGIN_SLOTS.filter(
   (s) => Number.parseFloat(s.left) >= 55,
 );
 
-export const GAG_SLOTS: Record<string, RoamSlot[]> = {
-  // REPLACEMENT FAILED — bottom-right only, below form bands; never under panels / across orb.
-  drone: [
-    { left: "78%", top: "78%" },
-    { left: "84%", top: "72%" },
-    { left: "72%", top: "82%" },
-    { left: "88%", top: "76%" },
+/**
+ * REPLACEMENT FAILED path layouts — pick slots opposite the live form / CTA / orb.
+ * Stamp is ~200×120px; keep ≥3% viewport margin so RETRY // ALSO FAILED never clips.
+ */
+export type DronePathLayout =
+  | "title"
+  | "spotlight" // Form 00 / 00C / Settle — orb left, form or CTA in bottom band
+  | "left" // leaveLeft — form owns right column; orb in left gutter
+  | "right" // leaveRight (01B) — form left; orb right
+  | "bottom"; // leaveBottom / pace (01C) — form upper; orb floor-left
+
+/** Scene-aware drone anchors — never under panels, never over primary CTAs, never on orb. */
+export const DRONE_PATH_SLOTS: Record<DronePathLayout, RoamSlot[]> = {
+  // Title: side margins only (clear of centered BEGIN / SUBMIT stack).
+  title: [
+    { left: "78%", top: "36%" },
+    { left: "82%", top: "52%" },
+    { left: "74%", top: "44%" },
+    { left: "86%", top: "30%" },
   ],
+  // Spotlight / Settle: park mid-right ABOVE the bottom form/CTA band; clear of left orb.
+  spotlight: [
+    { left: "82%", top: "20%" },
+    { left: "86%", top: "26%" },
+    { left: "78%", top: "16%" },
+    { left: "88%", top: "32%" },
+  ],
+  // leaveLeft: form covers ~36vw→right; park in left gutter ABOVE the orb dock (below stage header).
+  left: [
+    { left: "8%", top: "14%" },
+    { left: "12%", top: "16%" },
+    { left: "6%", top: "15%" },
+    { left: "14%", top: "13%" },
+  ],
+  // leaveRight (01B): form left, orb right — mid gap below typical form, above bottom clip.
+  right: [
+    { left: "62%", top: "64%" },
+    { left: "58%", top: "68%" },
+    { left: "66%", top: "60%" },
+    { left: "54%", top: "66%" },
+  ],
+  // leaveBottom / 01C: form max-h ~52vh from top 12%; park mid-right under form, above floor.
+  bottom: [
+    { left: "72%", top: "68%" },
+    { left: "66%", top: "70%" },
+    { left: "76%", top: "64%" },
+    { left: "70%", top: "66%" },
+  ],
+};
+
+export const GAG_SLOTS: Record<string, RoamSlot[]> = {
+  // Default drone pool = bottom path (safe under shortened forms). Prefer DRONE_PATH_SLOTS via layout.
+  drone: DRONE_PATH_SLOTS.bottom,
   coffee: [
     { left: "86%", top: "50%" },
     { left: "12%", top: "46%" },
@@ -63,6 +108,20 @@ export const GAG_SLOTS: Record<string, RoamSlot[]> = {
     { left: "86%", top: "40%" },
   ],
 };
+
+/** Resolve drone path from assistant safe side + scene flags. */
+export function dronePathLayout(opts: {
+  calm?: boolean;
+  spotlight?: boolean;
+  companion?: boolean;
+  safeSide?: "left" | "right" | "bottom";
+}): DronePathLayout {
+  if (opts.calm) return "title";
+  if (opts.spotlight || opts.companion) return "spotlight";
+  if (opts.safeSide === "right") return "right";
+  if (opts.safeSide === "bottom") return "bottom";
+  return "left";
+}
 
 export const CHAMBER_SLOTS: RoamSlot[] = [
   // Keep clear of left spotlight / dock-left orb so prop text never reads through the orb.
@@ -161,12 +220,7 @@ export const TITLE_BAR_LAYOUTS: FacilityBar[][] = [
 
 /** Title gag anchors — stay in side margins, clear of the centered CTA stack. */
 export const TITLE_GAG_SLOTS: Record<string, RoamSlot[]> = {
-  drone: [
-    { left: "78%", top: "36%" },
-    { left: "82%", top: "58%" },
-    { left: "74%", top: "48%" },
-    { left: "86%", top: "28%" },
-  ],
+  drone: DRONE_PATH_SLOTS.title,
   coffee: [
     { left: "84%", top: "44%" },
     { left: "8%", top: "52%" },

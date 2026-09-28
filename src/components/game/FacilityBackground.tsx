@@ -156,7 +156,7 @@ export function FacilityBackground({
               opacity: sterile
                 ? 0.28
                 : calm
-                  ? 0.2 + (i % 2) * 0.05
+                  ? 0.32 + (i % 2) * 0.06
                   : 0.28 + (i % 3) * 0.05,
               background: sterile
                 ? "linear-gradient(to top, #222833, #3a4252)"

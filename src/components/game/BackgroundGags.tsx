@@ -378,22 +378,23 @@ export function BackgroundGags({
             <span className="absolute -top-1 left-0.5 h-1.5 w-1.5 rounded-full bg-cyan/70" />
             <span className="absolute -top-1 right-0.5 h-1.5 w-1.5 rounded-full bg-cyan/40" />
           </motion.div>
+          {/* Wordless danger plaque — robot presses a silhouette, not readable wallpaper (#12). */}
           <motion.button
             type="button"
-            className={`absolute bottom-1 left-[4.5rem] font-mono text-[9px] tracking-widest text-danger/85 ${
+            className={`absolute bottom-1 left-[4.5rem] flex h-5 w-14 items-center justify-center border border-danger/35 bg-black/40 ${
               live
-                ? "pointer-events-auto cursor-pointer border border-transparent px-1 hover:border-danger/40 hover:bg-danger/10 hover:text-danger"
+                ? "pointer-events-auto cursor-pointer hover:border-danger/70 hover:bg-danger/15"
                 : "pointer-events-none"
             }`}
             animate={{
               opacity: [0.15, 0.15, 1, 1, 0.35, 0.35],
               scale: [1, 1, 1, 0.92, 1, 1],
-              textShadow: [
+              boxShadow: [
                 "0 0 0 transparent",
                 "0 0 0 transparent",
-                "0 0 8px rgba(255,77,109,0.5)",
-                "0 0 14px rgba(255,77,109,0.8)",
-                "0 0 4px rgba(255,77,109,0.3)",
+                "0 0 8px rgba(255,77,109,0.45)",
+                "0 0 14px rgba(255,77,109,0.75)",
+                "0 0 4px rgba(255,77,109,0.25)",
                 "0 0 0 transparent",
               ],
             }}
@@ -413,8 +414,9 @@ export function BackgroundGags({
             }
             aria-label={live ? "Inspect background propaganda" : undefined}
             tabIndex={live ? 0 : -1}
+            data-do-not-press-glyph="true"
           >
-            DO NOT PRESS
+            <span className="h-1 w-8 rounded-full bg-danger/80" />
           </motion.button>
         </div>
       ) : null}

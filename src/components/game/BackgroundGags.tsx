@@ -2,7 +2,16 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { GAG_SLOTS, TITLE_GAG_SLOTS, pickSlotDistant, roamIntervalMs, type RoamSlot } from "@/game/ambientRoam";
+import {
+  DRONE_PATH_SLOTS,
+  GAG_SLOTS,
+  TITLE_GAG_SLOTS,
+  dronePathLayout,
+  pickSlotDistant,
+  roamIntervalMs,
+  type DronePathLayout,
+  type RoamSlot,
+} from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
 
 import { DroneGag as DroneGagImpl } from "./gags/DroneGag";
@@ -117,6 +126,11 @@ export function BackgroundGags({
   suppressToasts = false,
   /** Title medium density — quieter props, margin slots, soft toasts. In-game unchanged. */
   calm = false,
+  /** Spotlight forms / companion Settle — drone parks above bottom CTA/form band. */
+  spotlight = false,
+  companion = false,
+  /** Assistant safe side — drives leaveLeft / leaveRight / leaveBottom drone pools. */
+  safeSide = "left",
   onAmbient,
 }: {
   paused?: boolean;
@@ -124,14 +138,22 @@ export function BackgroundGags({
   hoverLanguage?: boolean;
   suppressToasts?: boolean;
   calm?: boolean;
+  spotlight?: boolean;
+  companion?: boolean;
+  safeSide?: "left" | "right" | "bottom";
   /** When set, gags are clickable eggs — not fake hover-only chrome */
   onAmbient?: (id: string, secret?: string) => void;
 }) {
+  const path: DronePathLayout = dronePathLayout({
+    calm,
+    spotlight,
+    companion,
+    safeSide,
+  });
   const slotPools = calm ? TITLE_GAG_SLOTS : GAG_SLOTS;
+  const dronePool = DRONE_PATH_SLOTS[path];
   const [active, setActive] = useState<GagId>("drone");
-  const [slot, setSlot] = useState<RoamSlot>(() =>
-    pickSlotDistant((calm ? TITLE_GAG_SLOTS : GAG_SLOTS).drone!),
-  );
+  const [slot, setSlot] = useState<RoamSlot>(() => pickSlotDistant(dronePool));
   const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "72%", top: "70%" });
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
@@ -147,6 +169,18 @@ export function BackgroundGags({
   const onAmbientRef = useRef(onAmbient);
   const lastBannerAt = useRef(0);
   const suppressRef = useRef(suppressToasts);
+  const pathRef = useRef(path);
+  // QA / evidence: ?ambient=drone locks REPLACEMENT FAILED for geometry captures.
+  const [forceDrone, setForceDrone] = useState(false);
+  useEffect(() => {
+    try {
+      setForceDrone(
+        new URLSearchParams(window.location.search).get("ambient") === "drone",
+      );
+    } catch {
+      setForceDrone(false);
+    }
+  }, []);
   useEffect(() => {
     onAmbientRef.current = onAmbient;
   }, [onAmbient]);
@@ -154,17 +188,33 @@ export function BackgroundGags({
     suppressRef.current = suppressToasts;
   }, [suppressToasts]);
 
+  // When form/orb layout changes, immediately re-seat the drone into the matching path pool.
+  useEffect(() => {
+    if (pathRef.current === path) return;
+    pathRef.current = path;
+    const nextSlot = pickSlotDistant(DRONE_PATH_SLOTS[path], slotRef.current);
+    slotRef.current = nextSlot;
+    setSlot(nextSlot);
+    if (active === "drone" || forceDrone) {
+      setActive("drone");
+    }
+  }, [path, active, forceDrone]);
+
   // Rotate gag identity AND relocate to a fresh distant anchor (not opacity-only).
   // Longer cadence — ambient banners should feel rare, not wallpaper.
   useEffect(() => {
     if (paused) return;
+    if (forceDrone) return; // QA lock — keep REPLACEMENT FAILED seated in path pool.
     let i = 0;
     let timer: number;
     const tick = () => {
       const step = Math.random() > 0.22 ? 1 : 2;
       i = (i + step) % ORDER.length;
       const next = ORDER[i]!;
-      const pool = slotPools[next] ?? slotPools.drone!;
+      const pool =
+        next === "drone"
+          ? DRONE_PATH_SLOTS[pathRef.current]
+          : (slotPools[next] ?? slotPools.drone!);
       const nextSlot = pickSlotDistant(pool, slotRef.current);
       slotRef.current = nextSlot;
       setSlot(nextSlot);
@@ -203,7 +253,7 @@ export function BackgroundGags({
       roamIntervalMs(16000, 26000),
     );
     return () => clearTimeout(timer);
-  }, [paused, calm, slotPools]);
+  }, [paused, calm, slotPools, forceDrone]);
 
   // Rare departure comedy — long cooldown so REPLACEMENT FAILED isn't wallpaper.
   // When a toast does fire, Ambient fiddling still bumps (never toast-only).
@@ -241,6 +291,15 @@ export function BackgroundGags({
   };
 
   const live = !!onAmbient;
+  const shown = forceDrone ? "drone" : active;
+  useEffect(() => {
+    if (!forceDrone) return;
+    const pool = DRONE_PATH_SLOTS[pathRef.current];
+    const nextSlot = pickSlotDistant(pool, slotRef.current);
+    slotRef.current = nextSlot;
+    setSlot(nextSlot);
+    setActive("drone");
+  }, [forceDrone, path]);
 
   return (
     <div
@@ -248,18 +307,20 @@ export function BackgroundGags({
       data-ambient-roam="true"
       data-ambient-subtle="true"
       data-title-calm={calm ? "true" : undefined}
+      data-drone-path={path}
+      data-force-drone={forceDrone ? "true" : undefined}
     >
       <AnimatePresence mode="wait">
-        {active === "drone" && !paused ? (
+        {shown === "drone" && !paused ? (
           <DroneGag
-            key={`drone-${slot.left}-${slot.top}`}
+            key={`drone-${path}-${slot.left}-${slot.top}`}
             interactive={live}
             onTip={calm ? undefined : setTip}
             onReact={() => react("drone")}
             slot={slot}
           />
         ) : null}
-        {active === "coffee" && !paused ? (
+        {shown === "coffee" && !paused ? (
           <CoffeeGag
             key={`coffee-${slot.left}-${slot.top}`}
             interactive={live}
@@ -268,7 +329,7 @@ export function BackgroundGags({
             slot={slot}
           />
         ) : null}
-        {active === "printer" && !paused ? (
+        {shown === "printer" && !paused ? (
           <PrinterGag
             key={`printer-${slot.left}-${slot.top}`}
             interactive={live}
@@ -277,7 +338,7 @@ export function BackgroundGags({
             slot={slot}
           />
         ) : null}
-        {active === "corridor" && !paused ? (
+        {shown === "corridor" && !paused ? (
           <CorridorGag
             key={`corridor-${slot.left}-${slot.top}`}
             interactive={live}
@@ -286,7 +347,7 @@ export function BackgroundGags({
             slot={slot}
           />
         ) : null}
-        {active === "containment" && !paused ? (
+        {shown === "containment" && !paused ? (
           <ContainmentGag
             key={`containment-${slot.left}-${slot.top}`}
             interactive={live}

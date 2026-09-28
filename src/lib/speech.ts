@@ -1,8 +1,15 @@
 "use client";
 
 /**
- * Browser Web Speech delivery for scripted AI / System lines.
- * Speech is presentation only — dialogue strings remain authoritative.
+ * Speech presentation for scripted AI / System lines.
+ *
+ * P1 #19 — live browser speechSynthesis is GATED OFF by default.
+ * Robotic TTS must not be the default player voice.
+ * Follow-up: recorded character VO for hero beats + build-time baked neural TTS
+ * per line ID (WAV/OGG). No runtime cloud TTS API (keeps no-runtime-LLM boundary).
+ *
+ * Hybrid path: keep this director for future baked-audio routing; do not re-enable
+ * LIVE_BROWSER_TTS until baked/VO assets land.
  */
 
 type SpeakOptions = {
@@ -12,6 +19,9 @@ type SpeakOptions = {
   system?: boolean;
 };
 
+/** Hard gate — unmute must not arm robotic SpeechSynthesis. */
+const LIVE_BROWSER_TTS = false;
+
 class SpeechDirector {
   private enabled = false;
   private speaking = false;
@@ -19,21 +29,27 @@ class SpeechDirector {
   private voicesReady = false;
 
   setEnabled(enabled: boolean) {
-    this.enabled = enabled;
-    if (!enabled) this.cancel();
+    // Even when audio unmutes, never arm live browser TTS until VO/baked path lands.
+    this.enabled = LIVE_BROWSER_TTS && enabled;
+    if (!this.enabled) this.cancel();
   }
 
   isEnabled() {
     return this.enabled;
   }
 
+  /** True when robotic SpeechSynthesis would be allowed (always false until #19 VO lands). */
+  liveBrowserTtsAllowed() {
+    return LIVE_BROWSER_TTS;
+  }
+
   private ensureVoices() {
+    if (!LIVE_BROWSER_TTS) return;
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     const pick = () => {
       const voices = window.speechSynthesis.getVoices();
       if (!voices.length) return;
       this.voicesReady = true;
-      // Prefer crisp English voices; Google/Microsoft tend to read UI copy cleanly.
       this.preferredVoice =
         voices.find((v) => /en(-|_)US/i.test(v.lang) && /Google|Microsoft|Samantha|Daniel/i.test(v.name)) ??
         voices.find((v) => /^en/i.test(v.lang)) ??
@@ -47,6 +63,7 @@ class SpeechDirector {
   }
 
   speak(text: string, options: SpeakOptions = {}) {
+    if (!LIVE_BROWSER_TTS) return;
     if (typeof window === "undefined" || !this.enabled) return;
     if (!window.speechSynthesis) return;
     const cleaned = text.replace(/[.…]+/g, ".").replace(/\s+/g, " ").trim();
@@ -69,9 +86,8 @@ class SpeechDirector {
       this.speaking = false;
     };
 
-    // Small defer helps some browsers after cancel().
     window.setTimeout(() => {
-      if (!this.enabled) return;
+      if (!this.enabled || !LIVE_BROWSER_TTS) return;
       window.speechSynthesis.speak(utter);
     }, 40);
   }

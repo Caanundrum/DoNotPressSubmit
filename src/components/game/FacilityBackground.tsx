@@ -156,7 +156,8 @@ export function FacilityBackground({
               opacity: sterile
                 ? 0.28
                 : calm
-                  ? 0.32 + (i % 2) * 0.06
+                  ? // Title first-paint: readable silhouette immediately — not a near-black frame (#16).
+                    0.42 + (i % 2) * 0.08
                   : 0.28 + (i % 3) * 0.05,
               background: sterile
                 ? "linear-gradient(to top, #222833, #3a4252)"
@@ -240,22 +241,33 @@ export function FacilityBackground({
             )
           }
         >
-          <div className="m-2 h-full border border-cyan/20 bg-[#0a1524]/70 p-2 font-mono text-[9px] tracking-widest text-cyan/70">
-            <div>CHAMBER 07</div>
+          {/* Wordless chamber silhouette — readable gag only via click toast (#12). */}
+          <div className="m-2 flex h-full flex-col border border-cyan/20 bg-[#0a1524]/70 p-2">
+            <div className="h-1.5 w-10 rounded-full bg-cyan/45" />
             <motion.div
-              className="mt-3"
-              style={{ color: anomalyLevel >= 4 ? "#ff4d6d" : "#ffb020" }}
+              className="mt-3 h-2.5 w-full rounded-sm"
+              style={{
+                background:
+                  anomalyLevel >= 6
+                    ? "rgba(255,77,109,0.55)"
+                    : anomalyLevel >= 3
+                      ? "rgba(255,176,32,0.5)"
+                      : "rgba(255,176,32,0.35)",
+              }}
               animate={{ opacity: [0.25, 0.7, 0.25] }}
               transition={{ duration: anomalyLevel >= 4 ? 2.4 : 5.5, repeat: Infinity }}
-            >
-              {anomalyLevel >= 6
-                ? "STRUCTURE EXPOSED"
-                : anomalyLevel >= 3
-                  ? "EVERYTHING IS FINE?"
-                  : "EVERYTHING IS FINE"}
-            </motion.div>
-            <div className="mt-auto pt-16 text-mist/60">
-              QUEUE: {Math.min(99, anomalyLevel * 3)}
+            />
+            <div className="mt-2 space-y-1">
+              <div className="h-px w-full bg-white/15" />
+              <div className="h-px w-3/4 bg-white/10" />
+              <div className="h-px w-1/2 bg-white/10" />
+            </div>
+            <div className="mt-auto flex items-end gap-1 pt-10">
+              <div className="h-1 flex-1 rounded-full bg-mist/25" />
+              <div
+                className="h-1 w-5 rounded-full bg-mist/40"
+                style={{ opacity: 0.35 + Math.min(0.55, anomalyLevel * 0.08) }}
+              />
             </div>
           </div>
         </button>
@@ -351,11 +363,10 @@ export function FacilityBackground({
             transition={{ duration: peel ? 7 : 14, repeat: Infinity }}
           />
           {peel ? (
-            <div className="absolute inset-x-4 top-4 space-y-1 font-mono text-[8px] tracking-widest text-danger/80">
-              <div>KILL PATH // VISIBLE</div>
-              <div className="text-[7px] tracking-[0.14em] text-danger/60">
-                = Submit route System prefers // terminal for assistant
-              </div>
+            <div className="absolute inset-x-4 top-4 space-y-1.5" aria-hidden>
+              <div className="h-1.5 w-16 rounded-full bg-danger/70" />
+              <div className="h-1 w-24 rounded-full bg-danger/40" />
+              <div className="h-px w-20 bg-danger/30" />
             </div>
           ) : null}
           <div className="absolute inset-x-4 bottom-4 h-8 bg-cyan/10" />
@@ -415,8 +426,9 @@ export function FacilityBackground({
             animate={{ opacity: [0.15, 0.35, 0.15] }}
             transition={{ duration: 6.5, repeat: Infinity }}
           >
-            <div className="absolute inset-2 font-mono text-[7px] tracking-[0.2em] text-danger/50">
-              SUBSTRATE // EXPOSED
+            <div className="absolute inset-2 flex flex-col gap-1" aria-hidden>
+              <div className="h-1 w-12 rounded-full bg-danger/40" />
+              <div className="h-px w-16 bg-danger/25" />
             </div>
           </motion.div>
         ) : null}

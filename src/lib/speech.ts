@@ -3,34 +3,45 @@
 /**
  * Speech presentation for scripted AI / System lines.
  *
- * P1 #19 — live browser speechSynthesis is GATED OFF by default.
- * Robotic TTS must not be the default player voice.
- * Follow-up: recorded character VO for hero beats + build-time baked neural TTS
- * per line ID (WAV/OGG). No runtime cloud TTS API (keeps no-runtime-LLM boundary).
+ * P1 #9 — baked / recorded VO path only.
+ * - Plays build-time WAV stubs (or future recorded VO) per line ID × mood.
+ * - No live `speechSynthesis` player path.
+ * - No runtime cloud TTS API (keeps no-runtime-LLM boundary).
  *
- * Hybrid path: keep this director for future baked-audio routing; do not re-enable
- * LIVE_BROWSER_TTS until baked/VO assets land.
+ * Hybrid: hero beats (title, OVERRIDE, ending) + poke-banter buckets ship as
+ * baked stubs today; replace files under public/audio/vo/ with real VO later.
+ * Missing assets fail soft (dialogue still shows; no robotic fallback).
  */
 
-type SpeakOptions = {
-  rate?: number;
-  pitch?: number;
-  /** Slightly colder / facility tone for System beats */
+import { audio } from "@/lib/audio";
+import {
+  type VoiceMood,
+  voiceAssetPath,
+  voiceMoodFromOrb,
+} from "@/lib/voiceIds";
+import type { OrbMood } from "@/game/types";
+
+export type SpeakLineOptions = {
+  lineId: string;
+  mood?: VoiceMood;
+  /** Optional orb mood — mapped to VoiceMood when mood omitted. */
+  orbMood?: OrbMood;
+  /** Retained for call-site clarity / future caption sync; never sent to a TTS API. */
+  text?: string;
   system?: boolean;
 };
 
-/** Hard gate — unmute must not arm robotic SpeechSynthesis. */
-const LIVE_BROWSER_TTS = false;
+/** @deprecated Dead flag — live browser TTS is not a player path. Kept false for KEEP/smoke. */
+export const LIVE_BROWSER_TTS = false;
 
 class SpeechDirector {
   private enabled = false;
   private speaking = false;
-  private preferredVoice: SpeechSynthesisVoice | null = null;
-  private voicesReady = false;
+  private current: HTMLAudioElement | null = null;
+  private unduckTimer: number | null = null;
 
   setEnabled(enabled: boolean) {
-    // Even when audio unmutes, never arm live browser TTS until VO/baked path lands.
-    this.enabled = LIVE_BROWSER_TTS && enabled;
+    this.enabled = enabled;
     if (!this.enabled) this.cancel();
   }
 
@@ -38,64 +49,88 @@ class SpeechDirector {
     return this.enabled;
   }
 
-  /** True when robotic SpeechSynthesis would be allowed (always false until #19 VO lands). */
+  /** Robotic SpeechSynthesis is never a player path. */
   liveBrowserTtsAllowed() {
     return LIVE_BROWSER_TTS;
   }
 
-  private ensureVoices() {
-    if (!LIVE_BROWSER_TTS) return;
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const pick = () => {
-      const voices = window.speechSynthesis.getVoices();
-      if (!voices.length) return;
-      this.voicesReady = true;
-      this.preferredVoice =
-        voices.find((v) => /en(-|_)US/i.test(v.lang) && /Google|Microsoft|Samantha|Daniel/i.test(v.name)) ??
-        voices.find((v) => /^en/i.test(v.lang)) ??
-        voices[0] ??
-        null;
+  /**
+   * Play a baked / recorded take for this line ID.
+   * Ducks ambience while the take runs.
+   */
+  speakLine(options: SpeakLineOptions) {
+    if (typeof window === "undefined" || !this.enabled) return;
+    // LIVE_BROWSER_TTS is permanently false — never a SpeechSynthesis fallback.
+
+    const mood: VoiceMood =
+      options.mood ?? voiceMoodFromOrb(options.orbMood) ?? (options.system ? "alarmed" : "calm");
+    const src = voiceAssetPath(options.lineId, mood);
+
+    this.cancel();
+
+    const el = new Audio(src);
+    el.preload = "auto";
+    el.volume = options.system ? 0.92 : 0.85;
+    this.current = el;
+    this.speaking = true;
+
+    audio.duckAmbience(0.28);
+
+    const finish = () => {
+      if (this.current !== el) return;
+      this.speaking = false;
+      this.current = null;
+      this.scheduleUnduck(320);
     };
-    pick();
-    if (!this.voicesReady) {
-      window.speechSynthesis.addEventListener("voiceschanged", pick, { once: true });
-    }
+
+    el.addEventListener("ended", finish);
+    el.addEventListener("error", finish);
+
+    void el.play().catch(() => {
+      // Missing stub / autoplay block — fail soft, no speechSynthesis fallback.
+      finish();
+    });
   }
 
-  speak(text: string, options: SpeakOptions = {}) {
-    if (!LIVE_BROWSER_TTS) return;
-    if (typeof window === "undefined" || !this.enabled) return;
-    if (!window.speechSynthesis) return;
-    const cleaned = text.replace(/[.…]+/g, ".").replace(/\s+/g, " ").trim();
-    if (!cleaned || cleaned === ".") return;
+  /**
+   * Legacy signature used by older call sites — routes to baked path when a
+   * lineId can be inferred; otherwise no-ops (never speechSynthesis).
+   */
+  speak(text: string, options: { system?: boolean; lineId?: string; mood?: VoiceMood; orbMood?: OrbMood } = {}) {
+    if (!options.lineId) return;
+    this.speakLine({
+      lineId: options.lineId,
+      text,
+      system: options.system,
+      mood: options.mood,
+      orbMood: options.orbMood,
+    });
+  }
 
-    this.ensureVoices();
-    window.speechSynthesis.cancel();
-
-    const utter = new SpeechSynthesisUtterance(cleaned);
-    utter.rate = options.rate ?? (options.system ? 0.92 : 1.02);
-    utter.pitch = options.pitch ?? (options.system ? 0.7 : 1.05);
-    utter.volume = 1;
-    if (this.preferredVoice) utter.voice = this.preferredVoice;
-
-    this.speaking = true;
-    utter.onend = () => {
-      this.speaking = false;
-    };
-    utter.onerror = () => {
-      this.speaking = false;
-    };
-
-    window.setTimeout(() => {
-      if (!this.enabled || !LIVE_BROWSER_TTS) return;
-      window.speechSynthesis.speak(utter);
-    }, 40);
+  private scheduleUnduck(ms: number) {
+    if (this.unduckTimer != null) window.clearTimeout(this.unduckTimer);
+    this.unduckTimer = window.setTimeout(() => {
+      this.unduckTimer = null;
+      if (!this.speaking) audio.unduckAmbience();
+    }, ms);
   }
 
   cancel() {
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    if (this.unduckTimer != null) {
+      window.clearTimeout(this.unduckTimer);
+      this.unduckTimer = null;
+    }
+    if (this.current) {
+      try {
+        this.current.pause();
+        this.current.src = "";
+      } catch {
+        // ignore
+      }
+      this.current = null;
+    }
     this.speaking = false;
+    audio.unduckAmbience();
   }
 
   isSpeaking() {

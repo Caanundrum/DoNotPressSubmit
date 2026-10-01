@@ -108,41 +108,52 @@ export function TitleLogo({
           <span className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent [animation:sweep_3.5s_linear_infinite]" />
         </span>
       </motion.button>
+
+      {/*
+        P1 #10 — reserved toast band BETWEEN Submit and the subtitle.
+        Always the same in-flow height → no CTA column jump; toast never covers
+        "A Chaos Standard assessment…" and never reaches BEGIN (siblings below).
+      */}
+      <div
+        className={
+          compact
+            ? "relative mx-auto mt-2 min-h-[2.85rem] w-[min(100%,22rem)]"
+            : "relative mx-auto mt-3 min-h-[3.1rem] w-[min(100%,22rem)]"
+        }
+        data-title-submit-toast-band="true"
+        aria-hidden={!gag}
+      >
+        <AnimatePresence>
+          {gag ? (
+            <motion.div
+              key={gag}
+              role="status"
+              aria-live="polite"
+              data-title-submit-toast="true"
+              className="pointer-events-none absolute inset-x-0 top-0 z-20 border border-danger/40 bg-black/80 px-3 py-2 font-mono text-[11px] leading-snug tracking-[0.06em] text-[#ffb0be] shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22 }}
+            >
+              {gag}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </div>
+
       <p
         className={
           compact
-            ? "mx-auto mt-2.5 max-w-md text-xs tracking-[0.08em] text-mist sm:text-sm"
-            : "mx-auto mt-5 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base"
+            ? "mx-auto mt-1.5 max-w-md text-xs tracking-[0.08em] text-mist sm:text-sm"
+            : "mx-auto mt-2 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base"
         }
+        data-title-subtitle="true"
       >
         A Chaos Standard assessment.
         <br />
         Try not to press Submit.
       </p>
-
-      {/*
-        Absolute overlay — no in-flow height, so CTA column never jumps ~30px.
-        Sits over the tagline band; never covers BEGIN (siblings below TitleLogo).
-      */}
-      <AnimatePresence>
-        {gag ? (
-          <motion.div
-            key={gag}
-            role="status"
-            aria-live="polite"
-            data-title-submit-toast="true"
-            className="pointer-events-none absolute left-1/2 z-20 w-[min(100%,22rem)] -translate-x-1/2 border border-danger/40 bg-black/80 px-3 py-2 font-mono text-[11px] leading-snug tracking-[0.06em] text-[#ffb0be] shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
-            // Sit in the tagline band well below SUBMIT lettering — never cover the lower half of SUBMIT (#17).
-            style={{ top: compact ? "78%" : "76%" }}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.22 }}
-          >
-            {gag}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </div>
   );
 }

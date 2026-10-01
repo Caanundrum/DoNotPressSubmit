@@ -49,7 +49,8 @@ function hashSeed(str) {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+    // Match runtime pokeLineId: keep FNV unsigned so ids stay poke-NN not poke--N.
+    h = Math.imul(h, 16777619) >>> 0;
   }
   return h >>> 0;
 }

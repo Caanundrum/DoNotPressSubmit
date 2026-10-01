@@ -46,5 +46,5 @@ export function endingLineId(endingId: string): string {
 }
 
 export function voiceAssetPath(lineId: string, mood: VoiceMood): string {
-  return `/audio/vo/${lineId}--{mood}.wav`.replace("{mood}", mood);
+  return `/audio/vo/${lineId}--${mood}.wav`;
 }

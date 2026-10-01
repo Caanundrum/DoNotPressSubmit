@@ -29,7 +29,13 @@ export function SystemBeat({
 
   useEffect(() => {
     audio.play("system", 0.75);
-    speech.speak(line, { system: true });
+    // Hero OVERRIDE beat — baked VO stub (replace with recorded take later).
+    speech.speakLine({
+      lineId: "hero-system-override",
+      text: line,
+      system: true,
+      mood: "alarmed",
+    });
     const arm = window.setTimeout(() => setArmed(true), 1800);
     const tick = window.setInterval(() => {
       setSecondsLeft((s) => {

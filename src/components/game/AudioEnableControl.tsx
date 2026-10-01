@@ -15,16 +15,19 @@ export function AudioEnableControl({
   useEffect(() => {
     return audio.subscribe((s) => {
       setMuted(s.muted);
-      // P1 #19: unmute arms SFX/ambience only — never live speechSynthesis.
-      speech.setEnabled(false);
+      // P1 #9: unmute arms SFX + ambience + baked VO — never live browser TTS.
+      speech.setEnabled(!s.muted);
       if (s.muted) speech.cancel();
     });
   }, []);
 
   const enable = () => {
     audio.enableSound();
-    // Keep robotic TTS gated; baked VO/hybrid speech lands in a follow-up.
-    speech.setEnabled(false);
+    speech.setEnabled(true);
+    // Hero title beat — soft stub; real VO swap keeps the same lineId.
+    if (placement === "title") {
+      speech.speakLine({ lineId: "hero-title", mood: "calm", text: "title" });
+    }
   };
 
   const mute = () => {

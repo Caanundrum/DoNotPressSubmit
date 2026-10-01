@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "bake-voice": "node scripts/bake-voice.mjs",
+    "predev": "npm run bake-voice",
     "dev": "next dev --port 43123",
+    "prebuild": "npm run bake-voice",
     "build": "next build",
     "start": "next start --port 43123",
     "lint": "eslint",

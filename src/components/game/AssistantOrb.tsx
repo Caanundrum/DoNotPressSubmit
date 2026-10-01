@@ -98,7 +98,7 @@ export function AssistantOrb({
   const [localFlinch, setLocalFlinch] = useState(false);
   const [nervousSpin, setNervousSpin] = useState(false);
   const [drag, setDrag] = useState({ x: 0, y: 0 });
-  /** Unauthorized microcopy only after a poke — folded into first poke beat (#10). */
+  /** Soft first-poke tell only — never idle instructional wallpaper competing with BEGIN / primary CTAs. */
   const [showPokeHint, setShowPokeHint] = useState(false);
   const pokedOnce = useRef(false);
   const dragOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -117,11 +117,11 @@ export function AssistantOrb({
   const handlePoke = () => {
     if (!pokeable || !onPoke) return;
     setLocalFlinch(true);
-    // Soft first-poke tell only — no idle "click me"; dialogue bubble owns the gag after.
+    // Soft first-poke tell only — no idle instructional wallpaper; dialogue bubble owns the gag after.
     if (!pokedOnce.current) {
       pokedOnce.current = true;
       setShowPokeHint(true);
-      window.setTimeout(() => setShowPokeHint(false), 1400);
+      window.setTimeout(() => setShowPokeHint(false), 900);
     }
     audio.playMoodCue("poke");
     onPoke();
@@ -389,11 +389,11 @@ export function AssistantOrb({
       ) : null}
       {pokeable && showPokeHint ? (
         <div
-          className="pointer-events-none font-mono text-[8px] tracking-[0.18em] text-cyan/55"
+          className="pointer-events-none mx-auto mt-0.5 h-1 w-4 rounded-full bg-cyan/40"
+          style={{ boxShadow: "0 0 5px rgba(110,231,255,0.25)" }}
           data-orb-poke-hint="true"
-        >
-          logged
-        </div>
+          aria-hidden
+        />
       ) : null}
     </div>
   );

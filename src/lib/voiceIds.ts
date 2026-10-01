@@ -29,7 +29,9 @@ export function pokeLineId(text: string): string {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < text.length; i++) {
     h ^= text.charCodeAt(i);
-    h = Math.imul(h, 16777619);
+    // Keep FNV step unsigned — Math.imul is signed int32; negative h % 24
+    // produced poke + double-dash + N paths that 404'd against baked poke-NN files.
+    h = Math.imul(h, 16777619) >>> 0;
   }
   const idx = h % 24;
   return `poke-${String(idx).padStart(2, "0")}`;
@@ -44,5 +46,5 @@ export function endingLineId(endingId: string): string {
 }
 
 export function voiceAssetPath(lineId: string, mood: VoiceMood): string {
-  return `/audio/vo/${lineId}--${mood}.wav`;
+  return `/audio/vo/${lineId}--{mood}.wav`.replace("{mood}", mood);
 }

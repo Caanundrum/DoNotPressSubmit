@@ -1,16 +1,18 @@
 /**
- * Build-time baked VO stubs (P1 #9).
+ * Build-time baked VO stubs (P1 #13).
  *
  * Writes short character-ish WAV takes per line ID × mood into public/audio/vo/.
  * No runtime speechSynthesis. No cloud TTS API.
  *
- * These are PLACEHOLDER takes (additive formant stubs) so playback plumbing
- * can ship before real recorded VO / neural bake. Re-run anytime:
+ * These are PLACEHOLDER takes (improved additive formant stubs) so playback
+ * plumbing ships without silence/404s. Real recorded character VO is still a
+ * follow-up — keep filenames `{lineId}--{mood}.wav` when swapping assets.
+ *
  *   node scripts/bake-voice.mjs
  *
  * Wired from npm run predev / prebuild.
  */
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -36,14 +38,26 @@ const HERO_IDS = [
 /** High-volume poke banter buckets (text hashed → poke-NN at runtime). */
 const POKE_COUNT = 24;
 
-/** A few high-traffic scene IDs so Act I / climax dialogue has audio. */
-const SCENE_IDS = [
-  "scene-act1-welcome",
-  "scene-act1-name",
-  "scene-act1-honesty",
-  "scene-act5-approach",
-  "scene-act5-climax",
-];
+/**
+ * Expand scene coverage: every playable scene id that ScenePlayer may request
+ * via sceneLineId(scene.id). Endings use hero-ending-* instead; report is silent.
+ */
+function collectSceneLineIds() {
+  const scenesDir = join(root, "src", "game", "scenes");
+  const ids = [];
+  for (const name of readdirSync(scenesDir)) {
+    if (!/^act\d\.ts$/.test(name)) continue;
+    const text = readFileSync(join(scenesDir, name), "utf8");
+    const re = /^\s{4}id:\s*"([^"]+)"/gm;
+    let m;
+    while ((m = re.exec(text))) {
+      const id = m[1];
+      if (id === "report" || id.startsWith("ending-")) continue;
+      ids.push(`scene-${id}`);
+    }
+  }
+  return ids;
+}
 
 function hashSeed(str) {
   let h = 2166136261 >>> 0;
@@ -58,41 +72,54 @@ function hashSeed(str) {
 function moodParams(mood) {
   switch (mood) {
     case "petty":
-      return { base: 196, buzz: 0.55, rate: 1.12, bright: 1.25, dur: 0.72 };
+      return { base: 188, buzz: 0.48, rate: 1.08, bright: 1.22, dur: 0.82, vibrato: 5.2, breath: 0.04 };
     case "alarmed":
-      return { base: 240, buzz: 0.85, rate: 1.28, bright: 1.45, dur: 0.58 };
+      return { base: 228, buzz: 0.72, rate: 1.22, bright: 1.38, dur: 0.66, vibrato: 7.5, breath: 0.06 };
     default:
-      return { base: 168, buzz: 0.35, rate: 0.95, bright: 1.0, dur: 0.9 };
+      return { base: 162, buzz: 0.32, rate: 0.94, bright: 1.0, dur: 1.02, vibrato: 3.6, breath: 0.03 };
   }
 }
 
-/** Synthetic “character voice” stub — not intelligible speech; distinct per id/mood. */
+/**
+ * Improved stub “character voice” — still not intelligible speech, but warmer
+ * formants + vibrato + soft noise so hero/poke paths feel less empty than
+ * the first-pass sine stubs. Distinct per id/mood.
+ */
 function synthesizePcm(lineId, mood) {
   const p = moodParams(mood);
   const seed = hashSeed(`${lineId}::${mood}`);
   const sampleRate = 22050;
-  const duration = p.dur + ((seed % 17) / 100);
+  const duration = p.dur + ((seed % 21) / 100);
   const n = Math.floor(sampleRate * duration);
   const data = new Float32Array(n);
 
-  const f0 = p.base + (seed % 37);
-  const f1 = f0 * 2.15;
-  const f2 = f0 * 3.4 * p.bright;
-  const syllables = 4 + (seed % 5);
+  const f0 = p.base + (seed % 41);
+  const f1 = f0 * 2.05;
+  const f2 = f0 * 3.25 * p.bright;
+  const f3 = f0 * 4.1;
+  const syllables = 5 + (seed % 6);
+  const contour = 1 + ((seed % 9) - 4) * 0.012;
 
   for (let i = 0; i < n; i++) {
     const t = i / sampleRate;
+    const prog = t / duration;
+    // Soft attack / release so stubs don't click.
     const env =
-      Math.min(1, t * 18) *
-      Math.min(1, (duration - t) * 10) *
-      (0.55 + 0.45 * Math.sin(2 * Math.PI * syllables * (t / duration) * p.rate));
-    const buzz = Math.sin(2 * Math.PI * f0 * t * p.rate);
+      Math.min(1, t * 22) *
+      Math.min(1, (duration - t) * 12) *
+      (0.62 + 0.38 * Math.sin(2 * Math.PI * syllables * prog * p.rate));
+    const vib = 1 + 0.012 * Math.sin(2 * Math.PI * p.vibrato * t);
+    const pitch = f0 * contour * vib * (1 + 0.04 * Math.sin(2 * Math.PI * 0.7 * prog));
+    const buzz = Math.sin(2 * Math.PI * pitch * t * p.rate);
+    // Cheap “glottal” shaping — soft clip of buzz before formants.
+    const glottal = Math.tanh(buzz * (1.35 + p.buzz * 0.4));
     const form =
-      0.55 * buzz +
-      0.28 * Math.sin(2 * Math.PI * f1 * t * p.rate + buzz * p.buzz) +
-      0.12 * Math.sin(2 * Math.PI * f2 * t) +
-      0.05 * (((seed >> (i % 8)) & 1) * 2 - 1) * p.buzz;
-    data[i] = form * env * 0.28;
+      0.42 * glottal +
+      0.26 * Math.sin(2 * Math.PI * f1 * t * p.rate + glottal * p.buzz) +
+      0.16 * Math.sin(2 * Math.PI * f2 * t + 0.3) +
+      0.08 * Math.sin(2 * Math.PI * f3 * t * 0.98) +
+      p.breath * (((seed >> ((i + 3) % 11)) & 1) * 2 - 1);
+    data[i] = form * env * 0.3;
   }
   return { sampleRate, data };
 }
@@ -134,6 +161,7 @@ function writeTake(lineId, mood) {
 
 mkdirSync(outDir, { recursive: true });
 
+const SCENE_IDS = collectSceneLineIds();
 const ids = [
   ...HERO_IDS,
   ...SCENE_IDS,
@@ -153,8 +181,10 @@ const manifest = {
   format: "wav",
   moods: [...MOODS],
   lineIds: ids,
+  sceneCoverage: SCENE_IDS.length,
+  stubQuality: "formant-v2",
   notes:
-    "Stub character takes (formant synthesis). Replace with recorded VO or neural bake; keep filenames {lineId}--{mood}.wav",
+    "STUB character takes (improved formant synthesis) — NOT recorded VO. Replace with real character VO / neural bake when assets land; keep filenames {lineId}--{mood}.wav. Hero + poke + all playable scene-* ids covered to avoid silence/404s.",
 };
 writeFileSync(join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 
@@ -162,15 +192,24 @@ const readme = `# Baked VO stubs
 
 Generated by \`node scripts/bake-voice.mjs\` (also \`predev\` / \`prebuild\`).
 
-- **Hero:** \`hero-title\`, \`hero-system-override\`, \`hero-ending-*\`
-- **Banter:** \`poke-00\` … \`poke-23\` (runtime hashes poke text → bucket)
-- **Moods:** calm / petty / alarmed → \`{lineId}--{mood}.wav\`
+## What ships today (honest)
 
-No live \`speechSynthesis\`. No runtime cloud TTS.
-Replace stubs with real recorded VO when assets land; keep the filename contract.
+| Layer | Status |
+| --- | --- |
+| Player path | baked WAV via \`speech.speakLine\` → \`/audio/vo/{lineId}--{mood}.wav\` |
+| Live \`speechSynthesis\` | **off** (never a player path) |
+| Runtime cloud TTS / LLM | **none** |
+| Hero | **formant stubs**: \`hero-title\`, \`hero-system-override\`, \`hero-ending-*\` |
+| Banter | **formant stubs**: \`poke-00\` … \`poke-23\` |
+| Scenes | **formant stubs**: all playable \`scene-{sceneId}\` from act1–5 |
+| Recorded character VO | **not shipped** — swap files in place when assets land |
+
+Moods: calm / petty / alarmed.
+
+WAV files are gitignored; regenerate on \`predev\` / \`prebuild\`. Ambience ducks under VO.
 `;
 writeFileSync(join(outDir, "README.md"), readme);
 
 console.log(
-  `bake-voice: wrote ${written} takes + manifest → ${existsSync(outDir) ? "public/audio/vo" : outDir}`,
+  `bake-voice: wrote ${written} takes (${SCENE_IDS.length} scenes + hero + poke) → ${existsSync(outDir) ? "public/audio/vo" : outDir}`,
 );

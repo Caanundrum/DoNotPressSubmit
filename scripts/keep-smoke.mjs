@@ -68,6 +68,8 @@ assert(/Math\.imul\(h,\s*16777619\)\s*>>>\s*0/.test(voiceIds), "pokeLineId keeps
 assert(existsSync(join(root, "scripts/bake-voice.mjs")), "bake-voice build script present");
 const bake = read("scripts/bake-voice.mjs");
 assert(/public\/audio\/vo|hero-system-override|poke-/.test(bake), "bake-voice writes hero + poke stubs");
+assert(/collectSceneLineIds|scene-\$\{|sceneCoverage|formant-v2/.test(bake), "bake-voice expands scene coverage (formant-v2)");
+assert(/NOT recorded VO|Replace with real|stub/i.test(bake), "bake-voice documents stubs honestly");
 
 const audioCtl = read("src/components/game/AudioEnableControl.tsx");
 assert(/UNMUTE|ENABLE SOUND/i.test(audioCtl), "unmute control preserved");
@@ -203,6 +205,8 @@ assert(!/click me/i.test(title), "title has no click-me microcopy");
 const orb = read("src/components/game/AssistantOrb.tsx");
 assert(!/UNAUTHORIZED CONTACT\?/.test(orb), "orb poke hint no longer competes as loud unauthorized wallpaper");
 assert(/data-orb-poke-hint|pokedOnce|first-poke/.test(orb), "orb poke hint folded into first poke only");
+assert(!/>\s*logged\s*</.test(orb) && !/>\s*click me\s*</i.test(orb), "orb poke hint is wordless pulse (no click-me / logged text)");
+assert(!/click me/i.test(orb), "AssistantOrb has no click-me microcopy");
 
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");
@@ -210,6 +214,12 @@ assert(/SUBMIT_GAGS/.test(titleLogo), "title SUBMIT has authored gag lines");
 assert(!/onBegin/.test(titleLogo), "title SUBMIT gag does not call Begin");
 assert(/What are you not supposed to do/.test(titleLogo), "title SUBMIT gag keeps Nick line");
 assert(/data-title-submit-toast|absolute/.test(titleLogo), "SUBMIT gag toast is absolute (no column jump)");
+assert(/data-title-submit-toast-band/.test(titleLogo), "SUBMIT gag toast band reserved between Submit and subtitle");
+assert(/data-title-subtitle/.test(titleLogo), "title subtitle marked so gag cannot cover it");
+assert(
+  titleLogo.indexOf("data-title-submit-toast-band") < titleLogo.indexOf("data-title-subtitle"),
+  "toast band appears before subtitle in DOM (subtitle stays readable under gag)",
+);
 
 const motion = read("src/game/motion.ts");
 assert(/max-h-\[min\(40vh,340px\)\]|leaveBottom/.test(motion), "bottom forms leave room for bubble above");

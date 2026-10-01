@@ -3,13 +3,13 @@
 /**
  * Speech presentation for scripted AI / System lines.
  *
- * P1 #9 — baked / recorded VO path only.
+ * P1 #13 — baked / recorded VO path only.
  * - Plays build-time WAV stubs (or future recorded VO) per line ID × mood.
  * - No live `speechSynthesis` player path.
  * - No runtime cloud TTS API (keeps no-runtime-LLM boundary).
  *
- * Hybrid: hero beats (title, OVERRIDE, ending) + poke-banter buckets ship as
- * baked stubs today; replace files under public/audio/vo/ with real VO later.
+ * Coverage: hero beats, poke-banter buckets, and all playable scene-* ids
+ * bake as formant stubs today; swap files for real character VO later.
  * Missing assets fail soft (dialogue still shows; no robotic fallback).
  */
 

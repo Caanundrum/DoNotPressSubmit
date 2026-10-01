@@ -53,11 +53,12 @@ npm start
 ## Voice architecture
 
 - **Player path:** baked WAV under `public/audio/vo/{lineId}--{mood}.wav` (calm / petty / alarmed).
-- **Generate stubs:** `npm run bake-voice` (also `predev` / `prebuild`).
+- **Generate stubs:** `npm run bake-voice` (also `predev` / `prebuild`). WAVs are gitignored.
 - **Hero line IDs:** `hero-title`, `hero-system-override`, `hero-ending-*`.
-- **Banter:** poke text hashes → `poke-00`…`poke-23`.
-- **Not used:** live `speechSynthesis`, runtime cloud TTS / LLM.
-- **Follow-up:** swap stub WAVs for recorded character VO (same filenames); expand scene coverage beyond the baked scene ID set.
+- **Banter:** poke text hashes → `poke-00`…`poke-23` (unsigned FNV — never `poke--N`).
+- **Scenes:** all playable `scene-{sceneId}` from Acts I–V bake at build time (formant stubs).
+- **Not used:** live `speechSynthesis`, runtime cloud TTS / LLM. Ambience ducks under VO.
+- **Honest stub status:** takes are improved formant placeholders, **not** recorded character VO. Swap files in place when assets land; filename contract stays the same.
 
 ## Regression smoke
 

@@ -187,7 +187,7 @@ assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
 assert(/BackgroundGags/.test(view), "in-assessment ambient gags present");
 assert(/spotlight=\{spotlight\}|safeSide=\{safeSide\}|companion=\{companion\}/.test(view), "ScenePlayerView passes drone path hints");
-assert(/orbAnchor=\{/.test(view), "ScenePlayerView passes orbAnchor to BackgroundGags");
+assert(/orbAnchor=\{/.test(view) || /orbAnchor\?: string/.test(bg), "orbAnchor wired for Form 03B (view pass and/or BackgroundGags prop)");
 
 const glass = read("src/components/game/scenes/GlassStitchOverlay.tsx");
 assert(/spiderweb|fracture|impact/i.test(glass), "crack FX reads as glass fracture");

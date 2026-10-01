@@ -1,10 +1,12 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { endingBlurb, endingTitle } from "@/game/state";
 import type { EndingId, EnvironmentPreset, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
+import { speech } from "@/lib/speech";
+import { endingLineId, voiceMoodFromOrb } from "@/lib/voiceIds";
 import { AssistantOrb } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
 
@@ -25,6 +27,18 @@ export function EndingSequence({
   onContinue: () => void;
 }) {
   const presence = endingPresence(endingId);
+
+  useEffect(() => {
+    speech.speakLine({
+      lineId: endingLineId(endingId),
+      text: aiLine || presence.silentLine,
+      mood: voiceMoodFromOrb(presence.mood),
+      orbMood: presence.mood,
+    });
+    return () => speech.cancel();
+    // presence.silentLine / mood are pure from endingId
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endingId, aiLine]);
 
   return (
     <motion.div

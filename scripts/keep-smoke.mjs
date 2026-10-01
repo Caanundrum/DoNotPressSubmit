@@ -48,12 +48,23 @@ const popup = read("src/components/game/scenes/PopupWar.tsx");
 assert(/minHeight:\s*44/.test(popup), "PopupWar DISMISS minHeight 44");
 
 const speech = read("src/lib/speech.ts");
-assert(speech.includes("SpeechSynthesis"), "Web Speech API still referenced for hybrid path");
-assert(/LIVE_BROWSER_TTS\s*=\s*false/.test(speech), "live speechSynthesis gated off (P1 #19)");
-assert(/baked|VO|hybrid/i.test(speech), "speech follow-up notes baked VO / hybrid path");
+assert(!/speechSynthesis\.speak|new SpeechSynthesisUtterance/.test(speech), "no live speechSynthesis player path");
+assert(/LIVE_BROWSER_TTS\s*=\s*false/.test(speech), "LIVE_BROWSER_TTS stays false");
+assert(/speakLine|voiceAssetPath|baked|\/audio\/vo\//i.test(speech), "baked VO speakLine path present");
+assert(/duckAmbience|unduckAmbience/.test(read("src/lib/audio.ts")), "ambience ducks under VO");
+
+const voiceIds = read("src/lib/voiceIds.ts");
+assert(/calm|petty|alarmed/.test(voiceIds), "voice moods calm/petty/alarmed");
+assert(/pokeLineId|sceneLineId|endingLineId/.test(voiceIds), "line ID helpers for baked VO");
+
+assert(existsSync(join(root, "scripts/bake-voice.mjs")), "bake-voice build script present");
+const bake = read("scripts/bake-voice.mjs");
+assert(/public\/audio\/vo|hero-system-override|poke-/.test(bake), "bake-voice writes hero + poke stubs");
 
 const audioCtl = read("src/components/game/AudioEnableControl.tsx");
 assert(/UNMUTE|ENABLE SOUND/i.test(audioCtl), "unmute control preserved");
+assert(/speakLine|hero-title|setEnabled\(true\)/.test(audioCtl), "unmute arms baked VO not browser TTS");
+assert(!/speechSynthesis/.test(audioCtl), "AudioEnableControl never references speechSynthesis");
 
 const nextCfg = read("next.config.ts");
 assert(nextCfg.includes('output: "standalone"'), "standalone App Hosting output");
@@ -62,6 +73,8 @@ const scenePlayer = read("src/components/game/scenes/ScenePlayer.tsx");
 assert(!scenePlayer.includes("requestAssistantFlavor"), "ScenePlayer has no assistant flavor client");
 assert(!scenePlayer.includes("flavorLine"), "ScenePlayer has no flavorLine state");
 assert(!scenePlayer.includes("@/lib/ai"), "ScenePlayer does not import lib/ai");
+assert(/glassTimer/.test(scenePlayer), "crack FX timer ref prevents rapid-poke wipe");
+assert(/pokeLineId|speakLine/.test(scenePlayer), "ScenePlayer routes VO through baked speakLine");
 
 assert(!existsSync(join(root, "src/app/api/assistant")), "no /api/assistant route");
 assert(!existsSync(join(root, "src/lib/ai")), "no src/lib/ai provider tree");
@@ -176,6 +189,12 @@ assert(/TitleLogo/.test(title), "title keeps brand logo");
 assert(!/TITLE_IDLE_COMEDY/.test(title), "title does not park idle comedy under the orb");
 assert(!/\{\s*[\"']\/\/ residue — click me[\"']\s*\}/.test(title), "title strips idle residue click-me wallpaper");
 assert(!/ASSISTANT ONLINE/.test(title), "title orb status not idle wallpaper competing with BEGIN");
+assert(/data-residue-hint/.test(title), "title soft residue hint (wordless pulse) present");
+assert(!/click me/i.test(title), "title has no click-me microcopy");
+
+const orb = read("src/components/game/AssistantOrb.tsx");
+assert(!/UNAUTHORIZED CONTACT\?/.test(orb), "orb poke hint no longer competes as loud unauthorized wallpaper");
+assert(/data-orb-poke-hint|pokedOnce|first-poke/.test(orb), "orb poke hint folded into first poke only");
 
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");

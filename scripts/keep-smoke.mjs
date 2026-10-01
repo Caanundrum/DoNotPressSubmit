@@ -121,6 +121,8 @@ assert(/pickSlot|GAG_SLOTS|CHAMBER_SLOTS/.test(roam), "ambient roam slot pools")
 assert(/BAR_LAYOUTS|pickBarLayout|pickSlotDistant/.test(roam), "facility bar layouts + distant picks");
 assert(/TITLE_BAR_LAYOUTS|TITLE_GAG_SLOTS|TITLE_CHAMBER_SLOTS/.test(roam), "title calm roam pools present");
 assert(/DRONE_PATH_SLOTS|dronePathLayout/.test(roam), "REPLACEMENT FAILED scene-aware path pools");
+assert(/overhead/.test(roam), "Form 03B overhead drone path pool present");
+assert(/orbAnchor === \"overhead\"|orbAnchor === 'overhead'/.test(roam), "dronePathLayout routes overhead anchors");
 
 const bg = read("src/components/game/BackgroundGags.tsx");
 assert(/data-ambient-roam|pickSlotDistant|roamIntervalMs/.test(bg), "BackgroundGags relocates eggs");
@@ -128,12 +130,16 @@ assert(/data-ambient-subtle|22000|36000/.test(bg), "BackgroundGags quieter roam 
 assert(/TITLE_GAG_SLOTS|calm|data-title-calm/.test(bg), "BackgroundGags supports title calm density");
 assert(/data-drone-path|DRONE_PATH_SLOTS|dronePathLayout/.test(bg), "BackgroundGags uses drone path layout");
 assert(/spotlight|safeSide|companion/.test(bg), "BackgroundGags receives layout hints for drone pathing");
+assert(/orbAnchor/.test(bg), "BackgroundGags receives orbAnchor for Form 03B pathing");
+assert(/data-toast-path/.test(bg), "click-gag toast docks by drone path");
 
 const drone = read("src/components/game/gags/DroneGag.tsx");
 assert(/data-replacement-failed|data-replacement-outline/.test(drone), "DroneGag marks REPLACEMENT FAILED outline");
 assert(/data-drone-floor|bottomPct|nearBottom/.test(drone), "DroneGag bottom-pins to avoid edge clip");
 assert(/RETRY \/\/ ALSO FAILED/.test(drone), "DroneGag keeps RETRY // ALSO FAILED gag copy");
 assert(/data-drone-gag|gagOpen|data-drone-idle-glyph/.test(drone), "DroneGag idle is wordless; gag text on click");
+assert(/safeLeft >= 78|nearRight = safeLeft >= 78/.test(drone), "DroneGag right-pins only in true right margin");
+assert(/footprintVh/.test(drone), "DroneGag reserves open-gag vertical footprint");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
 assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocates");
@@ -181,6 +187,7 @@ assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
 assert(/BackgroundGags/.test(view), "in-assessment ambient gags present");
 assert(/spotlight=\{spotlight\}|safeSide=\{safeSide\}|companion=\{companion\}/.test(view), "ScenePlayerView passes drone path hints");
+assert(/orbAnchor=\{/.test(view), "ScenePlayerView passes orbAnchor to BackgroundGags");
 
 const glass = read("src/components/game/scenes/GlassStitchOverlay.tsx");
 assert(/spiderweb|fracture|impact/i.test(glass), "crack FX reads as glass fracture");

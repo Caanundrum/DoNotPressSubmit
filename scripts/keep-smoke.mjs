@@ -48,7 +48,9 @@ const popup = read("src/components/game/scenes/PopupWar.tsx");
 assert(/minHeight:\s*44/.test(popup), "PopupWar DISMISS minHeight 44");
 
 const speech = read("src/lib/speech.ts");
-assert(speech.includes("SpeechSynthesis"), "Web Speech preserved");
+assert(speech.includes("SpeechSynthesis"), "Web Speech API still referenced for hybrid path");
+assert(/LIVE_BROWSER_TTS\s*=\s*false/.test(speech), "live speechSynthesis gated off (P1 #19)");
+assert(/baked|VO|hybrid/i.test(speech), "speech follow-up notes baked VO / hybrid path");
 
 const audioCtl = read("src/components/game/AudioEnableControl.tsx");
 assert(/UNMUTE|ENABLE SOUND/i.test(audioCtl), "unmute control preserved");
@@ -130,14 +132,22 @@ assert(/spotlight|safeSide|companion/.test(bg), "BackgroundGags receives layout 
 const drone = read("src/components/game/gags/DroneGag.tsx");
 assert(/data-replacement-failed|data-replacement-outline/.test(drone), "DroneGag marks REPLACEMENT FAILED outline");
 assert(/data-drone-floor|bottomPct|nearBottom/.test(drone), "DroneGag bottom-pins to avoid edge clip");
-assert(/RETRY \/\/ ALSO FAILED/.test(drone), "DroneGag keeps RETRY // ALSO FAILED line");
+assert(/RETRY \/\/ ALSO FAILED/.test(drone), "DroneGag keeps RETRY // ALSO FAILED gag copy");
+assert(/data-drone-gag|gagOpen|data-drone-idle-glyph/.test(drone), "DroneGag idle is wordless; gag text on click");
 
 const fac = read("src/components/game/FacilityBackground.tsx");
 assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocates");
+assert(!/>\s*CHAMBER 07\s*</.test(fac), "FacilityBackground strips idle CHAMBER 07 wallpaper");
+assert(!/>\s*EVERYTHING IS FINE/.test(fac), "FacilityBackground strips idle EVERYTHING IS FINE wallpaper");
+assert(!/QUEUE:\s*\{/.test(fac), "FacilityBackground strips idle QUEUE wallpaper");
+assert(/Wordless chamber|wordless chamber/i.test(fac), "FacilityBackground chamber is wordless idle");
 assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
 assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
 assert(/stiffness:\s*22|v \* -3|v \* -7/.test(fac), "facility parallax/motion quieted");
 assert(/TITLE_BAR_LAYOUTS|calm/.test(fac), "FacilityBackground supports title calm density");
+
+assert(!/>DO NOT PRESS</.test(bg), "BackgroundGags strips idle DO NOT PRESS wallpaper");
+assert(/data-do-not-press-glyph/.test(bg), "BackgroundGags uses wordless do-not-press glyph");
 
 const title = read("src/components/game/TitleScreen.tsx");
 assert(/FacilityBackground/.test(title), "title restores facility depth");
@@ -151,6 +161,8 @@ assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
 assert(!/TITLE_IDLE_COMEDY/.test(title), "title does not park idle comedy under the orb");
+assert(!/\{\s*[\"']\/\/ residue — click me[\"']\s*\}/.test(title), "title strips idle residue click-me wallpaper");
+assert(!/ASSISTANT ONLINE/.test(title), "title orb status not idle wallpaper competing with BEGIN");
 
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");

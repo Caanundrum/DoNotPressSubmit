@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 
-/** Visual residue of chaos vs obedient paths (Act III+). Never blocks clicks. */
+/** Visual residue of chaos vs obedient paths (Act III+). Never blocks clicks.
+ * Wordless ambient (#12) — shapes / tint only; no readable wallpaper. */
 export function PathResidue({
   kind,
 }: {
@@ -12,7 +13,7 @@ export function PathResidue({
 
   if (kind === "chaos") {
     return (
-      <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden" data-path-residue="chaos">
         <motion.div
           className="absolute inset-0"
           style={{
@@ -34,19 +35,18 @@ export function PathResidue({
         />
         <div className="absolute inset-3 border border-danger/25" />
         <motion.div
-          className="absolute right-[6%] top-[18%] rotate-[-8deg] font-mono text-[11px] tracking-[0.35em] text-danger/55"
+          className="absolute right-[6%] top-[18%] h-2 w-16 rotate-[-8deg] rounded-sm bg-danger/45"
           animate={{ opacity: [0.35, 0.7, 0.35] }}
           transition={{ duration: 3.5, repeat: Infinity }}
-        >
-          UNAUTHORIZED
-        </motion.div>
+          aria-hidden
+        />
       </div>
     );
   }
 
   // obedient
   return (
-    <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 z-[6] overflow-hidden" data-path-residue="obedient">
       <motion.div
         className="absolute inset-0"
         style={{
@@ -57,9 +57,10 @@ export function PathResidue({
         transition={{ duration: 5, repeat: Infinity }}
       />
       <div className="absolute inset-4 border border-cyan/20" />
-      <div className="absolute left-[5%] top-[14%] font-mono text-[9px] tracking-[0.28em] text-cyan/45">
-        COMPLIANT CHANNEL
-      </div>
+      <div
+        className="absolute left-[5%] top-[14%] h-1.5 w-14 rounded-full bg-cyan/40"
+        aria-hidden
+      />
       <motion.div
         className="absolute bottom-[10%] left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-cyan/35 to-transparent"
         animate={{ opacity: [0.3, 0.8, 0.3] }}

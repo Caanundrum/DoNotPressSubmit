@@ -95,8 +95,8 @@ export function PrinterGag({
 
       <motion.button
         type="button"
-        className={`mt-2 border border-cyan/25 bg-black/55 px-2 py-0.5 font-mono text-[9px] tracking-[0.22em] text-mist/75 ${
-          live ? "pointer-events-auto cursor-pointer hover:border-cyan hover:text-cyan" : "pointer-events-none"
+        className={`mt-2 flex h-5 w-20 items-center justify-center gap-1 border border-cyan/25 bg-black/55 px-2 ${
+          live ? "pointer-events-auto cursor-pointer hover:border-cyan" : "pointer-events-none"
         }`}
         animate={{ opacity: [0, 0, 1, 1, 0.6] }}
         transition={{ duration: 7, times: [0, 0.4, 0.55, 0.85, 1] }}
@@ -108,10 +108,12 @@ export function PrinterGag({
               }
             : undefined
         }
-        aria-label={interactive ? "Inspect SCISSORS EN ROUTE memo" : undefined}
+        aria-label={interactive ? "Inspect printer memo" : undefined}
         tabIndex={interactive ? 0 : -1}
+        data-printer-idle-glyph="true"
       >
-        SCISSORS EN ROUTE
+        <span className="h-1 w-8 rounded-full bg-mist/50" />
+        <span className="h-1.5 w-1.5 rounded-full bg-danger/70" />
       </motion.button>
     </motion.div>
   );

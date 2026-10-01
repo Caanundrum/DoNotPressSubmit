@@ -202,42 +202,28 @@ export function TitleScreen({
           }
           wave={waving}
           flinch={gagReact}
-          label={
-            waving
-              ? "ASSISTANT WAVING"
-              : allyBefore
-                ? "ASSISTANT REMEMBERS"
-                : "ASSISTANT ONLINE"
-          }
+          // No idle status wallpaper competing with BEGIN (#12 / #13) —
+          // status microcopy only appears as a click reaction toast below.
+          label={residueLine ? (waving ? "ASSISTANT WAVING" : allyBefore ? "ASSISTANT REMEMBERS" : undefined) : undefined}
         />
-        {waving ? (
+        {/* Wordless residue tell — click reveals comedy; no "// residue — click me" wallpaper. */}
+        {remembered && !residueLine ? (
           <motion.div
-            className="mt-1 max-w-[180px] text-center font-mono text-[9px] tracking-[0.12em] text-[#b7d0e4]"
-            style={{ textShadow: "0 1px 3px rgba(0,0,0,0.95), 0 0 1px rgba(0,0,0,0.8)" }}
+            className="mx-auto mt-1.5 h-1 w-8 rounded-full bg-cyan/45"
+            style={{ boxShadow: "0 0 8px rgba(110,231,255,0.35)" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.72, 0.92, 0.72] }}
+            animate={{ opacity: [0.45, 0.85, 0.45] }}
             transition={{ duration: 2.8, repeat: Infinity }}
             data-residue-hint="true"
-          >
-            {"// residue — click me"}
-          </motion.div>
-        ) : null}
-        {allyBefore && !waving ? (
-          <motion.div
-            className="mt-1 max-w-[180px] text-center font-mono text-[8px] tracking-[0.12em] text-cyan/75"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.5, 0.9, 0.5] }}
-            transition={{ duration: 3.2, repeat: Infinity }}
-          >
-            {"// ally channel — click"}
-          </motion.div>
+            aria-hidden
+          />
         ) : null}
         {residueLine ? (
           <motion.div
             className="mt-1.5 max-w-[200px] border border-cyan/25 bg-black/45 px-2 py-1 text-center font-mono text-[8px] tracking-[0.1em] text-[#d0dcec]/85"
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 0.9, y: 0 }}
+            data-residue-toast="true"
           >
             {residueLine}
           </motion.div>

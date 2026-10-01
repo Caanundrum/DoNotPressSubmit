@@ -276,10 +276,12 @@ export function AmbientChrome({
             }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-cyan" />
+            {/* Hover stays wordless — comedy copy only on click toast (#12). */}
             {hovering ? (
-              <span className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap border border-cyan/30 bg-black/70 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.16em] text-cyan/85">
-                {meta.hover}
-              </span>
+              <span
+                className="pointer-events-none absolute bottom-full left-1/2 mb-1 h-1.5 w-6 -translate-x-1/2 rounded-full bg-cyan/55"
+                aria-hidden
+              />
             ) : null}
           </button>
         );
@@ -429,14 +431,18 @@ export function AmbientRoamers({
           </span>
         ) : null}
         {kind === "stamp" ? (
-          <span className="rotate-[-12deg] border border-danger/50 bg-danger/15 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.12em] text-danger/90">
-            APPROVED?
+          <span
+            className="flex h-5 w-10 rotate-[-12deg] items-center justify-center border border-danger/50 bg-danger/15"
+            aria-hidden
+          >
+            <span className="h-1 w-6 rounded-full bg-danger/70" />
           </span>
         ) : null}
         {slowed ? (
-          <span className="pointer-events-none absolute left-6 top-0 whitespace-nowrap font-mono text-[8px] tracking-[0.14em] text-cyan/70">
-            {kind === "crumb" ? "crumb slowing…" : kind === "checkbox" ? "box hesitating…" : "stamp sticky…"}
-          </span>
+          <span
+            className="pointer-events-none absolute left-6 top-0.5 h-1 w-6 rounded-full bg-cyan/50"
+            aria-hidden
+          />
         ) : null}
       </motion.button>
       <AnimatePresence>

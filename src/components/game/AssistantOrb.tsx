@@ -98,6 +98,8 @@ export function AssistantOrb({
   const [localFlinch, setLocalFlinch] = useState(false);
   const [nervousSpin, setNervousSpin] = useState(false);
   const [drag, setDrag] = useState({ x: 0, y: 0 });
+  /** Unauthorized microcopy only after a poke — not idle wallpaper (#12). */
+  const [showPokeHint, setShowPokeHint] = useState(false);
   const dragOrigin = useRef<{ x: number; y: number } | null>(null);
   const showingFlinch = flinch || localFlinch;
   const flushCore = FLUSH_CORE[choiceFlush];
@@ -114,9 +116,11 @@ export function AssistantOrb({
   const handlePoke = () => {
     if (!pokeable || !onPoke) return;
     setLocalFlinch(true);
+    setShowPokeHint(true);
     audio.playMoodCue("poke");
     onPoke();
     window.setTimeout(() => setLocalFlinch(false), 520);
+    window.setTimeout(() => setShowPokeHint(false), 2200);
   };
 
   const brightness =
@@ -378,8 +382,11 @@ export function AssistantOrb({
           {label}
         </div>
       ) : null}
-      {pokeable ? (
-        <div className="pointer-events-none font-mono text-[8px] tracking-[0.2em] text-cyan/80">
+      {pokeable && showPokeHint ? (
+        <div
+          className="pointer-events-none font-mono text-[8px] tracking-[0.2em] text-cyan/80"
+          data-orb-poke-hint="true"
+        >
           UNAUTHORIZED CONTACT?
         </div>
       ) : null}

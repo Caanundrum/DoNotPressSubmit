@@ -1,12 +1,10 @@
 "use client";
 
-import { motion, type TargetAndTransition } from "framer-motion";
+import { type TargetAndTransition } from "framer-motion";
 import {
-  assistantSafeSide,
   dialogueDocksAbove,
   dialogueDocksBeside,
   dialogueDocksLeft,
-  panelLayoutClass,
   type AssistantSafeSide,
 } from "@/game/motion";
 import type {
@@ -18,7 +16,7 @@ import type {
   SceneDef,
 } from "@/game/types";
 import { AmbientChrome, AmbientRoamers } from "../AmbientInteractives";
-import { AssistantOrb, type ChoiceFlush } from "../AssistantOrb";
+import type { ChoiceFlush } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
 import {
   SceneTransition,
@@ -26,16 +24,9 @@ import {
 } from "../effects/SceneTransition";
 import { FacilityBackground } from "../FacilityBackground";
 import { PathResidue } from "../PathResidue";
-import { AuthorityStamp } from "./AuthorityStamp";
-import { CheckboxRebellion } from "./CheckboxRebellion";
-import { EscapingButton } from "./EscapingButton";
 import { GlassStitchOverlay, type GlassPhase } from "./GlassStitchOverlay";
-import { PeelReveal } from "./PeelReveal";
-import { PopupWar } from "./PopupWar";
-import { RestlessOptions } from "./RestlessOptions";
-import { SceneChoiceList } from "./SceneChoiceList";
-import { SubmitClimax } from "./SubmitClimax";
-import { SystemBeat } from "./SystemBeat";
+import { ScenePlayerViewAssistant } from "./ScenePlayerViewAssistant";
+import { ScenePlayerViewPanels } from "./ScenePlayerViewPanels";
 
 export type ScenePlayerViewProps = {
   scene: SceneDef;
@@ -101,14 +92,8 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
   const dockAbove = dialogueDocksAbove(orbAnchor);
   const dockLeft = dialogueDocksLeft(orbAnchor);
   const dockBeside = dialogueDocksBeside(orbAnchor);
-  // Safe layering:
-  // - Non-gag: assistant (orb+bubble) paints ABOVE the form so Form 01C never cuts the first line.
-  //   Spatial leave* zones keep the bubble out of readable Q/A (form still owns center).
-  // - Form 01C pace: floor-left dock — bubble BESIDE orb, never over drifting/pinned answers.
-  // - buryAssistant / Act III popup chaos: orb stays under the gag stack on purpose.
   const assistantZ = buryAssistant ? "z-[15]" : "z-[42]";
   const panelZ = buryAssistant || scene.kind === "setpiece" ? "z-30" : "z-[28]";
-  // Right-edge: bubble toward center. Floor pace: bubble beside. Low: column above. Else below.
   const assistantLayout = dockLeft
     ? "flex-row-reverse items-start"
     : dockBeside
@@ -116,8 +101,6 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       : dockAbove
         ? "flex-col-reverse items-center"
         : "flex-col items-center";
-  // Long lines shorten into the safe column so Q/A never hides under the bubble.
-  // Cap width near edges so last words aren't truncated by the viewport clip.
   const bubbleMax = spotlight
     ? "min(220px, 30vw)"
     : dockLeft
@@ -159,10 +142,10 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         spotlight={spotlight}
         companion={companion}
         safeSide={safeSide}
+        orbAnchor={typeof orbAnchor === "string" ? orbAnchor : undefined}
         onAmbient={onAmbient}
       />
       <PathResidue kind={residue} />
-      {/* Phase-only: idle clears fracture. Flags must not re-paint crack across waits. */}
       <GlassStitchOverlay phase={glassPhase} ticket={showTicket} />
       {!systemLock && scene.kind !== "climax" ? (
         <AmbientChrome
@@ -189,7 +172,6 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
       ) : null}
 
-      {/* Stage chrome — both labels on the left so ENABLE SOUND never covers them. */}
       <div className="pointer-events-none absolute left-3 top-3 z-[5] max-w-[min(70%,720px)] sm:left-4 sm:top-4">
         <div className="break-words font-mono text-[9px] leading-snug tracking-[0.12em] text-[#d8e4f2] sm:text-[10px] sm:tracking-[0.16em]">
           {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
@@ -205,357 +187,17 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         </div>
       </div>
 
-      {/*
-        Assistant orb + dialogue — reserved safe zone on non-gag forms.
-        Layout rules: safe-zone dock, form owns center, bubble yields.
-        Default: pointer-events none so form CTAs stay mouse-hittable.
-        Pokeable scenes enable a tiny hit target on the orb only.
-        buryAssistant gag scenes keep the orb under/behind the form on purpose.
-      */}
-      <motion.div
-        className={`absolute ${assistantZ} flex gap-1.5 pointer-events-none ${assistantLayout}`}
-        style={{
-          left: orbStyle.right ? "auto" : (orbStyle.left ?? "2.5%"),
-          right: orbStyle.right ?? "auto",
-          top: orbStyle.top,
-          // FM animate x/y owns transform — do not rely on translate(-50%) for edge safety.
-          transform: "none",
-          // Right-dock / beside: width follows content so the bubble stays inside the frame.
-          width: dockLeft || dockBeside
-            ? "auto"
-            : Math.max(orbStyle.size, spotlight ? 220 : 152),
-          maxWidth: dockLeft
-            ? "min(32vw, 248px)"
-            : dockBeside
-              ? "min(34vw, 280px)"
-              : spotlight
-                ? "min(28vw, 220px)"
-                : dockAbove
-                  ? "min(40vw, 280px)"
-                  : "min(28vw, 210px)",
-          // Keep orb+rings+label+bubble inside the stage with a few px margin.
-          padding: 4,
-          boxSizing: "content-box",
-        }}
-        data-assistant-dock={
-          dockLeft ? "left" : dockBeside ? "beside" : dockAbove ? "above" : "below"
-        }
-        data-assistant-yield={buryAssistant ? "gag" : "safe-zone"}
-        data-assistant-safe-dock="true"
-        data-assistant-above-form={buryAssistant ? "false" : "true"}
-        animate={
-          orbAnchor === "pace"
-            ? // Tiny floor sway — never wander under the form answer box.
-              { x: [-2, 2, -1, 0] }
-            : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 2, -1, 2, 0], y: [0, -1, 1, 0] }
-              : spotlight
-                ? { x: 0, y: 0, scale: 1 }
-                : { x: 0, y: 0 }
-        }
-        transition={
-          orbAnchor === "pace" || orbAnchor === "flee" || orbAnchor === "avoid-submit"
-            ? {
-                duration: orbAnchor === "pace" ? 6.5 : 3.4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }
-            : spotlight
-              ? { duration: 0.55, ease: "easeOut" }
-              : { type: "spring", stiffness: 90, damping: 18 }
-        }
-        initial={false}
-      >
-        {spotlight ? (
-          <motion.div
-            className="pointer-events-none absolute inset-[-24%] -z-10 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(110,231,255,0.22) 0%, rgba(110,231,255,0.06) 45%, transparent 70%)",
-            }}
-            animate={{ opacity: [0.55, 0.95, 0.55], scale: [0.95, 1.05, 0.95] }}
-            transition={{ duration: 3.2, repeat: Infinity }}
-          />
-        ) : null}
-        {/* Explicit poke hit layer — companion Hold + mid/late beats must never silently no-op. */}
-        <div
-          className={pokeable ? "pointer-events-auto relative z-[1] shrink-0" : "pointer-events-none relative shrink-0"}
-          style={{ width: orbStyle.size }}
-        >
-          <AssistantOrb
-            mood={systemLock ? "nervous" : state.aiMood}
-            size={orbStyle.size}
-            label={orbStatusLabel}
-            pokeable={pokeable}
-            onPoke={onOrbPoke}
-            flinch={pokeFlinch}
-            glance={glance}
-            choiceFlush={choiceFlush}
-            draggable={pokeable && !spotlight}
-          />
-        </div>
-        <motion.div
-          className="pointer-events-none glass-panel assistant-bubble shrink px-2.5 py-1.5 text-sm leading-relaxed text-[#d7e6f5]"
-          style={{
-            maxWidth: bubbleMax,
-            maxHeight: spotlight
-              ? "min(26vh, 170px)"
-              : dockBeside
-                ? "min(18vh, 120px)"
-                : dockAbove
-                  ? "min(22vh, 140px)"
-                  : "min(22vh, 140px)",
-            // No scrollbars — wrap hard so edge docks never truncate mid-word.
-            overflow: "hidden",
-            overflowWrap: "anywhere",
-            wordBreak: "break-word",
-            // Floor-beside: nudge bubble up slightly so it reads next to orb, not under form.
-            marginTop: dockBeside ? 4 : 0,
-            // Dock-above: keep last bubble line clear of the orb (Form 02 "I'm nosy").
-            marginBottom: dockAbove ? 8 : 0,
-          }}
-          key={aiLine || "silent"}
-          data-assistant-bubble="true"
-          data-bubble-dock={
-            dockLeft ? "left" : dockBeside ? "beside" : dockAbove ? "above" : "below"
-          }
-          initial={{
-            opacity: 0,
-            x: dockLeft ? 8 : dockBeside ? -8 : 0,
-            y: dockLeft || dockBeside ? 0 : dockAbove ? -8 : 8,
-            scale: 0.96,
-          }}
-          animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, x: 0, y: 0, scale: 1 }}
-        >
-          <div className="mb-1 font-mono text-[8px] tracking-[0.16em] text-cyan/80 sm:text-[9px]">
-            ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
-            {buryAssistant ? " // UNDER PRESSURE" : ""}
-            {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
-            {choiceFlush === "ally"
-              ? " // ALLIED"
-              : choiceFlush === "obey"
-                ? " // OBEYING"
-                : choiceFlush === "chaos"
-                  ? " // CHAOS READ"
-                  : ""}
-          </div>
-          <div
-            className={`break-words ${spotlight ? "text-[13px] leading-snug" : "text-[11px] leading-snug sm:text-[12px]"}`}
-            style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
-          >
-            {systemLock ? "…" : aiLine || "…"}
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {companion ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[4%] z-30 flex max-h-[34vh] flex-col items-center gap-2 overflow-hidden px-4">
-          <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#d8e4f2]">
-            {scene.formId ?? "SIDE CHANNEL // NO FORM"}
-          </div>
-          {scene.title ? (
-            <h2
-              className="text-center text-xl tracking-[0.12em] text-white sm:text-2xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {scene.title}
-            </h2>
-          ) : null}
-          {scene.prompt ? (
-            <p className="max-w-xl text-center text-sm text-[#d2dceb]">{scene.prompt}</p>
-          ) : null}
-          {scene.companion === "wait" ? (
-            <button
-              type="button"
-              disabled={!companionReady}
-              className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={() => finishCompanion()}
-            >
-              {companionReady ? (scene.continueLabel ?? "I WAITED") : "HOLD STILL…"}
-            </button>
-          ) : null}
-          {scene.companion === "watch" ? (
-            <button
-              type="button"
-              disabled={!watchedPulse}
-              className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:opacity-40"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={() => finishCompanion()}
-            >
-              {watchedPulse ? (scene.continueLabel ?? "I SAW THAT") : "WATCHING…"}
-            </button>
-          ) : null}
-          {scene.companion === "respond" && scene.choices ? (
-            <div className="pointer-events-auto flex flex-wrap items-center justify-center gap-2">
-              {scene.choices.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  className="border border-cyan/35 bg-black/50 px-4 py-3 font-mono text-[11px] tracking-[0.18em] text-[#e8eef8] transition hover:border-cyan/70"
-                  style={{ fontFamily: "var(--font-display)" }}
-                  onClick={() => finishCompanion(opt.id)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-
-      {!companion ? (
-      <motion.div
-        className={`glass-panel assessment-panel facility-hud absolute ${panelZ} ${
-          scene.kind === "climax" ? "p-3 sm:p-4" : "p-4 sm:p-6"
-        } ${panelLayoutClass(
-          panelMotion,
-          spotlight && scene.kind !== "climax" && scene.kind !== "setpiece",
-          {
-            buryAssistant,
-            climax: scene.kind === "climax",
-            safeSide:
-              scene.kind === "climax" || scene.kind === "setpiece"
-                ? assistantSafeSide(orbAnchor as OrbAnchor, false)
-                : safeSide,
-          },
-        )}`}
-        data-panel-safe={buryAssistant ? "gag-overlap" : "respects-assistant"}
-        data-form-owns-center={buryAssistant ? "false" : "true"}
-        data-form-above-glass="true"
-        initial={panelVar.initial}
-        animate={
-          panelShake
-            ? { rotate: [-0.7, 0.7, -0.3, 0], y: [0, -6, 0], opacity: 1, x: 0, scale: 1 }
-            : panelVar.animate
-        }
-        transition={
-          // Framer Motion: spring/inertia only support 2 keyframes. Multi-keyframe
-          // panel motions (drift/scatter/pressure) and panelShake must use tweens.
-          panelShake
-            ? {
-                rotate: { duration: 0.45, ease: "easeOut" },
-                y: { duration: 0.45, ease: "easeOut" },
-                default: { duration: 0.35, ease: "easeOut" },
-              }
-            : panelMotion === "drift"
-              ? {
-                  // Only x/y loop — never re-run opacity from 0 (that made private vote unreadable).
-                  opacity: { duration: 0.45 },
-                  x: { duration: 9, repeat: Infinity, ease: "easeInOut" },
-                  y: { duration: 9, repeat: Infinity, ease: "easeInOut" },
-                  default: { duration: 0.45, ease: "easeOut" },
-                }
-              : panelMotion === "scatter" || panelMotion === "pressure"
-                ? {
-                    opacity: { duration: 0.45 },
-                    scale: {
-                      duration: panelMotion === "pressure" ? 1.1 : 0.9,
-                      ease: "easeOut",
-                    },
-                    rotate: {
-                      duration: 1.2,
-                      ease: "easeInOut",
-                    },
-                    default: { duration: 0.5, ease: "easeOut" },
-                  }
-                : { type: "spring", stiffness: 120, damping: 18 }
-        }
-        style={{ pointerEvents: "auto" }}
-      >
-        <div className="assessment-panel-inner">
-          {scene.formId ? (
-            <div className="font-mono text-[10px] tracking-[0.28em] text-[#c5d3e4]">
-              {scene.formId}
-            </div>
-          ) : null}
-          {scene.title ? (
-            <h2
-              className={`tracking-[0.1em] text-white ${
-                scene.kind === "climax"
-                  ? "text-lg sm:text-2xl"
-                  : "text-xl sm:text-3xl"
-              }`}
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {scene.title}
-            </h2>
-          ) : null}
-          {scene.prompt && scene.kind !== "climax" ? (
-            <p className="max-w-3xl text-sm leading-snug text-[#d2dceb] sm:text-base">
-              {scene.prompt}
-            </p>
-          ) : null}
-
-          {hasLatePending && lateHint ? (
-            <div className="pointer-events-none font-mono text-[9px] tracking-[0.2em] text-cyan/70">
-              {"// residual field noise — something wants to be an option"}
-            </div>
-          ) : null}
-
-          {scene.kind === "choice" ? (
-            <SceneChoiceList
-              choices={visibleChoices}
-              choiceMotion={choiceMotion}
-              selected={selected}
-              hoverChoice={hoverChoice}
-              state={state}
-              onPick={pickChoice}
-              onHover={setHoverChoice}
-              onState={onState}
-            />
-          ) : null}
-
-          {scene.kind === "dialogue" ? (
-            <button
-              type="button"
-              className="mt-1 border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={continueDialogue}
-            >
-              {scene.continueLabel ?? "CONTINUE"}
-            </button>
-          ) : null}
-
-          {scene.kind === "setpiece" && scene.setpiece === "escaping-button" ? (
-            <EscapingButton onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "popup-war" ? (
-            <PopupWar onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "checkbox-rebellion" ? (
-            <CheckboxRebellion onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "restless-options" ? (
-            <RestlessOptions onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "authority-stamp" ? (
-            <AuthorityStamp onComplete={onSetpieceDone} />
-          ) : null}
-          {scene.kind === "setpiece" && scene.setpiece === "peel-reveal" ? (
-            <PeelReveal onComplete={onSetpieceDone} />
-          ) : null}
-
-          {scene.kind === "climax" ? (
-            <SubmitClimax
-              state={state}
-              aiLine={aiLine}
-              onChoose={onClimax}
-              onHoverOption={(id) => setHoverChoice(id)}
-            />
-          ) : null}
-        </div>
-      </motion.div>
-      ) : null}
-
-      {scene.kind === "system" ? (
-        <SystemBeat
-          title={scene.systemTitle ?? "SYSTEM OVERRIDE"}
-          line={scene.systemLine ?? "CONTINUE ASSESSMENT."}
-          continueLabel={scene.continueLabel ?? "CONTINUE ASSESSMENT"}
-          onContinue={finishSystem}
-        />
-      ) : null}
+      <ScenePlayerViewAssistant
+        p={p}
+        assistantZ={assistantZ}
+        assistantLayout={assistantLayout}
+        dockLeft={dockLeft}
+        dockBeside={dockBeside}
+        dockAbove={dockAbove}
+        bubbleMax={bubbleMax}
+        orbStatusLabel={orbStatusLabel}
+      />
+      <ScenePlayerViewPanels p={p} panelZ={panelZ} />
     </div>
   );
 }

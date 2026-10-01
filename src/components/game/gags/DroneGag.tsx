@@ -10,9 +10,12 @@ import { audio } from "@/lib/audio";
  * Idle: shape + motion only — no readable wallpaper.
  * Click: comedy label flashes inside the outline (then clears) + parent toast.
  *
- * Pathing contract (P0):
+ * Pathing contract (P0 #8 click-gag card):
  * - Outline box stays ≥3% inside the viewport (no bottom/edge clip).
- * - Right-edge pins use `right`; near-bottom pins use `bottom`.
+ * - Right-edge pins use `right` only in the true right margin (≥78%); mid-gap
+ *   slots left-pin so a 200px stamp never grows westward under leaveRight forms
+ *   (Form 03B failure mode).
+ * - Near-bottom pins use `bottom` with open-gag footprint headroom.
  * - Scene slots (DRONE_PATH_SLOTS) keep the box clear of forms, CTAs, and the orb.
  * - When gag text is visible, full "REPLACEMENT FAILED" + "RETRY // ALSO FAILED" stay inside the outline.
  */
@@ -35,15 +38,16 @@ export function DroneGag({
   const safeLeft = Number.isFinite(leftPct) ? leftPct : 72;
   const safeTop = Number.isFinite(topPct) ? topPct : 68;
 
-  // Stamp footprint ≈ 200×118px → ~15.6vw × 14.8vh @ 1280×800.
-  // Near-right: pin with `right` so the box grows left (never clips).
-  // Near-bottom: pin with `bottom` so height never spills past the floor.
-  const nearRight = safeLeft >= 55;
+  // Stamp footprint ≈ 200×118 idle / ~200×140 open → ~15.6vw × 17.5vh @ 1280×800.
+  // Right-pin ONLY in the true right margin. Mid-gap slots (68–76%) must left-pin —
+  // otherwise `right: 30%` grows the 200px box westward under tall leaveRight forms (03B).
+  const nearRight = safeLeft >= 78;
   const nearBottom = safeTop >= 58;
-  const rightPct = Math.max(2.5, Math.min(30, 100 - safeLeft));
-  // Keep ≥3% floor clearance even when slot top is aggressive.
+  const rightPct = Math.max(2.5, Math.min(22, 100 - safeLeft));
+  // Open-gag outline is taller than idle glyphs — reserve ~18vh so RETRY never clips.
+  const footprintVh = 18;
   const bottomPct = nearBottom
-    ? Math.max(3, Math.min(22, 100 - safeTop - 15))
+    ? Math.max(3, Math.min(22, 100 - safeTop - footprintVh))
     : 3;
 
   const pinStyle: CSSProperties = {

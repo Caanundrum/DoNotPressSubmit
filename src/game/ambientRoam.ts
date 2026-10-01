@@ -32,13 +32,16 @@ export const ORB_CLEAR_SLOTS: RoamSlot[] = MARGIN_SLOTS.filter(
 
 /**
  * REPLACEMENT FAILED path layouts — pick slots opposite the live form / CTA / orb.
- * Stamp is ~200×120px; keep ≥3% viewport margin so RETRY // ALSO FAILED never clips.
+ * Stamp is ~200×120px (taller when click-gag copy opens); keep ≥3% viewport margin
+ * so RETRY // ALSO FAILED never clips. Click-gag card must stay geometrically clear
+ * of form panels (ambient z sits under forms — overlap = card hidden under chrome).
  */
 export type DronePathLayout =
   | "title"
   | "spotlight" // Form 00 / 00C / Settle — orb left, form or CTA in bottom band
   | "left" // leaveLeft — form owns right column; orb in left gutter
   | "right" // leaveRight (01B) — form left; orb right
+  | "overhead" // Form 03B — tall left form + right/high orb; park below both
   | "bottom"; // leaveBottom / pace (01C) — form upper; orb floor-left
 
 /** Scene-aware drone anchors — never under panels, never over primary CTAs, never on orb. */
@@ -64,12 +67,21 @@ export const DRONE_PATH_SLOTS: Record<DronePathLayout, RoamSlot[]> = {
     { left: "6%", top: "15%" },
     { left: "14%", top: "13%" },
   ],
-  // leaveRight (01B): form left, orb right — mid gap below typical form, above bottom clip.
+  // leaveRight (01B): form ends ~66vw; park mid-right BELOW form, left of right-dock orb.
+  // Slots stay <78% left so DroneGag left-pins (right-pin would grow westward under the form).
   right: [
-    { left: "62%", top: "64%" },
-    { left: "58%", top: "68%" },
-    { left: "66%", top: "60%" },
-    { left: "54%", top: "66%" },
+    { left: "70%", top: "68%" },
+    { left: "72%", top: "72%" },
+    { left: "68%", top: "70%" },
+    { left: "74%", top: "66%" },
+  ],
+  // Form 03B overhead: tall leaveRight form + right/high orb — horizontal gap is < stamp width.
+  // Park in the floor mid-right band BELOW form + orb so the click-gag card stays fully visible.
+  overhead: [
+    { left: "70%", top: "72%" },
+    { left: "72%", top: "76%" },
+    { left: "68%", top: "74%" },
+    { left: "74%", top: "70%" },
   ],
   // leaveBottom / 01C: form max-h ~52vh from top 12%; park mid-right under form, above floor.
   bottom: [
@@ -115,9 +127,19 @@ export function dronePathLayout(opts: {
   spotlight?: boolean;
   companion?: boolean;
   safeSide?: "left" | "right" | "bottom";
+  /** When set, overhead / loom / flee use the tall-form floor band (Form 03B). */
+  orbAnchor?: string;
 }): DronePathLayout {
   if (opts.calm) return "title";
   if (opts.spotlight || opts.companion) return "spotlight";
+  // Tall right-dock orbs + leaveRight forms — stamp cannot fit in the side gap.
+  if (
+    opts.orbAnchor === "overhead" ||
+    opts.orbAnchor === "loom" ||
+    opts.orbAnchor === "flee"
+  ) {
+    return "overhead";
+  }
   if (opts.safeSide === "right") return "right";
   if (opts.safeSide === "bottom") return "bottom";
   return "left";

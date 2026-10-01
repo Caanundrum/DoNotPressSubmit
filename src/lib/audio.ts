@@ -34,6 +34,9 @@ class AudioDirector {
   private ctx: AudioContext | null = null;
   private lastMood: OrbMood | null = null;
   private lastMoodAt = 0;
+  /** Base ambience gain before VO ducking. */
+  private ambienceBaseVolume = 0.22;
+  private ambienceDucked = false;
 
   subscribe(listener: Listener) {
     this.listeners.add(listener);
@@ -96,13 +99,30 @@ class AudioDirector {
     }
   }
 
-  /** Explicit player opt-in for SFX, ambience, and speech. */
+  /** Explicit player opt-in for SFX, ambience, and baked VO. */
   enableSound() {
     this.unlock();
     this.muted = false;
     this.emit();
     this.play("click", 0.45);
-    this.play("ambience", 0.22);
+    this.play("ambience", this.ambienceBaseVolume);
+  }
+
+  /** Duck facility ambience under baked / recorded VO. */
+  duckAmbience(factor = 0.28) {
+    if (!this.ambience || this.muted) return;
+    this.ambienceDucked = true;
+    this.ambience.volume = Math.max(0.04, this.ambienceBaseVolume * factor);
+  }
+
+  /** Restore ambience after VO ends / cancels. */
+  unduckAmbience() {
+    if (!this.ambience || this.muted) {
+      this.ambienceDucked = false;
+      return;
+    }
+    this.ambienceDucked = false;
+    this.ambience.volume = this.ambienceBaseVolume;
   }
 
   setMuted(muted: boolean) {
@@ -140,7 +160,10 @@ class AudioDirector {
         this.ambience = this.get(FILES.ambience);
         this.ambience.loop = true;
       }
-      this.ambience.volume = Math.min(0.35, volume);
+      this.ambienceBaseVolume = Math.min(0.35, volume);
+      this.ambience.volume = this.ambienceDucked
+        ? Math.max(0.04, this.ambienceBaseVolume * 0.28)
+        : this.ambienceBaseVolume;
       void this.ambience.play().catch(() => undefined);
       return;
     }

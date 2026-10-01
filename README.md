@@ -26,7 +26,7 @@ npm start
 
 ## How to playtest
 
-1. Title screen → **UNMUTE / ENABLE SOUND** (optional; SFX + Web Speech).
+1. Title screen → **UNMUTE / ENABLE SOUND** (optional; SFX + ambience + baked VO stubs).
 2. **BEGIN ASSESSMENT** starts Act I. **CONTINUE ASSESSMENT** resumes localStorage.
 3. Play Acts I–V. Late **UNAUTHORIZED?** / **SIDE PATH** options unlock secrets.
 4. Kinetic beats: restless calibration, authority stamp, escaping button, popup war, checkbox rebellion, interface peel.
@@ -42,7 +42,7 @@ npm start
 - Assistant safe zone + sticky orb poke dialogue
 - Choice / Allegiance / private vote / lobby panels stay high-contrast; HCOS splash dwells ~9.5s
 - Assessment prompts enter/slide/drift/scatter/re-anchor — form steps back on key pitches
-- Unmute + Web Speech preserved
+- Unmute + baked VO stubs (no live browser TTS)
 - Zero scrollbars — viewport-fit shell
 - System Directive CTA always matches its prompt
 - Act V climax endings fit in one glance
@@ -50,13 +50,22 @@ npm start
 - Authored scene transitions + expanded background gags + per-ending cinematics
 - Firebase App Hosting `standalone` preserved
 
+## Voice architecture
+
+- **Player path:** baked WAV under `public/audio/vo/{lineId}--{mood}.wav` (calm / petty / alarmed).
+- **Generate stubs:** `npm run bake-voice` (also `predev` / `prebuild`).
+- **Hero line IDs:** `hero-title`, `hero-system-override`, `hero-ending-*`.
+- **Banter:** poke text hashes → `poke-00`…`poke-23`.
+- **Not used:** live `speechSynthesis`, runtime cloud TTS / LLM.
+- **Follow-up:** swap stub WAVs for recorded character VO (same filenames); expand scene coverage beyond the baked scene ID set.
+
 ## Regression smoke
 
 ```bash
 npm run keep-smoke
 ```
 
-Locks poke thresholds, Act III KEEP comedy, mouse-fair hit pads, unmute/Web Speech/standalone, and asserts **no** live-LLM / `/api/assistant` remnants.
+Locks poke thresholds, Act III KEEP comedy, mouse-fair hit pads, unmute/baked-VO/standalone, and asserts **no** live-LLM / `/api/assistant` remnants.
 
 ## Out of scope
 

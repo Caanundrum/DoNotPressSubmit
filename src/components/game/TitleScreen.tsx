@@ -206,14 +206,14 @@ export function TitleScreen({
           // status microcopy only appears as a click reaction toast below.
           label={residueLine ? (waving ? "ASSISTANT WAVING" : allyBefore ? "ASSISTANT REMEMBERS" : undefined) : undefined}
         />
-        {/* Wordless residue tell — click reveals comedy; no "// residue — click me" wallpaper. */}
+        {/* Soft residue tell — pulse only; comedy on click. Never idle residue wallpaper. */}
         {remembered && !residueLine ? (
           <motion.div
-            className="mx-auto mt-1.5 h-1 w-8 rounded-full bg-cyan/45"
-            style={{ boxShadow: "0 0 8px rgba(110,231,255,0.35)" }}
+            className="mx-auto mt-1.5 h-1 w-6 rounded-full bg-cyan/35"
+            style={{ boxShadow: "0 0 6px rgba(110,231,255,0.28)" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.45, 0.85, 0.45] }}
-            transition={{ duration: 2.8, repeat: Infinity }}
+            animate={{ opacity: [0.35, 0.7, 0.35] }}
+            transition={{ duration: 3.2, repeat: Infinity }}
             data-residue-hint="true"
             aria-hidden
           />

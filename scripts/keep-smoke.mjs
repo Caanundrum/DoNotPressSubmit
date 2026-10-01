@@ -56,6 +56,14 @@ assert(/duckAmbience|unduckAmbience/.test(read("src/lib/audio.ts")), "ambience d
 const voiceIds = read("src/lib/voiceIds.ts");
 assert(/calm|petty|alarmed/.test(voiceIds), "voice moods calm/petty/alarmed");
 assert(/pokeLineId|sceneLineId|endingLineId/.test(voiceIds), "line ID helpers for baked VO");
+assert(/Math\.imul\(h,\s*16777619\)\s*>>>\s*0/.test(voiceIds), "pokeLineId keeps FNV hash unsigned");
+// Runtime must never request poke--N (signed modulo bug).
+{
+  // Inline the fixed contract: pad 0..23 → poke-00..poke-23, never poke--.
+  const ids = Array.from({ length: 24 }, (_, i) => `poke-${String(i).padStart(2, "0")}`);
+  assert(ids.every((id) => /^poke-\d{2}$/.test(id) && !/^poke--/.test(id)), "poke id contract poke-NN");
+  assert(!/return\s*`poke--/.test(voiceIds), "pokeLineId return template is poke-NN not poke--N");
+}
 
 assert(existsSync(join(root, "scripts/bake-voice.mjs")), "bake-voice build script present");
 const bake = read("scripts/bake-voice.mjs");

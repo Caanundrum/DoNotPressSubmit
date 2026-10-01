@@ -1,1 +1,1 @@
-LOADING
+file:///workspace/keep-smoke-upload.mjs

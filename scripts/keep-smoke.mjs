@@ -112,9 +112,16 @@ assert(/No auth|no auth|multiplayer/i.test(rule), "Cursor rule: no auth/multipla
 assert(/Visual Vertical Slice|Grade-A/i.test(rule), "Cursor rule: VVS / Grade-A priority");
 
 const view = read("src/components/game/scenes/ScenePlayerView.tsx");
-assert(/data-form-owns-center|form owns center|assistant-yield/i.test(view), "safe layering: form owns center");
-assert(/z-\[42\]|z-\[28\]|z-\[15\]|z-30/.test(view), "safe layering z-index stack (bubble above form)");
-assert(/data-assistant-above-form/.test(view), "assistant paints above non-gag forms");
+const viewAssistant = existsSync(join(root, "src/components/game/scenes/ScenePlayerViewAssistant.tsx"))
+  ? read("src/components/game/scenes/ScenePlayerViewAssistant.tsx")
+  : "";
+const viewPanels = existsSync(join(root, "src/components/game/scenes/ScenePlayerViewPanels.tsx"))
+  ? read("src/components/game/scenes/ScenePlayerViewPanels.tsx")
+  : "";
+const viewAll = view + viewAssistant + viewPanels;
+assert(/data-form-owns-center|form owns center|assistant-yield/i.test(viewAll), "safe layering: form owns center");
+assert(/z-\[42\]|z-\[28\]|z-\[15\]|z-30/.test(viewAll), "safe layering z-index stack (bubble above form)");
+assert(/data-assistant-above-form/.test(viewAll), "assistant paints above non-gag forms");
 
 const roam = read("src/game/ambientRoam.ts");
 assert(/pickSlot|GAG_SLOTS|CHAMBER_SLOTS/.test(roam), "ambient roam slot pools");
@@ -183,11 +190,11 @@ assert(/top-\[12%\]/.test(motion), "form panels clear SOUND ON corner");
 assert(/right:\s*\"1\.5%\"/.test(motion), "right-side orb docks pin with right margin");
 assert(/transform:\s*\"none\"/.test(motion), "orb stage avoids translate centering (FM-safe)");
 
-assert(/AssistantOrb/.test(view), "in-assessment Assistant orb present");
+assert(/AssistantOrb/.test(viewAll), "in-assessment Assistant orb present");
 assert(/FacilityBackground/.test(view), "in-assessment facility background present");
 assert(/BackgroundGags/.test(view), "in-assessment ambient gags present");
 assert(/spotlight=\{spotlight\}|safeSide=\{safeSide\}|companion=\{companion\}/.test(view), "ScenePlayerView passes drone path hints");
-assert(/orbAnchor=\{/.test(view) || /orbAnchor\?: string/.test(bg), "orbAnchor wired for Form 03B (view pass and/or BackgroundGags prop)");
+assert(/orbAnchor=\{/.test(view), "ScenePlayerView passes orbAnchor to BackgroundGags");
 
 const glass = read("src/components/game/scenes/GlassStitchOverlay.tsx");
 assert(/spiderweb|fracture|impact/i.test(glass), "crack FX reads as glass fracture");
@@ -195,9 +202,9 @@ assert(/data-glass-behind-form|z-\[22\]/.test(glass), "crack stays behind form c
 assert(/data-glass-stitch|stitching UI/.test(glass), "stitch tier present");
 assert(/phase === "stitch"/.test(glass) && /ticket/.test(glass), "ticket only on stitch ladder");
 
-assert(/data-assistant-safe-dock|data-form-above-glass/.test(view), "bubble safe dock hardened");
-assert(/data-bubble-dock/.test(view), "bubble dock side marked");
-assert(/z-\[42\]|z-\[28\]/.test(view), "safe layering z-index stack (assistant above form)");
+assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
+assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
+assert(/z-\[42\]|z-\[28\]/.test(viewAll), "safe layering z-index stack (assistant above form)");
 
 const globals = read("src/app/globals.css");
 assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");

@@ -14,6 +14,7 @@ import { rememberTitleAlly, rememberTitleWave } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
+import { endingLineId, pokeLineId, sceneLineId, voiceMoodFromOrb } from "@/lib/voiceIds";
 import { FacilityBackground } from "../FacilityBackground";
 import { AssessmentReport } from "./AssessmentReport";
 import { EndingSequence } from "./EndingSequence";
@@ -80,6 +81,8 @@ function ScenePlayerInner({
   const [choiceFlush, setChoiceFlush] = useState<ChoiceFlush>("neutral");
   const [choiceGlanceBoost, setChoiceGlanceBoost] = useState(0);
   const advanceTimer = useRef<number | null>(null);
+  /** Invalidate prior crack/stitch clear timers so rapid pokes don't wipe a newer FX beat. */
+  const glassTimer = useRef<number | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -96,6 +99,12 @@ function ScenePlayerInner({
     },
     [onState],
   );
+
+  useEffect(() => {
+    return () => {
+      if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!scene?.choices?.some((c) => c.late)) return;
@@ -167,10 +176,28 @@ function ScenePlayerInner({
       speech.cancel();
       return;
     }
+    // Poke banter owns the VO channel while a poke notice is sticky.
+    if (pokeNotice) {
+      speech.speakLine({
+        lineId: pokeLineId(pokeNotice),
+        text: pokeNotice,
+        orbMood: state.aiMood,
+      });
+      return () => speech.cancel();
+    }
     if (!aiLine) return;
-    speech.speak(aiLine);
+    const lineId =
+      scene.kind === "ending" && scene.endingId
+        ? endingLineId(scene.endingId)
+        : sceneLineId(scene.id);
+    speech.speakLine({
+      lineId,
+      text: aiLine,
+      orbMood: state.aiMood,
+      mood: voiceMoodFromOrb(state.aiMood),
+    });
     return () => speech.cancel();
-  }, [aiLine, scene]);
+  }, [aiLine, scene, pokeNotice, state.aiMood]);
 
   const onAmbient = useCallback(
     (id: string, secret?: string) => {
@@ -279,14 +306,24 @@ function ScenePlayerInner({
     // Sticky poke line — never clear back to beat opening while still on this scene.
     setPokeNotice(notice);
     setReaction(null);
-    if (glassEvent === "crack") {
-      setGlassPhase("crack");
-      // Readable shatter beat, then fade clear — never leave lines across waits.
-      window.setTimeout(() => setGlassPhase((p) => (p === "crack" ? "idle" : p)), 2400);
-    } else if (glassEvent === "stitch") {
-      // Ladder: residual crack → tape stitch → clear (ticket shows during stitch only).
-      setGlassPhase("stitch");
-      window.setTimeout(() => setGlassPhase("idle"), 4200);
+    if (glassEvent === "crack" || glassEvent === "stitch") {
+      if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
+      if (glassEvent === "crack") {
+        setGlassPhase("crack");
+        // Readable shatter beat, then fade clear — never leave lines across waits.
+        // Timer ref: rapid poke 3→5 must not let the first timeout wipe the newer crack.
+        glassTimer.current = window.setTimeout(() => {
+          glassTimer.current = null;
+          setGlassPhase((p) => (p === "crack" ? "idle" : p));
+        }, 2400);
+      } else {
+        // Ladder: residual crack → tape stitch → clear (ticket shows during stitch only).
+        setGlassPhase("stitch");
+        glassTimer.current = window.setTimeout(() => {
+          glassTimer.current = null;
+          setGlassPhase("idle");
+        }, 4200);
+      }
     }
     if (status) {
       setChamberStatus(status);

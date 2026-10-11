@@ -66,11 +66,9 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
     setSlots((prev) =>
       prev.map((s) => {
         if (s.id === id) {
-          // Park in this chip's own row lane — never share X with another pinned row.
           return { ...s, x: clampX(PIN_X[s.row] ?? X_MIN) };
         }
         if (pinned[s.id]) return { ...s, x: clampX(PIN_X[s.row] ?? s.x) };
-        // Nudge unpinned siblings so they don't sit under the new pin.
         return { ...s, x: clampX(X_MIN + 18 + ((s.x + 11) % (X_MAX - X_MIN - 18))) };
       }),
     );
@@ -117,7 +115,6 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             onHoverEnd={() => setHoverId((h) => (h === s.id ? null : h))}
             onClick={() => pin(s.id)}
           >
-            {/* Full label — wrap, never ellipsize (P0 #11). */}
             <span className="block whitespace-normal break-words">{s.label}</span>
             {isPinned ? (
               <span className="mt-0.5 block font-mono text-[9px] tracking-widest text-cyan">

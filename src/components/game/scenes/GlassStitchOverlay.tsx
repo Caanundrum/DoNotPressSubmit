@@ -13,17 +13,20 @@ export type GlassPhase = "idle" | "crack" | "stitch";
 export function GlassStitchOverlay({
   phase,
   ticket = false,
+  /** Title uses a lower layer so crack never buries BEGIN / CTA column. */
+  layerClass = "z-[22]",
 }: {
   phase: GlassPhase;
   /** Late poke: orb "files a ticket" stamp — only while stitch ladder is visible */
   ticket?: boolean;
+  layerClass?: string;
 }) {
   const showFracture = phase === "crack" || phase === "stitch";
   const healing = phase === "stitch";
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-[22] overflow-hidden"
+      className={`pointer-events-none absolute inset-0 overflow-hidden ${layerClass}`}
       aria-hidden
       data-glass-phase={phase}
       data-glass-behind-form="true"

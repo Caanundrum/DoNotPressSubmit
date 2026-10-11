@@ -56,21 +56,28 @@ export function SceneChoiceList({
               onHoverEnd={() => onHover(null)}
               className="group relative overflow-visible border px-4 py-3 text-left transition disabled:cursor-default sm:py-3.5"
               style={{
+                // Teal hover border ONLY under the pointer (P1 #15) — danger/unauthorized
+                // get a quiet default tell, never a permanent "hovered" cyan rim.
                 borderColor: isSelected
                   ? "rgba(110,231,255,0.9)"
-                  : opt.secret
-                    ? "rgba(180,120,255,0.72)"
-                    : opt.unauthorized || opt.danger
-                      ? "rgba(110,231,255,0.6)"
-                      : "rgba(200,220,240,0.58)",
+                  : isHover
+                    ? "rgba(110,231,255,0.85)"
+                    : opt.secret
+                      ? "rgba(180,120,255,0.55)"
+                      : opt.unauthorized || opt.danger
+                        ? "rgba(255,140,160,0.42)"
+                        : "rgba(200,220,240,0.58)",
                 background: isSelected
                   ? "linear-gradient(90deg, rgba(40,90,120,0.88), rgba(16,24,36,0.96))"
                   : "linear-gradient(155deg, rgba(28,40,58,0.98) 0%, rgba(10,14,22,1) 100%)",
                 boxShadow: isSelected
                   ? "0 0 0 1px rgba(110,231,255,0.4), 0 0 24px rgba(110,231,255,0.22)"
-                  : "0 0 0 1px rgba(0,0,0,0.5) inset, 0 10px 28px rgba(0,0,0,0.45)",
+                  : isHover
+                    ? "0 0 0 1px rgba(110,231,255,0.35), 0 0 18px rgba(110,231,255,0.16)"
+                    : "0 0 0 1px rgba(0,0,0,0.5) inset, 0 10px 28px rgba(0,0,0,0.45)",
                 color: "#f4f7fb",
               }}
+              data-choice-hover={isHover ? "true" : "false"}
               initial={opt.late ? { opacity: 0, y: 8, scale: 0.98 } : enter.initial}
               animate={
                 isSelected
@@ -139,7 +146,11 @@ export function SceneChoiceList({
                   {"···"}
                 </span>
               ) : null}
-              <span className="pointer-events-none absolute inset-y-0 left-0 w-0 bg-cyan/10 transition-all group-hover:w-full" />
+              {/* CSS group-hover alone can lag behind dodge motion hit-tests — drive wash from hoverChoice. */}
+              <span
+                className="pointer-events-none absolute inset-y-0 left-0 bg-cyan/10 transition-all"
+                style={{ width: isHover && !selected ? "100%" : "0%" }}
+              />
             </motion.button>
           );
         })}

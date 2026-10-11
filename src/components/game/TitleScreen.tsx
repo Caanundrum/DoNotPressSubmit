@@ -1,13 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { POKE_WORLD } from "@/game/aiLifeLocks";
 import { AssistantOrb } from "./AssistantOrb";
 import { AudioEnableControl } from "./AudioEnableControl";
 import { BackgroundGags } from "./BackgroundGags";
 import { BeginControl } from "./BeginControl";
 import { FacilityBackground } from "./FacilityBackground";
 import { TitleLogo } from "./TitleLogo";
+import {
+  GlassStitchOverlay,
+  type GlassPhase,
+} from "./scenes/GlassStitchOverlay";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 
@@ -40,6 +45,11 @@ export function TitleScreen({
   const [eggClicks, setEggClicks] = useState(0);
   const [residueLine, setResidueLine] = useState<string | null>(null);
   const [gagReact, setGagReact] = useState(false);
+  /** Title poke ladder — same glass + suture FX as forms (P1 #13). */
+  const [titlePokes, setTitlePokes] = useState(0);
+  const [glassPhase, setGlassPhase] = useState<GlassPhase>("idle");
+  const [pokeFlinch, setPokeFlinch] = useState(false);
+  const glassTimer = useRef<number | null>(null);
 
   const onResidueClick = () => {
     if (!remembered) return;
@@ -64,6 +74,27 @@ export function TitleScreen({
   const onSubmitGag = () => {
     setGagReact(true);
     window.setTimeout(() => setGagReact(false), 700);
+  };
+
+  const onTitleOrbPoke = () => {
+    const n = titlePokes + 1;
+    setTitlePokes(n);
+    setPokeFlinch(true);
+    window.setTimeout(() => setPokeFlinch(false), 520);
+    if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
+    if (n === POKE_WORLD.crack || n === 5 || n === 9) {
+      setGlassPhase("crack");
+      glassTimer.current = window.setTimeout(() => {
+        glassTimer.current = null;
+        setGlassPhase((p) => (p === "crack" ? "idle" : p));
+      }, 2400);
+    } else if (n === POKE_WORLD.stitch || n === POKE_WORLD.ticket) {
+      setGlassPhase("stitch");
+      glassTimer.current = window.setTimeout(() => {
+        glassTimer.current = null;
+        setGlassPhase("idle");
+      }, 4200);
+    }
   };
 
   return (
@@ -165,44 +196,46 @@ export function TitleScreen({
         </motion.div>
       </div>
 
-      {/* Orb: present, clear of CTA column, a few px off the bottom edge */}
+      {/* Full glass + suture — same overlay as forms (P1 #13). Behind CTAs/BEGIN. */}
+      <GlassStitchOverlay
+        phase={glassPhase}
+        ticket={titlePokes >= POKE_WORLD.ticket && glassPhase === "stitch"}
+        layerClass="z-[8]"
+      />
+
+      {/*
+        Orb dock: ≥24px from viewport edges for orb + label + hint (P1 #14).
+        Use 32px (bottom-8/left-8) so the full stack clears even with residue pulse.
+      */}
       <motion.div
-        className={`absolute bottom-4 left-5 z-20 sm:bottom-5 sm:left-7 ${
-          remembered ? "cursor-pointer" : "pointer-events-none"
-        }`}
+        className="absolute bottom-8 left-8 z-20"
         data-title-orb-dock="true"
+        data-title-orb-edge-pad="32"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.55 }}
-        aria-hidden={!remembered}
-        onClick={remembered ? onResidueClick : undefined}
-        role={remembered ? "button" : undefined}
-        tabIndex={remembered ? 0 : undefined}
-        onKeyDown={
-          remembered
-            ? (e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  onResidueClick();
-                }
-              }
-            : undefined
-        }
       >
         <AssistantOrb
           size={96}
           mood={
             gagReact
               ? "amused"
-              : waving
-                ? "excited"
-                : allyBefore
-                  ? "amused"
-                  : orbMood
+              : pokeFlinch
+                ? "irritated"
+                : waving
+                  ? "excited"
+                  : allyBefore
+                    ? "amused"
+                    : orbMood
           }
           wave={waving}
-          flinch={gagReact}
-          // No idle status wallpaper competing with BEGIN (#12 / #13) —
+          flinch={gagReact || pokeFlinch}
+          pokeable
+          onPoke={() => {
+            onTitleOrbPoke();
+            if (remembered) onResidueClick();
+          }}
+          // No idle status wallpaper competing with BEGIN —
           // status microcopy only appears as a click reaction toast below.
           label={residueLine ? (waving ? "ASSISTANT WAVING" : allyBefore ? "ASSISTANT REMEMBERS" : undefined) : undefined}
         />

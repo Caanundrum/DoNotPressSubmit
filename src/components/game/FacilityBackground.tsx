@@ -190,8 +190,9 @@ export function FacilityBackground({
             </div>
           </div>
         ))}
+        {/* Soft transit washes — decorative only (not hit targets). */}
         <motion.div
-          className="absolute top-[34%] h-2 w-28 rounded-full bg-cyan/10"
+          className="pointer-events-none absolute top-[34%] h-2 w-28 rounded-full bg-cyan/[0.06] blur-[2px]"
           animate={{ x: sterile ? "40%" : ["-10%", "110%"] }}
           transition={{
             duration: sterile ? 0 : 58 / Math.max(0.35, intensity),
@@ -199,15 +200,19 @@ export function FacilityBackground({
             ease: "linear",
           }}
           style={{ left: 0 }}
+          aria-hidden
+          data-ambient-dust="rail"
         />
         <motion.div
-          className="absolute top-[48%] h-1.5 w-20 rounded-full bg-white/8"
+          className="pointer-events-none absolute top-[48%] h-1.5 w-20 rounded-full bg-white/[0.05] blur-[1.5px]"
           animate={{ x: sterile ? "55%" : ["110%", "-20%"] }}
           transition={{
             duration: sterile ? 0 : 74 / Math.max(0.35, intensity),
             repeat: sterile ? 0 : Infinity,
             ease: "linear",
           }}
+          aria-hidden
+          data-ambient-dust="rail"
         />
       </motion.div>
 
@@ -443,16 +448,19 @@ export function FacilityBackground({
       </motion.div>
 
       <motion.div className="absolute inset-0" style={{ x: nearX }}>
+        {/* Dust motes — clearly decorative (P1 #16): soft blur, no cyan punch, no target silhouette. */}
         {[...Array(sterile ? 3 : 8)].map((_, i) => (
           <motion.span
             key={i}
-            className="absolute h-1 w-1 rounded-full bg-white/30"
+            className="pointer-events-none absolute h-1.5 w-1.5 rounded-full bg-white/[0.12] blur-[1.5px]"
             style={{ left: `${(i * 17) % 100}%`, top: `${(i * 29) % 90}%` }}
             animate={{
-              y: sterile ? 0 : [0, -14, 0],
-              opacity: sterile ? 0.05 : [0.04, 0.18, 0.04],
+              y: sterile ? 0 : [0, -10, 0],
+              opacity: sterile ? 0.03 : [0.03, 0.1, 0.03],
             }}
-            transition={{ duration: 11 + (i % 5), repeat: Infinity, delay: i * 0.35 }}
+            transition={{ duration: 14 + (i % 5), repeat: Infinity, delay: i * 0.35 }}
+            aria-hidden
+            data-ambient-dust="true"
           />
         ))}
         <div

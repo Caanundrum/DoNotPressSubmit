@@ -153,18 +153,20 @@ export function DroneGag({
         ) : (
           <motion.button
             type="button"
-            className={`mt-1.5 flex w-full flex-col items-center gap-1 border border-system-warn/25 bg-black/35 px-1.5 py-1.5 ${
-              live ? "pointer-events-auto cursor-pointer hover:border-cyan/40" : "pointer-events-none"
+            className={`mt-1.5 flex w-full flex-col items-center gap-1.5 border border-system-warn/55 bg-black/55 px-2 py-2 ${
+              live ? "pointer-events-auto cursor-pointer hover:border-cyan/50" : "pointer-events-none"
             }`}
-            animate={{ opacity: [0.55, 0.9, 0.55] }}
+            animate={{ opacity: [0.75, 1, 0.75] }}
             transition={{ duration: 5.5, repeat: Infinity }}
             onClick={interactive ? fireGag : undefined}
             aria-label={interactive ? "Inspect drone memo" : undefined}
             tabIndex={interactive ? 0 : -1}
             data-drone-idle-glyph="true"
+            data-drone-memo-strip="true"
           >
-            <span className="h-1 w-[70%] rounded-full bg-system-warn/55" />
-            <span className="h-0.5 w-[45%] rounded-full bg-mist/35" />
+            {/* Raised size/contrast memo strip (P1 #17) — still wordless idle glyphs. */}
+            <span className="h-1.5 w-[82%] rounded-sm bg-system-warn/85 shadow-[0_0_8px_rgba(255,176,32,0.35)]" />
+            <span className="h-1 w-[58%] rounded-sm bg-[#e8eef8]/55" />
           </motion.button>
         )}
       </div>

@@ -239,6 +239,19 @@ assert(/data-glass-behind-form|z-\[22\]/.test(glass), "crack stays behind form c
 assert(/data-glass-stitch|stitching UI/.test(glass), "stitch tier present");
 assert(/phase === "stitch"/.test(glass) && /ticket/.test(glass), "ticket only on stitch ladder");
 
+const restless = read("src/components/game/scenes/RestlessOptions.tsx");
+assert(!/truncate/.test(restless), "Form 01C restless answers never ellipsize");
+assert(/whitespace-normal|break-words/.test(restless), "Form 01C restless answers wrap fully");
+assert(/PIN_X|ROWS/.test(restless), "Form 01C pinned answers use non-overlapping lanes");
+assert(/data-restless-options/.test(restless), "Form 01C restless craft marked");
+
+assert(/GlassStitchOverlay/.test(title), "title crack FX uses full glass overlay");
+assert(/data-title-orb-edge-pad|bottom-8 left-8/.test(title), "title orb dock ≥24px from edges");
+assert(/data-drone-memo-strip/.test(drone), "Drone memo strip marked for contrast");
+assert(/data-ambient-dust/.test(fac), "floating dust marked decorative");
+assert(/bottom-\[10%\]|data-companion-stack/.test(viewPanels), "I SAW THAT companion stack lifted for bottom margin");
+assert(/I'm archiving either way/.test(act1), "Form 02 bubble line punched up");
+
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
 assert(/z-\[42\]|z-\[28\]/.test(viewAll), "safe layering z-index stack (assistant above form)");

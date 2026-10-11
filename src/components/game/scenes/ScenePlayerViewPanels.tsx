@@ -35,7 +35,11 @@ export function ScenePlayerViewPanels({
   return (
     <>
       {companion ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-[4%] z-30 flex max-h-[34vh] flex-col items-center gap-2 overflow-hidden px-4">
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-[10%] z-30 flex max-h-[34vh] flex-col items-center gap-2 overflow-hidden px-4"
+          data-companion-stack="true"
+          data-companion-bottom-safe="true"
+        >
           <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#d8e4f2]">
             {scene.formId ?? "SIDE CHANNEL // NO FORM"}
           </div>

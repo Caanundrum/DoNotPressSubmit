@@ -306,7 +306,7 @@ export const act1Scenes: SceneDef[] = [
     formId: "FORM 02 // CALIBRATION",
     title: "How honest are we being?",
     prompt: "On a scale from 'HR brochure' to 'court deposition,' where are you today?",
-    aiLine: "Please answer honestly. Or don't. I'm collecting either way, and I'm nosy.",
+    aiLine: "Answer honestly. Or charmingly. I'm archiving either way — and I read the footnotes.",
     aiMood: "listening",
     orbAnchor: "listen",
     panelMotion: "settle",

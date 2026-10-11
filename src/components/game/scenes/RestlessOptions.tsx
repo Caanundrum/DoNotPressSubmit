@@ -13,8 +13,12 @@ type Slot = { id: string; label: string; x: number; row: number };
  */
 const X_MIN = 4;
 const X_MAX = 48;
-/** Vertical lane tops (%) — ≥22pt gaps so wrap + PINNED badge never collide. */
-const ROWS = [16, 42, 68];
+/**
+ * Vertical lane tops (%) inside the craft box.
+ * Gaps must fit a 2-line wrap + PINNED badge (~86px) with clear air — prior
+ * 26%-of-320px lanes still collided by ~3px when the middle chip wrapped.
+ */
+const ROWS = [12, 40, 70];
 /** Pin parking X per row — staggered so pinned chips never share a stack. */
 const PIN_X = [6, 10, 14];
 
@@ -74,7 +78,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative h-[min(42vh,320px)] w-full overflow-hidden border border-cyan/25 bg-black/40"
+      className="relative h-[min(48vh,380px)] w-full overflow-hidden border border-cyan/25 bg-black/40"
       data-restless-options="true"
     >
       <div className="absolute left-3 top-2 z-10 font-mono text-[10px] tracking-[0.22em] text-cyan">

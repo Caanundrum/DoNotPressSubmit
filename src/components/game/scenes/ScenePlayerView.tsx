@@ -74,6 +74,7 @@ export type ScenePlayerViewProps = {
   onState: (next: GameState) => void;
   continueDialogue: () => void;
   onSetpieceDone: () => void;
+  onEscapingHit?: (hits: number) => void;
   onClimax: (action: "submit" | "refuse" | "escape" | "disable" | "secret") => void;
   finishSystem: () => void;
 };
@@ -101,15 +102,16 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       : dockAbove
         ? "flex-col-reverse items-center"
         : "flex-col items-center";
+  // Wide enough that Form 03 / Final Counterpoint / Form 09 never ellipsize mid-word.
   const bubbleMax = spotlight
-    ? "min(220px, 30vw)"
+    ? "min(320px, 42vw)"
     : dockLeft
-      ? "min(180px, 24vw)"
+      ? "min(260px, 32vw)"
       : dockBeside
-        ? "min(220px, 28vw)"
+        ? "min(240px, 30vw)"
         : dockAbove
-          ? "min(240px, 36vw)"
-          : "min(200px, 26vw)";
+          ? "min(300px, 40vw)"
+          : "min(220px, 28vw)";
   const orbStatusLabel =
     orbAnchor === "pace"
       ? "ASSISTANT // DRIFT"

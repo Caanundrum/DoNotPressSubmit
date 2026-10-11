@@ -38,26 +38,28 @@ export function ScenePlayerViewAssistant({
         buryAssistant gag scenes keep the orb under/behind the form on purpose.
       */}
       <motion.div
-        className={`absolute ${assistantZ} flex gap-1.5 pointer-events-none ${assistantLayout}`}
+        className={`absolute ${assistantZ} flex pointer-events-none ${assistantLayout}`}
         style={{
           left: orbStyle.right ? "auto" : (orbStyle.left ?? "2.5%"),
           right: orbStyle.right ?? "auto",
           top: orbStyle.top,
           // FM animate x/y owns transform — do not rely on translate(-50%) for edge safety.
           transform: "none",
+          // ≥20px gap clears flinch recoil (x±16 / y±14) so the bubble never kisses the orb.
+          gap: pokeFlinch ? 24 : 20,
           // Right-dock / beside: width follows content so the bubble stays inside the frame.
           width: dockLeft || dockBeside
             ? "auto"
-            : Math.max(orbStyle.size, spotlight ? 220 : 152),
+            : Math.max(orbStyle.size, spotlight ? 280 : 168),
           maxWidth: dockLeft
-            ? "min(32vw, 248px)"
+            ? "min(40vw, 340px)"
             : dockBeside
-              ? "min(34vw, 280px)"
+              ? "min(38vw, 300px)"
               : spotlight
-                ? "min(28vw, 220px)"
+                ? "min(44vw, 340px)"
                 : dockAbove
-                  ? "min(40vw, 280px)"
-                  : "min(28vw, 210px)",
+                  ? "min(48vw, 340px)"
+                  : "min(32vw, 240px)",
           // Keep orb+rings+label+bubble inside the stage with a few px margin.
           padding: 4,
           boxSizing: "content-box",
@@ -68,6 +70,7 @@ export function ScenePlayerViewAssistant({
         data-assistant-yield={buryAssistant ? "gag" : "safe-zone"}
         data-assistant-safe-dock="true"
         data-assistant-above-form={buryAssistant ? "false" : "true"}
+        data-bubble-safe-gap={pokeFlinch ? "flinch" : "idle"}
         animate={
           orbAnchor === "pace"
             ? // Tiny floor sway — never wander under the form answer box.
@@ -123,27 +126,31 @@ export function ScenePlayerViewAssistant({
           className="pointer-events-none glass-panel assistant-bubble shrink px-2.5 py-1.5 text-sm leading-relaxed text-[#d7e6f5]"
           style={{
             maxWidth: bubbleMax,
+            // Tall enough for Form 03 / Counterpoint / Form 09 full lines — no mid-word cut.
             maxHeight: spotlight
-              ? "min(26vh, 170px)"
+              ? "min(42vh, 280px)"
               : dockBeside
-                ? "min(18vh, 120px)"
+                ? "min(28vh, 180px)"
                 : dockAbove
-                  ? "min(22vh, 140px)"
-                  : "min(22vh, 140px)",
-            // No scrollbars — wrap hard so edge docks never truncate mid-word.
-            overflow: "hidden",
+                  ? "min(36vh, 240px)"
+                  : dockLeft
+                    ? "min(36vh, 240px)"
+                    : "min(30vh, 200px)",
+            // Wrap only — never clip the last line into the orb.
+            overflow: "visible",
             overflowWrap: "anywhere",
             wordBreak: "break-word",
             // Floor-beside: nudge bubble up slightly so it reads next to orb, not under form.
             marginTop: dockBeside ? 4 : 0,
-            // Dock-above: keep last bubble line clear of the orb (Form 02 "I'm nosy").
-            marginBottom: dockAbove ? 8 : 0,
+            // Dock-above: keep last bubble line clear of the orb during idle pulse + flinch.
+            marginBottom: dockAbove ? 20 : 0,
           }}
           key={aiLine || "silent"}
           data-assistant-bubble="true"
           data-bubble-dock={
             dockLeft ? "left" : dockBeside ? "beside" : dockAbove ? "above" : "below"
           }
+          data-bubble-no-clip="true"
           initial={{
             opacity: 0,
             x: dockLeft ? 8 : dockBeside ? -8 : 0,

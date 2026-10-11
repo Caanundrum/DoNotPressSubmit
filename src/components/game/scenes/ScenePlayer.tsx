@@ -1,1 +1,1 @@
-PLACEHOLDER
+@file:/tmp/sp-content-only.txt

@@ -15,11 +15,14 @@ export function GlassStitchOverlay({
   ticket = false,
   /** Title uses a lower layer so crack never buries BEGIN / CTA column. */
   layerClass = "z-[22]",
+  /** Title: full-bleed glass (no form-column yield mask) so shatter matches forms. */
+  fullStage = false,
 }: {
   phase: GlassPhase;
   /** Late poke: orb "files a ticket" stamp — only while stitch ladder is visible */
   ticket?: boolean;
   layerClass?: string;
+  fullStage?: boolean;
 }) {
   const showFracture = phase === "crack" || phase === "stitch";
   const healing = phase === "stitch";
@@ -30,15 +33,20 @@ export function GlassStitchOverlay({
       aria-hidden
       data-glass-phase={phase}
       data-glass-behind-form="true"
-      style={{
-        // Yield over the form column — fracture stays in facility margins/left stage.
-        WebkitMaskImage:
-          "linear-gradient(90deg, #000 0%, #000 52%, rgba(0,0,0,0.35) 68%, transparent 82%), linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.4) 88%, transparent 100%)",
-        maskImage:
-          "linear-gradient(90deg, #000 0%, #000 52%, rgba(0,0,0,0.35) 68%, transparent 82%), linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.4) 88%, transparent 100%)",
-        WebkitMaskComposite: "source-in",
-        maskComposite: "intersect",
-      }}
+      data-glass-full-stage={fullStage ? "true" : "false"}
+      style={
+        fullStage
+          ? undefined
+          : {
+              // Yield over the form column — fracture stays in facility margins/left stage.
+              WebkitMaskImage:
+                "linear-gradient(90deg, #000 0%, #000 52%, rgba(0,0,0,0.35) 68%, transparent 82%), linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.4) 88%, transparent 100%)",
+              maskImage:
+                "linear-gradient(90deg, #000 0%, #000 52%, rgba(0,0,0,0.35) 68%, transparent 82%), linear-gradient(180deg, #000 0%, #000 72%, rgba(0,0,0,0.4) 88%, transparent 100%)",
+              WebkitMaskComposite: "source-in",
+              maskComposite: "intersect",
+            }
+      }
     >
       <AnimatePresence>
         {showFracture ? (

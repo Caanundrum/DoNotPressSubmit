@@ -6,11 +6,17 @@ import { audio } from "@/lib/audio";
 
 type Slot = { id: string; label: string; x: number; row: number };
 
-/** Keep chips inside the craft box (account for ~42%/220px chip width). */
+/**
+ * Keep chips inside the craft box.
+ * Width budget leaves room for full 2-line wrap (never ellipsis).
+ * Rows are spaced so a wrapped + PINNED chip never overlaps the next lane.
+ */
 const X_MIN = 4;
-const X_MAX = 50;
-/** Fixed vertical rows (%) — answers never share a band; leave floor clear for helper line. */
-const ROWS = [24, 44, 64];
+const X_MAX = 48;
+/** Vertical lane tops (%) — ≥22pt gaps so wrap + PINNED badge never collide. */
+const ROWS = [16, 42, 68];
+/** Pin parking X per row — staggered so pinned chips never share a stack. */
+const PIN_X = [6, 10, 14];
 
 function clampX(x: number) {
   return Math.min(X_MAX, Math.max(X_MIN, x));
@@ -56,17 +62,21 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
     setSlots((prev) =>
       prev.map((s) => {
         if (s.id === id) {
-          const order = Object.keys(pinned).length;
-          return { ...s, x: clampX(X_MIN + order * 2) };
+          // Park in this chip's own row lane — never share X with another pinned row.
+          return { ...s, x: clampX(PIN_X[s.row] ?? X_MIN) };
         }
-        if (pinned[s.id]) return { ...s, x: clampX(s.x) };
-        return { ...s, x: clampX(X_MIN + ((s.x + 17) % (X_MAX - X_MIN))) };
+        if (pinned[s.id]) return { ...s, x: clampX(PIN_X[s.row] ?? s.x) };
+        // Nudge unpinned siblings so they don't sit under the new pin.
+        return { ...s, x: clampX(X_MIN + 18 + ((s.x + 11) % (X_MAX - X_MIN - 18))) };
       }),
     );
   };
 
   return (
-    <div className="relative h-[min(36vh,280px)] w-full overflow-hidden border border-cyan/25 bg-black/40">
+    <div
+      className="relative h-[min(42vh,320px)] w-full overflow-hidden border border-cyan/25 bg-black/40"
+      data-restless-options="true"
+    >
       <div className="absolute left-3 top-2 z-10 font-mono text-[10px] tracking-[0.22em] text-cyan">
         CALIBRATION DRIFT // PINNED {pins}/3
       </div>
@@ -77,7 +87,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
           <motion.button
             key={s.id}
             type="button"
-            className="absolute max-w-[min(42%,220px)] border px-3 py-2 text-left font-mono text-[11px] tracking-[0.14em] text-[#e2ebf6]"
+            className="absolute w-[min(52%,280px)] border px-3 py-2 text-left font-mono text-[11px] leading-snug tracking-[0.12em] text-[#e2ebf6]"
             style={{
               left: `${s.x}%`,
               top: `${top}%`,
@@ -89,6 +99,8 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
                 : "rgba(12,20,32,0.92)",
               zIndex: isPinned ? 2 : 1,
             }}
+            data-restless-chip={s.id}
+            data-restless-pinned={isPinned ? "true" : "false"}
             animate={{
               x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 3 : -3, 0],
               scale: hoverId === s.id ? 1.02 : 1,
@@ -101,7 +113,8 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             onHoverEnd={() => setHoverId((h) => (h === s.id ? null : h))}
             onClick={() => pin(s.id)}
           >
-            <span className="block truncate">{s.label}</span>
+            {/* Full label — wrap, never ellipsize (P0 #11). */}
+            <span className="block whitespace-normal break-words">{s.label}</span>
             {isPinned ? (
               <span className="mt-0.5 block font-mono text-[9px] tracking-widest text-cyan">
                 PINNED

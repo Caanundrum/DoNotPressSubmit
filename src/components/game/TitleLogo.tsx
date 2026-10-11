@@ -117,8 +117,8 @@ export function TitleLogo({
       <div
         className={
           compact
-            ? "relative mx-auto mt-2 min-h-[2.85rem] w-[min(100%,22rem)]"
-            : "relative mx-auto mt-3 min-h-[3.1rem] w-[min(100%,22rem)]"
+            ? "relative mx-auto mt-2 min-h-[3.15rem] w-[min(100%,22rem)]"
+            : "relative mx-auto mt-3 min-h-[3.4rem] w-[min(100%,22rem)]"
         }
         data-title-submit-toast-band="true"
         aria-hidden={!gag}
@@ -145,8 +145,8 @@ export function TitleLogo({
       <p
         className={
           compact
-            ? "mx-auto mt-1.5 max-w-md text-xs tracking-[0.08em] text-mist sm:text-sm"
-            : "mx-auto mt-2 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base"
+            ? "mx-auto mt-3 max-w-md text-xs tracking-[0.08em] text-mist sm:text-sm"
+            : "mx-auto mt-3.5 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base"
         }
         data-title-subtitle="true"
       >

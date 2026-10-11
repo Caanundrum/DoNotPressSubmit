@@ -5,7 +5,14 @@ import { useEffect, useState } from "react";
 import { audio } from "@/lib/audio";
 import { FairChaseTarget } from "../FairChaseTarget";
 
-export function EscapingButton({ onComplete }: { onComplete: () => void }) {
+export function EscapingButton({
+  onComplete,
+  onHit,
+}: {
+  onComplete: () => void;
+  /** Progressive orb line — clears stale "Round one" after archives. */
+  onHit?: (hits: number) => void;
+}) {
   const [hits, setHits] = useState(0);
 
   useEffect(() => {
@@ -35,7 +42,11 @@ export function EscapingButton({ onComplete }: { onComplete: () => void }) {
         style={{ fontFamily: "var(--font-display)" }}
         onHit={() => {
           audio.play("click", 0.35);
-          setHits((h) => h + 1);
+          setHits((h) => {
+            const next = h + 1;
+            onHit?.(next);
+            return next;
+          });
         }}
       >
         DO NOT ARCHIVE

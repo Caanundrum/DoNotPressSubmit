@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import {
   MARGIN_SLOTS,
@@ -9,6 +9,7 @@ import {
   roamIntervalMs,
   type RoamSlot,
 } from "@/game/ambientRoam";
+import { showAmbientToast } from "@/game/ambientToastBus";
 import { audio } from "@/lib/audio";
 
 export type AmbientTargetId =
@@ -41,10 +42,10 @@ const TARGET_LINES: Record<
     assistantAside: "Status lies for a living. Relatable.",
   },
   "replacement-failed": {
-    hover: "Drone memo residue",
-    click: "REPLACEMENT FAILED — also: dignity failed. Logged.",
+    hover: "Your replacement drone",
+    click: "Facility sent this drone to replace you. The drone failed. Logged.",
     secret: "drone-memo",
-    assistantAside: "That drone and I share a performance review.",
+    assistantAside: "That was supposed to be your understudy. Awkward.",
   },
   "coffee-mug": {
     hover: "HUMAN PERFORMANCE compound",
@@ -188,7 +189,6 @@ export function AmbientChrome({
   peelVisible?: boolean;
 }) {
   const [hoverId, setHoverId] = useState<AmbientTargetId | null>(null);
-  const [flash, setFlash] = useState<string | null>(null);
   const [tintId, setTintId] = useState<AmbientTargetId | null>(null);
   const [pins, setPins] = useState<Record<string, RoamSlot>>(initialPinMap);
 
@@ -247,19 +247,35 @@ export function AmbientChrome({
         const tinted = tintId === spot.id;
         const style: CSSProperties = pins[spot.id] ?? spot.home;
         return (
-          <button
+          <motion.button
             key={spot.id}
             type="button"
             className={`pointer-events-auto absolute flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan ${
               tinted
                 ? "border-cyan bg-cyan/45 shadow-[0_0_14px_rgba(110,231,255,0.55)]"
                 : hovering
-                  ? "border-cyan bg-cyan/35 shadow-[0_0_10px_rgba(110,231,255,0.45)]"
-                  : "border-cyan/50 bg-cyan/20 shadow-[0_0_8px_rgba(110,231,255,0.35)]"
+                  ? "border-cyan bg-cyan/40 shadow-[0_0_12px_rgba(110,231,255,0.55)]"
+                  : "border-cyan/70 bg-cyan/25 shadow-[0_0_10px_rgba(110,231,255,0.4)]"
             }`}
             style={style}
             data-roam-egg={spot.id}
+            data-clickable-dot="true"
             aria-label={`Inspect ${spot.label}`}
+            // Idle ring/pulse — clickable dots read as interactive vs decorative dust.
+            animate={
+              tinted || hovering
+                ? { scale: 1.15 }
+                : { scale: [1, 1.12, 1], boxShadow: [
+                    "0 0 8px rgba(110,231,255,0.35)",
+                    "0 0 14px rgba(110,231,255,0.55)",
+                    "0 0 8px rgba(110,231,255,0.35)",
+                  ] }
+            }
+            transition={
+              tinted || hovering
+                ? { duration: 0.15 }
+                : { duration: 2.4, repeat: Infinity, ease: "easeInOut" }
+            }
             onMouseEnter={() => {
               setHoverId(spot.id);
               audio.play("hover", 0.15);
@@ -269,13 +285,18 @@ export function AmbientChrome({
               e.stopPropagation();
               audio.play("click", 0.3);
               setTintId(spot.id);
-              setFlash(meta.click);
+              showAmbientToast(meta.click, 2400);
               onAmbient(spot.id, meta.secret);
-              window.setTimeout(() => setFlash(null), 2400);
               window.setTimeout(() => setTintId((t) => (t === spot.id ? null : t)), 900);
             }}
           >
             <span className="h-1.5 w-1.5 rounded-full bg-cyan" />
+            {/* Ring halo — distinct from decorative dust motes (pointer-events none). */}
+            <span
+              className="pointer-events-none absolute inset-[-3px] rounded-full border border-cyan/40"
+              aria-hidden
+              data-clickable-dot-ring="true"
+            />
             {/* Hover stays wordless — comedy copy only on click toast (#12). */}
             {hovering ? (
               <span
@@ -283,23 +304,9 @@ export function AmbientChrome({
                 aria-hidden
               />
             ) : null}
-          </button>
+          </motion.button>
         );
       })}
-
-      <AnimatePresence>
-        {flash ? (
-          <motion.div
-            key={flash}
-            className="pointer-events-none absolute bottom-[4%] left-1/2 z-10 max-w-[min(90vw,440px)] -translate-x-1/2 border border-cyan/35 bg-black/75 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            {flash}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </div>
   );
 }
@@ -326,7 +333,6 @@ export function AmbientRoamers({
   const kind = ROAMER_BY_ACT[act];
   const [slowed, setSlowed] = useState(false);
   const [gone, setGone] = useState(false);
-  const [gag, setGag] = useState<string | null>(null);
 
   const onClick = useCallback(() => {
     if (!kind || gone) return;
@@ -338,10 +344,9 @@ export function AmbientRoamers({
         : kind === "checkbox"
           ? "Checkbox claims it checked itself. Philosophy department notified."
           : "Authority stamp drifted off-policy. Still sticky.";
-    setGag(line);
+    showAmbientToast(line, 2400);
     setGone(true);
     onRoamer(kind, secret);
-    window.setTimeout(() => setGag(null), 2400);
   }, [kind, gone, onRoamer]);
 
   // Keep roamers in upper/side bands — never lower-center CTA column.
@@ -383,17 +388,8 @@ export function AmbientRoamers({
     return () => clearTimeout(timer);
   }, [paused, kind]);
 
-  if (paused || !kind || gone) {
-    return gag ? (
-      <motion.div
-        className="pointer-events-none absolute bottom-[8%] right-[4%] z-[9] max-w-[240px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        {gag}
-      </motion.div>
-    ) : null;
-  }
+  // Toast lives on shared ambientToastBus (BackgroundGags host) — no local gag UI.
+  if (paused || !kind || gone) return null;
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[9] overflow-hidden" data-ambient-roam="roamers">
@@ -445,18 +441,6 @@ export function AmbientRoamers({
           />
         ) : null}
       </motion.button>
-      <AnimatePresence>
-        {gag ? (
-          <motion.div
-            className="pointer-events-none absolute bottom-[8%] right-[4%] max-w-[240px] border border-cyan/30 bg-black/70 px-2 py-1.5 font-mono text-[9px] tracking-[0.14em] text-cyan/90"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {gag}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </div>
   );
 }

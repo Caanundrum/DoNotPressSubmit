@@ -226,8 +226,9 @@ export function panelLayoutClass(
   const leaveRight =
     "left-[2%] right-[min(40vw,420px)] max-w-[min(60vw,820px)]";
   // Form 01C floor/side: leave a left gutter for orb+bubble (never over answers/helper).
+  // Taller leaveBottom so Form 06 subtitle + options aren't clipped at 1280×800.
   const leaveBottom =
-    "left-[min(34vw,360px)] right-[2%] top-[12%] bottom-auto max-h-[min(52vh,440px)] max-w-[min(64vw,860px)] overflow-hidden";
+    "left-[min(34vw,360px)] right-[2%] top-[12%] bottom-auto max-h-[min(58vh,480px)] max-w-[min(64vw,860px)] overflow-hidden";
 
   if (spotlight) {
     // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
@@ -296,12 +297,13 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
         },
       };
     case "scatter":
+      // Softer enter — Form 06 options stay inside the panel (no left-edge clip).
       return {
         initial: {
           opacity: 0,
-          x: (index % 2 ? 1 : -1) * (28 + index * 12),
-          y: -12 + index * 6,
-          rotate: (index % 2 ? 1 : -1) * 3,
+          x: (index % 2 ? 1 : -1) * (10 + index * 4),
+          y: -6 + index * 2,
+          rotate: (index % 2 ? 1 : -1) * 1.5,
         },
         animate: { opacity: 1, x: 0, y: 0, rotate: 0 },
       };

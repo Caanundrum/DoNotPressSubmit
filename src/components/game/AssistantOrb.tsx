@@ -169,8 +169,9 @@ export function AssistantOrb({
                 }
               : showingFlinch
                 ? {
-                    y: [0, -14, 4, 0],
-                    x: [0, -16, 10, 0],
+                    // Keep recoil inside the bubble safe gap (≥20px) — never dive into dialogue.
+                    y: [0, -10, 3, 0],
+                    x: [0, -10, 6, 0],
                     scale: m.scale * 0.92,
                     rotate: glanceRotate,
                   }

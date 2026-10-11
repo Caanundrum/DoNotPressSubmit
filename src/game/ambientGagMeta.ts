@@ -4,7 +4,8 @@ export type GagId = "drone" | "coffee" | "printer" | "corridor" | "containment";
 export const GAG_CLICK: Record<GagId, { id: string; line: string; secret?: string }> = {
   drone: {
     id: "replacement-failed",
-    line: "Drone memo: REPLACEMENT FAILED. Also: dignity failed. Logged.",
+    // Self-explanatory: facility tried to replace YOU with this drone — it failed.
+    line: "Facility sent this drone to replace you. The drone failed. Logged.",
     secret: "drone-memo",
   },
   coffee: {
@@ -36,9 +37,9 @@ export const GAG_DEPART: Record<
   drone: {
     id: "replacement-failed",
     secret: "drone-memo",
-    touched: "Drone memo filed and left. REPLACEMENT FAILED still echoes.",
+    touched: "Your replacement drone filed itself out. Still failed. Logged.",
     missed:
-      "REPLACEMENT FAILED scrolled off-frame. Dignity remained failed. Logged.",
+      "Your replacement drone left the frame. Status remained FAILED. Logged.",
   },
   coffee: {
     id: "coffee-mug",
@@ -66,4 +67,3 @@ export const GAG_DEPART: Record<
     missed: "EVERYTHING IS FINE plaque dimmed itself off-stage. Logged.",
   },
 };
-

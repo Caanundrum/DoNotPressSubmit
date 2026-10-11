@@ -107,7 +107,7 @@ export const act4Scenes: SceneDef[] = [
     orbAnchor: "spotlight",
     spotlight: true,
     panelMotion: "pressure",
-    continueLabel: "SAY IT OUT LOUD",
+    continueLabel: "SAY IT ALOUD",
     next: "act4-argument",
     anomalyLevel: 6,
   },

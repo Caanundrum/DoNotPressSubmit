@@ -15,6 +15,7 @@ import {
 import { audio } from "@/lib/audio";
 import { GAG_CLICK, GAG_DEPART, type GagId } from "@/game/ambientGagMeta";
 import { ambientToastClassName } from "@/game/ambientToastDock";
+import { showAmbientToast, subscribeAmbientToast } from "@/game/ambientToastBus";
 
 import { DroneGag as DroneGagImpl } from "./gags/DroneGag";
 import { CoffeeGag as CoffeeGagImpl } from "./gags/CoffeeGag";
@@ -95,6 +96,7 @@ export function BackgroundGags({
   const [tinySlot, setTinySlot] = useState<RoamSlot>({ left: "72%", top: "70%" });
   const [tip, setTip] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
+  useEffect(() => subscribeAmbientToast(setFlash), []);
   const touched = useRef<Record<GagId, boolean>>({
     drone: false,
     coffee: false,
@@ -211,9 +213,8 @@ export function BackgroundGags({
     // Quieter: ~12% of cooled departures speak.
     if (!cooled || Math.random() > 0.12) return;
     lastBannerAt.current = now;
-    setFlash(depart.missed);
+    showAmbientToast(depart.missed, 2200);
     onAmbientRef.current(depart.id, depart.secret);
-    window.setTimeout(() => setFlash(null), 2200);
   }, [active, paused, calm]);
 
   const react = (gag: GagId) => {
@@ -222,8 +223,7 @@ export function BackgroundGags({
     touched.current[gag] = true;
     if (!suppressRef.current) {
       lastBannerAt.current = Date.now();
-      setFlash(meta.line);
-      window.setTimeout(() => setFlash(null), 2200);
+      showAmbientToast(meta.line, 2200);
     }
     onAmbient?.(meta.id, meta.secret);
   };
@@ -319,9 +319,11 @@ export function BackgroundGags({
                   ? (e) => {
                       e.stopPropagation();
                       audio.play("click", 0.3);
-                      setFlash("Tiny robot pressed DO NOT PRESS. Facility filed an irony incident.");
+                      showAmbientToast(
+                        "Tiny robot pressed DO NOT PRESS. Facility filed an irony incident.",
+                        2200,
+                      );
                       onAmbient?.("do-not-press", "bg-propaganda");
-                      window.setTimeout(() => setFlash(null), 2200);
                     }
                   : undefined
               }
@@ -341,15 +343,17 @@ export function BackgroundGags({
         </div>
       ) : null}
 
+      {/* Single shared toast host — bus replaces lines so memos never stack (P1 #7). */}
       <AnimatePresence>
-        {flash ? (
+        {flash && !suppressToasts ? (
           <motion.div
             key={flash}
             data-ambient-toast="true"
             data-toast-path={path}
+            data-toast-bus="true"
             className={ambientToastClassName(path, calm)}
             initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: calm ? 0.75 : 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
           >
             {flash}

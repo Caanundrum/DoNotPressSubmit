@@ -114,13 +114,15 @@ export function TitleLogo({
         Always the same in-flow height → no CTA column jump; toast never covers
         "A Chaos Standard assessment…" and never reaches BEGIN (siblings below).
       */}
+      {/* ≥12px gap below SUBMIT and above subtitle; larger toast type (P1 #6). */}
       <div
         className={
           compact
-            ? "relative mx-auto mt-2 min-h-[3.15rem] w-[min(100%,22rem)]"
-            : "relative mx-auto mt-3 min-h-[3.4rem] w-[min(100%,22rem)]"
+            ? "relative mx-auto mt-3 min-h-[3.4rem] w-[min(100%,22rem)]"
+            : "relative mx-auto mt-3.5 min-h-[3.6rem] w-[min(100%,22rem)]"
         }
         data-title-submit-toast-band="true"
+        data-title-submit-toast-gap="12"
         aria-hidden={!gag}
       >
         <AnimatePresence>
@@ -130,7 +132,7 @@ export function TitleLogo({
               role="status"
               aria-live="polite"
               data-title-submit-toast="true"
-              className="pointer-events-none absolute inset-x-0 top-0 z-20 border border-danger/40 bg-black/80 px-3 py-2 font-mono text-[11px] leading-snug tracking-[0.06em] text-[#ffb0be] shadow-[0_8px_24px_rgba(0,0,0,0.55)]"
+              className="pointer-events-none absolute inset-x-0 top-0 z-20 border border-danger/40 bg-black/85 px-3 py-2.5 font-mono text-[12px] leading-snug tracking-[0.06em] text-[#ffb0be] shadow-[0_8px_24px_rgba(0,0,0,0.55)] sm:text-[13px]"
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}

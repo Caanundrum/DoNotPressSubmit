@@ -405,6 +405,16 @@ function ScenePlayerInner({
     go(state, scene.next);
   };
 
+  const onEscapingHit = (hits: number) => {
+    if (hits >= 3) {
+      setReaction("All 3 hits archived. The button regrets character development.");
+    } else if (hits === 2) {
+      setReaction("Two hits in. One more and we file it under fiction.");
+    } else if (hits === 1) {
+      setReaction("Hit one. It's less smug already.");
+    }
+  };
+
   const onSetpieceDone = () => {
     if (!scene.next) return;
     go(
@@ -511,6 +521,7 @@ function ScenePlayerInner({
       onState={onState}
       continueDialogue={continueDialogue}
       onSetpieceDone={onSetpieceDone}
+      onEscapingHit={onEscapingHit}
       onClimax={onClimax}
       finishSystem={finishSystem}
     />

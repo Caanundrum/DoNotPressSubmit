@@ -88,7 +88,6 @@ export function AssessmentReport({
             <Stat
               label="Ambient fiddling"
               value={String(state.counters.ambientClicks ?? 0)}
-              highlight={(state.counters.ambientClicks ?? 0) >= 3}
             />
             <Stat label="Assistant mood" value={personalityGloss(state.aiPersonality)} />
             {state.flags.serialPoker || state.secrets.includes("orb-poker-serial") ? (

@@ -82,7 +82,8 @@ export function TitleScreen({
     setPokeFlinch(true);
     window.setTimeout(() => setPokeFlinch(false), 520);
     if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
-    if (n === POKE_WORLD.crack || n === 5 || n === 9) {
+    // Same poke ladder as forms — crack@3 / stitch@7 / ticket@12 (no extra 5/9 hairline beats).
+    if (n === POKE_WORLD.crack) {
       setGlassPhase("crack");
       glassTimer.current = window.setTimeout(() => {
         glassTimer.current = null;
@@ -196,11 +197,12 @@ export function TitleScreen({
         </motion.div>
       </div>
 
-      {/* Full glass + suture — same overlay as forms (P1 #13). Behind CTAs/BEGIN. */}
+      {/* Full glass + suture — same overlay as forms (P1 #4). Behind CTAs/BEGIN. */}
       <GlassStitchOverlay
         phase={glassPhase}
         ticket={titlePokes >= POKE_WORLD.ticket && glassPhase === "stitch"}
         layerClass="z-[8]"
+        fullStage
       />
 
       {/*
@@ -239,15 +241,16 @@ export function TitleScreen({
           // status microcopy only appears as a click reaction toast below.
           label={residueLine ? (waving ? "ASSISTANT WAVING" : allyBefore ? "ASSISTANT REMEMBERS" : undefined) : undefined}
         />
-        {/* Soft residue tell — pulse only; comedy on click. Never idle residue wallpaper. */}
-        {remembered && !residueLine ? (
+        {/* Idle poke hint — readable at rest (≥24px from edges via dock pad). Comedy on click. */}
+        {!residueLine ? (
           <motion.div
-            className="mx-auto mt-1.5 h-1 w-6 rounded-full bg-cyan/35"
-            style={{ boxShadow: "0 0 6px rgba(110,231,255,0.28)" }}
+            className="mx-auto mt-1.5 h-1.5 w-7 rounded-full bg-cyan/45"
+            style={{ boxShadow: "0 0 8px rgba(110,231,255,0.4)" }}
             initial={{ opacity: 0 }}
-            animate={{ opacity: [0.35, 0.7, 0.35] }}
-            transition={{ duration: 3.2, repeat: Infinity }}
+            animate={{ opacity: [0.4, 0.85, 0.4] }}
+            transition={{ duration: 2.8, repeat: Infinity }}
             data-residue-hint="true"
+            data-title-idle-hint="true"
             aria-hidden
           />
         ) : null}

@@ -5,19 +5,19 @@ import { useEffect, useState, type CSSProperties, type MouseEvent } from "react"
 import { audio } from "@/lib/audio";
 
 /**
- * REPLACEMENT FAILED — wordless idle drone prop (P0 #11 / #12).
+ * YOUR REPLACEMENT / FAILED — wordless idle drone prop (P0 gag clarity).
  *
  * Idle: shape + motion only — no readable wallpaper.
- * Click: comedy label flashes inside the outline (then clears) + parent toast.
+ * Click: self-explanatory comedy — facility tried to replace YOU with this drone.
  *
- * Pathing contract (P0 #8 click-gag card):
+ * Pathing contract:
  * - Outline box stays ≥3% inside the viewport (no bottom/edge clip).
  * - Right-edge pins use `right` only in the true right margin (≥78%); mid-gap
  *   slots left-pin so a 200px stamp never grows westward under leaveRight forms
  *   (Form 03B failure mode).
  * - Near-bottom pins use `bottom` with open-gag footprint headroom.
- * - Scene slots (DRONE_PATH_SLOTS) keep the box clear of forms, CTAs, and the orb.
- * - When gag text is visible, full "REPLACEMENT FAILED" + "RETRY // ALSO FAILED" stay inside the outline.
+ * - Scene slots (DRONE_PATH_SLOTS) keep the box ≥24px clear of forms, CTAs, and the orb.
+ * - When gag text is visible, full labels stay inside the outline.
  */
 export function DroneGag({
   interactive,
@@ -44,8 +44,8 @@ export function DroneGag({
   const nearRight = safeLeft >= 78;
   const nearBottom = safeTop >= 58;
   const rightPct = Math.max(2.5, Math.min(22, 100 - safeLeft));
-  // Open-gag outline is taller than idle glyphs — reserve ~18vh so RETRY never clips.
-  const footprintVh = 18;
+  // Open-gag outline is taller (3 label lines) — reserve headroom so copy never clips.
+  const footprintVh = 22;
   const bottomPct = nearBottom
     ? Math.max(3, Math.min(22, 100 - safeTop - footprintVh))
     : 3;
@@ -141,11 +141,14 @@ export function DroneGag({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={interactive ? fireGag : undefined}
-            aria-label={interactive ? "Inspect REPLACEMENT FAILED memo" : undefined}
+            aria-label={interactive ? "Inspect your failed replacement drone" : undefined}
             tabIndex={interactive ? 0 : -1}
             data-drone-gag-copy="true"
           >
-            REPLACEMENT FAILED
+            YOUR REPLACEMENT
+            <span className="mt-0.5 block w-full whitespace-nowrap text-center font-mono text-[7px] tracking-[0.1em] text-system-warn/90">
+              STATUS: FAILED
+            </span>
             <span className="mt-0.5 block w-full whitespace-nowrap text-center font-mono text-[7px] tracking-[0.1em] text-mist/55">
               RETRY // ALSO FAILED
             </span>

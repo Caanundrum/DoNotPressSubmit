@@ -29,7 +29,7 @@ export function ScenePlayerViewPanels({
     panelShake, hasLatePending, lateHint, visibleChoices, choiceMotion, selected,
     hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor, aiLine,
     finishCompanion, pickChoice, setHoverChoice, onState, continueDialogue,
-    onSetpieceDone, onClimax, finishSystem,
+    onSetpieceDone, onEscapingHit, onClimax, finishSystem,
   } = p;
 
   return (
@@ -73,7 +73,7 @@ export function ScenePlayerViewPanels({
               style={{ fontFamily: "var(--font-display)" }}
               onClick={() => finishCompanion()}
             >
-              {watchedPulse ? (scene.continueLabel ?? "I SAW THAT") : "WATCHING…"}
+              {watchedPulse ? (scene.continueLabel ?? "YOU SETTLED. I NOTICED.") : "WATCHING…"}
             </button>
           ) : null}
           {scene.companion === "respond" && scene.choices ? (
@@ -199,16 +199,17 @@ export function ScenePlayerViewPanels({
           {scene.kind === "dialogue" ? (
             <button
               type="button"
-              className="mt-1 border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20"
+              className="mt-1 max-w-full whitespace-normal border border-cyan/40 bg-cyan/10 px-4 py-3 text-center font-mono text-[11px] leading-tight tracking-[0.18em] text-white transition hover:bg-cyan/20 sm:px-5 sm:text-[12px] sm:tracking-[0.22em]"
               style={{ fontFamily: "var(--font-display)" }}
               onClick={continueDialogue}
+              data-dialogue-continue="true"
             >
               {scene.continueLabel ?? "CONTINUE"}
             </button>
           ) : null}
 
           {scene.kind === "setpiece" && scene.setpiece === "escaping-button" ? (
-            <EscapingButton onComplete={onSetpieceDone} />
+            <EscapingButton onComplete={onSetpieceDone} onHit={onEscapingHit} />
           ) : null}
           {scene.kind === "setpiece" && scene.setpiece === "popup-war" ? (
             <PopupWar onComplete={onSetpieceDone} />

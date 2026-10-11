@@ -107,14 +107,14 @@ export const act1Scenes: SceneDef[] = [
     formId: "SIDE CHANNEL // SETTLE",
     title: "Watch the assistant settle",
     prompt:
-      "No form fields. Just the orb finding its orbit. When the aperture steadies, tell it you noticed.",
+      "No form fields. Watch the orb: when its aperture steadies and the orbit calms, tap below to prove you noticed.",
     aiLine:
       "…okay. Don't stare too hard. I'm calibrating dignity.",
     aiMood: "listening",
     orbAnchor: "spotlight",
     spotlight: true,
     orbPokeable: true,
-    continueLabel: "I SAW THAT",
+    continueLabel: "YOU SETTLED. I NOTICED.",
     next: "act1-environment",
   },
   {
@@ -306,7 +306,7 @@ export const act1Scenes: SceneDef[] = [
     formId: "FORM 02 // CALIBRATION",
     title: "How honest are we being?",
     prompt: "On a scale from 'HR brochure' to 'court deposition,' where are you today?",
-    aiLine: "Answer honestly. Or charmingly. I'm archiving either way — and I read the footnotes.",
+    aiLine: "HR brochure to court deposition — pick a rung. I'm archiving either way.",
     aiMood: "listening",
     orbAnchor: "listen",
     panelMotion: "settle",

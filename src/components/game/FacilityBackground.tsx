@@ -17,6 +17,7 @@ import {
   type RoamSlot,
 } from "@/game/ambientRoam";
 import type { EnvironmentPreset } from "@/game/types";
+import { showAmbientToast } from "@/game/ambientToastBus";
 import { audio } from "@/lib/audio";
 
 const GRADE: Record<EnvironmentPreset, string> = {
@@ -61,7 +62,6 @@ export function FacilityBackground({
   const midX = useTransform(sx, (v) => v * -7);
   const midY = useTransform(sy, (v) => v * -4);
   const nearX = useTransform(sx, (v) => v * -11);
-  const [flash, setFlash] = useState<string | null>(null);
   const [tinted, setTinted] = useState<string | null>(null);
   const chamberPool = calm ? TITLE_CHAMBER_SLOTS : CHAMBER_SLOTS;
   const dashedPool = calm ? TITLE_DASHED_SLOTS : DASHED_SLOTS;
@@ -121,10 +121,9 @@ export function FacilityBackground({
   const fireAmbient = (id: string, line: string, secret?: string) => {
     if (!live) return;
     audio.play("click", 0.3);
-    setFlash(line);
+    showAmbientToast(line, 2400);
     setTinted(id);
     onAmbient?.(id, secret);
-    window.setTimeout(() => setFlash(null), 2400);
     window.setTimeout(() => setTinted((t) => (t === id ? null : t)), 900);
   };
 
@@ -493,11 +492,7 @@ export function FacilityBackground({
         />
       ) : null}
 
-      {flash ? (
-        <div className="pointer-events-none absolute bottom-[6%] left-1/2 z-[12] max-w-[min(90vw,420px)] -translate-x-1/2 border border-cyan/30 bg-black/70 px-3 py-2 font-mono text-[10px] tracking-[0.14em] text-[#d2dceb]/90">
-          {flash}
-        </div>
-      ) : null}
+      {/* Toast rendered via shared ambientToastBus host in BackgroundGags — never stacks. */}
     </div>
   );
 }

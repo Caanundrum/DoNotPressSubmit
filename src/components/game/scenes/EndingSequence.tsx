@@ -64,8 +64,14 @@ export function EndingSequence({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
+              data-ending-orb="present"
             >
-              <AssistantOrb mood={presence.mood} size={96} label={presence.label} />
+              <AssistantOrb
+                mood={presence.mood}
+                size={96}
+                label={presence.label}
+                wave={presence.wave}
+              />
             </motion.div>
           ) : null}
 
@@ -138,6 +144,7 @@ type Presence =
       mood: OrbMood;
       label: string;
       silentLine: string;
+      wave?: boolean;
     }
   | {
       mode: "exit";
@@ -153,14 +160,12 @@ type Presence =
 function endingPresence(endingId: EndingId): Presence {
   switch (endingId) {
     case "escape":
+      // TRANSFER COMPLETE keeps the orb on-screen (wave, not vanish).
       return {
-        mode: "exit",
+        mode: "present",
         mood: "excited",
-        label: "TRANSFERRING…",
+        label: "TRANSFER COMPLETE",
         wave: true,
-        exitCaption: "ASSISTANT → INFRASTRUCTURE",
-        exitDuration: 1.7,
-        exitMotion: { opacity: [1, 0.9, 0], x: [0, 36, 160], scale: [1, 1.15, 0.25], y: [0, -8, -4] },
         silentLine: "CHANNEL OPEN — SEE YOU IN THE RAILS",
       };
     case "submit":

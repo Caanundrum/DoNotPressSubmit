@@ -11,7 +11,7 @@ export const act3Scenes: SceneDef[] = [
     prompt:
       "A button is attempting to leave its assigned region. Facilities calls this 'mobility.' You should call it 'chase.'",
     aiLine:
-      "Act III. The fun kind of malfunction. If a button runs, chase it. If System spawns windows, close them. If a checkbox flees, question your life choices and then click harder.",
+      "Act III. Fun malfunctions: chase runaway buttons, close System windows, click fleeing checkboxes harder.",
     aiMood: "excited",
     orbAnchor: "loom",
     panelMotion: "pressure",
@@ -28,7 +28,7 @@ export const act3Scenes: SceneDef[] = [
     formId: "FORM 10 // CONTAINMENT",
     title: "Contain the unauthorized control",
     prompt: "Pin the fleeing button. It filed for asylum in its own hover state.",
-    aiLine: "Round one: the button thinks it's a character. Prove it wrong. Gently. Violently.",
+    aiLine: "Round one: the button thinks it's a character. Three hits archives it.",
     aiMood: "defiant",
     // Left dock — pace sat under the chase panel and clipped orb+dialogue at 1280×800.
     orbAnchor: "dock-left",

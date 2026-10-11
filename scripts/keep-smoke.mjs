@@ -246,15 +246,38 @@ assert(/PIN_X|ROWS/.test(restless), "Form 01C pinned answers use non-overlapping
 assert(/data-restless-options/.test(restless), "Form 01C restless craft marked");
 
 assert(/GlassStitchOverlay/.test(title), "title crack FX uses full glass overlay");
+assert(/fullStage/.test(title), "title glass uses fullStage (no form-yield hairline mask)");
 assert(/data-title-orb-edge-pad|bottom-8 left-8/.test(title), "title orb dock ≥24px from edges");
+assert(/data-title-idle-hint|data-residue-hint/.test(title), "title idle orb hint readable at rest");
 assert(/data-drone-memo-strip/.test(drone), "Drone memo strip marked for contrast");
 assert(/data-ambient-dust/.test(fac), "floating dust marked decorative");
-assert(/bottom-\[10%\]|data-companion-stack/.test(viewPanels), "I SAW THAT companion stack lifted for bottom margin");
-assert(/I'm archiving either way/.test(act1), "Form 02 bubble line punched up");
+assert(/bottom-\[10%\]|data-companion-stack/.test(viewPanels), "Settle companion stack lifted for bottom margin");
+assert(/YOU SETTLED\. I NOTICED/.test(act1), "Settle CTA names the settle beat (not vague I SAW THAT)");
+assert(/HR brochure to court deposition|archiving either way/.test(act1), "Form 02 bubble line punched up");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
+assert(/data-bubble-safe-gap|data-bubble-no-clip/.test(viewAll), "bubble keeps safe gap during flinch / no mid-line clip");
 assert(/z-\[42\]|z-\[28\]/.test(viewAll), "safe layering z-index stack (assistant above form)");
+
+const ending = read("src/components/game/scenes/EndingSequence.tsx");
+assert(/TRANSFER COMPLETE/.test(ending), "escape ending keeps TRANSFER COMPLETE orb label");
+assert(/case \"escape\"[\s\S]*mode:\s*\"present\"/.test(ending), "escape ending orb stays present (not exit-vanish)");
+assert(/data-ending-orb=\"present\"/.test(ending), "ending orb present marker");
+
+assert(/YOUR REPLACEMENT|STATUS: FAILED/.test(drone), "drone gag self-explanatory YOUR REPLACEMENT / FAILED");
+assert(/RETRY \/\/ ALSO FAILED/.test(drone), "drone gag keeps RETRY // ALSO FAILED punchline");
+assert(/replace you|replacement drone/i.test(read("src/game/ambientGagMeta.ts")), "drone toast explains facility tried to replace you");
+
+const toastBus = read("src/game/ambientToastBus.ts");
+assert(/showAmbientToast|subscribeAmbientToast/.test(toastBus), "shared ambient toast bus (replace, never stack)");
+assert(/data-toast-bus|showAmbientToast/.test(bg), "BackgroundGags hosts shared toast bus");
+assert(/data-clickable-dot/.test(read("src/components/game/AmbientInteractives.tsx")), "clickable cyan dots marked distinct");
+assert(/data-title-submit-toast-gap/.test(titleLogo), "SUBMIT toast gap marker ≥12px");
+assert(/fullStage/.test(glass), "GlassStitchOverlay supports fullStage for title");
+
+assert(/onEscapingHit|All 3 hits archived/.test(scenePlayer), "Form 10 hit lines clear stale Round one");
+assert(/Three hits archives|All 3 hits/.test(act3) || /onHit/.test(escaping), "Form 10 archive progression wired");
 
 const globals = read("src/app/globals.css");
 assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");

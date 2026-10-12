@@ -1,0 +1,1 @@
+LOAD_FROM_FILE:/workspace/src/brand/mark/markPart1.ts

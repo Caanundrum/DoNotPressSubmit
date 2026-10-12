@@ -1,1 +1,1 @@
-export const markPart0 = "LOAD_FROM_FILE:/tmp/DoNotPressSubmit/src/brand/mark/markPart0.ts";
+LOAD_FROM_FILE:/tmp/dnps-logo-batches/markPart0_content.ts

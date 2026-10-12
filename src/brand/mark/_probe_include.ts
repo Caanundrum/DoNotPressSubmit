@@ -1,1 +1,0 @@
-cursor:include-file:/tmp/dnps-logo-batches/CONTENT_markPart0.ts

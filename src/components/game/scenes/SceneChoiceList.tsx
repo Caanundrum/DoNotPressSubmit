@@ -125,7 +125,8 @@ export function SceneChoiceList({
                 ) : null}
                 {opt.secret ? (
                   <span
-                    className="shrink-0 font-mono text-[10px] tracking-[0.2em] text-[#d0b4ff] sm:text-[11px]"
+                    className="shrink-0 whitespace-nowrap font-mono text-[11px] tracking-[0.18em] text-[#e0c8ff] sm:text-[12px]"
+                    style={{ textShadow: "0 0 8px rgba(180,120,255,0.35)" }}
                     data-side-path-tag="true"
                   >
                     SIDE PATH

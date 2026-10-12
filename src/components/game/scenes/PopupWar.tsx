@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
 
 type Popup = { id: number; x: number; y: number; label: string; z: number };
@@ -16,6 +16,9 @@ const LABELS = [
   "THIS NOTICE HAS CHILDREN",
   "URGENCY.EXE IS PREGNANT",
   "DISMISS ME. I DARE YOU",
+  "COUSIN WINDOW ARRIVED",
+  "STILL NOT COMPLIANT",
+  "DISMISS QUEUE OVERFLOW",
 ];
 
 /** Non-overlapping-ish grid slots so dismiss stays hittable. */
@@ -39,15 +42,29 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
   const [topZ, setTopZ] = useState(3);
   const [focusId, setFocusId] = useState<number | null>(2);
   const [hoverDismiss, setHoverDismiss] = useState<number | null>(null);
+  /** Dismissed labels never respawn — no "Compliance required" zombie pile (P1). */
+  const dismissedLabels = useRef(new Set<string>());
+  const labelCursor = useRef(2);
   const needed = 8;
 
   const progress = useMemo(() => Math.min(needed, closed), [closed]);
 
   const slotFor = (index: number) => SLOTS[index % SLOTS.length]!;
 
+  const nextFreshLabel = () => {
+    for (let i = 0; i < LABELS.length * 2; i++) {
+      const label = LABELS[labelCursor.current % LABELS.length]!;
+      labelCursor.current += 1;
+      if (!dismissedLabels.current.has(label)) return label;
+    }
+    return `NOTICE // CASCADE ${labelCursor.current++}`;
+  };
+
   const dismiss = (id: number) => {
     audio.play("click", 0.4);
     setPopups((prev) => {
+      const victim = prev.find((p) => p.id === id);
+      if (victim) dismissedLabels.current.add(victim.label);
       const next = prev.filter((p) => p.id !== id);
       const newlyClosed = closed + 1;
       setClosed(newlyClosed);
@@ -66,7 +83,7 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
           id: Date.now() + i + Math.random(),
           x: slot.x,
           y: slot.y,
-          label: LABELS[(newlyClosed + i) % LABELS.length]!,
+          label: nextFreshLabel(),
           z,
         });
       }

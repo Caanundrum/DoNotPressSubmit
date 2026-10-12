@@ -28,6 +28,11 @@ export function ScenePlayerViewAssistant({
     aiLine, glance, pokeFlinch, choiceFlush, pokeable, onOrbPoke,
   } = p;
 
+  // Spotlight / Counterpoint: bubble BESIDE the orb (never above a 168px body that
+  // can enlarge/pulse into the dialogue). Keep ≥28px gap through flinch/recoil.
+  const safeGap = pokeFlinch ? 36 : spotlight ? 32 : 28;
+  const bubbleReads = !systemLock || !!aiLine;
+
   return (
     <>
       {/*
@@ -35,7 +40,8 @@ export function ScenePlayerViewAssistant({
         Layout rules: safe-zone dock, form owns center, bubble yields.
         Default: pointer-events none so form CTAs stay mouse-hittable.
         Pokeable scenes enable a tiny hit target on the orb only.
-        buryAssistant gag scenes keep the orb under/behind the form on purpose.
+        buryAssistant gag scenes keep the orb under/behind the form on purpose
+        EXCEPT system beats — those keep the bubble readable above the overlay.
       */}
       <motion.div
         className={`absolute ${assistantZ} flex pointer-events-none ${assistantLayout}`}
@@ -45,38 +51,37 @@ export function ScenePlayerViewAssistant({
           top: orbStyle.top,
           // FM animate x/y owns transform — do not rely on translate(-50%) for edge safety.
           transform: "none",
-          // ≥20px gap clears flinch recoil (x±16 / y±14) so the bubble never kisses the orb.
-          gap: pokeFlinch ? 24 : 20,
-          // Right-dock / beside: width follows content so the bubble stays inside the frame.
-          width: dockLeft || dockBeside
+          gap: safeGap,
+          // Right-dock / beside / spotlight-beside: width follows content so the bubble stays inside the frame.
+          width: dockLeft || dockBeside || spotlight
             ? "auto"
             : Math.max(orbStyle.size, spotlight ? 280 : 168),
           maxWidth: dockLeft
-            ? "min(40vw, 340px)"
+            ? "min(42vw, 360px)"
             : dockBeside
-              ? "min(38vw, 300px)"
+              ? "min(40vw, 320px)"
               : spotlight
-                ? "min(44vw, 340px)"
+                ? "min(46vw, 380px)"
                 : dockAbove
-                  ? "min(48vw, 340px)"
-                  : "min(32vw, 240px)",
+                  ? "min(50vw, 360px)"
+                  : "min(34vw, 260px)",
           // Keep orb+rings+label+bubble inside the stage with a few px margin.
-          padding: 4,
+          padding: 6,
           boxSizing: "content-box",
         }}
         data-assistant-dock={
-          dockLeft ? "left" : dockBeside ? "beside" : dockAbove ? "above" : "below"
+          dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
         }
-        data-assistant-yield={buryAssistant ? "gag" : "safe-zone"}
+        data-assistant-yield={buryAssistant && !systemLock ? "gag" : "safe-zone"}
         data-assistant-safe-dock="true"
-        data-assistant-above-form={buryAssistant ? "false" : "true"}
-        data-bubble-safe-gap={pokeFlinch ? "flinch" : "idle"}
+        data-assistant-above-form={buryAssistant && !systemLock ? "false" : "true"}
+        data-bubble-safe-gap={pokeFlinch ? "flinch" : spotlight ? "spotlight" : "idle"}
         animate={
           orbAnchor === "pace"
             ? // Tiny floor sway — never wander under the form answer box.
               { x: [-2, 2, -1, 0] }
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
-              ? { x: [0, 2, -1, 2, 0], y: [0, -1, 1, 0] }
+              ? { x: [0, 1, -1, 1, 0], y: [0, -1, 1, 0] }
               : spotlight
                 ? { x: 0, y: 0, scale: 1 }
                 : { x: 0, y: 0 }
@@ -96,12 +101,17 @@ export function ScenePlayerViewAssistant({
       >
         {spotlight ? (
           <motion.div
-            className="pointer-events-none absolute inset-[-24%] -z-10 rounded-full"
+            className="pointer-events-none absolute -z-10 rounded-full"
             style={{
+              // Bound the glow to the orb hit box only — never wash over bubble/label.
+              width: orbStyle.size * 1.35,
+              height: orbStyle.size * 1.35,
+              left: 0,
+              top: 0,
               background:
-                "radial-gradient(circle, rgba(110,231,255,0.22) 0%, rgba(110,231,255,0.06) 45%, transparent 70%)",
+                "radial-gradient(circle, rgba(110,231,255,0.2) 0%, rgba(110,231,255,0.05) 45%, transparent 70%)",
             }}
-            animate={{ opacity: [0.55, 0.95, 0.55], scale: [0.95, 1.05, 0.95] }}
+            animate={{ opacity: [0.5, 0.85, 0.5], scale: [0.96, 1.04, 0.96] }}
             transition={{ duration: 3.2, repeat: Infinity }}
           />
         ) : null}
@@ -109,6 +119,7 @@ export function ScenePlayerViewAssistant({
         <div
           className={pokeable ? "pointer-events-auto relative z-[1] shrink-0" : "pointer-events-none relative shrink-0"}
           style={{ width: orbStyle.size }}
+          data-orb-hit-layer="true"
         >
           <AssistantOrb
             mood={systemLock ? "nervous" : state.aiMood}
@@ -128,40 +139,46 @@ export function ScenePlayerViewAssistant({
             maxWidth: bubbleMax,
             // Tall enough for Form 03 / Counterpoint / Form 09 full lines — no mid-word cut.
             maxHeight: spotlight
-              ? "min(42vh, 280px)"
+              ? "min(48vh, 320px)"
               : dockBeside
-                ? "min(28vh, 180px)"
+                ? "min(32vh, 200px)"
                 : dockAbove
-                  ? "min(36vh, 240px)"
+                  ? "min(40vh, 260px)"
                   : dockLeft
-                    ? "min(36vh, 240px)"
-                    : "min(30vh, 200px)",
+                    ? "min(40vh, 260px)"
+                    : "min(34vh, 220px)",
             // Wrap only — never clip the last line into the orb.
             overflow: "visible",
             overflowWrap: "anywhere",
             wordBreak: "break-word",
-            // Floor-beside: nudge bubble up slightly so it reads next to orb, not under form.
-            marginTop: dockBeside ? 4 : 0,
+            marginTop: dockBeside || spotlight ? 4 : 0,
             // Dock-above: keep last bubble line clear of the orb during idle pulse + flinch.
-            marginBottom: dockAbove ? 20 : 0,
+            marginBottom: dockAbove && !spotlight ? 24 : 0,
           }}
           key={aiLine || "silent"}
           data-assistant-bubble="true"
           data-bubble-dock={
-            dockLeft ? "left" : dockBeside ? "beside" : dockAbove ? "above" : "below"
+            dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
           }
           data-bubble-no-clip="true"
           initial={{
             opacity: 0,
-            x: dockLeft ? 8 : dockBeside ? -8 : 0,
-            y: dockLeft || dockBeside ? 0 : dockAbove ? -8 : 8,
+            x: dockLeft ? 8 : dockBeside || spotlight ? -8 : 0,
+            y: dockLeft || dockBeside || spotlight ? 0 : dockAbove ? -8 : 8,
             scale: 0.96,
           }}
-          animate={{ opacity: buryAssistant && systemLock ? 0.35 : 1, x: 0, y: 0, scale: 1 }}
+          animate={{
+            // System directive must NOT faint the bubble — keep it fully readable (P0).
+            opacity: buryAssistant && !systemLock ? 0.85 : 1,
+            x: 0,
+            y: 0,
+            scale: 1,
+          }}
         >
-          <div className="mb-1 font-mono text-[8px] tracking-[0.16em] text-cyan/80 sm:text-[9px]">
+          <div className="mb-1 select-none font-mono text-[8px] tracking-[0.16em] text-cyan/80 sm:text-[9px]">
             ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
-            {buryAssistant ? " // UNDER PRESSURE" : ""}
+            {buryAssistant && !systemLock ? " // UNDER PRESSURE" : ""}
+            {systemLock ? " // UNDER PRESSURE" : ""}
             {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
             {choiceFlush === "ally"
               ? " // ALLIED"
@@ -175,7 +192,7 @@ export function ScenePlayerViewAssistant({
             className={`break-words ${spotlight ? "text-[13px] leading-snug" : "text-[11px] leading-snug sm:text-[12px]"}`}
             style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
           >
-            {systemLock ? "…" : aiLine || "…"}
+            {bubbleReads ? aiLine || "…" : "…"}
           </div>
         </motion.div>
       </motion.div>

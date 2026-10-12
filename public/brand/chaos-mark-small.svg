@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Clean dimensional outline 32px mark -->
+  <rect width="32" height="32" rx="7" fill="#07090E"/>
+  <rect width="32" height="32" rx="7" stroke="#161C26" stroke-width="0.75"/>
+
+  <g transform="rotate(-15, 16, 16)">
+    <rect
+      x="8"
+      y="8"
+      width="16"
+      height="16"
+      rx="5"
+      stroke="#6EE7FF"
+      stroke-width="1.2"
+      fill="#6EE7FF"
+      fill-opacity="0.15"
+    />
+    <rect x="10" y="8.5" width="2.5" height="2.5" rx="0.5" fill="#6EE7FF"/>
+    <g transform="translate(20, 20) rotate(25)">
+      <rect x="-1" y="-2.5" width="2" height="5" rx="0.8" fill="#FF9F43"/>
+    </g>
+  </g>
+</svg>

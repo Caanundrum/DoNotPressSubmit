@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { CHAOS_MARK_DATA_URI } from "@/brand/mark";
+import { CHAOS_WORDMARK_DATA_URI } from "@/brand/wordmark";
 import { audio } from "@/lib/audio";
 
 /**
  * Chaos Standard studio splash — ported from Chaos_Standard_Home StudioSplashReveal.
  * CRT electron-beam unzip → Bewildered Terminal mark → wordmark glide → fade to HCOS.
- * Timing / motion / composition match Home; skip via click / Esc / Space / Enter / SKIP.
+ *
+ * Source of truth: Home `/brand/chaos-mark-symbol.png` + `/brand/chaos-wordmark.png`
+ * (BRAND_GUIDE “Bewildered Terminal”). Exact PNG pixels are embedded as data URIs
+ * under `src/brand/*` so forge matches Home without binary MCP upload.
  */
 type AnimationStep =
   | "idle"
@@ -104,8 +109,8 @@ export function ChaosSplash({
       data-chaos-splash="true"
       data-chaos-splash-step={step}
     >
-      {/* Top telemetry */}
-      <div className="absolute left-0 right-0 top-0 z-20 flex h-12 items-center justify-between border-b border-white/5 bg-[#030406]/90 px-5 backdrop-blur-md sm:h-14 sm:px-6">
+      {/* Top telemetry — Home StudioSplashReveal */}
+      <div className="absolute left-0 right-0 top-0 z-20 flex h-12 items-center justify-between border-b border-white/5 bg-[#030406]/90 px-5 backdrop-blur-md sm:h-16 sm:px-6">
         <div className="font-mono text-[10px] tracking-[0.25em] text-[var(--cs-slate-standard)]">
           CHAOS_STANDARD // REVEAL_SEQUENCE
         </div>
@@ -123,7 +128,7 @@ export function ChaosSplash({
       </div>
 
       {/* Bottom telemetry */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 flex h-12 items-center justify-between border-t border-white/5 bg-[#030406]/90 px-5 backdrop-blur-md sm:h-14 sm:px-6">
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex h-12 items-center justify-between border-t border-white/5 bg-[#030406]/90 px-5 backdrop-blur-md sm:h-16 sm:px-6">
         <div className="font-mono text-[10px] tracking-[0.2em] text-[var(--cs-hazard-orange)]">
           &gt; {telemetry}
         </div>
@@ -149,7 +154,7 @@ export function ChaosSplash({
       />
 
       <div className="relative z-10 flex max-w-xl flex-col items-center px-4 text-center">
-        {/* Bewildered Terminal — CRT clip-path unzip */}
+        {/* Bewildered Terminal — Home chaos-mark-symbol.png (exact pixels via data URI) */}
         <div className="relative flex w-48 items-center justify-center sm:w-56">
           <div
             style={{
@@ -162,10 +167,9 @@ export function ChaosSplash({
             className="h-auto w-full"
             data-chaos-mark="true"
           >
-            {/* SVG ships on forge; PNG preferred when present (local/evidence). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/chaos-symbol-dark.svg"
+              src={CHAOS_MARK_DATA_URI}
               alt="Chaos Standard Terminal"
               className="block h-auto w-full object-contain"
               draggable={false}
@@ -202,7 +206,7 @@ export function ChaosSplash({
           />
         </div>
 
-        {/* Wordmark glide — Home dual-tone CHAOS (hazard) + STANDARD (slate) */}
+        {/* Wordmark glide — Home chaos-wordmark.png (fractured CHAOS + STANDARD) */}
         <div
           style={{
             transform: isWordmarkVisible
@@ -213,23 +217,16 @@ export function ChaosSplash({
               "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), opacity 650ms ease-out",
             filter: "drop-shadow(0 10px 25px rgba(0,0,0,0.9))",
           }}
-          className="mt-4 flex w-72 flex-col items-center sm:w-96"
+          className="mt-3 w-72 sm:w-96"
           data-chaos-wordmark="true"
         >
-          <div className="flex flex-col items-center" data-chaos-wordmark-fallback="true">
-            <div
-              className="text-glow-hazard text-3xl font-extrabold tracking-[0.28em] text-[var(--cs-hazard-orange)] sm:text-4xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              CHAOS
-            </div>
-            <div
-              className="mt-1 text-lg font-semibold tracking-[0.42em] text-[var(--cs-slate-standard)] sm:text-xl"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              STANDARD
-            </div>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={CHAOS_WORDMARK_DATA_URI}
+            alt="Chaos Standard Wordmark"
+            className="block h-auto w-full object-contain"
+            draggable={false}
+          />
         </div>
 
         <div

@@ -162,18 +162,13 @@ export function ChaosSplash({
             className="h-auto w-full"
             data-chaos-mark="true"
           >
-            {/* Prefer PNG mark; SVG fallback ships for forge sync. */}
+            {/* SVG ships on forge; PNG preferred when present (local/evidence). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/brand/chaos-mark-symbol.png"
+              src="/brand/chaos-symbol-dark.svg"
               alt="Chaos Standard Terminal"
               className="block h-auto w-full object-contain"
               draggable={false}
-              onError={(e) => {
-                const el = e.currentTarget;
-                if (el.src.includes("chaos-symbol-dark.svg")) return;
-                el.src = "/brand/chaos-symbol-dark.svg";
-              }}
             />
           </div>
 
@@ -221,24 +216,7 @@ export function ChaosSplash({
           className="mt-4 flex w-72 flex-col items-center sm:w-96"
           data-chaos-wordmark="true"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand/chaos-wordmark.png"
-            alt="Chaos Standard"
-            className="h-auto w-full object-contain"
-            draggable={false}
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
-              if (fallback) fallback.hidden = false;
-            }}
-          />
-          <div
-            hidden
-            className="flex flex-col items-center"
-            aria-hidden
-            data-chaos-wordmark-fallback="true"
-          >
+          <div className="flex flex-col items-center" data-chaos-wordmark-fallback="true">
             <div
               className="text-glow-hazard text-3xl font-extrabold tracking-[0.28em] text-[var(--cs-hazard-orange)] sm:text-4xl"
               style={{ fontFamily: "var(--font-display)" }}

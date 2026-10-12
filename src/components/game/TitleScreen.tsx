@@ -209,9 +209,17 @@ export function TitleScreen({
           transition={{ delay: 0.8 }}
           data-title-footer="true"
         >
-          <span title="Chaos Standard production mark">CHAOS STANDARD</span>
-          <span className="text-cyan/65">/</span>
-          <span title="Facility chamber">HCOS // CHAMBER 07</span>
+          <span
+            title="Chaos Standard production mark"
+            className="tracking-[0.2em] text-[var(--cs-hazard-orange)]"
+            data-chaos-brand-footer="true"
+          >
+            CHAOS STANDARD
+          </span>
+          <span className="text-[var(--cs-slate-dim)]">/</span>
+          <span title="Facility chamber" className="text-[var(--cs-slate-standard)]">
+            HCOS // CHAMBER 07
+          </span>
         </motion.div>
       </div>
 

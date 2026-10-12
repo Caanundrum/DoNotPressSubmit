@@ -7,12 +7,13 @@ import { audio } from "@/lib/audio";
 
 export function SubmitClimax({
   state,
-  aiLine,
+  formLine,
   onChoose,
   onHoverOption,
 }: {
   state: GameState;
-  aiLine: string;
+  /** Form-owned subtitle — must NOT duplicate the orb bubble (P0 no-echo). */
+  formLine: string;
   onChoose: (action: "submit" | "refuse" | "escape" | "disable" | "secret") => void;
   onHoverOption?: (id: string | null) => void;
 }) {
@@ -43,9 +44,12 @@ export function SubmitClimax({
         </div>
       </motion.div>
 
-      {/* Orb already shows the pitch — keep a one-line reminder, never a second essay. */}
-      <p className="shrink-0 text-center text-[12px] leading-snug text-[#d2dceb] sm:text-sm">
-        {aiLine}
+      {/* Form subtitle stays distinct from the orb pitch — never paste aiLine here. */}
+      <p
+        className="shrink-0 text-center text-[12px] leading-snug text-[#d2dceb] sm:text-sm"
+        data-climax-form-line="true"
+      >
+        {formLine}
       </p>
 
       <div

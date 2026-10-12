@@ -150,7 +150,8 @@ export const act3Scenes: SceneDef[] = [
     formId: "FORM 12 // CONSENT",
     title: "Acknowledge terms (good luck)",
     prompt: "Catch the checkbox. Consent that sprints is still consent. Allegedly.",
-    aiLine: "It agreed, then fled. Classic. Chase the little liar.",
+    // Unique vs on-screen chase chrome — still keeps flee comedy for smoke (P0 no-stale-echo).
+    aiLine: "Consent just sprinted. Catch the checkbox before it lawyer-ups and flees again.",
     aiMood: "amused",
     // REGRESSION LOCK: Form 12 orb must stay dock-left (never pace) — tall chase panel clips pace.
     // Safe-zone dock: Form 12 chase panel is tall; pace clipped orb off-screen.

@@ -27,7 +27,7 @@ export function ScenePlayerViewPanels({
   const {
     scene, state, companion, companionReady, watchedPulse, panelMotion, panelVar,
     panelShake, hasLatePending, lateHint, visibleChoices, choiceMotion, selected,
-    hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor, aiLine,
+    hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor,
     finishCompanion, pickChoice, setHoverChoice, onState, continueDialogue,
     onSetpieceDone, onEscapingHit, onClimax, finishSystem,
   } = p;
@@ -69,11 +69,12 @@ export function ScenePlayerViewPanels({
             <button
               type="button"
               disabled={!watchedPulse}
-              className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:opacity-40"
+              className="pointer-events-auto min-h-[48px] border border-cyan/55 bg-cyan/15 px-6 py-3.5 font-mono text-[12px] tracking-[0.2em] text-white shadow-[0_0_18px_rgba(110,231,255,0.18)] transition hover:bg-cyan/25 disabled:opacity-45"
               style={{ fontFamily: "var(--font-display)" }}
               onClick={() => finishCompanion()}
+              data-settle-cta="true"
             >
-              {watchedPulse ? (scene.continueLabel ?? "YOU SETTLED. I NOTICED.") : "WATCHING…"}
+              {watchedPulse ? (scene.continueLabel ?? "YOU SETTLED. I NOTICED.") : "WATCHING THE ORBIT…"}
             </button>
           ) : null}
           {scene.companion === "respond" && scene.choices ? (
@@ -230,7 +231,10 @@ export function ScenePlayerViewPanels({
           {scene.kind === "climax" ? (
             <SubmitClimax
               state={state}
-              aiLine={aiLine}
+              formLine={
+                scene.prompt ??
+                "System wants a tidy score. Prior choices color which exits stay open."
+              }
               onChoose={onClimax}
               onHoverOption={(id) => setHoverChoice(id)}
             />

@@ -74,7 +74,7 @@
     <!-- Inner Chamfer / Screen Inset Border -->
     <rect x="132" y="72" width="336" height="262" rx="22" fill="#090B10" stroke="#1C212B" stroke-width="4" />
 
-    <!-- Chassis VentilationSlots (Top Right Subtle Detail) -->
+    <!-- Chassis Ventilation Slots (Top Right Subtle Detail) -->
     <g opacity="0.4" stroke="#FF6A00" stroke-width="2" stroke-linecap="round">
       <line x1="430" y1="62" x2="455" y2="62" />
       <line x1="430" y1="67" x2="455" y2="67" />

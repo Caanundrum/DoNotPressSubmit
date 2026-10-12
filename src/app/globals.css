@@ -1,1 +1,338 @@
-PLACEHOLDER
+@import "tailwindcss";
+
+:root {
+  /* Chaos Standard brand tokens — source: Chaos_Standard_Home BRAND_GUIDE.md */
+  --cs-pitch-black: #05070a;
+  --cs-surface-carbon: #11131b;
+  --cs-surface-elevated: #171924;
+  --cs-border-subtle: #232736;
+  --cs-hazard-orange: #ff6a00;
+  --cs-warm-amber: #ffa040;
+  --cs-slate-phosphor: #1e222a;
+  --cs-slate-standard: #94a3b8;
+  --cs-slate-dim: #64748b;
+  --cs-cyan: #00e5ff;
+  --cs-crimson: #ff2a5f;
+  --cs-violet: #8b5cf6;
+  --cs-gold: #f5a623;
+  --cs-text-main: #f8fafc;
+  --cs-text-muted: #94a3b8;
+  --cs-void: #090a0f;
+
+  /* DNPS aliases — game chrome maps onto Chaos Standard palette */
+  --void: var(--cs-pitch-black);
+  --graphite: var(--cs-surface-carbon);
+  --steel: var(--cs-surface-elevated);
+  --mist: var(--cs-slate-standard);
+  --glass: rgba(148, 163, 184, 0.08);
+  --cyan: var(--cs-cyan);
+  --cyan-dim: #00b8cc;
+  --assistant: #7ef4ff;
+  --system: #f8fafc;
+  --system-warn: var(--cs-warm-amber);
+  --danger: var(--cs-crimson);
+  --metal: var(--cs-slate-standard);
+  --panel: rgba(17, 19, 27, 0.82);
+  --hazard: var(--cs-hazard-orange);
+  --glow: 0 0 40px rgba(0, 229, 255, 0.22);
+  --glow-hazard: 0 0 36px rgba(255, 106, 0, 0.28);
+  --font-display: var(--font-display);
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+}
+
+@theme inline {
+  --color-void: var(--void);
+  --color-graphite: var(--graphite);
+  --color-steel: var(--steel);
+  --color-mist: var(--mist);
+  --color-cyan: var(--cyan);
+  --color-assistant: var(--assistant);
+  --color-system: var(--system);
+  --color-system-warn: var(--system-warn);
+  --color-danger: var(--danger);
+  --color-metal: var(--metal);
+  --font-sans: var(--font-ui);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Absolute ban on scrollbars — game must fit the viewport by design. */
+*,
+*::before,
+*::after {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  background: var(--cs-pitch-black);
+  color: var(--cs-text-main);
+  font-family: var(--font-ui), system-ui, sans-serif;
+  overflow: hidden;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  min-height: 100%;
+  max-height: 100dvh;
+  position: relative;
+}
+
+button {
+  font: inherit;
+}
+
+.game-shell {
+  position: fixed;
+  inset: 0;
+  /* Prefer % over 100vw — vw includes scrollbar gutter and re-opens H-scroll. */
+  width: 100%;
+  height: 100dvh;
+  max-width: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(255, 106, 0, 0.07), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 72% 82%, rgba(0, 229, 255, 0.08), transparent 55%),
+    linear-gradient(180deg, #090a0f 0%, var(--cs-pitch-black) 55%, #030406 100%);
+}
+
+.no-scroll {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+/* Compact assessment panel: scale to fit, never scroll */
+.assessment-panel {
+  overflow: hidden;
+  max-height: min(78vh, 100%);
+  max-width: 100%;
+}
+
+.assessment-panel[data-panel-safe="gag-overlap"] {
+  /* Climax / bury forms may use more vertical room so endings stay in-frame. */
+  max-height: min(90dvh, 100%);
+}
+
+.assessment-panel-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* System / report overlays must never introduce scrollbars */
+.system-beat-shell,
+.ending-shell,
+.report-shell {
+  overflow: hidden !important;
+  max-width: min(calc(100% - 1.5rem), 560px);
+  width: min(88%, 560px);
+  max-height: min(88dvh, 100%);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+/* Assessment stage owns the viewport — no letterboxed card chrome */
+.facility-stage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.scanlines {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.45) 3px
+  );
+  mix-blend-mode: multiply;
+  z-index: 40;
+}
+
+.vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.65) 100%);
+  z-index: 35;
+}
+
+.glass-panel {
+  background: linear-gradient(
+    155deg,
+    rgba(23, 25, 36, 0.88) 0%,
+    rgba(17, 19, 27, 0.94) 55%,
+    rgba(9, 10, 15, 0.96) 100%
+  );
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.5) inset,
+    0 24px 80px rgba(0, 0, 0, 0.55),
+    var(--glow);
+  backdrop-filter: blur(18px);
+}
+
+/* Facility-HUD panels — Chaos Standard carbon chrome, not SaaS cards.
+   Fully opaque fill so Assistant bubbles / glass FX cannot ghost through Q/A. */
+.facility-hud,
+.assessment-panel.facility-hud {
+  border-radius: 2px;
+  border-color: rgba(0, 229, 255, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.55) inset,
+    inset 0 1px 0 rgba(0, 229, 255, 0.1),
+    0 18px 48px rgba(0, 0, 0, 0.55);
+  background:
+    linear-gradient(180deg, rgba(0, 229, 255, 0.07) 0 1px, transparent 1px),
+    linear-gradient(
+      155deg,
+      rgb(23, 25, 36) 0%,
+      rgb(9, 10, 15) 55%,
+      rgb(5, 7, 10) 100%
+    );
+  backdrop-filter: none;
+  isolation: isolate;
+}
+
+.assessment-panel[data-form-above-glass="true"] {
+  /* Form chrome above fracture FX (z-22). Assistant dock is z-42 so bubbles
+     never paint under the panel (Form 01C). Spatial leave* zones keep Q/A clear. */
+  z-index: 28;
+}
+
+.assistant-bubble {
+  border-radius: 2px;
+  border-color: rgba(0, 229, 255, 0.34);
+  /* Dense fill — never translucent over form if z-order races. */
+  background: linear-gradient(
+    155deg,
+    rgba(17, 19, 27, 0.96) 0%,
+    rgba(5, 7, 10, 0.98) 100%
+  );
+}
+
+.text-glow {
+  text-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+}
+
+.text-glow-hazard {
+  text-shadow: 0 0 18px rgba(255, 106, 0, 0.45);
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  70% {
+    opacity: 0.15;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+/* Phase 3 — authored light / glitch accents */
+.light-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(110, 231, 255, 0.08) 35%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(110, 231, 255, 0.08) 65%,
+    transparent 100%
+  );
+  filter: blur(8px);
+}
+
+.chromatic-flash {
+  background:
+    linear-gradient(90deg, rgba(255, 77, 109, 0.18), transparent 40%),
+    linear-gradient(270deg, rgba(110, 231, 255, 0.16), transparent 40%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.facility-rail {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(110, 231, 255, 0.35),
+    transparent
+  );
+}
+
+.vol-beam {
+  background: linear-gradient(
+    180deg,
+    rgba(110, 231, 255, 0.14),
+    transparent 70%
+  );
+  filter: blur(12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanlines,
+  .ambient-motion,
+  .light-sweep,
+  .chromatic-flash {
+    animation: none !important;
+  }
+}

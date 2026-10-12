@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { POKE_WORLD } from "@/game/aiLifeLocks";
+import { showAmbientToast } from "@/game/ambientToastBus";
 import { AssistantOrb } from "./AssistantOrb";
 import { AudioEnableControl } from "./AudioEnableControl";
 import { BackgroundGags } from "./BackgroundGags";
@@ -15,6 +16,18 @@ import {
 } from "./scenes/GlassStitchOverlay";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
+
+/** Title prop click payoffs — obvious joke, no backstory (P0 gag clarity). */
+const TITLE_PROP_TOAST: Record<string, string> = {
+  "coffee-mug": "Title mug: still empty, still judgmental. Facility filed a thirst incident.",
+  "do-not-press": "Tiny robot pressed DO NOT PRESS on the title. Irony ticket printed.",
+  "chamber-07": "CHAMBER 07 panel blinked. It has opinions. None of them help BEGIN.",
+  "replacement-failed": "Your title-screen replacement drone failed. You remain the protagonist.",
+  "printer-scissors": "Title printer queued scissors. BEGIN is still the real door.",
+  "corridor-etiquette": "Corridor drones on the title practiced after-you. Throughput: zero.",
+  "containment-fine": "EVERYTHING IS FINE plaque on title. Unprompted. Still concerning.",
+  default: "Background prop noticed you. It will not start the assessment for you.",
+};
 
 /**
  * Calm cinematic title: dim facility life + sparse roaming eggs + orb.
@@ -110,18 +123,23 @@ export function TitleScreen({
         environment={waving ? "escape" : allyBefore ? "pristine" : "pristine"}
         anomalyLevel={allyBefore && !waving ? 1 : 0}
         hoverLanguage
-        onAmbient={() => {
-          // Live eggs for secret/ledger bumps — no idle comedy parked under the orb.
-          audio.play("click", 0.22);
+        onAmbient={(id) => {
+          // FacilityBackground already toasts via fireAmbient — bump only if bus missed.
+          if (id && !TITLE_PROP_TOAST[id]) {
+            showAmbientToast(TITLE_PROP_TOAST.default!, 2200);
+          }
         }}
       />
-      <BackgroundGags
-        calm
-        hoverLanguage
-        onAmbient={() => {
-          audio.play("click", 0.22);
-        }}
-      />
+      {/* z-30 so gag click toasts paint above title chrome (never silent props). */}
+      <div className="pointer-events-none absolute inset-0 z-30" data-title-gag-layer="true">
+        <BackgroundGags
+          calm
+          hoverLanguage
+          onAmbient={() => {
+            // react() already shows the gag toast — keep interactive live.
+          }}
+        />
+      </div>
 
       {allyBefore && !waving ? (
         <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
@@ -210,9 +228,10 @@ export function TitleScreen({
         Use 32px (bottom-8/left-8) so the full stack clears even with residue pulse.
       */}
       <motion.div
-        className="absolute bottom-8 left-8 z-20"
+        className="absolute bottom-8 left-8 z-20 select-none"
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"
+        style={{ userSelect: "none" }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.55 }}
@@ -237,22 +256,31 @@ export function TitleScreen({
             onTitleOrbPoke();
             if (remembered) onResidueClick();
           }}
-          // No idle status wallpaper competing with BEGIN —
-          // status microcopy only appears as a click reaction toast below.
-          label={residueLine ? (waving ? "ASSISTANT WAVING" : allyBefore ? "ASSISTANT REMEMBERS" : undefined) : undefined}
+          // Idle status stays wordless vs BEGIN; click may show residue label.
+          // select-none on dock prevents rapid-poke text selection of ASSISTANT (P1).
+          label={residueLine ? (waving ? "ASSISTANT WAVING" : allyBefore ? "ASSISTANT REMEMBERS" : "ASSISTANT") : undefined}
         />
-        {/* Idle poke hint — readable at rest (≥24px from edges via dock pad). Comedy on click. */}
+        {/* Idle poke hint — readable pulse + soft caption (≥24px from edges via dock pad). */}
         {!residueLine ? (
-          <motion.div
-            className="mx-auto mt-1.5 h-1.5 w-7 rounded-full bg-cyan/45"
-            style={{ boxShadow: "0 0 8px rgba(110,231,255,0.4)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0.4, 0.85, 0.4] }}
-            transition={{ duration: 2.8, repeat: Infinity }}
-            data-residue-hint="true"
-            data-title-idle-hint="true"
-            aria-hidden
-          />
+          <div className="mt-1.5 flex flex-col items-center gap-1" data-title-idle-hint-stack="true">
+            <motion.div
+              className="h-1.5 w-7 rounded-full bg-cyan/55"
+              style={{ boxShadow: "0 0 8px rgba(110,231,255,0.45)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.45, 0.95, 0.45] }}
+              transition={{ duration: 2.8, repeat: Infinity }}
+              data-residue-hint="true"
+              data-title-idle-hint="true"
+              aria-hidden
+            />
+            <div
+              className="select-none font-mono text-[8px] tracking-[0.16em] text-cyan/70"
+              style={{ userSelect: "none", textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
+              data-title-orb-hint-copy="true"
+            >
+              poke soft
+            </div>
+          </div>
         ) : null}
         {residueLine ? (
           <motion.div

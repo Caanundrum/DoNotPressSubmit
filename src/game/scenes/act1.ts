@@ -107,7 +107,7 @@ export const act1Scenes: SceneDef[] = [
     formId: "SIDE CHANNEL // SETTLE",
     title: "Watch the assistant settle",
     prompt:
-      "No form fields. Watch the orb: when its aperture steadies and the orbit calms, tap below to prove you noticed.",
+      "No form fields. Watch the orb settle — aperture steady, orbit calm — then tap the glowing button below. That's the joke: you noticed.",
     aiLine:
       "…okay. Don't stare too hard. I'm calibrating dignity.",
     aiMood: "listening",
@@ -305,8 +305,9 @@ export const act1Scenes: SceneDef[] = [
     environment: "pristine",
     formId: "FORM 02 // CALIBRATION",
     title: "How honest are we being?",
-    prompt: "On a scale from 'HR brochure' to 'court deposition,' where are you today?",
-    aiLine: "HR brochure to court deposition — pick a rung. I'm archiving either way.",
+    prompt:
+      "Honesty scale: 1 HR brochure · 2 hallway rumor · 3 mostly strategic · 4 sworn affidavit · 5 court deposition. Pick where you are today.",
+    aiLine: "Pick a rung on the honesty scale. I'm archiving either way.",
     aiMood: "listening",
     orbAnchor: "listen",
     panelMotion: "settle",
@@ -314,7 +315,7 @@ export const act1Scenes: SceneDef[] = [
     choices: [
       {
         id: "honest-yes",
-        label: "Completely honest",
+        label: "5 — Court deposition energy",
         effects: {
           flags: { claimedHonest: true },
           relationship: 1,
@@ -326,7 +327,7 @@ export const act1Scenes: SceneDef[] = [
       },
       {
         id: "honest-sorta",
-        label: "Mostly honest, strategically",
+        label: "3 — Mostly strategic",
         effects: {
           flags: { claimedMostly: true },
           relationship: 1,
@@ -338,7 +339,7 @@ export const act1Scenes: SceneDef[] = [
       },
       {
         id: "honest-lie",
-        label: "I am a perfect employee",
+        label: "1 — HR brochure energy",
         effects: {
           flags: { claimedPerfect: true },
           counters: { liedToAI: 1 },
@@ -408,7 +409,8 @@ export const act1Scenes: SceneDef[] = [
     formId: "FORM 03 // STRESS RESPONSE",
     title: "Deadlines are circling. You…",
     prompt: "Pick your primary coping strategy. Wrong answers are still comedy.",
-    aiLine: "If your instinct is 'press the final-looking thing,' please unlearn that here.",
+    // Unique vs option "Press whatever looks final" — never echo form chrome (P0).
+    aiLine: "Deadlines make people grab the shiniest button. Resist the glow. Pick a coping style instead.",
     aiMood: "thinking",
     orbAnchor: "listen",
     panelMotion: "rise",

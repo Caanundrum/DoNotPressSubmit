@@ -1,21 +1,24 @@
 import type { Metadata } from "next";
-import { Oxanium, Rajdhani, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const display = Oxanium({
+/** Chaos Standard display — Space Grotesk (Home BRAND_GUIDE). */
+const display = Space_Grotesk({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
-const ui = Rajdhani({
+/** Chaos Standard body/UI — Inter. */
+const ui = Inter({
   variable: "--font-ui",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
+/** Chaos Standard telemetry — JetBrains Mono. */
 const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
@@ -25,8 +28,10 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "DO NOT PRESS SUBMIT",
-  description:
-    "A Chaos Standard assessment. Try not to press Submit.",
+  description: "A Chaos Standard assessment. Try not to press Submit.",
+  icons: {
+    icon: "/brand/favicon.png",
+  },
 };
 
 export default function RootLayout({

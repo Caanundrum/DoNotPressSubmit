@@ -284,5 +284,28 @@ assert(/Three hits archives|All 3 hits/.test(act3) || /onHit/.test(escaping), "F
 const globals = read("src/app/globals.css");
 assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");
 
+// Chaos Standard brand port (Home BRAND_GUIDE + StudioSplashReveal).
+assert(/--cs-hazard-orange:\s*#ff6a00|--cs-hazard-orange:\s*#FF6A00/i.test(globals), "CS hazard orange token");
+assert(/--cs-pitch-black:\s*#05070a|--cs-pitch-black:\s*#05070A/i.test(globals), "CS pitch black token");
+assert(/--cs-cyan:\s*#00e5ff|--cs-cyan:\s*#00E5FF/i.test(globals), "CS DNPS cyan token");
+assert(
+  existsSync(join(root, "public/brand/chaos-mark-symbol.png")) ||
+    existsSync(join(root, "public/brand/chaos-symbol-dark.svg")),
+  "brand mark asset present (png or svg)",
+);
+assert(
+  existsSync(join(root, "public/brand/chaos-wordmark.png")) ||
+    existsSync(join(root, "public/brand/chaos-symbol-dark.svg")),
+  "brand wordmark / mark suite present",
+);
+assert(existsSync(join(root, "public/brand/chaos-symbol-dark.svg")), "brand SVG mark present for forge sync");
+const chaosSplash = read("src/components/game/ChaosSplash.tsx");
+assert(/data-chaos-splash|StudioSplashReveal|ELECTRON_BEAM|chaos-mark-symbol/.test(chaosSplash), "ChaosSplash CRT reveal ported from Home");
+assert(/clipPath|clip-path|inset\(49\.2%/.test(chaosSplash), "ChaosSplash CRT clip-path unzip");
+assert(/chaos-wordmark\.png|data-chaos-wordmark-fallback|CHAOS/.test(chaosSplash), "ChaosSplash wordmark (asset or dual-tone fallback)");
+const layout = read("src/app/layout.tsx");
+assert(/Space_Grotesk|Space Grotesk/.test(layout), "display font is Space Grotesk (Chaos Standard)");
+assert(/JetBrains_Mono|JetBrains Mono/.test(layout), "mono font is JetBrains Mono (Chaos Standard)");
+
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

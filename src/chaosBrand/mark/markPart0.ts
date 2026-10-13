@@ -1,1 +1,1 @@
-CURSOR_FILE:/workspace/src/chaosBrand/mark/markPart0.ts
+@workspace/src/chaosBrand/mark/markPart0.ts

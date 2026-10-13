@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CHAOS_MARK_DATA_URI } from "@/brand/mark";
-import { CHAOS_WORDMARK_DATA_URI } from "@/brand/wordmark";
+import { CHAOS_MARK_DATA_URI } from "@/chaosBrand/mark";
+import { CHAOS_WORDMARK_DATA_URI } from "@/chaosBrand/wordmark";
 import { audio } from "@/lib/audio";
 
 /**
  * Chaos Standard studio splash — ported from Chaos_Standard_Home StudioSplashReveal.
  * CRT electron-beam unzip → Bewildered Terminal mark → wordmark glide → fade to HCOS.
  *
- * Source of truth: Home `/brand/chaos-mark-symbol.png` + `/brand/chaos-wordmark.png`
- * (BRAND_GUIDE “Bewildered Terminal”). Exact PNG pixels are embedded as data URIs
- * under `src/brand/*` so forge matches Home without binary MCP upload.
+ * Source of truth: Nick masters (monitor 04 + wordmark 07) ≡ cleaned Home
+ * `/brand/chaos-mark-symbol.png` + `/brand/chaos-wordmark.png`. Exact PNG pixels
+ * embedded under `src/chaosBrand/*` (forge-safe). CRT timing matches StudioSplashReveal.
  */
 type AnimationStep =
   | "idle"
@@ -206,7 +206,7 @@ export function ChaosSplash({
           />
         </div>
 
-        {/* Wordmark glide — Home chaos-wordmark.png (fractured CHAOS + STANDARD) */}
+        {/* Wordmark glide — Home chaos-wordmark.png (fractured CHAOS + silver STANDARD) */}
         <div
           style={{
             transform: isWordmarkVisible

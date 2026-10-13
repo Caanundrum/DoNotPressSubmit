@@ -1,1 +1,1 @@
-LOAD_FROM_FILE
+@file:///tmp/markPart0-content.ts

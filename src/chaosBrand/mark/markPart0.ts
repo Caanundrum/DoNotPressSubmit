@@ -1,1 +1,1 @@
-PLACEHOLDER_WILL_REPLACE
+@/workspace/src/chaosBrand/mark/markPart0.ts

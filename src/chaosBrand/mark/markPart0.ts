@@ -1,1 +1,1 @@
-@workspace/src/chaosBrand/mark/markPart0.ts
+@file:/tmp/mcp_push_markPart0.json

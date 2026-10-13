@@ -1,1 +1,1 @@
-PLACEHOLDER
+@file:///tmp/mcp_args_01_content.txt

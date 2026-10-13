@@ -1,1 +1,1 @@
-/workspace/src/chaosBrand/mark/markPart0.ts
+export const markPart0 = "TESTINLINE";

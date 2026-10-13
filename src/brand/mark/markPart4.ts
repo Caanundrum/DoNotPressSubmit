@@ -1,0 +1,10 @@
+import { markPart4_h0 } from "./markPart4_h0";
+import { markPart4_h1 } from "./markPart4_h1";
+import { markPart4_h2 } from "./markPart4_h2";
+import { markPart4_h3 } from "./markPart4_h3";
+import { markPart4_h4 } from "./markPart4_h4";
+import { markPart4_h5 } from "./markPart4_h5";
+import { markPart4_h6 } from "./markPart4_h6";
+import { markPart4_h7 } from "./markPart4_h7";
+import { markPart4_h8 } from "./markPart4_h8";
+export const markPart4 = [markPart4_h0, markPart4_h1, markPart4_h2, markPart4_h3, markPart4_h4, markPart4_h5, markPart4_h6, markPart4_h7, markPart4_h8].join("");

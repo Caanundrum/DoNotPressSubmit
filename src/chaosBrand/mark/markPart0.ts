@@ -1,16 +1,1 @@
-import { markPart0_0 } from "./markPart0_0";
-import { markPart0_1 } from "./markPart0_1";
-import { markPart0_2 } from "./markPart0_2";
-import { markPart0_3 } from "./markPart0_3";
-import { markPart0_4 } from "./markPart0_4";
-import { markPart0_5 } from "./markPart0_5";
-import { markPart0_6 } from "./markPart0_6";
-import { markPart0_7 } from "./markPart0_7";
-import { markPart0_8 } from "./markPart0_8";
-import { markPart0_9 } from "./markPart0_9";
-import { markPart0_10 } from "./markPart0_10";
-import { markPart0_11 } from "./markPart0_11";
-import { markPart0_12 } from "./markPart0_12";
-import { markPart0_13 } from "./markPart0_13";
-import { markPart0_14 } from "./markPart0_14";
-export const markPart0 = markPart0_0+markPart0_1+markPart0_2+markPart0_3+markPart0_4+markPart0_5+markPart0_6+markPart0_7+markPart0_8+markPart0_9+markPart0_10+markPart0_11+markPart0_12+markPart0_13+markPart0_14;
+@file:///tmp/markPart0_content_only.txt

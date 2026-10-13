@@ -9,9 +9,9 @@ import { audio } from "@/lib/audio";
  * Chaos Standard studio splash — ported from Chaos_Standard_Home StudioSplashReveal.
  * CRT electron-beam unzip → Bewildered Terminal mark → wordmark glide → fade to HCOS.
  *
- * Source of truth: Nick masters (monitor 04 + wordmark 07) ≡ cleaned Home
- * `/brand/chaos-mark-symbol.png` + `/brand/chaos-wordmark.png`. Exact PNG pixels
- * embedded under `src/chaosBrand/*` (forge-safe). CRT timing matches StudioSplashReveal.
+ * Nick masters (04 monitor + 07 wordmark) ≡ Home `/brand/chaos-mark-symbol.png` +
+ * `/brand/chaos-wordmark.png`. Exact PNG pixels embedded in `src/chaosBrand/*` (md5-pinned)
+ * and mirrored under `public/brand/` when binaries are available. CRT timing = Home.
  */
 type AnimationStep =
   | "idle"
@@ -154,7 +154,7 @@ export function ChaosSplash({
       />
 
       <div className="relative z-10 flex max-w-xl flex-col items-center px-4 text-center">
-        {/* Bewildered Terminal — Home chaos-mark-symbol.png (exact pixels via data URI) */}
+        {/* Bewildered Terminal — Nick master 04 / Home chaos-mark-symbol.png */}
         <div className="relative flex w-48 items-center justify-center sm:w-56">
           <div
             style={{
@@ -206,7 +206,7 @@ export function ChaosSplash({
           />
         </div>
 
-        {/* Wordmark glide — Home chaos-wordmark.png (fractured CHAOS + silver STANDARD) */}
+        {/* Wordmark glide — Nick master 07 / Home chaos-wordmark.png */}
         <div
           style={{
             transform: isWordmarkVisible

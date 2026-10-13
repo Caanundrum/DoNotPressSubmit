@@ -1,1 +1,1 @@
-@file:///tmp/mcp_args_01_content.txt
+export const markPart0 = "TEST";

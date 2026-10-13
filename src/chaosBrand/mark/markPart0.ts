@@ -1,1 +1,1 @@
-export const markPart0 = "TEST";
+STUB

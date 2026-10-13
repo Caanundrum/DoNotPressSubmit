@@ -74,8 +74,9 @@ export function orbStageStyle(
 
   // Safe-zone dock: orb + rings + status label fully on-screen with a few px margin.
   // Right docks pin with `right` so FM transform overrides can't shove chrome off-frame.
+  // Spotlight size capped so bubble-beside + ASSISTANT // LIVE stay clear while enlarged.
   if (spotlight || anchor === "spotlight") {
-    return { left: "2.5%", top: "18%", transform: "none", size: 168 };
+    return { left: "2.5%", top: "16%", transform: "none", size: 148 };
   }
 
   switch (anchor ?? "dock-left") {
@@ -227,8 +228,9 @@ export function panelLayoutClass(
     "left-[2%] right-[min(40vw,420px)] max-w-[min(60vw,820px)]";
   // Form 01C floor/side: leave a left gutter for orb+bubble (never over answers/helper).
   // Taller leaveBottom so Form 06 subtitle + options aren't clipped at 1280×800.
+  // overflow-visible during/after transition — never mid-word clip options.
   const leaveBottom =
-    "left-[min(34vw,360px)] right-[2%] top-[12%] bottom-auto max-h-[min(58vh,480px)] max-w-[min(64vw,860px)] overflow-hidden";
+    "left-[min(34vw,360px)] right-[2%] top-[10%] bottom-auto max-h-[min(62vh,520px)] max-w-[min(64vw,860px)] overflow-visible";
 
   if (spotlight) {
     // Form retreats opposite the spotlight orb (left safe zone). Stay readable.

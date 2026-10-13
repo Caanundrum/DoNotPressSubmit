@@ -57,18 +57,19 @@ export function EndingSequence({
       </div>
 
       <div className="absolute inset-0 z-10 flex items-center justify-center px-3">
-        <div className="relative flex w-full max-w-[640px] flex-col items-center gap-3 sm:flex-row sm:items-end sm:justify-center sm:gap-5">
+        <div className="relative flex w-full max-w-[640px] flex-col items-center gap-4 sm:flex-row sm:items-end sm:justify-center sm:gap-6">
           {presence.mode === "present" ? (
             <motion.div
-              className="shrink-0"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 }}
+              className="relative z-20 shrink-0"
+              initial={{ opacity: 0, y: 10, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 18 }}
               data-ending-orb="present"
+              data-ending-orb-real="true"
             >
               <AssistantOrb
                 mood={presence.mood}
-                size={96}
+                size={endingId === "escape" ? 128 : 104}
                 label={presence.label}
                 wave={presence.wave}
               />
@@ -160,11 +161,11 @@ type Presence =
 function endingPresence(endingId: EndingId): Presence {
   switch (endingId) {
     case "escape":
-      // TRANSFER COMPLETE keeps the orb on-screen (wave, not vanish).
+      // TRANSFER COMPLETE keeps a real live orb on-screen (wave, not a dim prop / quote-only).
       return {
         mode: "present",
         mood: "excited",
-        label: "TRANSFER COMPLETE",
+        label: "ASSISTANT // TRANSFER COMPLETE",
         wave: true,
         silentLine: "CHANNEL OPEN — SEE YOU IN THE RAILS",
       };

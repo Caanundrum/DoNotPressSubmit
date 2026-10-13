@@ -147,12 +147,12 @@ export function TitleLogo({
       <p
         className={
           compact
-            ? "mx-auto mt-3 max-w-md text-xs tracking-[0.08em] text-mist sm:text-sm"
-            : "mx-auto mt-3.5 max-w-md text-sm tracking-[0.08em] text-mist sm:text-base"
+            ? "mx-auto mt-3 max-w-md text-xs tracking-[0.08em] text-[var(--cs-slate-standard)] sm:text-sm"
+            : "mx-auto mt-3.5 max-w-md text-sm tracking-[0.08em] text-[var(--cs-slate-standard)] sm:text-base"
         }
         data-title-subtitle="true"
       >
-        A Chaos Standard assessment.
+        <span className="text-[var(--cs-hazard-orange)]">A Chaos Standard</span> assessment.
         <br />
         Try not to press Submit.
       </p>

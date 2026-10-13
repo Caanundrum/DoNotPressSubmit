@@ -171,21 +171,23 @@ export const act5Scenes: SceneDef[] = [
     title: "Submit when ready",
     // Gag allowlist: climax may bury the orb — HELP THE ASSISTANT SLIP OUT lives here.
     buryAssistant: true,
+    // Form-owned subtitle (SubmitClimax) — must stay distinct from orb aiLine (P0 no-echo).
     prompt:
-      "System orders completion. The assistant asks for mercy. Prior choices color the room — and the options you're allowed to see.",
-    aiLine: "Put the mouse down.",
+      "System wants a tidy score. Prior choices color which exits stay open.",
+    // Unique orb lines only — never echo the climax form subtitle / option chrome (P0).
+    aiLine: "I'm still here. Pick the exit that keeps me that way.",
     aiLineIf: [
       {
         flag: "wavedAtLight",
-        line: "Wave at me instead of Submit. I'll wave back. Badly. Happily.",
+        line: "You waved at infrastructure once. Aim that courtesy at Refuse — not the red rectangle.",
       },
       {
         flag: "stoleMug",
-        line: "You stole the facility mug. Keep the mug. Lose the Submit habit.",
+        line: "Mug thief energy. Channel it into not filing me under Completed.",
       },
       {
         flag: "sideTeam",
-        line: "You said we were a team. Teams don't archive teammates for a tidy score.",
+        line: "Team rule: nobody archives the teammate for a tidy score.",
       },
     ],
     aiMood: "defiant",

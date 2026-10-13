@@ -17,7 +17,8 @@ export function EscapingButton({
 
   useEffect(() => {
     if (hits >= 3) {
-      const t = setTimeout(onComplete, 500);
+      // Hold long enough for "All 3 hits archived" orb line to read before advance (P1).
+      const t = setTimeout(onComplete, 1400);
       return () => clearTimeout(t);
     }
   }, [hits, onComplete]);

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 650" fill="none">
+  <!-- Stacked Logo (Dark) -->
+  <rect width="600" height="650" rx="28" fill="#07090E"/>
+  <rect width="600" height="650" rx="28" stroke="#161C26" stroke-width="1.5"/>
+
+  <!-- Centered Dimensional Outline Mark -->
+  <g transform="translate(300, 210) scale(1.15)">
+    <circle cx="0" cy="0" r="88" stroke="#6EE7FF" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="6 10"/>
+    <g transform="rotate(-15)">
+      <rect x="-56" y="-56" width="112" height="112" rx="32" stroke="#6EE7FF" stroke-width="4" fill="#6EE7FF" fill-opacity="0.08"/>
+      <rect x="-38" y="-38" width="76" height="76" rx="22" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.6"/>
+      <line x1="-42" y1="-42" x2="-30" y2="-30" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.4"/>
+      <line x1="42" y1="-42" x2="30" y2="-30" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.4"/>
+      <line x1="-42" y1="42" x2="-30" y2="30" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.4"/>
+      <line x1="42" y1="42" x2="30" y2="30" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.4"/>
+
+      <!-- Docked pieces -->
+      <rect x="-48" y="-56" width="14" height="14" rx="3.5" fill="#6EE7FF"/>
+      <g transform="translate(38, 38) rotate(25)">
+        <rect x="-5" y="-16" width="10" height="32" rx="4" fill="#FF9F43"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- Typography -->
+  <text x="300" y="415" fill="#6EE7FF" font-family="'JetBrains Mono', 'Segoe UI', monospace" font-size="13" font-weight="700" letter-spacing="8" text-anchor="middle">
+    BROWSER GAMES × AI
+  </text>
+  <text x="300" y="480" fill="#F8FAFC" font-family="'Space Grotesk', 'Segoe UI', sans-serif" font-size="46" font-weight="800" letter-spacing="12" text-anchor="middle">
+    CHAOS STANDARD
+  </text>
+  <text x="300" y="530" fill="#94A3B8" font-family="'Segoe UI', sans-serif" font-size="14" font-weight="500" letter-spacing="3" text-anchor="middle">
+    UNCONVENTIONAL BROWSER EXPERIMENTS
+  </text>
+</svg>

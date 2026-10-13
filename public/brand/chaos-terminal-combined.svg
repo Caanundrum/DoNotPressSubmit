@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 660" width="100%" height="100%">
+  <defs>
+    <!-- Background Radial Glow -->
+    <radialGradient id="orangeAmbientGlow" cx="50%" cy="35%" r="50%">
+      <stop offset="0%" stop-color="#FF6A00" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#FF6A00" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- CRT Screen Gradient (Slate Grey Phosphor) -->
+    <linearGradient id="slateScreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3A4354" />
+      <stop offset="50%" stop-color="#2D3442" />
+      <stop offset="100%" stop-color="#222834" />
+    </linearGradient>
+
+    <!-- CRT Glass Reflection Sheen -->
+    <linearGradient id="crtGlassSheen" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.12" />
+      <stop offset="35%" stop-color="#FFFFFF" stop-opacity="0.03" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.25" />
+    </linearGradient>
+
+    <!-- 3D Bevel for Monitor Housing -->
+    <linearGradient id="blackBevelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E232D" />
+      <stop offset="50%" stop-color="#0E1117" />
+      <stop offset="100%" stop-color="#05070A" />
+    </linearGradient>
+
+    <!-- Orange Lettering Bevel Gradient -->
+    <linearGradient id="chaosOrangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF8C33" />
+      <stop offset="50%" stop-color="#FF6A00" />
+      <stop offset="100%" stop-color="#CC5200" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="orangeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Ambient Backdrop Glow -->
+  <circle cx="300" cy="230" r="260" fill="url(#orangeAmbientGlow)" />
+
+  <!-- ========================================================================= -->
+  <!-- 1. MONITOR STAND                                                          -->
+  <!-- ========================================================================= -->
+  <g id="monitor-stand">
+    <!-- Stand Neck -->
+    <rect x="270" y="365" width="60" height="42" rx="4" fill="#141820" stroke="#FF6A00" stroke-width="4" />
+    <!-- Stand Neck Shadow -->
+    <rect x="274" y="370" width="52" height="12" fill="#080A0E" />
+
+    <!-- Stand Beveled Foot Base -->
+    <polygon points="210,430 245,402 355,402 390,430" fill="url(#blackBevelGrad)" stroke="#FF6A00" stroke-width="5" stroke-linejoin="round" />
+    <!-- Foot Front Lip -->
+    <polygon points="210,430 390,430 385,438 215,438" fill="#05070A" stroke="#FF6A00" stroke-width="3" />
+    <!-- Foot Non-slip Rubber Accent -->
+    <rect x="260" y="420" width="80" height="4" rx="2" fill="#FF6A00" opacity="0.6" />
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- 2. BLACK MONITOR CHASSIS                                                 -->
+  <!-- ========================================================================= -->
+  <g id="monitor-chassis">
+    <!-- Outer Heavy Bevel / Shadow -->
+    <rect x="106" y="46" width="388" height="328" rx="32" fill="#05070A" />
+
+    <!-- Main Black Housing with Bold Orange Beveled Rim -->
+    <rect x="110" y="50" width="380" height="320" rx="30" fill="url(#blackBevelGrad)" stroke="#FF6A00" stroke-width="7" stroke-linejoin="round" />
+
+    <!-- Inner Chamfer / Screen Inset Border -->
+    <rect x="132" y="72" width="336" height="262" rx="22" fill="#090B10" stroke="#1C212B" stroke-width="4" />
+
+    <!-- Chassis Ventilation Slots (Top Right Subtle Detail) -->
+    <g opacity="0.4" stroke="#FF6A00" stroke-width="2" stroke-linecap="round">
+      <line x1="430" y1="62" x2="455" y2="62" />
+      <line x1="430" y1="67" x2="455" y2="67" />
+    </g>
+
+    <!-- Power Indicator LED & Button (Bottom Right) -->
+    <rect x="425" y="342" width="28" height="8" rx="4" fill="#181D26" stroke="#2D3442" stroke-width="1.5" />
+    <circle cx="445" cy="346" r="3" fill="#FF6A00" filter="url(#orangeGlow)" />
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- 3. SLATE GREY CRT SCREEN                                                  -->
+  <!-- ========================================================================= -->
+  <g id="crt-screen">
+    <!-- Slate Grey Phosphor Screen Surface -->
+    <rect x="146" y="86" width="308" height="234" rx="16" fill="url(#slateScreenGrad)" stroke="#161922" stroke-width="4" />
+
+    <!-- CRT Inner Vignette / Depth Border -->
+    <rect x="148" y="88" width="304" height="230" rx="14" fill="none" stroke="#0C0E14" stroke-width="6" opacity="0.5" />
+
+    <!-- Glass Curvature Highlight Sheen -->
+    <path d="M 148 98 Q 300 86 450 98 L 450 180 Q 300 130 148 180 Z" fill="url(#crtGlassSheen)" pointer-events="none" />
+
+    <!-- Subtle Scanline Texture -->
+    <g opacity="0.08" stroke="#000000" stroke-width="2">
+      <line x1="148" y1="110" x2="452" y2="110" />
+      <line x1="148" y1="130" x2="452" y2="130" />
+      <line x1="148" y1="150" x2="452" y2="150" />
+      <line x1="148" y1="170" x2="452" y2="170" />
+      <line x1="148" y1="190" x2="452" y2="190" />
+      <line x1="148" y1="210" x2="452" y2="210" />
+      <line x1="148" y1="230" x2="452" y2="230" />
+      <line x1="148" y1="250" x2="452" y2="250" />
+      <line x1="148" y1="270" x2="452" y2="270" />
+      <line x1="148" y1="290" x2="452" y2="290" />
+    </g>
+
+    <!-- ===================================================================== -->
+    <!-- 4. THE BEWILDERED CHAOTIC FACE (FROM OPTION 1)                       -->
+    <!-- ===================================================================== -->
+    <g id="bewildered-face">
+      <!-- LEFT EYEBROW (Arched high in total bewilderment!) -->
+      <path d="M 195 132 C 205 110, 245 106, 268 126" fill="none" stroke="#0E1117" stroke-width="12" stroke-linecap="round" />
+      <path d="M 195 132 C 205 110, 245 106, 268 126" fill="none" stroke="#FF6A00" stroke-width="6" stroke-linecap="round" />
+
+      <!-- RIGHT EYEBROW (Skeptical, tilted down in puzzled confusion!) -->
+      <path d="M 330 156 C 352 142, 385 140, 412 152" fill="none" stroke="#0E1117" stroke-width="12" stroke-linecap="round" />
+      <path d="M 330 156 C 352 142, 385 140, 412 152" fill="none" stroke="#FF6A00" stroke-width="6" stroke-linecap="round" />
+
+      <!-- LEFT EYE: Big, wide, looking straight UP toward the ceiling! -->
+      <g id="left-eye">
+        <!-- Outer Eye Outline -->
+        <ellipse cx="232" cy="180" rx="38" ry="42" fill="#EAF0F8" stroke="#0E1117" stroke-width="9" />
+        <!-- Pupil gazing UP-LEFT into outer space -->
+        <circle cx="224" cy="162" r="19" fill="#0E1117" />
+        <circle cx="224" cy="162" r="17" fill="#FF6A00" />
+        <circle cx="224" cy="162" r="10" fill="#0E1117" />
+        <!-- White Catchlight Reflections -->
+        <circle cx="218" cy="156" r="4.5" fill="#FFFFFF" />
+        <circle cx="229" cy="167" r="2" fill="#FFFFFF" />
+      </g>
+
+      <!-- RIGHT EYE: Half-lidded squint, pupil gazing SIDEWAYS to the right! -->
+      <g id="right-eye">
+        <!-- Squint Sclera Underneath -->
+        <path d="M 324 186 C 335 210, 385 210, 404 186 C 385 174, 345 174, 324 186 Z" fill="#EAF0F8" stroke="#0E1117" stroke-width="8" stroke-linejoin="round" />
+        <!-- Pupil looking far right -->
+        <circle cx="376" cy="191" r="14" fill="#0E1117" />
+        <circle cx="376" cy="191" r="12" fill="#FF6A00" />
+        <circle cx="376" cy="191" r="7" fill="#0E1117" />
+        <circle cx="372" cy="187" r="3" fill="#FFFFFF" />
+        <!-- Heavy Drooping Eyelid Fold (The Skeptical Squint) -->
+        <path d="M 318 184 C 345 168, 385 168, 410 184" fill="none" stroke="#0E1117" stroke-width="10" stroke-linecap="round" />
+        <path d="M 320 184 C 345 170, 385 170, 408 184" fill="none" stroke="#FF6A00" stroke-width="5" stroke-linecap="round" />
+      </g>
+
+      <!-- NOSE: Minimalist Puzzled Twitch Dot -->
+      <circle cx="295" cy="225" r="3" fill="#0E1117" />
+      <circle cx="305" cy="225" r="3" fill="#0E1117" />
+
+      <!-- MOUTH: Asymmetrical, crooked, quizzical half-grin / smirk! -->
+      <g id="crooked-mouth">
+        <!-- Shadow Under Mouth -->
+        <path d="M 235 258 C 275 272, 335 270, 375 240" fill="none" stroke="#0E1117" stroke-width="11" stroke-linecap="round" />
+        <!-- Main Mouth Stroke -->
+        <path d="M 235 258 C 275 272, 335 270, 375 240" fill="none" stroke="#FF6A00" stroke-width="6" stroke-linecap="round" />
+        <!-- Right Smirk Cheek Crease -->
+        <path d="M 368 232 C 378 238, 379 248, 372 254" fill="none" stroke="#0E1117" stroke-width="8" stroke-linecap="round" />
+        <path d="M 368 232 C 378 238, 379 248, 372 254" fill="none" stroke="#FF6A00" stroke-width="4.5" stroke-linecap="round" />
+      </g>
+    </g>
+  </g>
+
+  <!-- ========================================================================= -->
+  <!-- 5. THE LETTERING (FROM OPTION 2: FRACTURED CHAOS + RIGID STANDARD)        -->
+  <!-- ========================================================================= -->
+  <g id="wordmark">
+    <!-- "CHAOS" — Fractured, Electric, 3D Block Beveled Hazard Orange -->
+    <g id="chaos-title" transform="translate(300, 520)">
+      <!-- Drop Shadow -->
+      <text x="0" y="4" text-anchor="middle" font-family="'Space Grotesk', 'Impact', 'Arial Black', sans-serif" font-size="76" font-weight="900" letter-spacing="0.1em" fill="#05070A">
+        CHAOS
+      </text>
+
+      <!-- 3D Bevel Underside (Dark Rust Orange) -->
+      <text x="0" y="2" text-anchor="middle" font-family="'Space Grotesk', 'Impact', 'Arial Black', sans-serif" font-size="76" font-weight="900" letter-spacing="0.1em" fill="#B34700">
+        CHAOS
+      </text>
+
+      <!-- Main Face Fill (Vibrant Hazard Orange) -->
+      <text x="0" y="0" text-anchor="middle" font-family="'Space Grotesk', 'Impact', 'Arial Black', sans-serif" font-size="76" font-weight="900" letter-spacing="0.1em" fill="url(#chaosOrangeGrad)" stroke="#FF6A00" stroke-width="1.5">
+        CHAOS
+      </text>
+
+      <!-- Fracture Cracks (Vector Lightning Splinters through CHAOS) -->
+      <g stroke="#0E1117" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- Crack through C -->
+        <path d="M -180 -25 L -165 -10 L -175 0 L -160 15" />
+        <!-- Crack through H -->
+        <path d="M -90 -35 L -80 -18 L -92 -5 L -82 12" />
+        <!-- Crack through A -->
+        <path d="M -5 -40 L 8 -22 L -2 -8 L 10 18" />
+        <!-- Crack through O -->
+        <path d="M 80 -30 L 92 -15 L 82 5 L 95 20" />
+        <!-- Crack through S -->
+        <path d="M 165 -28 L 175 -12 L 162 4 L 178 18" />
+      </g>
+      <!-- Glowing Orange Core in the Cracks -->
+      <g stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.8">
+        <path d="M -180 -25 L -165 -10 L -175 0 L -160 15" />
+        <path d="M -90 -35 L -80 -18 L -92 -5 L -82 12" />
+        <path d="M -5 -40 L 8 -22 L -2 -8 L 10 18" />
+        <path d="M 80 -30 L 92 -15 L 82 5 L 95 20" />
+        <path d="M 165 -28 L 175 -12 L 162 4 L 178 18" />
+      </g>
+    </g>
+
+    <!-- "STANDARD" — Ultra-clean, Rigid, Architectural, Uniform Slate Grey -->
+    <g id="standard-title" transform="translate(300, 595)">
+      <!-- Precision Background Plate / Baseline Bar -->
+      <rect x="-170" y="-36" width="340" height="4" fill="#FF6A00" opacity="0.4" rx="2" />
+
+      <!-- Main STANDARD Face in Architectural Slate Grey & White -->
+      <text x="0" y="0" text-anchor="middle" font-family="'Space Grotesk', 'Inter', 'Helvetica Neue', sans-serif" font-size="34" font-weight="800" letter-spacing="0.32em" fill="#E2E8F0">
+        STANDARD
+      </text>
+
+      <!-- Precision Alignment Marks on Sides (The Standard Metric) -->
+      <g stroke="#FF6A00" stroke-width="2.5" opacity="0.8">
+        <line x1="-200" y1="-10" x2="-180" y2="-10" />
+        <line x1="-190" y1="-15" x2="-190" y2="-5" />
+        <line x1="180" y1="-10" x2="200" y2="-10" />
+        <line x1="190" y1="-15" x2="190" y2="-5" />
+      </g>
+    </g>
+  </g>
+</svg>

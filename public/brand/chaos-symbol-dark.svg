@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <!-- Cyan glow and depth gradients -->
+    <radialGradient id="symAmbient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#6EE7FF" stop-opacity="0.2"/>
+      <stop offset="60%" stop-color="#6EE7FF" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="symDepthGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6EE7FF" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#6EE7FF" stop-opacity="0.03"/>
+    </linearGradient>
+
+    <filter id="cyanBloom" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Deep Obsidian Base -->
+  <rect width="512" height="512" rx="96" fill="#07090E"/>
+  <rect width="512" height="512" rx="96" stroke="#161C26" stroke-width="2"/>
+
+  <!-- Ambient Radial Aura -->
+  <circle cx="256" cy="256" r="190" fill="url(#symAmbient)"/>
+
+  <!-- Outer Faint Concentric Alignment Rings -->
+  <circle cx="256" cy="256" r="195" stroke="#6EE7FF" stroke-opacity="0.12" stroke-width="1.5" stroke-dasharray="6 10"/>
+  <circle cx="256" cy="256" r="172" stroke="#6EE7FF" stroke-opacity="0.2" stroke-width="1"/>
+
+  <!-- Tilted Dimensional Outline Frame (Rotated -15 deg) -->
+  <g transform="rotate(-15, 256, 256)">
+    <!-- Outer Cyan Wireframe Squircle -->
+    <rect
+      x="146"
+      y="146"
+      width="220"
+      height="220"
+      rx="62"
+      stroke="#6EE7FF"
+      stroke-width="5"
+      fill="none"
+      filter="url(#cyanBloom)"
+    />
+
+    <!-- Inset Depth Core with Translucent Fill -->
+    <rect
+      x="181"
+      y="181"
+      width="150"
+      height="150"
+      rx="42"
+      fill="url(#symDepthGlow)"
+      stroke="#6EE7FF"
+      stroke-width="2.5"
+      stroke-opacity="0.6"
+    />
+
+    <!-- Dimensional Corner Struts (Creating True Wireframe Depth) -->
+    <line x1="172" y1="172" x2="198" y2="198" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.5"/>
+    <line x1="340" y1="172" x2="314" y2="198" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.5"/>
+    <line x1="172" y1="340" x2="198" y2="314" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.5"/>
+    <line x1="340" y1="340" x2="314" y2="314" stroke="#6EE7FF" stroke-width="2" stroke-opacity="0.5"/>
+
+    <!-- Docked Piece 1: Top-Left Cyan Chip -->
+    <rect
+      x="165"
+      y="148"
+      width="24"
+      height="24"
+      rx="6"
+      fill="#6EE7FF"
+      filter="url(#cyanBloom)"
+    />
+
+    <!-- Docked Piece 2: Bottom-Right Warning Bar (Rotated 25 deg - The Controlled Anomaly) -->
+    <g transform="translate(322, 318) rotate(25)">
+      <rect
+        x="-11"
+        y="-30"
+        width="22"
+        height="60"
+        rx="7"
+        fill="#FF9F43"
+        stroke="#07090E"
+        stroke-width="2"
+      />
+    </g>
+  </g>
+</svg>

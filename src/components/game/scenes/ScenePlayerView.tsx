@@ -90,10 +90,16 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
     onState, continueDialogue, onSetpieceDone, onClimax, finishSystem,
   } = p;
 
-  const dockAbove = dialogueDocksAbove(orbAnchor);
+  const dockAbove = dialogueDocksAbove(orbAnchor) && !spotlight;
   const dockLeft = dialogueDocksLeft(orbAnchor);
-  const dockBeside = dialogueDocksBeside(orbAnchor);
-  const assistantZ = buryAssistant ? "z-[15]" : "z-[42]";
+  // Spotlight / Counterpoint / Settle: bubble beside the orb so enlargement never covers it.
+  const dockBeside = dialogueDocksBeside(orbAnchor) || spotlight;
+  // System directive: keep orb+bubble ABOVE the overlay (readable), not buried under z-50.
+  const assistantZ = systemLock
+    ? "z-[52]"
+    : buryAssistant
+      ? "z-[15]"
+      : "z-[42]";
   const panelZ = buryAssistant || scene.kind === "setpiece" ? "z-30" : "z-[28]";
   const assistantLayout = dockLeft
     ? "flex-row-reverse items-start"
@@ -104,18 +110,18 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         : "flex-col items-center";
   // Wide enough that Form 03 / Final Counterpoint / Form 09 never ellipsize mid-word.
   const bubbleMax = spotlight
-    ? "min(320px, 42vw)"
+    ? "min(340px, 44vw)"
     : dockLeft
-      ? "min(260px, 32vw)"
+      ? "min(280px, 34vw)"
       : dockBeside
-        ? "min(240px, 30vw)"
+        ? "min(260px, 32vw)"
         : dockAbove
-          ? "min(300px, 40vw)"
-          : "min(220px, 28vw)";
+          ? "min(320px, 42vw)"
+          : "min(240px, 30vw)";
   const orbStatusLabel =
     orbAnchor === "pace"
       ? "ASSISTANT // DRIFT"
-      : spotlight
+      : spotlight || systemLock
         ? "ASSISTANT // LIVE"
         : undefined;
 

@@ -3,6 +3,7 @@
  * Plain Node — string markers only (no TS loader required).
  */
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 
 const root = process.cwd();
@@ -30,7 +31,8 @@ assert(act3.includes('id: "act3-checkbox"'), "act3 checkbox scene present");
 assert(act3.includes('orbAnchor: "dock-left"'), "act3 Form 12 dock-left in scene data");
 assert(act3.includes("cousin"), "popup cousin gag copy present");
 assert(act3.includes("LOOK UNDERNEATH"), "LOOK UNDERNEATH continue label");
-assert(/agreed then fled|Agreed then fled|fled/i.test(act3), "agreed-then-fled / flee comedy present");
+assert(/fled|flees|sprint/i.test(act3), "checkbox flee comedy present");
+assert(!/It agreed, then fled/.test(act3), "Form 12 orb line is unique (no stale It agreed then fled echo)");
 
 const act1 = read("src/game/scenes/act1.ts");
 assert(/mug|Mug/.test(act1), "mug steal path still in Act I");
@@ -253,7 +255,8 @@ assert(/data-drone-memo-strip/.test(drone), "Drone memo strip marked for contras
 assert(/data-ambient-dust/.test(fac), "floating dust marked decorative");
 assert(/bottom-\[10%\]|data-companion-stack/.test(viewPanels), "Settle companion stack lifted for bottom margin");
 assert(/YOU SETTLED\. I NOTICED/.test(act1), "Settle CTA names the settle beat (not vague I SAW THAT)");
-assert(/HR brochure to court deposition|archiving either way/.test(act1), "Form 02 bubble line punched up");
+assert(/honesty scale|archiving either way|Pick a rung/.test(act1), "Form 02 honesty scale / rung line present");
+assert(/1 HR brochure|court deposition/.test(act1), "Form 02 shows HR-brochure-to-court scale");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
@@ -281,6 +284,48 @@ assert(/Three hits archives|All 3 hits/.test(act3) || /onHit/.test(escaping), "F
 
 const globals = read("src/app/globals.css");
 assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");
+
+// Chaos Standard brand port — Nick masters (04 monitor + 07 wordmark) ≡ cleaned Home PNGs.
+assert(/--cs-hazard-orange:\s*#ff6a00|--cs-hazard-orange:\s*#FF6A00/i.test(globals), "CS hazard orange token");
+assert(/--cs-pitch-black:\s*#05070a|--cs-pitch-black:\s*#05070A/i.test(globals), "CS pitch black token");
+assert(/--cs-cyan:\s*#00e5ff|--cs-cyan:\s*#00E5FF/i.test(globals), "CS DNPS cyan token");
+assert(existsSync(join(root, "src/chaosBrand/mark/index.ts")), "embedded Nick/Home mark module present");
+assert(existsSync(join(root, "src/chaosBrand/wordmark/index.ts")), "embedded Nick/Home wordmark module present");
+assert(existsSync(join(root, "src/chaosBrand/mark/markPart0.ts")), "mark PNG chunk 0 present");
+assert(existsSync(join(root, "src/chaosBrand/wordmark/wordPart0.ts")), "wordmark PNG chunk 0 present");
+const markPart0 = read("src/chaosBrand/mark/markPart0.ts");
+assert(!/LOAD_FROM_FILE|PLACEHOLDER_WILL_REPLACE/.test(markPart0), "mark chunks must be real base64 (not stubs)");
+assert(/export const markPart0 = "[A-Za-z0-9+/=]{200,}"/.test(markPart0), "markPart0 is real base64 payload");
+const wordPart0 = read("src/chaosBrand/wordmark/wordPart0.ts");
+assert(!/LOAD_FROM_FILE|PLACEHOLDER_WILL_REPLACE/.test(wordPart0), "wordmark chunks must be real base64");
+assert(/export const wordPart0 = "[A-Za-z0-9+/=]{200,}"/.test(wordPart0), "wordPart0 is real base64 payload");
+const markMod = read("src/chaosBrand/mark/index.ts");
+assert(/CHAOS_MARK_DATA_URI|data:image\/png;base64/.test(markMod), "mark module builds PNG data URI");
+assert(/md5 dbeea014e21c97b21f6e24d9e57d25d5/.test(markMod), "mark module pins Nick/Home monitor md5");
+const wordMod = read("src/chaosBrand/wordmark/index.ts");
+assert(/CHAOS_WORDMARK_DATA_URI|data:image\/png;base64/.test(wordMod), "wordmark module builds PNG data URI");
+assert(/md5 d41fa38805ac79e7fb1d20a240788d97/.test(wordMod), "wordmark module pins Nick/Home wordmark md5");
+// Reconstruct embed bytes and pin to Nick masters
+{
+  const parts = [0,1,2,3,4,5].map((i) => read(`src/chaosBrand/mark/markPart${i}.ts`).match(/export const markPart\d+ = "([^"]+)"/)[1]);
+  const buf = Buffer.from(parts.join(""), "base64");
+  assert(createHash("md5").update(buf).digest("hex") === "dbeea014e21c97b21f6e24d9e57d25d5", "reconstructed mark embed == Nick master 04");
+}
+{
+  const parts = [0,1,2,3,4,5,6,7].map((i) => read(`src/chaosBrand/wordmark/wordPart${i}.ts`).match(/export const wordPart\d+ = "([^"]+)"/)[1]);
+  const buf = Buffer.from(parts.join(""), "base64");
+  assert(createHash("md5").update(buf).digest("hex") === "d41fa38805ac79e7fb1d20a240788d97", "reconstructed wordmark embed == Nick master 07");
+}
+const chaosSplash = read("src/components/game/ChaosSplash.tsx");
+assert(/data-chaos-splash|StudioSplashReveal|ELECTRON_BEAM/.test(chaosSplash), "ChaosSplash CRT reveal ported from Home");
+assert(/clipPath|clip-path|inset\(49\.2%/.test(chaosSplash), "ChaosSplash CRT clip-path unzip");
+assert(/CHAOS_MARK_DATA_URI|@\/chaosBrand\/mark/.test(chaosSplash), "ChaosSplash uses embedded Bewildered Terminal mark");
+assert(/CHAOS_WORDMARK_DATA_URI|@\/chaosBrand\/wordmark/.test(chaosSplash), "ChaosSplash uses embedded cracked CHAOS / silver STANDARD wordmark");
+assert(!/chaos-symbol-dark\.svg["']/.test(chaosSplash), "ChaosSplash must not use wrong cyan-squircle symbol");
+assert(!/data-chaos-wordmark-fallback/.test(chaosSplash), "ChaosSplash must not use CSS typographic wordmark fallback");
+const layout = read("src/app/layout.tsx");
+assert(/Space_Grotesk|Space Grotesk/.test(layout), "display font is Space Grotesk (Chaos Standard)");
+assert(/JetBrains_Mono|JetBrains Mono/.test(layout), "mono font is JetBrains Mono (Chaos Standard)");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

@@ -1,20 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  --void: #05070c;
-  --graphite: #12161f;
-  --steel: #1c2433;
-  --mist: #c5d3e4;
-  --glass: rgba(180, 205, 235, 0.08);
-  --cyan: #6ee7ff;
-  --cyan-dim: #3aa9c4;
-  --assistant: #9ef2ff;
-  --system: #f4f1e8;
-  --system-warn: #ffb020;
-  --danger: #ff4d6d;
-  --metal: #9aa6b8;
-  --panel: rgba(12, 16, 26, 0.72);
-  --glow: 0 0 40px rgba(110, 231, 255, 0.25);
+  /* Chaos Standard brand tokens — source: Chaos_Standard_Home BRAND_GUIDE.md */
+  --cs-pitch-black: #05070a;
+  --cs-surface-carbon: #11131b;
+  --cs-surface-elevated: #171924;
+  --cs-border-subtle: #232736;
+  --cs-hazard-orange: #ff6a00;
+  --cs-warm-amber: #ffa040;
+  --cs-slate-phosphor: #1e222a;
+  --cs-slate-standard: #94a3b8;
+  --cs-slate-dim: #64748b;
+  --cs-cyan: #00e5ff;
+  --cs-crimson: #ff2a5f;
+  --cs-violet: #8b5cf6;
+  --cs-gold: #f5a623;
+  --cs-text-main: #f8fafc;
+  --cs-text-muted: #94a3b8;
+  --cs-void: #090a0f;
+
+  /* DNPS aliases — game chrome maps onto Chaos Standard palette */
+  --void: var(--cs-pitch-black);
+  --graphite: var(--cs-surface-carbon);
+  --steel: var(--cs-surface-elevated);
+  --mist: var(--cs-slate-standard);
+  --glass: rgba(148, 163, 184, 0.08);
+  --cyan: var(--cs-cyan);
+  --cyan-dim: #00b8cc;
+  --assistant: #7ef4ff;
+  --system: #f8fafc;
+  --system-warn: var(--cs-warm-amber);
+  --danger: var(--cs-crimson);
+  --metal: var(--cs-slate-standard);
+  --panel: rgba(17, 19, 27, 0.82);
+  --hazard: var(--cs-hazard-orange);
+  --glow: 0 0 40px rgba(0, 229, 255, 0.22);
+  --glow-hazard: 0 0 36px rgba(255, 106, 0, 0.28);
   --font-display: var(--font-display);
   --font-ui: var(--font-ui);
   --font-mono: var(--font-mono);
@@ -59,8 +80,8 @@ body {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  background: var(--void);
-  color: #e8eef8;
+  background: var(--cs-pitch-black);
+  color: var(--cs-text-main);
   font-family: var(--font-ui), system-ui, sans-serif;
   overflow: hidden;
   overflow-x: hidden;
@@ -88,9 +109,9 @@ button {
   overflow: hidden;
   overflow-x: hidden;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(40, 70, 110, 0.35), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 70% 80%, rgba(20, 40, 70, 0.4), transparent 55%),
-    linear-gradient(180deg, #070b14 0%, #05070c 55%, #03050a 100%);
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(255, 106, 0, 0.07), transparent 58%),
+    radial-gradient(ellipse 70% 50% at 72% 82%, rgba(0, 229, 255, 0.08), transparent 55%),
+    linear-gradient(180deg, #090a0f 0%, var(--cs-pitch-black) 55%, #030406 100%);
 }
 
 .no-scroll {
@@ -166,35 +187,35 @@ button {
 .glass-panel {
   background: linear-gradient(
     155deg,
-    rgba(30, 42, 62, 0.82) 0%,
-    rgba(10, 14, 22, 0.94) 55%,
-    rgba(16, 22, 34, 0.9) 100%
+    rgba(23, 25, 36, 0.88) 0%,
+    rgba(17, 19, 27, 0.94) 55%,
+    rgba(9, 10, 15, 0.96) 100%
   );
-  border: 1px solid rgba(200, 220, 240, 0.38);
+  border: 1px solid rgba(148, 163, 184, 0.28);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.5) inset,
-    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 24px 80px rgba(0, 0, 0, 0.55),
     var(--glow);
   backdrop-filter: blur(18px);
 }
 
-/* Facility-HUD panels — angular system chrome, not SaaS cards.
+/* Facility-HUD panels — Chaos Standard carbon chrome, not SaaS cards.
    Fully opaque fill so Assistant bubbles / glass FX cannot ghost through Q/A. */
 .facility-hud,
 .assessment-panel.facility-hud {
   border-radius: 2px;
-  border-color: rgba(110, 231, 255, 0.28);
+  border-color: rgba(0, 229, 255, 0.28);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.55) inset,
-    inset 0 1px 0 rgba(110, 231, 255, 0.12),
+    inset 0 1px 0 rgba(0, 229, 255, 0.1),
     0 18px 48px rgba(0, 0, 0, 0.55);
   background:
-    linear-gradient(180deg, rgba(110, 231, 255, 0.08) 0 1px, transparent 1px),
+    linear-gradient(180deg, rgba(0, 229, 255, 0.07) 0 1px, transparent 1px),
     linear-gradient(
       155deg,
-      rgb(16, 24, 38) 0%,
-      rgb(6, 10, 16) 55%,
-      rgb(8, 12, 20) 100%
+      rgb(23, 25, 36) 0%,
+      rgb(9, 10, 15) 55%,
+      rgb(5, 7, 10) 100%
     );
   backdrop-filter: none;
   isolation: isolate;
@@ -208,17 +229,21 @@ button {
 
 .assistant-bubble {
   border-radius: 2px;
-  border-color: rgba(110, 231, 255, 0.32);
+  border-color: rgba(0, 229, 255, 0.34);
   /* Dense fill — never translucent over form if z-order races. */
   background: linear-gradient(
     155deg,
-    rgba(10, 16, 26, 0.94) 0%,
-    rgba(6, 10, 18, 0.98) 100%
+    rgba(17, 19, 27, 0.96) 0%,
+    rgba(5, 7, 10, 0.98) 100%
   );
 }
 
 .text-glow {
-  text-shadow: 0 0 18px rgba(110, 231, 255, 0.45);
+  text-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
+}
+
+.text-glow-hazard {
+  text-shadow: 0 0 18px rgba(255, 106, 0, 0.45);
 }
 
 @keyframes drift {

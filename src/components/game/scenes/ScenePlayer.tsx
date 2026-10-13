@@ -129,7 +129,8 @@ function ScenePlayerInner({
       () => setCompanionReady(true),
       scene.companion === "wait" ? 2200 : 1400,
     );
-    const pulse = window.setTimeout(() => setWatchedPulse(true), 900);
+    // Settle CTA arms sooner so the payoff is obviously triggerable (P0 gag clarity).
+    const pulse = window.setTimeout(() => setWatchedPulse(true), 650);
     return () => {
       window.clearTimeout(ready);
       window.clearTimeout(pulse);

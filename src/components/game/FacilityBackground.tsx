@@ -241,7 +241,7 @@ export function FacilityBackground({
           onClick={() =>
             fireAmbient(
               "chamber-07",
-              "Queue still empty. Facility pretends that is fine.",
+              "Left panel poked. CHAMBER 07 still empty. Facility pretends that is fine.",
             )
           }
         >

@@ -104,11 +104,12 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             data-restless-chip={s.id}
             data-restless-pinned={isPinned ? "true" : "false"}
             animate={{
-              x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 3 : -3, 0],
-              scale: hoverId === s.id ? 1.02 : 1,
+              // Pinned cards settle hard — no x-drift / jitter after pin (P1).
+              x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 2 : -2, 0],
+              scale: hoverId === s.id && !isPinned ? 1.02 : 1,
             }}
             transition={{
-              duration: hoverId === s.id ? 0.25 : 1.8 + i * 0.2,
+              duration: isPinned ? 0.2 : hoverId === s.id ? 0.25 : 2.2 + i * 0.2,
               repeat: isPinned || hoverId === s.id ? 0 : Infinity,
             }}
             onHoverStart={() => setHoverId(s.id)}

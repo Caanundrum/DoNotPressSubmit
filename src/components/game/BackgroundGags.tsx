@@ -142,15 +142,21 @@ export function BackgroundGags({
 
   // Rotate gag identity AND relocate to a fresh distant anchor (not opacity-only).
   // Longer cadence — ambient banners should feel rare, not wallpaper.
+  // Form 03B overhead: dwell on drone longer so YOUR REPLACEMENT is findable (P0).
   useEffect(() => {
     if (paused) return;
     if (forceDrone) return; // QA lock — keep REPLACEMENT FAILED seated in path pool.
     let i = 0;
     let timer: number;
+    const overhead = pathRef.current === "overhead";
     const tick = () => {
       const step = Math.random() > 0.22 ? 1 : 2;
       i = (i + step) % ORDER.length;
-      const next = ORDER[i]!;
+      // On Form 03B overhead paths, bias toward the drone so YOUR REPLACEMENT is clickable.
+      const next =
+        pathRef.current === "overhead" && Math.random() > 0.35
+          ? "drone"
+          : ORDER[i]!;
       const pool =
         next === "drone"
           ? DRONE_PATH_SLOTS[pathRef.current]
@@ -185,15 +191,21 @@ export function BackgroundGags({
       }
       timer = window.setTimeout(
         tick,
-        roamIntervalMs(22000, 36000),
+        roamIntervalMs(
+          overhead || pathRef.current === "overhead" ? 28000 : 22000,
+          overhead || pathRef.current === "overhead" ? 42000 : 36000,
+        ),
       );
     };
     timer = window.setTimeout(
       tick,
-      roamIntervalMs(16000, 26000),
+      // First seat: prefer drone quickly on overhead so the gag is obvious.
+      pathRef.current === "overhead"
+        ? roamIntervalMs(4000, 8000)
+        : roamIntervalMs(16000, 26000),
     );
     return () => clearTimeout(timer);
-  }, [paused, calm, slotPools, forceDrone]);
+  }, [paused, calm, slotPools, forceDrone, path]);
 
   // Rare departure comedy — long cooldown so REPLACEMENT FAILED isn't wallpaper.
   // When a toast does fire, Ambient fiddling still bumps (never toast-only).

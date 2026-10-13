@@ -136,16 +136,22 @@ export function AssistantOrb({
   const squashY = m.squash;
   const squashX = 2 - m.squash;
 
+  // Cap visual scale so enlarged/defiant/excited never eats the status label or bubble gap.
+  const visualScale = Math.min(m.scale, 1.06);
+  // Spacer clears ring overflow (~18%) + capped scale so ASSISTANT // LIVE stays fully readable.
+  const labelClearPx = Math.ceil(size * 0.2);
+
   return (
     <div
-      className="relative flex flex-col items-center gap-3"
+      className="relative flex select-none flex-col items-center"
       style={{ width: size, pointerEvents: pokeable ? "auto" : "none" }}
       aria-hidden={!pokeable}
       data-expressive-mood={bucket}
       data-choice-flush={choiceFlush}
+      data-orb-label-clear={labelClearPx}
     >
       <motion.div
-        className="relative"
+        className="relative shrink-0"
         style={{
           width: size,
           height: size,
@@ -156,42 +162,47 @@ export function AssistantOrb({
           nervousSpin
             ? {
                 rotate: [0, 360, 720],
-                scale: m.scale * 1.08,
+                scale: visualScale * 1.04,
                 x: drag.x,
                 y: drag.y,
               }
             : wave
               ? {
                   y: [0, -10, 0, -8, 0],
-                  x: [0, 18, -6, 22, 0],
+                  x: [0, 14, -4, 16, 0],
                   rotate: [0, 8, -4, 10, 0],
-                  scale: m.scale,
+                  scale: visualScale,
                 }
               : showingFlinch
                 ? {
-                    // Keep recoil inside the bubble safe gap (≥20px) — never dive into dialogue.
-                    y: [0, -10, 3, 0],
-                    x: [0, -10, 6, 0],
-                    scale: m.scale * 0.92,
+                    // Keep recoil inside the bubble safe gap — never dive into dialogue or label.
+                    y: [0, -6, 2, 0],
+                    x: [0, -6, 4, 0],
+                    scale: visualScale * 0.94,
                     rotate: glanceRotate,
                   }
                 : {
-                    y: [0, -6 * squashY, 0],
+                    y: [0, -4 * squashY, 0],
                     x: orbitBoost
                       ? [
                           glanceX + drag.x,
-                          glanceX + drag.x + orbitBoost,
-                          glanceX + drag.x - orbitBoost * 0.7,
-                          glanceX + drag.x + (m.jitter ? m.jitter : 0),
+                          glanceX + drag.x + Math.min(orbitBoost, 8),
+                          glanceX + drag.x - Math.min(orbitBoost, 8) * 0.7,
+                          glanceX + drag.x + (m.jitter ? Math.min(m.jitter, 4) : 0),
                           glanceX + drag.x,
                         ]
                       : m.jitter
-                        ? [glanceX + drag.x, glanceX + drag.x + m.jitter, glanceX + drag.x - m.jitter, glanceX + drag.x]
+                        ? [
+                            glanceX + drag.x,
+                            glanceX + drag.x + Math.min(m.jitter, 4),
+                            glanceX + drag.x - Math.min(m.jitter, 4),
+                            glanceX + drag.x,
+                          ]
                         : glanceX + drag.x,
                     rotate: glanceRotate,
-                    scaleX: squashX,
-                    scaleY: squashY,
-                    scale: m.scale * (choiceFlush === "ally" ? 1.08 : choiceFlush === "obey" ? 0.94 : 1),
+                    scaleX: Math.min(squashX, 1.06),
+                    scaleY: Math.min(squashY, 1.06),
+                    scale: visualScale * (choiceFlush === "ally" ? 1.04 : choiceFlush === "obey" ? 0.96 : 1),
                   }
         }
         transition={
@@ -379,10 +390,17 @@ export function AssistantOrb({
         ))}
       </motion.div>
 
+      {/* Hard clear between scaled orb/rings and status label (P0 safe zone). */}
+      <div
+        className="pointer-events-none shrink-0"
+        style={{ height: labelClearPx }}
+        aria-hidden
+        data-orb-label-pad="true"
+      />
       {label ? (
         <div
-          className="pointer-events-none max-w-[240px] text-center font-mono text-[9px] tracking-[0.16em] text-[#d8e6f4] sm:text-[10px] sm:tracking-[0.18em]"
-          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.95)" }}
+          className="pointer-events-none max-w-[240px] select-none text-center font-mono text-[9px] tracking-[0.16em] text-[#d8e6f4] sm:text-[10px] sm:tracking-[0.18em]"
+          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.95)", userSelect: "none" }}
           data-orb-status-label="true"
         >
           {label}

@@ -1,1 +1,1 @@
-LOAD_FROM_FILE
+@file:/tmp/push_markPart0.json

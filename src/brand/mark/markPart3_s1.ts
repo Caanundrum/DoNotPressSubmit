@@ -1,0 +1,10 @@
+import { markPart3_s1_h0 } from "./markPart3_s1_h0";
+import { markPart3_s1_h1 } from "./markPart3_s1_h1";
+import { markPart3_s1_h2 } from "./markPart3_s1_h2";
+import { markPart3_s1_h3 } from "./markPart3_s1_h3";
+import { markPart3_s1_h4 } from "./markPart3_s1_h4";
+import { markPart3_s1_h5 } from "./markPart3_s1_h5";
+import { markPart3_s1_h6 } from "./markPart3_s1_h6";
+import { markPart3_s1_h7 } from "./markPart3_s1_h7";
+import { markPart3_s1_h8 } from "./markPart3_s1_h8";
+export const markPart3_s1 = [markPart3_s1_h0, markPart3_s1_h1, markPart3_s1_h2, markPart3_s1_h3, markPart3_s1_h4, markPart3_s1_h5, markPart3_s1_h6, markPart3_s1_h7, markPart3_s1_h8].join("");

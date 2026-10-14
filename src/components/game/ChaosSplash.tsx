@@ -61,30 +61,3 @@ export function ChaosSplash({
     </div>
   );
 }
-
-D. Open a pull request and merge
-
-Important: the PR must go into main, not any old cursor/... branch. Wrong base = fake “lots of conflicts.”
-
-
-
-
-
-Use this link (base is already main):
-
-https://github.com/Caanundrum/DoNotPressSubmit/compare/main...fix/splash-card-pngs?expand=1
-
-
-
-At the top, confirm: base: main ← compare: fix/splash-card-pngs
-
-
-
-Create the pull request
-
-
-
-Click Merge (you should not get a big conflict screen)
-
-
-

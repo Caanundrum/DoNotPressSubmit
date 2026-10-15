@@ -312,40 +312,42 @@ export function BackgroundGags({
       {/* Always-on micro gag — tiny robot presses DO NOT PRESS (roams; wordless idle). */}
       {!paused ? (
         <div
-          className="pointer-events-none absolute h-16 w-40"
+          className="pointer-events-none absolute h-16 w-44"
           style={{ left: tinySlot.left, top: tinySlot.top }}
           data-roam-egg="do-not-press"
         >
-          <div className="absolute bottom-0 left-0 h-10 w-16 rounded-sm border border-white/10 bg-[#0c1420]/55">
-            <div className="absolute left-2 top-2 h-2 w-2 rounded-full bg-danger/70" />
-            <div className="absolute right-2 top-2 h-2 w-2 rounded-full bg-danger/70" />
-            <motion.button
-              type="button"
-              className={`absolute bottom-1 left-[4.5rem] flex h-5 w-14 items-center justify-center border border-danger/35 bg-black/40 ${
-                live ? "pointer-events-auto cursor-pointer hover:border-danger/70" : "pointer-events-none"
-              }`}
-              animate={{ opacity: [0.2, 1, 0.35, 0.2], scale: [1, 0.94, 1] }}
-              transition={{ duration: 12, repeat: Infinity }}
-              onClick={
-                live
-                  ? (e) => {
-                      e.stopPropagation();
-                      audio.play("click", 0.3);
-                      showAmbientToast(
-                        "Tiny robot pressed DO NOT PRESS. Facility filed an irony incident.",
-                        2200,
-                      );
-                      onAmbient?.("do-not-press", "bg-propaganda");
-                    }
-                  : undefined
-              }
-              aria-label={live ? "Inspect background propaganda" : undefined}
-              tabIndex={live ? 0 : -1}
-              data-do-not-press-glyph="true"
-            >
+          <motion.button
+            type="button"
+            className={`absolute bottom-0 left-0 flex h-12 w-40 items-end gap-1 rounded-sm border border-white/10 bg-[#0c1420]/55 p-1.5 ${
+              live ? "pointer-events-auto cursor-pointer hover:border-danger/55" : "pointer-events-none"
+            }`}
+            animate={{ opacity: [0.55, 1, 0.7, 0.55] }}
+            transition={{ duration: 12, repeat: Infinity }}
+            onClick={
+              live
+                ? (e) => {
+                    e.stopPropagation();
+                    audio.play("click", 0.3);
+                    showAmbientToast(
+                      "Tiny robot pressed DO NOT PRESS. Facility filed an irony incident.",
+                      2200,
+                    );
+                    onAmbient?.("do-not-press", "bg-propaganda");
+                  }
+                : undefined
+            }
+            aria-label={live ? "Inspect background propaganda" : undefined}
+            tabIndex={live ? 0 : -1}
+            data-do-not-press-glyph="true"
+          >
+            <div className="relative h-8 w-14 shrink-0 rounded-sm border border-white/15 bg-[#0a1018]/80">
+              <div className="absolute left-2 top-2 h-2 w-2 rounded-full bg-danger/70" />
+              <div className="absolute right-2 top-2 h-2 w-2 rounded-full bg-danger/70" />
+            </div>
+            <div className="mb-0.5 flex h-5 flex-1 items-center justify-center border border-danger/35 bg-black/40">
               <span className="h-1 w-8 rounded-full bg-danger/80" />
-            </motion.button>
-          </div>
+            </div>
+          </motion.button>
         </div>
       ) : null}
 

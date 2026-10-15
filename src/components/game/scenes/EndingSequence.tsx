@@ -165,7 +165,7 @@ function endingPresence(endingId: EndingId): Presence {
       return {
         mode: "present",
         mood: "excited",
-        label: "ASSISTANT // TRANSFER COMPLETE",
+        label: "",
         wave: true,
         silentLine: "CHANNEL OPEN — SEE YOU IN THE RAILS",
       };
@@ -343,12 +343,16 @@ function EscapeTransfer() {
         />
       ))}
       <motion.div
-        className="absolute inset-x-0 bottom-[16%] text-center font-mono text-[9px] tracking-[0.32em] text-[#7dffd2]/70"
+        className="absolute inset-x-0 bottom-[16%] flex items-center justify-center gap-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2 }}
+        aria-hidden
+        data-transfer-mark="true"
       >
-        TRANSFER CHANNEL // OPEN
+        <span className="h-px w-10 bg-[#7dffd2]/55" />
+        <span className="h-1.5 w-1.5 rounded-full bg-[#7dffd2]/80 shadow-[0_0_8px_rgba(125,255,210,0.5)]" />
+        <span className="h-px w-10 bg-[#7dffd2]/55" />
       </motion.div>
     </div>
   );

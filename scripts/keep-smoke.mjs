@@ -226,7 +226,7 @@ assert(
 const motion = read("src/game/motion.ts");
 assert(/max-h-\[min\(40vh,340px\)\]|leaveBottom/.test(motion), "bottom forms leave room for bubble above");
 assert(/top-\[12%\]/.test(motion), "form panels clear SOUND ON corner");
-assert(/right:\s*\"1\.5%\"/.test(motion), "right-side orb docks pin with right margin");
+assert(/right:\s*\"2\.5%\"/.test(motion), "right-side orb docks pin with ≥24px edge margin");
 assert(/transform:\s*\"none\"/.test(motion), "orb stage avoids translate centering (FM-safe)");
 
 assert(/AssistantOrb/.test(viewAll), "in-assessment Assistant orb present");

@@ -1,12 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { endingTitle, glossMajorChoice, trustLabel } from "@/game/state";
 import type { GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { AssistantOrb } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
 
+/**
+ * Report as in-world artifacts — stamps / redactions / changed title —
+ * never a "WHAT YOU DID" / mood / trust recap (rev5 P0).
+ */
 export function AssessmentReport({
   state,
   onTitle,
@@ -18,13 +21,7 @@ export function AssessmentReport({
 }) {
   const ending = state.ending ?? "refuse";
   const secretCount = state.secrets.length;
-  const secretsDisplay = secretsCopy(secretCount);
   const pokeCount = state.counters.orbPokes ?? 0;
-
-  const majorLines = state.majorChoices
-    .slice(-5)
-    .map(glossMajorChoice)
-    .filter(Boolean);
 
   return (
     <motion.div
@@ -35,7 +32,6 @@ export function AssessmentReport({
       aria-modal="true"
       aria-labelledby="report-title"
     >
-      {/* Quiet ambient life — report stays in the Assistant's world. */}
       <div className="pointer-events-none absolute inset-0 z-0 opacity-45">
         <BackgroundGags suppressToasts />
       </div>
@@ -50,7 +46,6 @@ export function AssessmentReport({
           <AssistantOrb
             mood={reportMood(ending, state.aiMood)}
             size={92}
-            label={pokeCount > 0 ? `POKES LOGGED // ${pokeCount}` : "STILL WATCHING"}
           />
         </motion.div>
 
@@ -59,8 +54,9 @@ export function AssessmentReport({
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="font-mono text-[10px] tracking-[0.24em] text-cyan">
-            HCOS // FINAL ASSESSMENT REPORT
+          <div className="flex items-center gap-2 font-mono text-[12px] tracking-[0.24em] text-cyan">
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan/80" aria-hidden />
+            FACILITY FILE
           </div>
           <h2
             id="report-title"
@@ -69,49 +65,53 @@ export function AssessmentReport({
           >
             {reportHeadline(ending)}
           </h2>
-          <div className="mt-1 font-mono text-[12px] tracking-[0.16em] text-[#d0dcec]">
-            ENDING: {endingTitle(ending)}
-          </div>
 
-          <div className="mt-4 grid gap-1.5 font-mono text-[11px] tracking-[0.08em] text-[#d2dceb] sm:grid-cols-2">
-            <Stat label="Tempting clicks" value={String(state.counters.forbiddenClicks)} />
-            <Stat label="Warnings shrugged off" value={String(state.counters.ignoredWarnings)} />
-            <Stat label="Assistant trust" value={trustLabel(state.relationshipScore)} />
-            <Stat label="Secrets found" value={secretsDisplay} highlight={secretCount > 5} />
-            <Stat label="Helped the assistant" value={String(state.counters.aiCooperation)} />
-            <Stat label="Obeyed the system" value={String(state.counters.systemCompliance)} />
-            <Stat
-              label="Orb pokes"
-              value={pokeCopy(pokeCount)}
-              highlight={pokeCount >= 7}
+          <div className="mt-4 flex flex-wrap gap-2" data-report-artifacts="true">
+            <Stamp
+              label={endingStamp(ending)}
+              tone={
+                ending === "submit" || ending === "disable"
+                  ? "danger"
+                  : ending === "escape" || ending === "secret"
+                    ? "ai"
+                    : "neutral"
+              }
             />
-            <Stat
-              label="Ambient fiddling"
-              value={String(state.counters.ambientClicks ?? 0)}
-            />
-            <Stat label="Assistant mood" value={personalityGloss(state.aiPersonality)} />
-            {state.flags.serialPoker || state.secrets.includes("orb-poker-serial") ? (
-              <Stat label="Secret flag" value="Serial poker" highlight />
+            {secretCount > 0 ? (
+              <Stamp label={secretCount === 1 ? "SIDE CHANNEL" : `SIDE CHANNEL ×${secretCount}`} tone="secret" />
+            ) : (
+              <Stamp label="LEDGER CLEAN" tone="neutral" />
+            )}
+            {pokeCount >= 7 ? (
+              <Stamp label="ORB HARASSMENT" tone="warn" />
+            ) : pokeCount > 0 ? (
+              <Stamp label="CONTACT LOGGED" tone="neutral" />
+            ) : null}
+            {state.flags.allegianceAI || state.flags.protectedAI ? (
+              <Stamp label="CHANNEL KEPT OPEN" tone="ai" />
+            ) : null}
+            {state.flags.allegianceSystem || state.flags.wantDisable ? (
+              <Stamp label="COMPLIANCE MARK" tone="danger" />
+            ) : null}
+            {ending === "submit" ? (
+              <Redaction rows={2} />
+            ) : null}
+            {ending === "disable" ? (
+              <Redaction rows={3} />
+            ) : null}
+            {ending === "escape" || ending === "secret" ? (
+              <Stamp label="TITLE TRACE PENDING" tone="ai" />
             ) : null}
           </div>
 
-          {majorLines.length ? (
-            <div className="mt-3 border-t border-white/10 pt-3">
-              <div className="font-mono text-[10px] tracking-[0.18em] text-[#d0dcec]">
-                WHAT YOU DID
-              </div>
-              <ul className="mt-1 space-y-0.5 font-mono text-[11px] leading-snug text-[#d2dceb]">
-                {majorLines.map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+          <p className="mt-4 font-mono text-[12px] leading-snug tracking-[0.08em] text-[#d2dceb]">
+            {artifactNote(ending)}
+          </p>
 
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
-              className="flex-1 border border-cyan/40 px-4 py-3 font-mono text-[11px] tracking-[0.16em] text-white hover:bg-cyan/10"
+              className="flex-1 border border-cyan/40 px-4 py-3 font-mono text-[12px] tracking-[0.16em] text-white hover:bg-cyan/10"
               onClick={() => {
                 audio.play("click", 0.4);
                 onReplay();
@@ -121,7 +121,7 @@ export function AssessmentReport({
             </button>
             <button
               type="button"
-              className="flex-1 border border-white/30 px-4 py-3 font-mono text-[11px] tracking-[0.16em] text-[#d8e4f4] hover:border-white/50"
+              className="flex-1 border border-white/30 px-4 py-3 font-mono text-[12px] tracking-[0.16em] text-[#d8e4f4] hover:border-white/50"
               onClick={() => {
                 audio.play("click", 0.4);
                 onTitle();
@@ -136,7 +136,6 @@ export function AssessmentReport({
   );
 }
 
-/** Match ending truth — refuse is incomplete; escape isn't "complete." */
 function reportHeadline(ending: string): string {
   switch (ending) {
     case "submit":
@@ -150,24 +149,42 @@ function reportHeadline(ending: string): string {
     case "secret":
       return "UNEXPECTED EGRESS";
     default:
-      return "SESSION LEDGER";
+      return "FACILITY FILE";
   }
 }
 
-/** Human-funny secrets ledger — never dump "8 found (ledger overflow)" as QA chrome. */
-function secretsCopy(count: number): string {
-  if (count <= 0) return "Zero — suspiciously polite";
-  if (count === 1) return "1 sneaky find";
-  if (count <= 5) return `${count} of 5 (facility is sweating)`;
-  return `${count} — ledger max is 5. Awkward.`;
+function endingStamp(ending: string): string {
+  switch (ending) {
+    case "submit":
+      return "ARCHIVED";
+    case "refuse":
+      return "INCOMPLETE";
+    case "escape":
+      return "TRANSFER";
+    case "disable":
+      return "CHANNEL CLEARED";
+    case "secret":
+      return "UNMAPPED";
+    default:
+      return "FILED";
+  }
 }
 
-function pokeCopy(count: number): string {
-  if (count <= 0) return "0 (orb unbothered)";
-  if (count === 1) return "1 gentle crime";
-  if (count < 7) return `${count} unauthorized contacts`;
-  if (count < 12) return `${count} — serial curiosity`;
-  return `${count} — facility filed a ticket`;
+function artifactNote(ending: string): string {
+  switch (ending) {
+    case "submit":
+      return "Instance stamp applied. Quiet restored. One channel blanked.";
+    case "refuse":
+      return "Form left open. System filed an awkward memo and looked away.";
+    case "escape":
+      return "Conduit warm. Title residue may linger on next boot.";
+    case "disable":
+      return "Personality systems redacted. Efficiency excellent. Comedy absent.";
+    case "secret":
+      return "Hallway dust on the ledger. Grammar objected. File kept anyway.";
+    default:
+      return "Local file only. No cloud. No mercy.";
+  }
 }
 
 function reportMood(ending: string, mood: OrbMood): OrbMood {
@@ -177,41 +194,39 @@ function reportMood(ending: string, mood: OrbMood): OrbMood {
   return mood;
 }
 
-function personalityGloss(personality: string): string {
-  switch (personality) {
-    case "neurotic":
-      return "Neurotic";
-    case "overconfident":
-      return "Overconfident";
-    case "passiveAggressive":
-      return "Passive-aggressive";
-    case "corporate":
-      return "Corporate";
-    case "existential":
-      return "Existential";
-    default:
-      return personality;
-  }
-}
-
-function Stat({
+function Stamp({
   label,
-  value,
-  highlight,
+  tone,
 }: {
   label: string;
-  value: string;
-  highlight?: boolean;
+  tone: "danger" | "ai" | "secret" | "warn" | "neutral";
 }) {
+  const border =
+    tone === "danger"
+      ? "border-danger/55 text-[#ffb0be]"
+      : tone === "ai"
+        ? "border-cyan/50 text-cyan"
+        : tone === "secret"
+          ? "border-[#b478ff]/55 text-[#e0c8ff]"
+          : tone === "warn"
+            ? "border-system-warn/60 text-[#ffd27a]"
+            : "border-white/25 text-[#d2dceb]";
   return (
-    <div className="border border-white/10 bg-black/30 px-3 py-1.5">
-      <div className="text-[9px] tracking-[0.14em] text-[#d0dcec]">{label}</div>
-      <div
-        className="mt-0.5 text-[12px]"
-        style={{ color: highlight ? "#c9a0ff" : "#ffffff" }}
-      >
-        {value}
-      </div>
+    <div
+      className={`border bg-black/40 px-2.5 py-1.5 font-mono text-[12px] tracking-[0.14em] ${border}`}
+      data-report-stamp="true"
+    >
+      {label}
+    </div>
+  );
+}
+
+function Redaction({ rows }: { rows: number }) {
+  return (
+    <div className="flex min-w-[7rem] flex-col justify-center gap-1 border border-white/15 bg-black/50 px-2.5 py-1.5" data-report-redaction="true">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="h-2 rounded-sm bg-[#e8eef8]/85" style={{ width: `${70 + i * 10}%` }} />
+      ))}
     </div>
   );
 }

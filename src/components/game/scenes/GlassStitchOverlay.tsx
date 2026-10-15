@@ -241,7 +241,7 @@ export function GlassStitchOverlay({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
             >
-              ASSISTANT // stitching UI // apology pending
+              stitching UI // apology pending
             </motion.div>
           </motion.div>
         ) : null}

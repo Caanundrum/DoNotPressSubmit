@@ -101,15 +101,13 @@ export function SceneChoiceList({
                 delay: index * 0.04,
                 opacity: { duration: 0.35 },
                 duration:
-                  choiceMotion === "restless" || choiceMotion === "dodge" ? 2.8 : 0.4,
+                  choiceMotion === "dodge" ? 2.8 : choiceMotion === "restless" ? 0.35 : 0.4,
+                // Restless settles after enter — looping x/y ate the first click (Layer 03).
                 repeat:
-                  !motionPaused &&
-                  (choiceMotion === "restless" || choiceMotion === "dodge")
-                    ? Infinity
-                    : 0,
+                  !motionPaused && choiceMotion === "dodge" ? Infinity : 0,
                 repeatType: "loop",
               }}
-              whileHover={!selected ? { x: 3 } : undefined}
+              whileHover={!selected ? { x: 2 } : undefined}
             >
               <div className="flex items-center justify-between gap-3">
                 <span
@@ -125,7 +123,7 @@ export function SceneChoiceList({
                 ) : null}
                 {opt.secret ? (
                   <span
-                    className="shrink-0 whitespace-nowrap font-mono text-[11px] tracking-[0.18em] text-[#e0c8ff] sm:text-[12px]"
+                    className="shrink-0 whitespace-nowrap font-mono text-[12px] tracking-[0.18em] text-[#e0c8ff]"
                     style={{ textShadow: "0 0 8px rgba(180,120,255,0.35)" }}
                     data-side-path-tag="true"
                   >

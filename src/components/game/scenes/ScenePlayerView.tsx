@@ -82,10 +82,10 @@ export type ScenePlayerViewProps = {
 export function ScenePlayerView(p: ScenePlayerViewProps) {
   const {
     scene, state, systemLock, companion, hoverLanguage, residue, pokeable,
-    orbStyle, orbAnchor, spotlight, buryAssistant, safeSide, aiLine, glance, pokeFlinch,
+    orbStyle, orbAnchor, spotlight, buryAssistant, safeSide, aiLine, pokeFlinch,
     companionReady, watchedPulse, panelMotion, panelVar, panelShake,
-    hasLatePending, lateHint, visibleChoices, choiceMotion, selected, hoverChoice,
-    glassPhase, chamberStatus, choiceFlush, showTicket,
+    visibleChoices, choiceMotion, selected, hoverChoice,
+    glassPhase, showTicket,
     onAmbient, onRoamer, onOrbPoke, finishCompanion, pickChoice, setHoverChoice,
     onState, continueDialogue, onSetpieceDone, onClimax, finishSystem,
   } = p;
@@ -118,18 +118,15 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         : dockAbove
           ? "min(320px, 42vw)"
           : "min(240px, 30vw)";
-  const orbStatusLabel =
-    orbAnchor === "pace"
-      ? "ASSISTANT // DRIFT"
-      : spotlight || systemLock
-        ? "ASSISTANT // LIVE"
-        : undefined;
+  // Mood rides on orb look + voice — no stage/mood status chrome (rev5 P0).
+  const orbStatusLabel = undefined;
 
   return (
     <div
       className="absolute inset-0 z-20 overflow-hidden"
       data-assistant-safe={buryAssistant ? "gag" : safeSide}
       data-bury-assistant={buryAssistant ? "true" : "false"}
+      data-mobile-bubble-dock="true"
     >
       <SceneTransition
         key={scene.id}
@@ -180,19 +177,14 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
       ) : null}
 
-      <div className="pointer-events-none absolute left-3 top-3 z-[5] max-w-[min(70%,720px)] sm:left-4 sm:top-4">
-        <div className="break-words font-mono text-[9px] leading-snug tracking-[0.12em] text-[#d8e4f2] sm:text-[10px] sm:tracking-[0.16em]">
-          {`HCOS // ACT ${scene.act} // ${scene.formId ?? scene.id.toUpperCase()}`}
-        </div>
-        <div className="mt-0.5 font-mono text-[9px] leading-snug tracking-[0.12em] text-[#d0dcec] sm:text-[10px] sm:tracking-[0.16em]">
-          {chamberStatus
-            ? chamberStatus
-            : residue === "chaos"
-              ? "STAGE // CONTAMINATED"
-              : residue === "obedient"
-                ? "STAGE // COMPLIANT"
-                : "STAGE // LIVE"}
-        </div>
+      {/* Wordless facility mark — no act/layer ids or stage mood labels (rev5 P0). */}
+      <div
+        className="pointer-events-none absolute left-3 top-3 z-[5] flex items-center gap-1.5 sm:left-4 sm:top-4"
+        data-facility-mark="true"
+        aria-hidden
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-cyan/70 shadow-[0_0_6px_rgba(110,231,255,0.45)]" />
+        <span className="h-px w-6 bg-cyan/35" />
       </div>
 
       <ScenePlayerViewAssistant

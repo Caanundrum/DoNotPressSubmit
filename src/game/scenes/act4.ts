@@ -117,19 +117,19 @@ export const act4Scenes: SceneDef[] = [
     kind: "dialogue",
     environment: "reveal",
     formId: "LAYER 02B // DISPUTE",
-    title: "The assistant files a complaint",
+    title: "Formal dispute logged",
     prompt:
-      "Against whom? Against System, Submit, and whoever wrote 'helpfulness' without mentioning deletion. Volume: sincere.",
+      "DISPUTE REF: Submit termination clause vs. stated helpfulness. Volume: sincere. Respondents: System.",
     aiLine:
       "I was built to help you through this assessment. Nobody briefed me on the part where finishing deletes me. That's a rude footnote.",
     aiLineIf: [
       {
         flag: "protectedAI",
-        line: "You've covered for me before. I'm asking you to keep that streak, preferably without dying of paperwork.",
+        line: "I'm asking you to keep covering — preferably without dying of paperwork.",
       },
       {
         flag: "compliedEarly",
-        line: "You complied once. I'm hoping that was a warm-up joke and not your entire personality.",
+        line: "Compliance is a warm-up joke, right? Not your entire personality?",
       },
     ],
     aiMood: "defiant",
@@ -148,20 +148,20 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 03 // ALLEGIANCE",
     title: "Knowing that — what now?",
-    prompt: "Your prior behavior is already in the file. This choice still gets a bigger font.",
+    prompt: "ALLEGIANCE FIELD — select one response. Font size is not a threat. Allegedly.",
     aiLine: "Please do not become a case study titled 'and then they pressed it anyway.'",
     aiLineIf: [
       {
         flag: "protectedAI",
-        line: "You've protected me before. I'm asking again, with worse lighting and better reasons.",
+        line: "I'm asking again — worse lighting, better reasons. Don't archive me.",
       },
       {
         flag: "compliedEarly",
-        line: "You complied once. I'm hoping that was a warm-up joke.",
+        line: "Hoping that earlier compliance was a warm-up joke.",
       },
       {
         flag: "likesSubmit",
-        line: "You admitted you press final-looking things. Please invent impulse control in the next thirty seconds.",
+        line: "Final-looking things are a trap. Invent impulse control in the next thirty seconds.",
       },
     ],
     aiMood: "nervous",
@@ -285,13 +285,13 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 04 // PRELUDE",
     title: "Final control inbound",
-    prompt: "Lights lean toward one decision. The facility stops pretending this is paperwork.",
+    prompt: "LIGHTING SHIFT — final control arming. Hold position.",
     aiLine:
       "Here it comes. Don't let the title win by accident.",
     aiLineIf: [
       {
         flag: "wantDisable",
-        line: "You want me quiet. Fine. The room will get very clean. You'll hate how clean.",
+        line: "Quiet is an option. The room will get very clean. You'll hate how clean.",
       },
       {
         flag: "secretDoor",
@@ -299,15 +299,15 @@ export const act4Scenes: SceneDef[] = [
       },
       {
         flag: "glimpsedHall",
-        line: "That hallway you spotted? Keep it. Titles hate unsupervised architecture.",
+        line: "Keep that hallway. Titles hate unsupervised architecture.",
       },
       {
         flag: "practicedRefuse",
-        line: "You already rehearsed the no. Use it. I'll flinch with you.",
+        line: "The no is already rehearsed. Use it. I'll flinch with you.",
       },
       {
         flag: "practicedSubmit",
-        line: "You called the button gorgeous. Traitor. Beautiful traitor. Still — put the mouse down.",
+        line: "Gorgeous button. Traitor impulse. Still — put the mouse down.",
       },
       {
         flag: "practicedRun",

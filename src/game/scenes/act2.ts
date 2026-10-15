@@ -337,12 +337,12 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 07 // COMPLIANCE",
     title: "System wants the assistant quiet",
-    // Gag allowlist: silencing beat — panel may bury the orb on purpose.
-    buryAssistant: true,
+    // Keep orb+bubble clear of the panel (rev5 P1) — comedy stays in the copy.
+    buryAssistant: false,
     prompt: "Will you play along with Directive 07, or make this a worse comedy?",
     aiLine: "If you side with them, I will become extremely professional and extremely petty.",
     aiMood: "defiant",
-    orbAnchor: "loom",
+    orbAnchor: "dock-left",
     panelMotion: "pressure",
     choiceMotion: "restless",
     choices: [
@@ -396,7 +396,7 @@ export const act2Scenes: SceneDef[] = [
     // Gag allowlist: surveillance bury — form crowds the assistant.
     buryAssistant: true,
     prompt: "Background machinery paused mid-cycle. Even the printer looks attentive.",
-    aiLine: "See? Even the hardware wants gossip. Act III is where the interface stops pretending it's furniture.",
+    aiLine: "See? Even the hardware wants gossip. Next section peels the chrome — don't look away.",
     aiMood: "suspicious",
     orbAnchor: "pace",
     panelMotion: "drift",
@@ -417,7 +417,7 @@ export const act2Scenes: SceneDef[] = [
     aiLineIf: [
       {
         flag: "protectedAI",
-        line: "You protected me. Unwise. Appreciated. Let's misbehave carefully.",
+        line: "Cover appreciated. Unwise. Let's misbehave carefully.",
       },
       {
         flag: "compliedEarly",

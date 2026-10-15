@@ -17,7 +17,7 @@ export function AuthorityStamp({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div className="relative h-[min(46vh,360px)] w-full overflow-hidden border border-system-warn/40 bg-black/45">
-      <div className="absolute left-3 top-3 z-10 font-mono text-[10px] tracking-[0.22em] text-system-warn">
+      <div className="absolute left-3 top-3 z-10 font-mono text-[12px] tracking-[0.22em] text-system-warn">
         AUTHORITY STAMP // IMPRESSIONS {hits}/3
       </div>
       <motion.div
@@ -30,8 +30,8 @@ export function AuthorityStamp({ onComplete }: { onComplete: () => void }) {
         maxHits={3}
         moveMs={1600}
         hitPad={32}
-        arenaPadding={16}
-        className="absolute flex h-28 w-28 items-center justify-center rounded-full border-2 border-white/80 bg-black/80 font-mono text-[10px] tracking-[0.18em] text-white shadow-[0_0_28px_rgba(255,176,32,0.35)]"
+        arenaPadding={20}
+        className="absolute flex h-28 w-28 items-center justify-center rounded-full border-2 border-white/80 bg-black/80 font-mono text-[12px] tracking-[0.18em] text-white shadow-[0_0_28px_rgba(255,176,32,0.35)]"
         style={{ fontFamily: "var(--font-display)" }}
         onHit={() => {
           audio.play("system", 0.45);
@@ -40,7 +40,7 @@ export function AuthorityStamp({ onComplete }: { onComplete: () => void }) {
       >
         <span style={{ transform: `rotate(${hits * 25}deg)` }}>APPROVED</span>
       </FairChaseTarget>
-      <div className="pointer-events-none absolute bottom-3 left-3 right-3 font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
+      <div className="pointer-events-none absolute bottom-3 left-3 right-3 font-mono text-[12px] tracking-[0.16em] text-[#c5d3e4]">
         Catch the rubber stamp before it certifies nonsense.
       </div>
     </div>

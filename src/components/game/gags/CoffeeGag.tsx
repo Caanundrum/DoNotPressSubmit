@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { audio } from "@/lib/audio";
 
 export function CoffeeGag({
@@ -16,6 +16,7 @@ export function CoffeeGag({
   slot?: CSSProperties;
 }) {
   const live = !!interactive;
+  const [paused, setPaused] = useState(false);
 
   return (
     <motion.div
@@ -31,17 +32,23 @@ export function CoffeeGag({
         className={`flex items-end gap-3 border-0 bg-transparent p-0 ${
           live ? "pointer-events-auto cursor-pointer" : ""
         }`}
-        animate={{ x: [0, 48, 96] }}
-        transition={{ duration: 7, ease: "easeInOut" }}
+        // Soft sway only — long lateral slide made the mug flee the click (rev5 P0).
+        animate={paused ? { x: 0 } : { x: [0, 10, 0, -8, 0] }}
+        transition={{ duration: 5.5, ease: "easeInOut", repeat: paused ? 0 : Infinity }}
         onMouseEnter={() => {
+          setPaused(true);
           onTip?.("HUMAN PERFORMANCE // mug in transit");
           if (live) audio.play("hover", 0.12);
         }}
-        onMouseLeave={() => onTip?.(null)}
+        onMouseLeave={() => {
+          setPaused(false);
+          onTip?.(null);
+        }}
         onClick={
           interactive
             ? (e) => {
                 e.stopPropagation();
+                setPaused(true);
                 onReact?.();
               }
             : undefined

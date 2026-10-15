@@ -20,7 +20,17 @@ export function GameRoot() {
   const [game, setGame] = useState<GameState | null>(null);
   const [hasContinue, setHasContinue] = useState(() => {
     if (typeof window === "undefined") return false;
-    return !!loadSave();
+    const saved = loadSave();
+    if (!saved) return false;
+    if (
+      saved.ending ||
+      saved.sceneId === "report" ||
+      saved.sceneId.startsWith("ending-")
+    ) {
+      clearSave();
+      return false;
+    }
+    return true;
   });
   const [titleWave, setTitleWave] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -95,6 +105,16 @@ export function GameRoot() {
       beginNew();
       return;
     }
+    // Finished runs must not reopen the report as a "continue" (rev5 P1 stale report).
+    if (
+      saved.ending ||
+      saved.sceneId === "report" ||
+      saved.sceneId.startsWith("ending-")
+    ) {
+      clearSave();
+      beginNew();
+      return;
+    }
     setGame(saved);
     setHasContinue(true);
     setOrbMood(saved.aiMood);
@@ -113,6 +133,16 @@ export function GameRoot() {
 
   const returnTitle = useCallback(() => {
     speech.cancel();
+    const saved = loadSave();
+    // Clear completed ledgers so title never resurrects a stale report.
+    if (
+      saved &&
+      (saved.ending ||
+        saved.sceneId === "report" ||
+        saved.sceneId.startsWith("ending-"))
+    ) {
+      clearSave();
+    }
     setPhase("title");
     setHasContinue(!!loadSave());
     setTitleWave(loadTitleWave().waved);

@@ -26,7 +26,7 @@ export function ScenePlayerViewPanels({
 }) {
   const {
     scene, state, companion, companionReady, watchedPulse, panelMotion, panelVar,
-    panelShake, hasLatePending, lateHint, visibleChoices, choiceMotion, selected,
+    panelShake, visibleChoices, choiceMotion, selected,
     hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor,
     finishCompanion, pickChoice, setHoverChoice, onState, continueDialogue,
     onSetpieceDone, onEscapingHit, onClimax, finishSystem,
@@ -178,11 +178,7 @@ export function ScenePlayerViewPanels({
             </p>
           ) : null}
 
-          {hasLatePending && lateHint ? (
-            <div className="pointer-events-none font-mono text-[9px] tracking-[0.2em] text-cyan/70">
-              {"// residual field noise — something wants to be an option"}
-            </div>
-          ) : null}
+          {/* Side paths unlock silently — no residual-noise telegraph (rev5 P0). */}
 
           {scene.kind === "choice" ? (
             <SceneChoiceList
@@ -231,10 +227,7 @@ export function ScenePlayerViewPanels({
           {scene.kind === "climax" ? (
             <SubmitClimax
               state={state}
-              formLine={
-                scene.prompt ??
-                "System wants a tidy score. Prior choices color which exits stay open."
-              }
+              formLine={scene.prompt ?? "FINAL CONTROL ARMED. SELECT A RESPONSE."}
               onChoose={onClimax}
               onHoverOption={(id) => setHoverChoice(id)}
             />

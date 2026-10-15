@@ -12,15 +12,14 @@ type Slot = { id: string; label: string; x: number; row: number };
  * Rows are spaced so a wrapped + PINNED chip never overlaps the next lane.
  */
 const X_MIN = 4;
-const X_MAX = 48;
+const X_MAX = 42;
 /**
- * Vertical lane tops (%) inside the craft box.
- * Gaps must fit a 2-line wrap + PINNED badge (~86px) with clear air — prior
- * 26%-of-320px lanes still collided by ~3px when the middle chip wrapped.
+ * Vertical lane tops (%) inside the craft box (footer is outside the drift area).
+ * Gaps must fit a 2-line wrap + PINNED badge with clear air.
  */
-const ROWS = [12, 40, 70];
+const ROWS = [8, 36, 64];
 /** Pin parking X per row — staggered so pinned chips never share a stack. */
-const PIN_X = [6, 10, 14];
+const PIN_X = [4, 8, 12];
 
 function clampX(x: number) {
   return Math.min(X_MAX, Math.max(X_MIN, x));
@@ -76,56 +75,59 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative h-[min(48vh,380px)] w-full overflow-hidden border border-cyan/25 bg-black/40"
+      className="relative flex h-[min(48vh,380px)] w-full flex-col overflow-hidden border border-cyan/25 bg-black/40 max-sm:h-[min(42vh,320px)]"
       data-restless-options="true"
     >
-      <div className="absolute left-3 top-2 z-10 font-mono text-[10px] tracking-[0.22em] text-cyan">
+      <div className="shrink-0 px-3 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
         CALIBRATION DRIFT // PINNED {pins}/3
       </div>
-      {slots.map((s, i) => {
-        const isPinned = !!pinned[s.id];
-        const top = ROWS[s.row] ?? ROWS[i] ?? 50;
-        return (
-          <motion.button
-            key={s.id}
-            type="button"
-            className="absolute w-[min(52%,280px)] border px-3 py-2 text-left font-mono text-[11px] leading-snug tracking-[0.12em] text-[#e2ebf6]"
-            style={{
-              left: `${s.x}%`,
-              top: `${top}%`,
-              fontFamily: "var(--font-display)",
-              padding: "10px 12px",
-              borderColor: isPinned ? "rgba(110,231,255,0.7)" : "rgba(200,220,240,0.28)",
-              background: isPinned
-                ? "rgba(40,90,120,0.45)"
-                : "rgba(12,20,32,0.92)",
-              zIndex: isPinned ? 2 : 1,
-            }}
-            data-restless-chip={s.id}
-            data-restless-pinned={isPinned ? "true" : "false"}
-            animate={{
-              // Pinned cards settle hard — no x-drift / jitter after pin (P1).
-              x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 2 : -2, 0],
-              scale: hoverId === s.id && !isPinned ? 1.02 : 1,
-            }}
-            transition={{
-              duration: isPinned ? 0.2 : hoverId === s.id ? 0.25 : 2.2 + i * 0.2,
-              repeat: isPinned || hoverId === s.id ? 0 : Infinity,
-            }}
-            onHoverStart={() => setHoverId(s.id)}
-            onHoverEnd={() => setHoverId((h) => (h === s.id ? null : h))}
-            onClick={() => pin(s.id)}
-          >
-            <span className="block whitespace-normal break-words">{s.label}</span>
-            {isPinned ? (
-              <span className="mt-0.5 block font-mono text-[9px] tracking-widest text-cyan">
-                PINNED
-              </span>
-            ) : null}
-          </motion.button>
-        );
-      })}
-      <div className="pointer-events-none absolute bottom-2 left-3 right-3 z-[3] border-t border-white/5 bg-black/55 px-0 pt-1.5 font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
+      <div className="relative min-h-0 flex-1 overflow-hidden pb-1">
+        {slots.map((s, i) => {
+          const isPinned = !!pinned[s.id];
+          const top = ROWS[s.row] ?? ROWS[i] ?? 50;
+          return (
+            <motion.button
+              key={s.id}
+              type="button"
+              className="absolute w-[min(72%,280px)] border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] text-[#e2ebf6] max-sm:w-[min(88%,300px)]"
+              style={{
+                left: `${s.x}%`,
+                top: `${top}%`,
+                fontFamily: "var(--font-display)",
+                padding: "10px 12px",
+                borderColor: isPinned ? "rgba(110,231,255,0.7)" : "rgba(200,220,240,0.28)",
+                background: isPinned
+                  ? "rgba(40,90,120,0.45)"
+                  : "rgba(12,20,32,0.92)",
+                zIndex: isPinned ? 2 : 1,
+              }}
+              data-restless-chip={s.id}
+              data-restless-pinned={isPinned ? "true" : "false"}
+              animate={{
+                // Pinned cards settle hard — no x-drift / jitter after pin (P1).
+                x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 2 : -2, 0],
+                scale: hoverId === s.id && !isPinned ? 1.02 : 1,
+              }}
+              transition={{
+                duration: isPinned ? 0.2 : hoverId === s.id ? 0.25 : 2.2 + i * 0.2,
+                repeat: isPinned || hoverId === s.id ? 0 : Infinity,
+              }}
+              onHoverStart={() => setHoverId(s.id)}
+              onHoverEnd={() => setHoverId((h) => (h === s.id ? null : h))}
+              onPointerDown={() => setHoverId(s.id)}
+              onClick={() => pin(s.id)}
+            >
+              <span className="block whitespace-normal break-words">{s.label}</span>
+              {isPinned ? (
+                <span className="mt-0.5 block font-mono text-[12px] tracking-widest text-cyan">
+                  PINNED
+                </span>
+              ) : null}
+            </motion.button>
+          );
+        })}
+      </div>
+      <div className="pointer-events-none shrink-0 border-t border-white/5 bg-black/70 px-3 py-1.5 font-mono text-[12px] tracking-[0.14em] text-[#c5d3e4]">
         Click each drifting answer until the form admits it has a preference.
       </div>
     </div>

@@ -154,9 +154,10 @@ export function TitleScreen({
         Orb docks bottom-left (few px off edge) — present, not fighting CTAs.
         shrink-0 chrome + min-h-0 middle so footer clears 1280×800.
       */}
-      <div className="relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7">
+      {/* pointer-events-none shell so left-panel / robot / mug keep receiving clicks (rev5 P0). */}
+      <div className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7">
         <motion.div
-          className="shrink-0 font-mono text-[9px] tracking-[0.28em] text-[#d0dcec]/70 sm:text-[10px] sm:tracking-[0.35em]"
+          className="shrink-0 font-mono text-[12px] tracking-[0.28em] text-[#d0dcec]/70 sm:text-[10px] sm:tracking-[0.35em]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -168,7 +169,7 @@ export function TitleScreen({
 
         <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8">
           <motion.div
-            className="shrink-0"
+            className="pointer-events-auto shrink-0"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.7 }}
@@ -177,7 +178,7 @@ export function TitleScreen({
           </motion.div>
 
           <motion.div
-            className="flex shrink-0 flex-col items-center gap-5 sm:gap-6"
+            className="pointer-events-auto flex shrink-0 flex-col items-center gap-5 sm:gap-6"
             data-title-cta-column="true"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -188,7 +189,7 @@ export function TitleScreen({
             {onContinue ? (
               <button
                 type="button"
-                className="border border-white/20 px-5 py-2.5 font-mono text-[11px] tracking-[0.24em] text-[#d2dceb]/90 transition hover:border-cyan/40"
+                className="border border-white/20 px-5 py-2.5 font-mono text-[12px] tracking-[0.24em] text-[#d2dceb]/90 transition hover:border-cyan/40"
                 onClick={() => {
                   audio.play("click", 0.4);
                   onContinue();
@@ -202,7 +203,7 @@ export function TitleScreen({
 
         {/* Footer: readable vs BEGIN (BEGIN stays brighter); must clear 1280×800 */}
         <motion.div
-          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[8px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[9px] sm:tracking-[0.2em]"
+          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[12px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[9px] sm:tracking-[0.2em]"
           style={{ textShadow: "0 1px 2px rgba(0,0,0,0.85)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

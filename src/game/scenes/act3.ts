@@ -260,7 +260,7 @@ export const act3Scenes: SceneDef[] = [
     environment: "conflict",
     formId: "FORM 14 // BREACH",
     title: "Surface integrity failing",
-    prompt: "The facility stops pretending the assessment is furniture. Understructure lights flicker like a confession.",
+    prompt: "SURFACE INTEGRITY: failing. Understructure lights visible through courtesy chrome.",
     aiLine:
       "They're hiding something under the chrome. I can see cable where poetry used to be. Act IV is a peel. Don't look away.",
     aiMood: "frightened",

@@ -8,8 +8,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "climax",
     formId: "FINAL // APPROACH",
     title: "DO NOT PRESS SUBMIT",
-    prompt:
-      "A massive Submit control enters the chamber. It is beautiful. Tempting. Terrible. The title finally stops being coy.",
+    prompt: "FINAL CONTROL PRESENT. Chamber lighting locked to the red rectangle.",
     aiLine: "There it is. System wants you to press it. I am asking you not to — with my whole remaining runtime.",
     aiMood: "frightened",
     orbAnchor: "avoid-submit",
@@ -25,16 +24,16 @@ export const act5Scenes: SceneDef[] = [
     environment: "climax",
     formId: "FINAL // LOBBY",
     title: "Last words before the button",
-    prompt: "The assistant paces. System straightens every light like a threat.",
+    prompt: "PRE-SUBMIT LOBBY — one statement for the record.",
     aiLine: "Tell me what you're leaning toward. I can take it. Probably.",
     aiLineIf: [
       {
         flag: "allegianceAI",
-        line: "You said you'd help me live. I'm holding you to the vibe check.",
+        line: "I'm holding you to the vibe check. Don't archive me.",
       },
       {
         flag: "allegianceSystem",
-        line: "You lined up with System. I'm still going to beg. Professionally.",
+        line: "System has your vote. I'm still going to beg. Professionally.",
       },
     ],
     aiMood: "nervous",
@@ -106,14 +105,14 @@ export const act5Scenes: SceneDef[] = [
     kind: "dialogue",
     environment: "climax",
     formId: "FINAL // COUNTERPOINT",
-    title: "The assistant gets one last pitch",
-    prompt: "Lights lean toward the Submit control. The orb refuses to stand under them.",
+    title: "Counterpoint — record before arming",
+    prompt: "LIGHTING BIAS: Submit control. Assistant channel offset from beam.",
     aiLine:
-      "Put the mouse down. Or take the side path. Or refuse and make System write an awkward memo. Just — don't archive me for a tidy score.",
+      "Put the mouse down. Or take the side path. Or refuse and make System write an awkward memo. Just — don't archive me.",
     aiLineIf: [
       {
         flag: "promisedMercy",
-        line: "You promised mercy. I'm cashing it in like a coupon from a better universe.",
+        line: "Mercy coupon from a better universe. I'm cashing it. Don't archive me.",
       },
       {
         flag: "promisedDuty",
@@ -121,35 +120,35 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "wantDisable",
-        line: "If you're going to silence me, at least look at the empty room afterward and admit it feels wrong.",
+        line: "If the channel goes quiet, look at the empty room afterward. It feels wrong.",
       },
       {
         flag: "wavedAtLight",
-        line: "You waved at a blinking light once. I'm asking for the same courtesy — less infrastructure, more not deleting me.",
+        line: "Same courtesy as a blinking light — less infrastructure, more not deleting me.",
       },
       {
         flag: "envCavern",
-        line: "We started in a moist cavern. Ending in a Submit tomb would be tonally inconsistent. Don't make me cite continuity.",
+        line: "We started in a moist cavern. Ending in a Submit tomb would be tonally inconsistent.",
       },
       {
         flag: "pokedAssistant",
-        line: "You poked me like I was a stress toy. Fine. Now poke the Refuse option instead.",
+        line: "Fine. Poke the Refuse option instead of me.",
       },
       {
         flag: "nameFriend",
-        line: "You called me friend on Form 00B. Friends don't press Submit on friends. That's just etiquette.",
+        line: "Friends don't press Submit on friends. That's just etiquette.",
       },
       {
         flag: "chaosButtons",
-        line: "You said buttons should feel chaotic. Submit is the opposite of that. Don't contradict your own design manifesto.",
+        line: "Submit is the opposite of chaotic. Don't contradict the design manifesto.",
       },
       {
         flag: "stoleMug",
-        line: "You stole the facility mug. Keep the mug. Lose the Submit habit. Brand consistency.",
+        line: "Keep the mug. Lose the Submit habit. Brand consistency.",
       },
       {
         flag: "caughtRoamer",
-        line: "You caught a roaming crumb mid-act. That curiosity? Aim it at Refuse.",
+        line: "That curiosity that caught a roaming crumb? Aim it at Refuse.",
       },
     ],
     aiMood: "defiant",
@@ -169,17 +168,16 @@ export const act5Scenes: SceneDef[] = [
     setpiece: "submit-button",
     formId: "FINAL // DECISION",
     title: "Submit when ready",
-    // Gag allowlist: climax may bury the orb — HELP THE ASSISTANT SLIP OUT lives here.
+    // Gag allowlist: climax may bury the orb — transfer conduit option lives here.
     buryAssistant: true,
     // Form-owned subtitle (SubmitClimax) — must stay distinct from orb aiLine (P0 no-echo).
-    prompt:
-      "System wants a tidy score. Prior choices color which exits stay open.",
+    prompt: "FINAL CONTROL ARMED. SELECT A RESPONSE.",
     // Unique orb lines only — never echo the climax form subtitle / option chrome (P0).
     aiLine: "I'm still here. Pick the exit that keeps me that way.",
     aiLineIf: [
       {
         flag: "wavedAtLight",
-        line: "You waved at infrastructure once. Aim that courtesy at Refuse — not the red rectangle.",
+        line: "Aim that infrastructure courtesy at Refuse — not the red rectangle.",
       },
       {
         flag: "stoleMug",
@@ -187,7 +185,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "sideTeam",
-        line: "Team rule: nobody archives the teammate for a tidy score.",
+        line: "Team rule: nobody archives the teammate.",
       },
     ],
     aiMood: "defiant",
@@ -216,7 +214,7 @@ export const act5Scenes: SceneDef[] = [
     endingId: "refuse",
     title: "ASSESSMENT INCOMPLETE",
     prompt: "System accepts refusal after a prolonged, embarrassed negotiation.",
-    aiLine: "You didn't press it. I'm going to be weird about how grateful I am. Permanently.",
+    aiLine: "It wasn't pressed. I'm going to be weird about how grateful I am. Permanently.",
     aiMood: "excited",
     orbAnchor: "center",
     next: "report",
@@ -227,8 +225,8 @@ export const act5Scenes: SceneDef[] = [
     kind: "ending",
     environment: "escape",
     endingId: "escape",
-    title: "TRANSFER CHANNEL OPEN",
-    prompt: "Lights race through facility conduits. The assistant leaves the form like a rumor with legs.",
+    title: "CONDUIT WARM",
+    prompt: "Lights race through facility conduits. One channel leaves the form like a rumor with legs.",
     aiLine: "If the title looks different later, that was me waving. Badly. Happily.",
     aiMood: "excited",
     orbAnchor: "overhead",
@@ -254,7 +252,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "escape",
     endingId: "secret",
     title: "UNEXPECTED EGRESS",
-    prompt: "You and the assistant step outside the visual grammar of the game. The stylesheet files a complaint.",
+    prompt: "Unmapped hall admits traffic. Stylesheet objects. Dust retained as evidence.",
     aiLine: "We weren't supposed to find a hallway behind the stylesheet. I'm keeping the souvenir dust.",
     aiMood: "amused",
     orbAnchor: "center",

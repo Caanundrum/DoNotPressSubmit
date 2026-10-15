@@ -336,3 +336,86 @@ button {
     animation: none !important;
   }
 }
+
+/*
+ * Phone: dock assistant bubble as a full-width strip under the form.
+ * Never a narrow column over answers (rev5 P0 mobile).
+ * Min chrome text ~12px.
+ */
+@media (max-width: 640px) {
+  .game-shell {
+    font-size: 12px;
+  }
+
+  [data-mobile-bubble-dock="true"] [data-assistant-safe-dock="true"] {
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-direction: row !important;
+    align-items: flex-end !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 0.55rem 0.7rem calc(0.55rem + env(safe-area-inset-bottom, 0px)) !important;
+    box-sizing: border-box !important;
+    background: linear-gradient(
+      180deg,
+      rgba(5, 7, 10, 0) 0%,
+      rgba(5, 7, 10, 0.92) 28%,
+      rgba(5, 7, 10, 0.98) 100%
+    );
+    z-index: 44 !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assistant-bubble {
+    max-width: none !important;
+    flex: 1 1 auto !important;
+    max-height: min(28vh, 160px) !important;
+    font-size: 12px !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel.facility-hud {
+    left: 0.4rem !important;
+    right: 0.4rem !important;
+    top: 0.45rem !important;
+    bottom: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: min(58dvh, calc(100dvh - 9.5rem)) !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel[data-panel-safe="gag-overlap"] {
+    max-height: min(52dvh, calc(100dvh - 10rem)) !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel-inner {
+    gap: 0.35rem;
+  }
+
+  [data-facility-mark="true"] {
+    font-size: 12px;
+  }
+
+  .system-beat-shell,
+  .ending-shell,
+  .report-shell {
+    width: min(94%, 560px);
+    max-height: min(84dvh, 100%);
+    font-size: 12px;
+  }
+
+  [data-sound-corner="true"] {
+    font-size: 12px !important;
+    padding: 0.4rem 0.65rem !important;
+  }
+
+  [data-side-path-tag="true"] {
+    font-size: 12px !important;
+  }
+
+  [data-restless-options="true"] {
+    font-size: 12px;
+  }
+}

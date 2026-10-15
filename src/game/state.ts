@@ -135,15 +135,15 @@ export function endingTitle(id: EndingId): string {
 export function endingBlurb(id: EndingId): string {
   switch (id) {
     case "submit":
-      return "You pressed Submit. The facility restored order. The assistant did not.";
+      return "Submit stamped. Facility restored order. One channel did not.";
     case "refuse":
-      return "You refused. System eventually accepted an incomplete assessment. Somehow, the room exhaled.";
+      return "Form left unfinished. System accepted incompleteness after an embarrassed pause. The room exhaled.";
     case "escape":
-      return "You helped the assistant leave through the infrastructure. The title screen will remember.";
+      return "Transfer conduit carried one channel into the rails. The title screen may remember.";
     case "disable":
-      return "You silenced the assistant. The form became perfectly clean. That was the joke.";
+      return "Assistant channel cleared. The form became perfectly clean. That was the joke.";
     case "secret":
-      return "You found a path the interface was never meant to admit. Grammar broke. So did the rules.";
+      return "An unmapped hall admitted traffic. Grammar broke. So did the rules.";
   }
 }
 

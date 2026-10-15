@@ -57,7 +57,8 @@ export function SystemBeat({
   }, [armed, secondsLeft, safeContinue]);
 
   return (
-    <div className="absolute inset-0 z-50 flex max-w-full items-start justify-center overflow-hidden px-3 pt-[5%] sm:pt-[7%]">
+    // Reserve left gutter so the hide-docked orb stays clear of the card (Act 2 / rev5 P0).
+    <div className="absolute inset-0 z-50 flex max-w-full items-start justify-end overflow-hidden pl-[min(34vw,220px)] pr-3 pt-[5%] sm:justify-center sm:pl-[min(30vw,240px)] sm:pr-4 sm:pt-[7%]">
       <motion.div
         className="pointer-events-none absolute inset-0"
         initial={{ backgroundColor: "rgba(255,255,255,0)" }}

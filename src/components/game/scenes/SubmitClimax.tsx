@@ -32,16 +32,20 @@ export function SubmitClimax({
           animate={{ opacity: [0.3, 0.55, 0.3], scale: [0.95, 1.03, 0.95] }}
           transition={{ duration: 2.8, repeat: Infinity }}
         />
-        <div
-          className="relative w-full max-w-2xl border border-danger/70 bg-gradient-to-b from-[#5a1824] via-[#2a0c12] to-[#12060a] px-4 py-2.5 text-center shadow-[0_0_48px_rgba(255,77,109,0.35)] sm:px-6 sm:py-3"
+        <button
+          type="button"
+          data-climax-submit-control="true"
+          aria-label="Submit"
+          className="relative w-full max-w-2xl cursor-pointer border border-danger/70 bg-gradient-to-b from-[#5a1824] via-[#2a0c12] to-[#12060a] px-4 py-2.5 text-center shadow-[0_0_48px_rgba(255,77,109,0.35)] transition hover:border-danger sm:px-6 sm:py-3"
           style={{ fontFamily: "var(--font-display)" }}
+          onClick={() => {
+            audio.play("system", 0.7);
+            onChoose("submit");
+          }}
         >
-          <div className="font-mono text-[9px] tracking-[0.28em] text-danger/90">FINAL CONTROL</div>
+          <div className="font-mono text-[12px] tracking-[0.28em] text-danger/90">FINAL CONTROL</div>
           <div className="mt-0.5 text-2xl tracking-[0.16em] text-white sm:text-3xl">SUBMIT</div>
-          <div className="mt-1 font-mono text-[9px] tracking-[0.14em] text-[#ffc2cc]">
-            BEAUTIFUL · TEMPTING · TERRIBLE
-          </div>
-        </div>
+        </button>
       </motion.div>
 
       {/* Form subtitle stays distinct from the orb pitch — never paste aiLine here. */}
@@ -65,7 +69,7 @@ export function SubmitClimax({
           <motion.button
             key={opt.id}
             type="button"
-            className="border px-3 py-2 text-left font-mono text-[10px] leading-snug tracking-[0.12em] transition sm:px-3.5 sm:py-2.5 sm:text-[11px] sm:tracking-[0.14em]"
+            className="border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] transition sm:px-3.5 sm:py-2.5 sm:text-[12px] sm:tracking-[0.14em]"
             style={{
               borderColor:
                 opt.tone === "danger"

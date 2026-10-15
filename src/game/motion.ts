@@ -76,38 +76,38 @@ export function orbStageStyle(
   // Right docks pin with `right` so FM transform overrides can't shove chrome off-frame.
   // Spotlight size capped so bubble-beside + ASSISTANT // LIVE stay clear while enlarged.
   if (spotlight || anchor === "spotlight") {
-    return { left: "2.5%", top: "16%", transform: "none", size: 148 };
+    return { left: "3%", top: "16%", transform: "none", size: 148 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
-      // Form 01B — pin to right edge with margin; bubble grows toward center.
-      return { right: "1.5%", top: "28%", transform: "none", size: 104 };
+      // Form 01B — ≥24px edge pad; bubble grows toward center.
+      return { right: "2.5%", top: "28%", transform: "none", size: 104 };
     case "listen":
       // Form 01 — left dock, clear of restless CTAs and stage header.
-      return { left: "2.5%", top: "28%", transform: "none", size: 120 };
+      return { left: "3%", top: "28%", transform: "none", size: 120 };
     case "pace":
       // Form 01C — left gutter beside shortened form; bubble docks beside, never over answers.
-      return { left: "2%", top: "34%", transform: "none", size: 78 };
+      return { left: "3%", top: "34%", transform: "none", size: 78 };
     case "flee":
-      return { right: "1.5%", top: "10%", transform: "none", size: 88 };
+      return { right: "2.5%", top: "12%", transform: "none", size: 88 };
     case "loom":
       // Act III hazard etc. — full orb+bubble inside frame at 1280×800.
-      return { right: "1.5%", top: "16%", transform: "none", size: 118 };
+      return { right: "2.5%", top: "16%", transform: "none", size: 118 };
     case "hide":
       // Buried corner — gag allowlist only; still keep bubble on-screen.
-      return { left: "2.5%", top: "62%", transform: "none", size: 72 };
+      return { left: "3%", top: "62%", transform: "none", size: 72 };
     case "overhead":
-      // Form 03B — right/high; leave margin for rings + status under orb.
-      return { right: "1.5%", top: "10%", transform: "none", size: 92 };
+      // Form 03B — right/high; ≥24px edge pad for rings + bubble.
+      return { right: "2.5%", top: "12%", transform: "none", size: 92 };
     case "center":
-      return { left: "2.5%", top: "22%", transform: "none", size: 132 };
+      return { left: "3%", top: "22%", transform: "none", size: 132 };
     case "avoid-submit":
-      return { left: "2.5%", top: "58%", transform: "none", size: 104 };
+      return { left: "3%", top: "58%", transform: "none", size: 104 };
     case "dock-left":
     default:
       return {
-        left: `${2.5 + jitter}%`,
+        left: `${3 + jitter}%`,
         top: "32%",
         transform: "none",
         size: 118,
@@ -289,13 +289,11 @@ export function panelLayoutClass(
 export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
   switch (motion) {
     case "restless":
-      // Keep enter offsets inside the panel — "Moist cavern" must not clip on animate-in.
+      // Opacity-only enter — no x/y shift that swallows the first click (Layer 03 / rev5 P0).
       return {
-        initial: { opacity: 0, y: 6 + index * 2, x: index % 2 ? 4 : -4 },
+        initial: { opacity: 0 },
         animate: {
           opacity: 1,
-          y: [0, -2, 1.5, 0],
-          x: [0, index % 2 ? 3 : -3, 0],
         },
       };
     case "scatter":

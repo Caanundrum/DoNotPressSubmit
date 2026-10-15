@@ -28,7 +28,7 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
         moveMs={1500}
         hitPad={24}
         arenaPadding={12}
-        className="absolute flex max-w-[min(78%,340px)] items-center gap-3 border border-white/25 bg-[#0c1420]/92 px-3 py-2"
+        className="absolute flex w-max min-w-[14rem] max-w-[min(88%,360px)] items-center gap-3 border border-white/25 bg-[#0c1420]/92 px-3 py-2"
         onHit={() => {
           audio.play("click", 0.45);
           const next = checks + 1;
@@ -53,7 +53,7 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
             />
           ) : null}
         </span>
-        <span className="min-w-0 whitespace-normal break-words font-mono text-[11px] leading-snug tracking-[0.1em] text-[#e2ebf6]">
+        <span className="min-w-[10rem] shrink-0 whitespace-normal break-words font-mono text-[12px] leading-snug tracking-[0.08em] text-[#e2ebf6]">
           {LABELS[labelIdx]}
         </span>
       </FairChaseTarget>

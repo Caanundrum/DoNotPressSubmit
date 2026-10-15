@@ -175,21 +175,17 @@ export function ScenePlayerViewAssistant({
             scale: 1,
           }}
         >
-          <div className="mb-1 select-none font-mono text-[8px] tracking-[0.16em] text-cyan/80 sm:text-[9px]">
-            ASSISTANT{spotlight ? " // ADDRESSING YOU" : ""}
-            {buryAssistant && !systemLock ? " // UNDER PRESSURE" : ""}
-            {systemLock ? " // UNDER PRESSURE" : ""}
-            {glance < -0.5 ? " // RECOILING" : glance > 0.4 ? " // ATTENDING" : ""}
-            {choiceFlush === "ally"
-              ? " // ALLIED"
-              : choiceFlush === "obey"
-                ? " // OBEYING"
-                : choiceFlush === "chaos"
-                  ? " // CHAOS READ"
-                  : ""}
+          {/* Wordless speaker mark — mood is orb look + line, not a status strip. */}
+          <div
+            className="mb-1 flex select-none items-center gap-1.5"
+            aria-hidden
+            data-bubble-speaker-mark="true"
+          >
+            <span className="h-1 w-1 rounded-full bg-cyan/75" />
+            <span className="h-px w-4 bg-cyan/40" />
           </div>
           <div
-            className={`break-words ${spotlight ? "text-[13px] leading-snug" : "text-[11px] leading-snug sm:text-[12px]"}`}
+            className={`break-words text-[12px] leading-snug sm:text-[12px] ${spotlight ? "sm:text-[13px]" : ""}`}
             style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
           >
             {bubbleReads ? aiLine || "…" : "…"}

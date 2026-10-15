@@ -39,15 +39,15 @@ export function climaxOptions(state: GameState) {
     label: string;
     tone: "danger" | "system" | "ai" | "secret" | "sterile";
   }[] = [
-    { id: "submit", label: "PRESS SUBMIT (archive the assistant)", tone: "danger" },
-    { id: "refuse", label: "REFUSE — leave the form unfinished", tone: "ai" },
+    { id: "submit", label: "SUBMIT", tone: "danger" },
+    { id: "refuse", label: "LEAVE FORM UNFINISHED", tone: "ai" },
   ];
 
   if (state.flags.allegianceAI || state.flags.protectedAI || state.relationshipScore >= 2) {
-    options.push({ id: "escape", label: "HELP THE ASSISTANT SLIP OUT", tone: "ai" });
+    options.push({ id: "escape", label: "OPEN TRANSFER CONDUIT", tone: "ai" });
   }
   if (state.flags.wantDisable || state.flags.allegianceSystem) {
-    options.push({ id: "disable", label: "MUTE THE ASSISTANT AND FINISH ALONE", tone: "sterile" });
+    options.push({ id: "disable", label: "CLEAR CHANNEL AND FILE ALONE", tone: "sterile" });
   }
   if (
     state.flags.secretDoor ||
@@ -56,7 +56,7 @@ export function climaxOptions(state: GameState) {
     state.flags.nameError ||
     state.flags.glimpsedHall
   ) {
-    options.push({ id: "secret", label: "TAKE THE HALLWAY THAT ISN'T ON THE FORM", tone: "secret" });
+    options.push({ id: "secret", label: "FOLLOW THE UNMAPPED HALL", tone: "secret" });
   }
 
   return options;

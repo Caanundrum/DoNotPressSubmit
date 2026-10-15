@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
+
+/**
+ * Chaos Standard studio splash — Home StudioSplashReveal timing/feel,
+ * driven by public/brand PNG masters (no TS embeds).
+ * CRT electron-beam unzip → mark → wordmark glide → fade to HCOS.
+ */
+type AnimationStep =
+  | "idle"
+  | "beam"
+  | "blossom"
+  | "stabilize"
+  | "wordmark"
+  | "complete"
+  | "fadeout";
 
 export function ChaosSplash({
   onDone,
@@ -15,49 +29,211 @@ export function ChaosSplash({
     onDoneRef.current = onDone;
   }, [onDone]);
 
+  const [step, setStep] = useState<AnimationStep>("idle");
+  const [telemetry, setTelemetry] = useState("SYS.BOOT_SEQUENCE // CRT_WARMUP");
+
   useEffect(() => {
-    audio.play("logo", 0.4);
-    const ms = reducedMotion ? 1200 : 3000;
-    const t = window.setTimeout(() => onDoneRef.current(), ms);
-    const onKey = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.key === " " || e.key === "Enter") {
         e.preventDefault();
         onDoneRef.current();
       }
     };
-    window.addEventListener("keydown", onKey);
+    window.addEventListener("keydown", handleKeyDown);
+
+    if (reducedMotion) {
+      setStep("complete");
+      setTelemetry("CHAOS_STANDARD // CALIBRATION_COMPLETE");
+      audio.play("logo", 0.4);
+      const t = window.setTimeout(() => onDoneRef.current(), 1400);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.clearTimeout(t);
+      };
+    }
+
+    // Coordinated continuous timeline — matches Home StudioSplashReveal.
+    const t1 = window.setTimeout(() => {
+      setStep("beam");
+      setTelemetry("ELECTRON_BEAM // STABILIZING HORIZONTAL SWEEP");
+      audio.play("logo", 0.35);
+    }, 200);
+    const t2 = window.setTimeout(() => {
+      setStep("blossom");
+      setTelemetry("DEFLECTION_COILS // RASTER EXPANSION NOMINAL");
+    }, 650);
+    const t3 = window.setTimeout(() => {
+      setStep("stabilize");
+      setTelemetry("BEWILDERED_AI_INTERFACE // ONLINE");
+      audio.play("hover", 0.25);
+    }, 1250);
+    const t4 = window.setTimeout(() => {
+      setStep("wordmark");
+      setTelemetry("CHAOS_STANDARD // COGNITIVE_DISSONANCE_NOMINAL");
+      audio.play("logo", 0.5);
+    }, 1650);
+    const t5 = window.setTimeout(() => {
+      setStep("complete");
+      setTelemetry("CHAOS_STANDARD // CALIBRATION_COMPLETE");
+    }, 2450);
+    const t6 = window.setTimeout(() => setStep("fadeout"), 3850);
+    const t7 = window.setTimeout(() => onDoneRef.current(), 4450);
+
     return () => {
-      window.clearTimeout(t);
-      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+      window.clearTimeout(t4);
+      window.clearTimeout(t5);
+      window.clearTimeout(t6);
+      window.clearTimeout(t7);
     };
   }, [reducedMotion]);
 
+  const isRevealed = step !== "idle" && step !== "beam";
+  const isWordmarkVisible =
+    step === "wordmark" || step === "complete" || step === "fadeout";
+
   return (
     <div
-      className="absolute inset-0 z-50 flex cursor-pointer select-none items-center justify-center bg-[#05070A]"
+      className={`absolute inset-0 z-50 flex cursor-pointer select-none flex-col items-center justify-center overflow-hidden bg-[#05070A] transition-opacity duration-700 ${
+        step === "fadeout" ? "pointer-events-none opacity-0" : "opacity-100"
+      }`}
       onClick={() => onDoneRef.current()}
       role="dialog"
       aria-modal="true"
-      aria-label="Chaos Standard"
+      aria-label="Chaos Standard Reveal"
       data-chaos-splash="true"
+      data-chaos-splash-step={step}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/brand/chaos-splash-card.png"
-        alt="Chaos Standard"
-        className="w-full max-w-3xl"
-        draggable={false}
+      <div className="absolute left-0 right-0 top-0 z-20 flex h-12 items-center justify-between border-b border-white/5 bg-[#030406]/90 px-5 backdrop-blur-md sm:h-16 sm:px-6">
+        <div className="font-mono text-[10px] tracking-[0.25em] text-[#94A3B8]">
+          CHAOS_STANDARD // REVEAL_SEQUENCE
+        </div>
+        <button
+          type="button"
+          className="rounded bg-white/10 px-2.5 py-1 font-mono text-[11px] font-semibold tracking-[0.12em] text-[#F8FAFC] transition hover:bg-[#FF6A00] hover:text-[#05070A]"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDoneRef.current();
+          }}
+          data-chaos-splash-skip="true"
+        >
+          SKIP INTRO
+        </button>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex h-12 items-center justify-between border-t border-white/5 bg-[#030406]/90 px-5 backdrop-blur-md sm:h-16 sm:px-6">
+        <div className="font-mono text-[10px] tracking-[0.2em] text-[#FF6A00]">
+          &gt; {telemetry}
+        </div>
+        <div className="hidden font-mono text-[10px] text-[#64748B] sm:block">
+          PRESS [ESC] OR CLICK ANYWHERE
+        </div>
+      </div>
+
+      <div
+        className={`pointer-events-none absolute h-[min(72vw,720px)] w-[min(72vw,720px)] rounded-full blur-[140px] transition-all duration-1000 ${
+          step === "idle"
+            ? "scale-50 opacity-0"
+            : step === "beam"
+              ? "scale-75 bg-[#FF6A00]/10 opacity-40"
+              : step === "blossom"
+                ? "scale-95 bg-[#FF6A00]/25 opacity-70"
+                : step === "wordmark"
+                  ? "scale-110 bg-[#FF6A00]/35 opacity-90"
+                  : "scale-100 bg-[#FF6A00]/20 opacity-80"
+        }`}
+        aria-hidden
       />
-      <button
-        type="button"
-        className="absolute right-4 top-4 rounded bg-white/10 px-2.5 py-1 text-[11px] text-white"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDoneRef.current();
-        }}
-      >
-        SKIP
-      </button>
+
+      <div className="relative z-10 flex max-w-xl flex-col items-center px-4 text-center">
+        <div className="relative flex w-48 items-center justify-center sm:w-56">
+          <div
+            style={{
+              clipPath: isRevealed
+                ? "inset(0% 0% 0% 0%)"
+                : "inset(49.2% 0% 49.2% 0%)",
+              transition:
+                "clip-path 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms ease-out",
+              opacity: step === "idle" ? 0 : step === "beam" ? 0.35 : 1,
+              filter: "drop-shadow(0 15px 35px rgba(255,106,0,0.35))",
+            }}
+            className="h-auto w-full"
+            data-chaos-mark="true"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/chaos-mark-symbol.png"
+              alt="Chaos Standard Terminal"
+              className="block h-auto w-full object-contain"
+              draggable={false}
+            />
+          </div>
+
+          <div
+            style={{
+              transform: step === "idle" ? "scaleX(0)" : "scaleX(1)",
+              opacity:
+                step === "idle"
+                  ? 0
+                  : step === "beam"
+                    ? 1
+                    : step === "blossom"
+                      ? 0.4
+                      : 0,
+              height:
+                step === "blossom" ||
+                step === "stabilize" ||
+                step === "wordmark" ||
+                step === "complete" ||
+                step === "fadeout"
+                  ? "92%"
+                  : "3px",
+              transition:
+                step === "beam"
+                  ? "transform 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease"
+                  : "height 620ms cubic-bezier(0.16, 1, 0.3, 1), opacity 700ms ease-out",
+            }}
+            className="pointer-events-none absolute inset-x-2 top-1/2 -translate-y-1/2 rounded-lg bg-[#FF6A00] shadow-[0_0_25px_#FF6A00,0_0_50px_#FF6A00]"
+            aria-hidden
+          />
+        </div>
+
+        <div
+          style={{
+            transform: isWordmarkVisible
+              ? "translateY(0) scale(1)"
+              : "translateY(24px) scale(0.95)",
+            opacity: isWordmarkVisible ? 1 : 0,
+            transition:
+              "transform 750ms cubic-bezier(0.16, 1, 0.3, 1), opacity 650ms ease-out",
+            filter: "drop-shadow(0 10px 25px rgba(0,0,0,0.9))",
+          }}
+          className="mt-3 w-72 sm:w-96"
+          data-chaos-wordmark="true"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/chaos-wordmark.png"
+            alt="Chaos Standard Wordmark"
+            className="block h-auto w-full object-contain"
+            draggable={false}
+          />
+        </div>
+
+        <div
+          style={{
+            opacity: step === "complete" || step === "fadeout" ? 1 : 0,
+            transition: "opacity 600ms ease-out",
+          }}
+          className="mt-6 font-mono text-[11px] tracking-[0.3em] text-[#94A3B8]"
+          data-chaos-tagline="true"
+        >
+          A CHAOS STANDARD GAME
+        </div>
+      </div>
     </div>
   );
 }

@@ -199,7 +199,7 @@ assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
 assert(!/TITLE_IDLE_COMEDY/.test(title), "title does not park idle comedy under the orb");
-assert(!/\{\s*["']\/\/ residue — click me["']\s*\}/.test(title), "title strips idle residue click-me wallpaper");
+assert(!/\{\s*[\"']\/\/ residue — click me[\"']\s*\}/.test(title), "title strips idle residue click-me wallpaper");
 assert(!/ASSISTANT ONLINE/.test(title), "title orb status not idle wallpaper competing with BEGIN");
 assert(/data-residue-hint/.test(title), "title soft residue hint (wordless pulse) present");
 assert(!/click me/i.test(title), "title has no click-me microcopy");
@@ -293,7 +293,7 @@ assert(!existsSync(join(root, "src/chaosBrand")), "no leftover src/chaosBrand em
 {
   const brandGone = !existsSync(join(root, "src/brand"));
   const tsconfig = read("tsconfig.json");
-  const brandExcluded = /"src\/brand"/.test(tsconfig);
+  const brandExcluded = /\"src\/brand\"/.test(tsconfig);
   assert(brandGone || brandExcluded, "src/brand absent (preferred) or excluded from tsconfig while shards delete");
 }
 {
@@ -312,18 +312,21 @@ assert(!existsSync(join(root, "src/chaosBrand")), "no leftover src/chaosBrand em
 }
 const chaosSplash = read("src/components/game/ChaosSplash.tsx");
 assert(/data-chaos-splash/.test(chaosSplash), "ChaosSplash root marker present");
-assert(/\/brand\/chaos-splash-card\.png/.test(chaosSplash), "ChaosSplash uses public splash card PNG");
+assert(/\/brand\/chaos-mark-symbol\.png/.test(chaosSplash), "ChaosSplash uses public mark PNG");
+assert(/\/brand\/chaos-wordmark\.png/.test(chaosSplash), "ChaosSplash uses public wordmark PNG");
+assert(/clipPath|clip-path/.test(chaosSplash), "ChaosSplash CRT clip-path reveal present");
 assert(/#05070A|#05070a/.test(chaosSplash), "ChaosSplash uses pitch-black backdrop");
 assert(!/@\/chaosBrand|@\/brand\//.test(chaosSplash), "ChaosSplash must not import TS brand embeds");
 assert(!/CHAOS_MARK_DATA_URI|CHAOS_WORDMARK_DATA_URI/.test(chaosSplash), "ChaosSplash must not use data-URI embeds");
-assert(!/chaos-symbol-dark\.svg["']/.test(chaosSplash), "ChaosSplash must not use wrong cyan-squircle symbol");
+assert(!/chaos-symbol-dark\.svg[\"']/.test(chaosSplash), "ChaosSplash must not use wrong cyan-squircle symbol");
 assert(!/data-chaos-wordmark-fallback/.test(chaosSplash), "ChaosSplash must not use CSS typographic wordmark fallback");
+assert(!/src\/chaosBrand|src\/brand\//.test(chaosSplash), "ChaosSplash must not reference embed trees");
 {
   const scannedSrc = walk(join(root, "src")).map((f) => f.slice(root.length + 1));
   const embedImportHit = scannedSrc.find((rel) => {
     if (!/\.(ts|tsx)$/.test(rel)) return false;
     const src = read(rel);
-    return /@\/chaosBrand|@\/brand\/|from ["'].*chaosBrand|from ["'].*\/brand\//.test(src);
+    return /@\/chaosBrand|@\/brand\/|from [\"'].*chaosBrand|from [\"'].*\/brand\//.test(src);
   });
   assert(!embedImportHit, embedImportHit ? `no @/chaosBrand|@/brand import (${embedImportHit})` : "no @/chaosBrand|@/brand imports in src");
 }

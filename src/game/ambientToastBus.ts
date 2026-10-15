@@ -5,7 +5,7 @@
 type Listener = (line: string | null) => void;
 
 let current: string | null = null;
-let clearTimer: ReturnType<typeof setTimeout> | null = null;
+let clearTimer: number | null = null;
 const listeners = new Set<Listener>();
 
 export function showAmbientToast(line: string, ms = 2400) {

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-16T00:57:37.762Z",
+  "generatedAt": "2026-10-16T01:53:28.007Z",
   "format": "wav",
   "moods": [
     "calm",
@@ -14,7 +14,6 @@
     "hero-ending-escape",
     "hero-ending-disable",
     "hero-ending-secret",
-    "scene-act1-welcome",
     "scene-act1-name",
     "scene-act1-restless",
     "scene-act1-environment",
@@ -22,7 +21,6 @@
     "scene-act2-flicker",
     "scene-act2-unauthorized",
     "scene-act2-duplicate",
-    "scene-act2-system-intro",
     "scene-act2-system-rebuke",
     "scene-act2-companion-respond",
     "scene-act2-compliance",
@@ -35,7 +33,6 @@
     "scene-act4-choice",
     "scene-act4-prep",
     "scene-act5-lobby",
-    "scene-act5-system-push",
     "scene-act5-climax",
     "poke-00",
     "poke-01",
@@ -62,7 +59,7 @@
     "poke-22",
     "poke-23"
   ],
-  "sceneCoverage": 23,
+  "sceneCoverage": 20,
   "stubQuality": "formant-v2",
   "notes": "STUB character takes (improved formant synthesis) — NOT recorded VO. Replace with real character VO / neural bake when assets land; keep filenames {lineId}--{mood}.wav. Hero + poke + all playable scene-* ids covered to avoid silence/404s."
 }

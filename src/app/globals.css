@@ -383,15 +383,26 @@ button {
     bottom: auto !important;
     width: auto !important;
     max-width: none !important;
-    max-height: min(58dvh, calc(100dvh - 9.5rem)) !important;
+    /* Tall enough for Pressure's five options (incl. late mug) without clipping. */
+    max-height: min(68dvh, calc(100dvh - 8rem)) !important;
   }
 
   [data-mobile-bubble-dock="true"] .assessment-panel[data-panel-safe="gag-overlap"] {
-    max-height: min(52dvh, calc(100dvh - 10rem)) !important;
+    max-height: min(56dvh, calc(100dvh - 9rem)) !important;
   }
 
   [data-mobile-bubble-dock="true"] .assessment-panel-inner {
-    gap: 0.35rem;
+    gap: 0.3rem;
+  }
+
+  /* Dense five-option Pressure / similar — keep late unauthorized mug in frame. */
+  [data-mobile-bubble-dock="true"] [data-choice-count="5"] {
+    gap: 0.3rem !important;
+  }
+
+  [data-mobile-bubble-dock="true"] [data-choice-count="5"] button {
+    padding-top: 0.45rem !important;
+    padding-bottom: 0.45rem !important;
   }
 
   [data-facility-mark="true"] {

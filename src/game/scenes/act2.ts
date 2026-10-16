@@ -214,7 +214,7 @@ export const act2Scenes: SceneDef[] = [
     aiLineIf: [
       {
         flag: "sidedWithAI",
-        line: "You already picked me once. I'm going to cash that chip later. Softly. Desperately.",
+        line: "You already picked me once. I'm going to cash that chip later.",
       },
       {
         flag: "sidedWithSystem",

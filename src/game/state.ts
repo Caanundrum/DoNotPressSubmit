@@ -44,7 +44,7 @@ export function createInitialState(partial?: Partial<GameState>): GameState {
   return {
     sessionId: createSessionId(),
     act: 1,
-    sceneId: "act1-welcome",
+    sceneId: "act1-name",
     aiPersonality: pickPersonality(),
     aiMood: "neutral",
     relationshipScore: 0,

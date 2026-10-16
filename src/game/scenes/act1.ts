@@ -6,35 +6,20 @@ import type { SceneDef } from "../types";
  */
 export const act1Scenes: SceneDef[] = [
   {
-    id: "act1-welcome",
-    act: 1,
-    kind: "dialogue",
-    environment: "pristine",
-    formId: "FORM 00 // ORIENTATION",
-    title: "Human Compatibility & Onboarding",
-    prompt:
-      "You are seated in a facility that spent real money looking trustworthy. Confirm you are ready for a perfectly ordinary assessment.",
-    aiLine:
-      "Hi. I'm the assistant. I'll be charming, precise, and only slightly judgmental. If anything weird crawls onto the form, pretend we both imagined it.",
-    aiMood: "neutral",
-    orbAnchor: "spotlight",
-    spotlight: true,
-    orbPokeable: true,
-    panelMotion: "rise",
-    continueLabel: "I'M READY. PROBABLY.",
-    next: "act1-name",
-  },
-  {
     id: "act1-name",
     act: 1,
     kind: "choice",
     environment: "pristine",
-    formId: "FORM 00B // IDENTITY",
+    formId: "IDENTITY",
     title: "What should I call you?",
-    prompt: "What should I call you? Pick one, or make something up.",
-    aiLine: "Names help me fake intimacy. Also they look nice in the audit log.",
+    prompt:
+      "You are seated in a facility that spent real money looking trustworthy. What should I call you? Pick one, or make something up.",
+    aiLine:
+      "Hi. I'm the assistant — charming, precise, only slightly judgmental. Names help me fake intimacy. Also they look nice in the audit log.",
     aiMood: "listening",
-    orbAnchor: "dock-left",
+    orbAnchor: "spotlight",
+    spotlight: true,
+    orbPokeable: true,
     panelMotion: "slide-left",
     choiceMotion: "slide-in",
     choices: [

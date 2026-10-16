@@ -26,11 +26,11 @@ npm start
 
 ## How to playtest
 
-1. Title screen → **UNMUTE / ENABLE SOUND** (optional; SFX + ambience + baked VO stubs).
-2. **BEGIN ASSESSMENT** starts Act I. **CONTINUE ASSESSMENT** resumes localStorage.
-3. Play Acts I–V. Late **UNAUTHORIZED?** / **SIDE PATH** options unlock secrets.
-4. Kinetic beats: restless calibration, authority stamp, escaping button, popup war, checkbox rebellion, interface peel.
-5. Act V: Submit / Refuse / Escape / Disable / Side Path (path-dependent).
+1. Chaos splash → title (skip anytime). Corner **ENABLE SOUND** is always available; sound also arms when you begin.
+2. **BEGIN ASSESSMENT** (or third press on the title **SUBMIT** gag) runs a short corporate boot, then the assessment. **CONTINUE ASSESSMENT** resumes localStorage.
+3. One seamless onboarding that goes off the rails — no act bridges. Late **UNAUTHORIZED?** / side options unlock secrets.
+4. Kinetic beats: restless calibration, escaping button, popup war, checkbox rebellion, interface peel → allegiance.
+5. Final control: Submit / Leave unfinished / Help escape / Mute & file / Sneak the hall (path-dependent).
 6. Finish on the assessment report.
 
 ## What’s in this build

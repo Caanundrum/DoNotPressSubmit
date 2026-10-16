@@ -130,7 +130,7 @@ export function HcosSplash({
           transition={{ delay: 0.2 }}
         >
           <div className="mb-2 flex items-center justify-between text-[9px] tracking-[0.2em] text-cyan/70">
-            <span>HCOS // BOOT LOG</span>
+            <span>BOOT LOG</span>
             <span>SCAN {String(scan).padStart(2, "0")}%</span>
           </div>
           <div className="min-h-[5.5rem] space-y-1">

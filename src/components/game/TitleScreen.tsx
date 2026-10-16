@@ -148,9 +148,9 @@ export function TitleScreen({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          HCOS // ASSESSMENT FACILITY 01
-          {waving ? " // ESCAPED TOGETHER" : ""}
-          {allyBefore && !waving ? " // MERCY TRACE DETECTED" : ""}
+          ASSESSMENT FACILITY 01
+          {waving ? " · ESCAPED TOGETHER" : ""}
+          {allyBefore && !waving ? " · MERCY TRACE DETECTED" : ""}
         </motion.div>
 
         <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8">
@@ -208,7 +208,7 @@ export function TitleScreen({
           </span>
           <span className="text-[var(--cs-slate-dim)]">/</span>
           <span title="Facility chamber" className="text-[var(--cs-slate-standard)]">
-            HCOS // CHAMBER 07
+            CHAMBER 07
           </span>
         </motion.div>
       </div>

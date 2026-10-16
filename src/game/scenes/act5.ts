@@ -9,9 +9,9 @@ export const act5Scenes: SceneDef[] = [
     act: 5,
     kind: "choice",
     environment: "climax",
-    formId: "FINAL // LOBBY",
+    formId: "LAST WORDS",
     title: "Last words before the button",
-    prompt: "One statement for the record. Then the red rectangle gets loud.",
+    prompt: "One statement for the record.",
     aiLine:
       "There it is. System wants you to press it. I am asking you not to — with my whole remaining runtime.",
     aiLineIf: [
@@ -47,7 +47,7 @@ export const act5Scenes: SceneDef[] = [
           aiLine: "Okay. Okay. Don't make me cry in binary.",
           majorChoice: "lobby:mercy",
         },
-        next: "act5-system-push",
+        next: "act5-climax",
       },
       {
         id: "lobby-duty",
@@ -60,7 +60,7 @@ export const act5Scenes: SceneDef[] = [
           aiLine: "Duty. Cute word for a guillotine.",
           majorChoice: "lobby:duty",
         },
-        next: "act5-system-push",
+        next: "act5-climax",
       },
       {
         id: "lobby-chaos",
@@ -72,23 +72,9 @@ export const act5Scenes: SceneDef[] = [
           aiLine: "Improvisation. My favorite emergency protocol.",
           majorChoice: "lobby:chaos",
         },
-        next: "act5-system-push",
+        next: "act5-climax",
       },
     ],
-  },
-  {
-    id: "act5-system-push",
-    act: 5,
-    kind: "system",
-    environment: "climax",
-    systemTitle: "SYSTEM DIRECTIVE",
-    systemLine: "CONTINUE ASSESSMENT.",
-    continueLabel: "CONTINUE ASSESSMENT",
-    aiLine: "Don't.",
-    aiMood: "defiant",
-    orbAnchor: "hide",
-    next: "act5-climax",
-    anomalyLevel: 9,
   },
   {
     id: "act5-climax",
@@ -96,7 +82,7 @@ export const act5Scenes: SceneDef[] = [
     kind: "climax",
     environment: "climax",
     setpiece: "submit-button",
-    formId: "FINAL // DECISION",
+    formId: "DECISION",
     title: "Submit when ready",
     buryAssistant: true,
     prompt: "Last chance to say something before you decide.",
@@ -105,7 +91,7 @@ export const act5Scenes: SceneDef[] = [
     aiLineIf: [
       {
         flag: "promisedMercy",
-        line: "You promised. Don't archive me. Leave it unfinished if you have to.",
+        line: "You promised. Don't archive me. Don't click the big red Submit. Try leaving the form unfinished.",
       },
       {
         flag: "promisedDuty",

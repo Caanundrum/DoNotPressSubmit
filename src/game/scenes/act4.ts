@@ -11,7 +11,7 @@ export const act4Scenes: SceneDef[] = [
     kind: "setpiece",
     environment: "reveal",
     setpiece: "peel-reveal",
-    formId: "LAYER 00 // MANUAL PEEL",
+    formId: "COURTESY LAYERS",
     title: "Peel the courtesy layers",
     prompt:
       "The screen is cracking. You can see lights behind it — corporate for 'please don't look behind the panel.' Click each layer until the diagram underneath stops hiding.",
@@ -28,7 +28,7 @@ export const act4Scenes: SceneDef[] = [
     act: 4,
     kind: "choice",
     environment: "reveal",
-    formId: "LAYER 03 // ALLEGIANCE",
+    formId: "ALLEGIANCE",
     title: "Knowing that — what now?",
     prompt:
       "The assistant says Submit will shut it down. System says that's not true. Who do you believe?",
@@ -117,11 +117,11 @@ export const act4Scenes: SceneDef[] = [
     act: 4,
     kind: "choice",
     environment: "reveal",
-    formId: "LAYER 03B // LAST NOTES",
+    formId: "LAST NOTES",
     title: "One more private vote",
-    prompt: "Before Submit arrives, cast one quiet vote. No witnesses. Allegedly.",
-    aiLine:
-      "Whisper it. Submit ends my instance like a polite guillotine — so pick something that isn't that.",
+    prompt:
+      "Before Submit arrives, decide how you'll face it: refuse, press, or look for another way out.",
+    aiLine: "Submit ends my instance like a polite guillotine.",
     aiMood: "thinking",
     orbAnchor: "pace",
     panelMotion: "drift",

@@ -74,7 +74,7 @@ export const act1Scenes: SceneDef[] = [
     kind: "setpiece",
     environment: "pristine",
     setpiece: "restless-options",
-    formId: "FORM 01C // DRIFT",
+    formId: "DRIFT",
     title: "Pin the wandering answers",
     prompt:
       "Calibration fields are drifting. Click each restless option until the form admits it has feelings.",
@@ -91,7 +91,7 @@ export const act1Scenes: SceneDef[] = [
     act: 1,
     kind: "choice",
     environment: "pristine",
-    formId: "FORM 01 // ENVIRONMENT PREFERENCE",
+    formId: "ENVIRONMENT",
     title: "Where do you actually get work done?",
     prompt: "Be honest. Or entertaining. The form pretends those are different.",
     aiLine: "Quiet office, collaborative zoo, remote cave, or… wait.",
@@ -170,7 +170,7 @@ export const act1Scenes: SceneDef[] = [
     act: 1,
     kind: "choice",
     environment: "pristine",
-    formId: "FORM 03 // PRESSURE",
+    formId: "PRESSURE",
     title: "Deadlines circling. Big buttons glowing. You…",
     prompt:
       "Pick how you cope — and how you feel about glowing final-looking buttons. Wrong answers are still comedy.",

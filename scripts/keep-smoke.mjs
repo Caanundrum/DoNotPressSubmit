@@ -36,7 +36,11 @@ assert(!/It agreed, then fled/.test(act3), "Form 12 orb line is unique (no stale
 
 const act1 = read("src/game/scenes/act1.ts");
 assert(/mug|Mug/.test(act1), "mug steal path still in Act I");
-assert(!/act1-handshake|act1-companion-watch|act1-bridge/.test(act1), "slow Act I fillers / bridge cut");
+assert(!/act1-handshake|act1-companion-watch|act1-bridge|act1-welcome/.test(act1), "slow Act I fillers / bridge cut");
+assert(!/I'M READY\. PROBABLY/.test(act1), "single-button welcome continue removed");
+assert(!/FORM 00B/.test(act1), "orientation form chrome uses plain IDENTITY label");
+assert(/sceneId: "act1-name"/.test(read("src/game/state.ts")), "new runs start on act1-name");
+assert(/facility that spent real money looking trustworthy/.test(act1), "signature facility line kept on opening");
 assert(/act1-restless/.test(act1) && /next: "act1-restless"/.test(act1), "restless malfunction follows name");
 assert(!/Act II|WALK INTO ACT/.test(act1), "act1 has no visible Act bridge copy");
 

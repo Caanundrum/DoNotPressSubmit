@@ -103,7 +103,7 @@ export function EndingSequence({
             transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}
           >
             <div className="font-mono text-[10px] tracking-[0.32em] text-[#d0dcec]">
-              ENDING // {environment.toUpperCase()}
+              {environment.toUpperCase()}
             </div>
             <h2
               id="ending-title"

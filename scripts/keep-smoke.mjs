@@ -57,6 +57,15 @@ assert(/MUTE ASSISTANT AND FILE ALONE/.test(endings), "climax disable label clea
 assert(/SNEAK OUT THE UNMAPPED HALL/.test(endings), "climax secret label clear");
 assert(/action === "refuse"/.test(endings) && /ending-refuse/.test(endings), "refuse routes to ending-refuse");
 assert(!/relationshipScore >= 3/.test(endings), "refuse no longer upgrades via relationship");
+assert(!/wantDisable|allegianceSystem|secretDoor|relationshipScore/.test(endings), "climax options not flag-gated");
+assert(
+  (endings.match(/id: "submit"/g) || []).length >= 1 &&
+    (endings.match(/id: "refuse"/g) || []).length >= 1 &&
+    (endings.match(/id: "escape"/g) || []).length >= 1 &&
+    (endings.match(/id: "disable"/g) || []).length >= 1 &&
+    (endings.match(/id: "secret"/g) || []).length >= 1,
+  "climaxOptions always lists all five endings",
+);
 
 const popupSrc = read("src/components/game/scenes/PopupWar.tsx");
 assert(/needed = 5/.test(popupSrc), "PopupWar requires 5 dismissals");
@@ -296,7 +305,21 @@ assert(/What should I call you\? Pick one/.test(act1), "name prompt uses plain h
 assert(/Call me a friend/.test(act1), "friend label clarified");
 assert(/Moist cavern/.test(act1), "moist cavern option retained");
 assert(/please don't look behind the panel/.test(read("src/game/scenes/act4.ts")), "signature behind-the-panel line retained");
-assert(/Don't click the big red Submit/.test(read("src/game/scenes/act5.ts")), "climax refuse guidance matches labels");
+const act5 = read("src/game/scenes/act5.ts");
+assert(/Don't click the big red Submit/.test(act5), "climax refuse guidance matches labels");
+assert(!/act5-system-push|SYSTEM DIRECTIVE/.test(act5), "SYSTEM DIRECTIVE continue filler removed");
+assert(!/Then the red rectangle gets loud/.test(act5), "lobby no longer narrates the red rectangle");
+assert(!/Leave it unfinished if you have to/.test(act5), "refuse guidance uses big-red line consistently");
+const act4 = read("src/game/scenes/act4.ts");
+assert(!/cast one quiet vote|Whisper it/.test(act4), "prep vote copy clarified; whisper muddle cut");
+assert(/polite guillotine/.test(act4), "polite guillotine signature retained");
+assert(/decide how you'll face it/.test(act4), "prep vote says what the player is choosing");
+{
+  const sceneChrome = [act1, act2, act3, act4, act5].join("\n");
+  assert(!/formId:\s*"(?:FORM|LAYER|FINAL)\b/.test(sceneChrome), "no Form/Layer/Final structure formIds");
+  assert(!/formId:\s*"[^"]*\/\//.test(sceneChrome), "no X // Y structure-giving formIds");
+}
+assert(!/act2-system-intro/.test(act2), "act2 CONTINUE ASSESSMENT filler beat removed");
 assert(/text-\[13px\].*sm:text-\[15px\]|sm:text-\[15px\]/.test(viewAssistant), "assistant bubble primary type size");
 assert(/delay: 0\.35/.test(read("src/components/game/scenes/SceneChoiceList.tsx")), "choices stagger after bubble");
 assert(
@@ -314,6 +337,7 @@ assert(/data-bubble-safe-gap|data-bubble-no-clip/.test(viewAll), "bubble keeps s
 assert(/z-\[42\]|z-\[28\]/.test(viewAll), "safe layering z-index stack (assistant above form)");
 
 const ending = read("src/components/game/scenes/EndingSequence.tsx");
+assert(!/HCOS \/\/ ASSESSMENT FACILITY|HCOS \/\/ CHAMBER|ENDING \/\/ /.test(title + ending), "title/ending structure chrome purged");
 assert(/TRANSFER COMPLETE/.test(ending), "escape ending keeps TRANSFER COMPLETE orb label");
 assert(/case \"escape\"[\s\S]*mode:\s*\"present\"/.test(ending), "escape ending orb stays present (not exit-vanish)");
 assert(/data-ending-orb=\"present\"/.test(ending), "ending orb present marker");

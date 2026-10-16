@@ -41,7 +41,7 @@ export function ScenePlayerViewPanels({
           data-companion-bottom-safe="true"
         >
           <div className="pointer-events-none font-mono text-[10px] tracking-[0.28em] text-[#d8e4f2]">
-            {scene.formId ?? "SIDE CHANNEL // NO FORM"}
+            {scene.formId ?? "SIDE CHANNEL"}
           </div>
           {scene.title ? (
             <h2

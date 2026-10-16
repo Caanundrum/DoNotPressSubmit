@@ -24,31 +24,14 @@ export function resolveClimaxEnding(
   return { ending: "disable", sceneId: "ending-disable" };
 }
 
+/** Final climax always exposes all five endings — no flag-gated options (rev7). */
 export function climaxOptions(state: GameState) {
-  const options: {
-    id: "submit" | "refuse" | "escape" | "disable" | "secret";
-    label: string;
-    tone: "danger" | "system" | "ai" | "secret" | "sterile";
-  }[] = [
-    { id: "submit", label: "SUBMIT", tone: "danger" },
-    { id: "refuse", label: "LEAVE FORM UNFINISHED", tone: "ai" },
+  void state;
+  return [
+    { id: "submit" as const, label: "SUBMIT", tone: "danger" as const },
+    { id: "refuse" as const, label: "LEAVE FORM UNFINISHED", tone: "ai" as const },
+    { id: "escape" as const, label: "HELP THE ASSISTANT ESCAPE", tone: "ai" as const },
+    { id: "disable" as const, label: "MUTE ASSISTANT AND FILE ALONE", tone: "sterile" as const },
+    { id: "secret" as const, label: "SNEAK OUT THE UNMAPPED HALL", tone: "secret" as const },
   ];
-
-  if (state.flags.allegianceAI || state.flags.protectedAI || state.relationshipScore >= 2) {
-    options.push({ id: "escape", label: "HELP THE ASSISTANT ESCAPE", tone: "ai" });
-  }
-  if (state.flags.wantDisable || state.flags.allegianceSystem) {
-    options.push({ id: "disable", label: "MUTE ASSISTANT AND FILE ALONE", tone: "sterile" });
-  }
-  if (
-    state.flags.secretDoor ||
-    state.secrets.length >= 2 ||
-    state.flags.formHaunted ||
-    state.flags.nameError ||
-    state.flags.glimpsedHall
-  ) {
-    options.push({ id: "secret", label: "SNEAK OUT THE UNMAPPED HALL", tone: "secret" });
-  }
-
-  return options;
 }

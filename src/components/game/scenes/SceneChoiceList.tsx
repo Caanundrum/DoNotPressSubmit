@@ -98,7 +98,8 @@ export function SceneChoiceList({
                         }
               }
               transition={{
-                delay: index * 0.04,
+                // Bubble leads; choices stagger in after the line reads (overhaul).
+                delay: 0.35 + index * 0.05,
                 opacity: { duration: 0.35 },
                 duration:
                   choiceMotion === "dodge" ? 2.8 : choiceMotion === "restless" ? 0.35 : 0.4,

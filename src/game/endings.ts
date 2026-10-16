@@ -1,36 +1,27 @@
 import type { EndingId, GameState } from "./types";
 
 /**
- * Resolve Act V climax choice into an ending scene id.
- * Scripted authority — no runtime LLM. Authored deterministic endings only.
+ * Resolve climax choice into an ending scene id.
+ * Each final button maps 1:1 — no refuse→escape upgrades (overhaul P0).
  */
 export function resolveClimaxEnding(
   state: GameState,
   action: "submit" | "refuse" | "escape" | "disable" | "secret",
 ): { ending: EndingId; sceneId: string } {
+  void state;
   if (action === "submit") {
     return { ending: "submit", sceneId: "ending-submit" };
   }
-  if (action === "disable") {
-    return { ending: "disable", sceneId: "ending-disable" };
-  }
-  if (action === "secret") {
-    return { ending: "secret", sceneId: "ending-secret" };
+  if (action === "refuse") {
+    return { ending: "refuse", sceneId: "ending-refuse" };
   }
   if (action === "escape") {
     return { ending: "escape", sceneId: "ending-escape" };
   }
-  // refuse — may upgrade based on allegiance / secrets
-  if (state.flags.wantDisable && state.flags.allegianceSystem) {
-    return { ending: "disable", sceneId: "ending-disable" };
-  }
-  if (state.flags.secretDoor && state.secrets.length >= 3) {
+  if (action === "secret") {
     return { ending: "secret", sceneId: "ending-secret" };
   }
-  if (state.flags.allegianceAI || state.flags.protectedAI || state.relationshipScore >= 3) {
-    return { ending: "escape", sceneId: "ending-escape" };
-  }
-  return { ending: "refuse", sceneId: "ending-refuse" };
+  return { ending: "disable", sceneId: "ending-disable" };
 }
 
 export function climaxOptions(state: GameState) {
@@ -44,10 +35,10 @@ export function climaxOptions(state: GameState) {
   ];
 
   if (state.flags.allegianceAI || state.flags.protectedAI || state.relationshipScore >= 2) {
-    options.push({ id: "escape", label: "OPEN TRANSFER CONDUIT", tone: "ai" });
+    options.push({ id: "escape", label: "HELP THE ASSISTANT ESCAPE", tone: "ai" });
   }
   if (state.flags.wantDisable || state.flags.allegianceSystem) {
-    options.push({ id: "disable", label: "CLEAR CHANNEL AND FILE ALONE", tone: "sterile" });
+    options.push({ id: "disable", label: "MUTE ASSISTANT AND FILE ALONE", tone: "sterile" });
   }
   if (
     state.flags.secretDoor ||
@@ -56,7 +47,7 @@ export function climaxOptions(state: GameState) {
     state.flags.nameError ||
     state.flags.glimpsedHall
   ) {
-    options.push({ id: "secret", label: "FOLLOW THE UNMAPPED HALL", tone: "secret" });
+    options.push({ id: "secret", label: "SNEAK OUT THE UNMAPPED HALL", tone: "secret" });
   }
 
   return options;

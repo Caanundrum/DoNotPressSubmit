@@ -13,12 +13,10 @@ const LABELS = [
   "FORM INTEGRITY LOW",
   "PLEASE DISMISS",
   "PLEASE DO NOT DISMISS",
-  "THIS NOTICE HAS CHILDREN",
-  "URGENCY.EXE IS PREGNANT",
   "DISMISS ME. I DARE YOU",
-  "COUSIN WINDOW ARRIVED",
   "STILL NOT COMPLIANT",
   "DISMISS QUEUE OVERFLOW",
+  "PRIORITY NOTICE",
 ];
 
 /** Non-overlapping-ish grid slots so dismiss stays hittable. */
@@ -45,7 +43,7 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
   /** Dismissed labels never respawn — no "Compliance required" zombie pile (P1). */
   const dismissedLabels = useRef(new Set<string>());
   const labelCursor = useRef(2);
-  const needed = 8;
+  const needed = 5;
 
   const progress = useMemo(() => Math.min(needed, closed), [closed]);
 
@@ -108,7 +106,7 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="relative h-[min(48vh,380px)] w-full overflow-hidden border border-white/25 bg-black/40">
       <div className="pointer-events-none absolute left-3 top-3 z-30 font-mono text-[10px] tracking-[0.22em] text-system-warn">
-        POPUP WAR // CLEARED {progress}/{needed}
+        Closed {progress}/{needed}
       </div>
       <AnimatePresence>
         {popups.map((p) => {

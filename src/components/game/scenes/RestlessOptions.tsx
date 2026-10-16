@@ -79,7 +79,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
       data-restless-options="true"
     >
       <div className="shrink-0 px-3 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
-        CALIBRATION DRIFT // PINNED {pins}/3
+        Pinned {pins}/3
       </div>
       <div className="relative min-h-0 flex-1 overflow-hidden pb-1">
         {slots.map((s, i) => {

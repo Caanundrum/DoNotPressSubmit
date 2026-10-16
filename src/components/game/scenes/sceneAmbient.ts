@@ -49,7 +49,7 @@ const ACT_SPICE: Record<number, string[]> = {
     "Form 00 didn't cover this. Form 00 was a coward.",
   ],
   2: [
-    "Act II and you're already vandalizing my personal space. Noted.",
+    "Already vandalizing my personal space and we're barely into the form. Noted.",
     "System is watching. So am I. Guess who blinks first.",
   ],
   3: [
@@ -61,7 +61,7 @@ const ACT_SPICE: Record<number, string[]> = {
     "Glass is thin up here. Your finger is not helping the structural integrity.",
   ],
   5: [
-    "Climax adjacent and you're still tapping me like a stress lamp.",
+    "Final control inbound and you're still tapping me like a stress lamp.",
     "If we escape, I'm billing you for emotional overtime.",
   ],
 };

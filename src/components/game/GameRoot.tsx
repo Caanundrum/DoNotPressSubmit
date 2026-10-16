@@ -2,9 +2,9 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
-import { createInitialState } from "@/game/state";
+import { createInitialState, emptyCounters } from "@/game/state";
 import { clearSave, loadSave, loadTitleAlly, loadTitleWave, writeSave } from "@/game/storage";
-import type { GameState, OrbMood, ShellPhase } from "@/game/types";
+import type { BeginSeed, GameState, OrbMood, ShellPhase } from "@/game/types";
 import { SKIP_INTRO_KEY } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
@@ -66,6 +66,13 @@ export function GameRoot() {
     audio.unlock();
   }, []);
 
+  /** Unlock + unmute procedural SFX/ambience on assessment start. */
+  const armSound = useCallback(() => {
+    audio.unlock();
+    audio.enableSound();
+    speech.setEnabled(true);
+  }, []);
+
   const goTitle = useCallback(() => {
     setPhase("title");
     window.localStorage.setItem(SKIP_INTRO_KEY, "1");
@@ -85,27 +92,38 @@ export function GameRoot() {
     setOrbMood(ms > 4500 ? "amused" : "listening");
   }, []);
 
-  const beginNew = useCallback(() => {
-    warmAudio();
-    speech.cancel();
-    clearSave();
-    const next = createInitialState();
-    setGame(next);
-    writeSave(next);
-    setHasContinue(true);
-    setOrbMood("neutral");
+  const beginNew = useCallback(
+    (seed?: BeginSeed) => {
+      armSound();
+      speech.cancel();
+      clearSave();
+      const counters = { ...emptyCounters(), ...seed?.counters };
+      const next = createInitialState({
+        flags: { ...seed?.flags },
+        counters,
+      });
+      setGame(next);
+      writeSave(next);
+      setHasContinue(true);
+      setOrbMood("neutral");
+      // Corporate boot after Begin — not before title (overhaul).
+      setPhase("hcos");
+    },
+    [armSound],
+  );
+
+  const finishHcos = useCallback(() => {
     setPhase("playing");
-  }, [warmAudio]);
+  }, []);
 
   const continueAssessment = useCallback(() => {
-    warmAudio();
+    armSound();
     speech.cancel();
     const saved = loadSave();
     if (!saved) {
       beginNew();
       return;
     }
-    // Finished runs must not reopen the report as a "continue" (rev5 P1 stale report).
     if (
       saved.ending ||
       saved.sceneId === "report" ||
@@ -119,12 +137,13 @@ export function GameRoot() {
     setHasContinue(true);
     setOrbMood(saved.aiMood);
     setPhase("playing");
-  }, [warmAudio, beginNew]);
+  }, [armSound, beginNew]);
 
+  /** Chaos → title directly (skip visible hcos until Begin). */
   const finishChaos = useCallback(() => {
     warmAudio();
-    setPhase("hcos");
-  }, [warmAudio]);
+    goTitle();
+  }, [warmAudio, goTitle]);
 
   const updateGame = useCallback((next: GameState) => {
     setGame(next);
@@ -134,7 +153,6 @@ export function GameRoot() {
   const returnTitle = useCallback(() => {
     speech.cancel();
     const saved = loadSave();
-    // Clear completed ledgers so title never resurrects a stale report.
     if (
       saved &&
       (saved.ending ||
@@ -161,7 +179,8 @@ export function GameRoot() {
     setPhase("playing");
   }, []);
 
-  const showAudioCorner = phase === "playing" || phase === "hcos";
+  // Corner toggle on title + hcos + playing (overhaul).
+  const showAudioCorner = phase === "title" || phase === "playing" || phase === "hcos";
 
   return (
     <div
@@ -192,7 +211,7 @@ export function GameRoot() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
           >
-            <HcosSplash reducedMotion={reducedMotion} onDone={goTitle} />
+            <HcosSplash reducedMotion={reducedMotion} onDone={finishHcos} />
           </motion.div>
         ) : null}
 

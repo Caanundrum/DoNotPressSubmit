@@ -116,6 +116,12 @@ export interface BehaviorCounters {
   ambientClicks: number;
 }
 
+/** Optional seed when starting from title (e.g. third Submit gag). */
+export type BeginSeed = {
+  flags?: Record<string, boolean>;
+  counters?: Partial<BehaviorCounters>;
+};
+
 export interface GameState {
   sessionId: string;
   act: number;

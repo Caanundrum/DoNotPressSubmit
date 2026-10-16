@@ -55,15 +55,39 @@ export function ScenePlayerViewPanels({
             <p className="max-w-xl text-center text-sm text-[#d2dceb]">{scene.prompt}</p>
           ) : null}
           {scene.companion === "wait" ? (
-            <button
-              type="button"
-              disabled={!companionReady}
-              className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
-              style={{ fontFamily: "var(--font-display)" }}
-              onClick={() => finishCompanion()}
-            >
-              {companionReady ? (scene.continueLabel ?? "I WAITED") : "HOLD STILL…"}
-            </button>
+            <div className="flex flex-col items-center gap-3" data-companion-wait="true">
+              {companionReady ? (
+                <motion.div
+                  className="h-2 w-2 rounded-full bg-cyan"
+                  style={{ boxShadow: "0 0 16px rgba(110,231,255,0.85)" }}
+                  initial={{ scale: 0.6, opacity: 0.4 }}
+                  animate={{ scale: [1, 1.35, 1], opacity: [0.7, 1, 0.85] }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
+                  data-companion-settled="true"
+                  aria-hidden
+                />
+              ) : (
+                <div
+                  className="h-2 w-2 rounded-full bg-cyan/30"
+                  data-companion-settling="true"
+                  aria-hidden
+                />
+              )}
+              <button
+                type="button"
+                disabled={!companionReady}
+                className="pointer-events-auto border border-cyan/40 bg-cyan/10 px-5 py-3 font-mono text-[12px] tracking-[0.24em] text-white transition hover:bg-cyan/20 disabled:cursor-wait disabled:opacity-40"
+                style={{ fontFamily: "var(--font-display)" }}
+                onClick={() => finishCompanion()}
+              >
+                {companionReady ? (scene.continueLabel ?? "I WAITED") : "HOLD STILL…"}
+              </button>
+              {companionReady ? (
+                <div className="font-mono text-[9px] tracking-[0.22em] text-cyan/75" data-companion-settle-cue="true">
+                  ORBIT STEADY — YOU CAN CONTINUE
+                </div>
+              ) : null}
+            </div>
           ) : null}
           {scene.companion === "watch" ? (
             <button

@@ -18,7 +18,7 @@ export function AuthorityStamp({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="relative h-[min(46vh,360px)] w-full overflow-hidden border border-system-warn/40 bg-black/45">
       <div className="absolute left-3 top-3 z-10 font-mono text-[12px] tracking-[0.22em] text-system-warn">
-        AUTHORITY STAMP // IMPRESSIONS {hits}/3
+        Hits {hits}/3
       </div>
       <motion.div
         className="pointer-events-none absolute inset-8 border border-dashed border-white/15"

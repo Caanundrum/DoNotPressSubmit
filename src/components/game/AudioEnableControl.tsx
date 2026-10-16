@@ -1,12 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
 
+/**
+ * Corner mute/unmute only — title CTA unmute button removed (overhaul).
+ * Procedural SFX + ambience; baked VO stays disabled via speech controller.
+ */
 export function AudioEnableControl({
-  placement = "title",
+  placement = "corner",
 }: {
   placement?: "title" | "corner";
 }) {
@@ -15,7 +18,7 @@ export function AudioEnableControl({
   useEffect(() => {
     return audio.subscribe((s) => {
       setMuted(s.muted);
-      // P1 #9: unmute arms SFX + ambience + baked VO — never live browser TTS.
+      // Arms SFX/ambience path; VO speakLine remains a no-op.
       speech.setEnabled(!s.muted);
       if (s.muted) speech.cancel();
     });
@@ -24,10 +27,6 @@ export function AudioEnableControl({
   const enable = () => {
     audio.enableSound();
     speech.setEnabled(true);
-    // Hero title beat — soft stub; real VO swap keeps the same lineId.
-    if (placement === "title") {
-      speech.speakLine({ lineId: "hero-title", mood: "calm", text: "title" });
-    }
   };
 
   const mute = () => {
@@ -36,43 +35,19 @@ export function AudioEnableControl({
     speech.cancel();
   };
 
-  if (placement === "corner") {
-    return (
-      <button
-        type="button"
-        data-sound-corner="true"
-        onClick={() => (muted ? enable() : mute())}
-        className="pointer-events-auto absolute right-3 top-3 z-50 border border-white/25 bg-black/60 px-2.5 py-1.5 font-mono text-[12px] tracking-[0.2em] text-[#d8e4f4] backdrop-blur-sm transition hover:border-cyan/50 hover:text-white sm:text-[10px]"
-        aria-pressed={!muted}
-        aria-label={muted ? "Enable sound" : "Mute sound"}
-      >
-        {muted ? "ENABLE SOUND" : "SOUND ON"}
-      </button>
-    );
-  }
+  // Title placement retired — always render corner chrome.
+  void placement;
 
   return (
-    <motion.button
+    <button
       type="button"
+      data-sound-corner="true"
       onClick={() => (muted ? enable() : mute())}
-      className="pointer-events-auto border px-5 py-3 font-mono text-[11px] tracking-[0.28em] transition"
-      style={{
-        borderColor: muted ? "rgba(110,231,255,0.55)" : "rgba(170,200,230,0.28)",
-        background: muted
-          ? "linear-gradient(180deg, rgba(40,90,120,0.45), rgba(8,12,20,0.7))"
-          : "rgba(8,12,20,0.55)",
-        color: muted ? "#e8f7ff" : "#c5d4e8",
-        boxShadow: muted ? "0 0 28px rgba(110,231,255,0.18)" : "none",
-      }}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.65 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      className="pointer-events-auto absolute right-3 top-3 z-50 border border-white/25 bg-black/60 px-2.5 py-1.5 font-mono text-[12px] tracking-[0.2em] text-[#d8e4f4] backdrop-blur-sm transition hover:border-cyan/50 hover:text-white sm:text-[10px]"
       aria-pressed={!muted}
-      aria-label={muted ? "Unmute and enable sound" : "Mute sound"}
+      aria-label={muted ? "Enable sound" : "Mute sound"}
     >
-      {muted ? "UNMUTE / ENABLE SOUND" : "SOUND ENABLED — TAP TO MUTE"}
-    </motion.button>
+      {muted ? "ENABLE SOUND" : "SOUND ON"}
+    </button>
   );
 }

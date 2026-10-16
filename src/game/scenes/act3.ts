@@ -1,24 +1,10 @@
 import type { SceneDef } from "../types";
 
+/**
+ * Conflict stretch — chase → popup → wait → checkbox → blame → peel.
+ * No act bridges, no duplicate blame beat (overhaul).
+ */
 export const act3Scenes: SceneDef[] = [
-  {
-    id: "act3-warning",
-    act: 3,
-    kind: "dialogue",
-    environment: "conflict",
-    formId: "FORM 09 // HAZARD",
-    title: "Hazardous control detected",
-    prompt:
-      "A button is attempting to leave its assigned region. Facilities calls this 'mobility.' You should call it 'chase.'",
-    aiLine:
-      "Act III. Fun malfunctions: chase runaway buttons, close System windows, click fleeing checkboxes harder.",
-    aiMood: "excited",
-    orbAnchor: "loom",
-    panelMotion: "pressure",
-    continueLabel: "ENGAGE THE NONSENSE",
-    next: "act3-escaping",
-    anomalyLevel: 4,
-  },
   {
     id: "act3-escaping",
     act: 3,
@@ -27,65 +13,14 @@ export const act3Scenes: SceneDef[] = [
     setpiece: "escaping-button",
     formId: "FORM 10 // CONTAINMENT",
     title: "Contain the unauthorized control",
-    prompt: "Pin the fleeing button. It filed for asylum in its own hover state.",
-    aiLine: "Round one: the button thinks it's a character. Three hits archives it.",
+    prompt: "Pin the fleeing button before it leaves its assigned region.",
+    aiLine: "Things are starting to go wrong. Three hits archives the runaway. Go.",
     aiMood: "defiant",
-    // Left dock — pace sat under the chase panel and clipped orb+dialogue at 1280×800.
     orbAnchor: "dock-left",
     orbPokeable: true,
     panelMotion: "scatter",
-    next: "act3-between-1",
+    next: "act3-popup",
     anomalyLevel: 4,
-  },
-  {
-    id: "act3-between-1",
-    act: 3,
-    kind: "choice",
-    environment: "conflict",
-    formId: "FORM 10B // BREATHER",
-    title: "Who moved first?",
-    prompt: "Pick a narrative before System writes the minutes without you.",
-    aiLine: "Quick — while the sparks settle. Whose fault is the comedy?",
-    aiMood: "amused",
-    orbAnchor: "listen",
-    panelMotion: "slide-left",
-    choiceMotion: "restless",
-    choices: [
-      {
-        id: "moved-button",
-        label: "The button started it",
-        effects: {
-          flags: { blamedButton: true },
-          relationship: 1,
-          mood: "amused",
-          majorChoice: "moved:button",
-        },
-        next: "act3-popup",
-      },
-      {
-        id: "moved-system",
-        label: "System poked the beehive",
-        effects: {
-          flags: { blamedSystemEarly: true },
-          counters: { aiCooperation: 1 },
-          relationship: 1,
-          mood: "defiant",
-          majorChoice: "moved:system",
-        },
-        next: "act3-popup",
-      },
-      {
-        id: "moved-us",
-        label: "We poked it. With joy.",
-        effects: {
-          flags: { blamedUs: true },
-          relationship: 1,
-          mood: "excited",
-          majorChoice: "moved:us",
-        },
-        next: "act3-popup",
-      },
-    ],
   },
   {
     id: "act3-popup",
@@ -95,30 +30,12 @@ export const act3Scenes: SceneDef[] = [
     setpiece: "popup-war",
     formId: "FORM 11 // NOTICE FLOOD",
     title: "Popup containment protocol",
-    prompt: "Dismiss the notices. Each one spawns a cousin that learned nothing.",
-    aiLine: "Diplomacy failed. The windows are breeding. Hit DISMISS like it owes you rent.",
+    prompt: "Dismiss the notices. Each one thinks it's the most important thing in the room.",
+    aiLine: "Diplomacy failed. Hit DISMISS like it owes you rent.",
     aiMood: "irritated",
-    // Right dock inset — flee top-edge was clipping dialogue during popup flood.
     orbAnchor: "dock-right",
     orbPokeable: true,
     panelMotion: "drop",
-    next: "act3-between-2",
-    anomalyLevel: 5,
-  },
-  {
-    id: "act3-between-2",
-    act: 3,
-    kind: "dialogue",
-    environment: "conflict",
-    formId: "FORM 11B // CEASEFIRE?",
-    title: "Brief, dishonest silence",
-    prompt: "The popups pause. The facility pretends this was always the plan.",
-    aiLine:
-      "Don't relax. There's a checkbox warming up in the wings, and it has the morality of a cat.",
-    aiMood: "suspicious",
-    orbAnchor: "overhead",
-    panelMotion: "drift",
-    continueLabel: "WAIT WITH ME FIRST",
     next: "act3-companion-wait",
     anomalyLevel: 5,
   },
@@ -131,8 +48,8 @@ export const act3Scenes: SceneDef[] = [
     formId: "SIDE CHANNEL // HOLD",
     title: "Hold still with the assistant",
     prompt:
-      "The orb jitters under conflict lighting. Don't click the form. Just wait until its orbit steadies — then acknowledge.",
-    aiLine: "If you rush, System wins the tempo. Stay. Breathe. Pretend we're professionals.",
+      "The orb jitters under conflict lighting. Don't click the form. Wait until its orbit steadies — you'll see it settle — then acknowledge.",
+    aiLine: "If you rush, System sets the pace. Stay. Breathe. Pretend we're professionals.",
     aiMood: "nervous",
     orbAnchor: "spotlight",
     spotlight: true,
@@ -149,12 +66,9 @@ export const act3Scenes: SceneDef[] = [
     setpiece: "checkbox-rebellion",
     formId: "FORM 12 // CONSENT",
     title: "Acknowledge terms (good luck)",
-    prompt: "Catch the checkbox. Consent that sprints is still consent. Allegedly.",
-    // Unique vs on-screen chase chrome — still keeps flee comedy for smoke (P0 no-stale-echo).
+    prompt: "Catch the checkbox. It keeps changing its mind about agreeing.",
     aiLine: "Consent just sprinted. Catch the checkbox before it lawyer-ups and flees again.",
     aiMood: "amused",
-    // REGRESSION LOCK: Form 12 orb must stay dock-left (never pace) — tall chase panel clips pace.
-    // Safe-zone dock: Form 12 chase panel is tall; pace clipped orb off-screen.
     orbAnchor: "dock-left",
     orbPokeable: true,
     panelMotion: "scatter",
@@ -168,7 +82,7 @@ export const act3Scenes: SceneDef[] = [
     environment: "conflict",
     formId: "FORM 13 // DAMAGE REPORT",
     title: "Who caused this?",
-    prompt: "Select a narrative you can live with when the auditors invent feelings.",
+    prompt: "Select a narrative you can live with when the auditors ask.",
     aiLine: "Pick carefully. System is rewriting the minutes in real time and it has terrible handwriting.",
     aiMood: "suspicious",
     orbAnchor: "dock-right",
@@ -185,7 +99,7 @@ export const act3Scenes: SceneDef[] = [
           mood: "defiant",
           majorChoice: "blame:system",
         },
-        next: "act3-recovery",
+        next: "act4-peel-set",
       },
       {
         id: "blame-ai",
@@ -197,7 +111,7 @@ export const act3Scenes: SceneDef[] = [
           mood: "defeated",
           majorChoice: "blame:ai",
         },
-        next: "act3-recovery",
+        next: "act4-peel-set",
       },
       {
         id: "blame-player",
@@ -208,7 +122,7 @@ export const act3Scenes: SceneDef[] = [
           mood: "amused",
           majorChoice: "blame:self",
         },
-        next: "act3-recovery",
+        next: "act4-peel-set",
       },
       {
         id: "blame-secret",
@@ -222,52 +136,8 @@ export const act3Scenes: SceneDef[] = [
           mood: "confused",
           majorChoice: "blame:haunted",
         },
-        next: "act3-recovery",
+        next: "act4-peel-set",
       },
     ],
-  },
-  {
-    id: "act3-recovery",
-    act: 3,
-    kind: "dialogue",
-    environment: "conflict",
-    formId: "FORM 13B // REGROUP",
-    title: "Chrome, slightly dented",
-    prompt: "Beautiful panels are beginning to peel at the corners. Something honest is under the paint.",
-    aiLine:
-      "We dented the pretty lies. Good. Underneath is cable and spite — my natural habitat.",
-    aiLineIf: [
-      {
-        flag: "blameSystem",
-        line: "You blamed System. Correct. Also dangerous. I like both of those qualities in a human.",
-      },
-      {
-        flag: "blameAI",
-        line: "You blamed me. Fair. Rude. Fair.",
-      },
-    ],
-    aiMood: "defiant",
-    orbAnchor: "listen",
-    panelMotion: "rise",
-    continueLabel: "KEEP GOING",
-    next: "act3-bridge",
-    anomalyLevel: 5,
-  },
-  {
-    id: "act3-bridge",
-    act: 3,
-    kind: "dialogue",
-    environment: "conflict",
-    formId: "FORM 14 // BREACH",
-    title: "Surface integrity failing",
-    prompt: "SURFACE INTEGRITY: failing. Understructure lights visible through courtesy chrome.",
-    aiLine:
-      "They're hiding something under the chrome. I can see cable where poetry used to be. Act IV is a peel. Don't look away.",
-    aiMood: "frightened",
-    orbAnchor: "flee",
-    panelMotion: "edge",
-    continueLabel: "LOOK UNDERNEATH",
-    next: "act4-peel-set",
-    anomalyLevel: 5,
   },
 ];

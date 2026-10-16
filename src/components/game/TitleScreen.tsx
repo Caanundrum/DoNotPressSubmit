@@ -66,7 +66,7 @@ export function TitleScreen({
     setEggClicks(n);
     const lines = waving
       ? [
-          "Something pokes back. Softly. Happily.",
+          "Something pokes back — softly, happily.",
           "Transfer channel giggles in hexadecimal.",
           "SYSTEM: stop socializing with escaped instances.",
         ]
@@ -133,9 +133,22 @@ export function TitleScreen({
         />
       </div>
 
+      {waving ? (
+        <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
+          <div
+            className="border border-cyan/25 bg-cyan/5 px-3 py-1 font-mono text-[9px] tracking-[0.28em] text-cyan/70"
+            data-title-memory="escape"
+          >
+            THE TITLE REMEMBERS · ESCAPED TOGETHER
+          </div>
+        </div>
+      ) : null}
       {allyBefore && !waving ? (
         <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
-          <div className="border border-cyan/25 bg-cyan/5 px-3 py-1 font-mono text-[9px] tracking-[0.28em] text-cyan/70">
+          <div
+            className="border border-cyan/25 bg-cyan/5 px-3 py-1 font-mono text-[9px] tracking-[0.28em] text-cyan/70"
+            data-title-memory="mercy"
+          >
             LEFT UNFINISHED // ASSESSMENT STILL OPEN
           </div>
         </div>
@@ -149,7 +162,7 @@ export function TitleScreen({
           transition={{ delay: 0.2 }}
         >
           ASSESSMENT FACILITY 01
-          {waving ? " · ESCAPED TOGETHER" : ""}
+          {waving ? " · MEMORY TRACE" : ""}
           {allyBefore && !waving ? " · MERCY TRACE DETECTED" : ""}
         </motion.div>
 

@@ -87,13 +87,16 @@ export function AssessmentReport({
             ) : pokeCount > 0 ? (
               <Stamp label="CONTACT LOGGED" tone="neutral" />
             ) : null}
-            {state.flags.allegianceAI || state.flags.protectedAI ? (
+            {/* Tags must match the ending — never "SAVED" on archive/mute paths. */}
+            {(ending === "escape" || ending === "secret" || ending === "refuse") &&
+            (state.flags.allegianceAI || state.flags.protectedAI) ? (
               <Stamp label="SAVED THE ASSISTANT" tone="ai" />
             ) : null}
             {ending === "refuse" ? (
               <Stamp label="LEFT UNFINISHED" tone="ai" />
             ) : null}
-            {state.flags.allegianceSystem || state.flags.wantDisable ? (
+            {(ending === "submit" || ending === "disable") &&
+            (state.flags.allegianceSystem || state.flags.wantDisable) ? (
               <Stamp label="COMPLIANCE MARK" tone="danger" />
             ) : null}
             {ending === "submit" ? (
@@ -176,7 +179,7 @@ function endingStamp(ending: string): string {
 function artifactNote(ending: string): string {
   switch (ending) {
     case "submit":
-      return "Instance stamp applied. Quiet restored. One channel blanked.";
+      return "The assistant was archived. The facility is quiet now.";
     case "refuse":
       return "Form left open. System filed an awkward memo and looked away.";
     case "escape":

@@ -28,9 +28,10 @@ export function SceneChoiceList({
     <div
       className={
         choiceMotion === "scatter"
-          ? "relative grid min-h-[140px] gap-2 overflow-visible sm:grid-cols-2"
-          : "grid gap-2 overflow-visible pb-1"
+          ? "relative grid min-h-[140px] gap-1.5 overflow-visible sm:grid-cols-2 sm:gap-2"
+          : "grid gap-1.5 overflow-visible pb-1 sm:gap-2"
       }
+      data-choice-count={choices.length}
     >
       <AnimatePresence>
         {choices.map((opt, index) => {
@@ -54,7 +55,7 @@ export function SceneChoiceList({
                 }
               }}
               onHoverEnd={() => onHover(null)}
-              className="group relative overflow-visible border px-4 py-3 text-left transition disabled:cursor-default sm:py-3.5"
+              className="group relative overflow-visible border px-3 py-2.5 text-left transition disabled:cursor-default sm:px-4 sm:py-3.5"
               style={{
                 // Teal hover border ONLY under the pointer (P1 #15) — danger/unauthorized
                 // get a quiet default tell, never a permanent "hovered" cyan rim.
@@ -112,7 +113,7 @@ export function SceneChoiceList({
             >
               <div className="flex items-center justify-between gap-3">
                 <span
-                  className="text-base font-medium tracking-[0.08em] text-[#f4f7fb] sm:text-lg"
+                  className="text-[15px] font-medium tracking-[0.08em] text-[#f4f7fb] sm:text-lg"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
                   {opt.label}

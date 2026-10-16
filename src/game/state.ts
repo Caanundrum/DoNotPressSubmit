@@ -135,7 +135,7 @@ export function endingTitle(id: EndingId): string {
 export function endingBlurb(id: EndingId): string {
   switch (id) {
     case "submit":
-      return "Submit stamped. Facility restored order. One channel did not.";
+      return "The assistant was archived. The facility is quiet now.";
     case "refuse":
       return "Form left unfinished. System accepted incompleteness after an embarrassed pause. The room exhaled.";
     case "escape":

@@ -66,25 +66,22 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
       const next = prev.filter((p) => p.id !== id);
       const newlyClosed = closed + 1;
       setClosed(newlyClosed);
+      // Final click clears leftovers so Closed N/5 matches an empty board.
       if (newlyClosed >= needed) {
         setTimeout(onComplete, 400);
-        return next;
+        return [];
       }
-      // Keep the gag, ease the flood: usually one spawn; only spike once mid-cascade.
-      const spawnCount = newlyClosed === 4 ? 2 : 1;
+      // One spawn per dismiss — no mid-cascade double that leaves 3 up at 4/5.
       const spawned: Popup[] = [];
-      let z = topZ;
-      for (let i = 0; i < spawnCount; i++) {
-        z += 1;
-        const slot = slotFor(newlyClosed + i + next.length);
-        spawned.push({
-          id: Date.now() + i + Math.random(),
-          x: slot.x,
-          y: slot.y,
-          label: nextFreshLabel(),
-          z,
-        });
-      }
+      let z = topZ + 1;
+      const slot = slotFor(newlyClosed + next.length);
+      spawned.push({
+        id: Date.now() + Math.random(),
+        x: slot.x,
+        y: slot.y,
+        label: nextFreshLabel(),
+        z,
+      });
       setTopZ(z);
       // Cap stack so the primary readable beat isn't buried.
       const merged = [...next, ...spawned].slice(0, 3);

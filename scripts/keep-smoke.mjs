@@ -348,7 +348,10 @@ assert(/data-choice-count/.test(read("src/components/game/scenes/SceneChoiceList
 assert(/68dvh|choice-count="5"/.test(read("src/app/globals.css")), "mobile panel tall enough for five Pressure options");
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
 assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
-assert(/max-w-\[calc\(100%-28px\)\]|w-\[min\(78%/.test(checkbox), "Consent chase target stays inside panel");
+assert(
+  /w-\[min\(280px,calc\(100%-28px\)\)\]|max-w-\[calc\(100%-28px\)\]/.test(checkbox),
+  "Consent chase target stays inside panel",
+);
 assert(/VO_PLAYBACK_ENABLED = false/.test(speech) || /speakLine/.test(speech), "VO disable path marked");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");

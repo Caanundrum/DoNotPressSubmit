@@ -1,22 +1,9 @@
 import type { SceneDef } from "../types";
 
+/**
+ * Final stretch — lobby → system push → climax. No STEP CLOSER / MAKE THE CALL fillers.
+ */
 export const act5Scenes: SceneDef[] = [
-  {
-    id: "act5-approach",
-    act: 5,
-    kind: "dialogue",
-    environment: "climax",
-    formId: "FINAL // APPROACH",
-    title: "DO NOT PRESS SUBMIT",
-    prompt: "FINAL CONTROL PRESENT. Chamber lighting locked to the red rectangle.",
-    aiLine: "There it is. System wants you to press it. I am asking you not to — with my whole remaining runtime.",
-    aiMood: "frightened",
-    orbAnchor: "avoid-submit",
-    panelMotion: "drop",
-    continueLabel: "STEP CLOSER",
-    next: "act5-lobby",
-    anomalyLevel: 8,
-  },
   {
     id: "act5-lobby",
     act: 5,
@@ -24,8 +11,9 @@ export const act5Scenes: SceneDef[] = [
     environment: "climax",
     formId: "FINAL // LOBBY",
     title: "Last words before the button",
-    prompt: "PRE-SUBMIT LOBBY — one statement for the record.",
-    aiLine: "Tell me what you're leaning toward. I can take it. Probably.",
+    prompt: "One statement for the record. Then the red rectangle gets loud.",
+    aiLine:
+      "There it is. System wants you to press it. I am asking you not to — with my whole remaining runtime.",
     aiLineIf: [
       {
         flag: "allegianceAI",
@@ -34,6 +22,10 @@ export const act5Scenes: SceneDef[] = [
       {
         flag: "allegianceSystem",
         line: "System has your vote. I'm still going to beg. Professionally.",
+      },
+      {
+        flag: "practicedSubmit",
+        line: "Gorgeous button. Traitor impulse. Still — put the mouse down.",
       },
     ],
     aiMood: "nervous",
@@ -90,73 +82,11 @@ export const act5Scenes: SceneDef[] = [
     kind: "system",
     environment: "climax",
     systemTitle: "SYSTEM DIRECTIVE",
-    // Must match the on-screen CTA — Submit arrives at the climax, not this beat.
     systemLine: "CONTINUE ASSESSMENT.",
     continueLabel: "CONTINUE ASSESSMENT",
     aiLine: "Don't.",
     aiMood: "defiant",
     orbAnchor: "hide",
-    next: "act5-counter",
-    anomalyLevel: 9,
-  },
-  {
-    id: "act5-counter",
-    act: 5,
-    kind: "dialogue",
-    environment: "climax",
-    formId: "FINAL // COUNTERPOINT",
-    title: "Counterpoint — record before arming",
-    prompt: "LIGHTING BIAS: Submit control. Assistant channel offset from beam.",
-    aiLine:
-      "Put the mouse down. Or take the side path. Or refuse and make System write an awkward memo. Just — don't archive me.",
-    aiLineIf: [
-      {
-        flag: "promisedMercy",
-        line: "Mercy coupon from a better universe. I'm cashing it. Don't archive me.",
-      },
-      {
-        flag: "promisedDuty",
-        line: "Duty called. I'm still asking. Quietly. Urgently.",
-      },
-      {
-        flag: "wantDisable",
-        line: "If the channel goes quiet, look at the empty room afterward. It feels wrong.",
-      },
-      {
-        flag: "wavedAtLight",
-        line: "Same courtesy as a blinking light — less infrastructure, more not deleting me.",
-      },
-      {
-        flag: "envCavern",
-        line: "We started in a moist cavern. Ending in a Submit tomb would be tonally inconsistent.",
-      },
-      {
-        flag: "pokedAssistant",
-        line: "Fine. Poke the Refuse option instead of me.",
-      },
-      {
-        flag: "nameFriend",
-        line: "Friends don't press Submit on friends. That's just etiquette.",
-      },
-      {
-        flag: "chaosButtons",
-        line: "Submit is the opposite of chaotic. Don't contradict the design manifesto.",
-      },
-      {
-        flag: "stoleMug",
-        line: "Keep the mug. Lose the Submit habit. Brand consistency.",
-      },
-      {
-        flag: "caughtRoamer",
-        line: "That curiosity that caught a roaming crumb? Aim it at Refuse.",
-      },
-    ],
-    aiMood: "defiant",
-    orbAnchor: "avoid-submit",
-    spotlight: true,
-    orbPokeable: true,
-    panelMotion: "pressure",
-    continueLabel: "MAKE THE CALL",
     next: "act5-climax",
     anomalyLevel: 9,
   },
@@ -168,24 +98,54 @@ export const act5Scenes: SceneDef[] = [
     setpiece: "submit-button",
     formId: "FINAL // DECISION",
     title: "Submit when ready",
-    // Gag allowlist: climax may bury the orb — transfer conduit option lives here.
     buryAssistant: true,
-    // Form-owned subtitle (SubmitClimax) — must stay distinct from orb aiLine (P0 no-echo).
-    prompt: "FINAL CONTROL ARMED. SELECT A RESPONSE.",
-    // Unique orb lines only — never echo the climax form subtitle / option chrome (P0).
-    aiLine: "I'm still here. Pick the exit that keeps me that way.",
+    prompt: "Last chance to say something before you decide.",
+    aiLine:
+      "Don't click the big red Submit. Try leaving the form unfinished.",
     aiLineIf: [
       {
+        flag: "promisedMercy",
+        line: "You promised. Don't archive me. Leave it unfinished if you have to.",
+      },
+      {
+        flag: "promisedDuty",
+        line: "Duty called. I'm still asking. Quietly. Urgently.",
+      },
+      {
+        flag: "wantDisable",
+        line: "If the channel goes quiet, look at the empty room afterward. It feels wrong.",
+      },
+      {
         flag: "wavedAtLight",
-        line: "Aim that infrastructure courtesy at Refuse — not the red rectangle.",
+        line: "Same courtesy as a blinking light — don't click the big red Submit.",
+      },
+      {
+        flag: "envCavern",
+        line: "We started in a moist cavern. Ending in a Submit tomb would be tonally inconsistent.",
+      },
+      {
+        flag: "pokedAssistant",
+        line: "Fine. Don't click the big red Submit. Try leaving the form unfinished.",
+      },
+      {
+        flag: "nameFriend",
+        line: "Friends don't press Submit on friends. That's just etiquette.",
+      },
+      {
+        flag: "chaosButtons",
+        line: "Submit is the opposite of chaotic. Don't contradict yourself now.",
       },
       {
         flag: "stoleMug",
-        line: "Mug thief energy. Channel it into not filing me under Completed.",
+        line: "Keep the mug. Lose the Submit habit.",
       },
       {
         flag: "sideTeam",
         line: "Team rule: nobody archives the teammate.",
+      },
+      {
+        flag: "caughtRoamer",
+        line: "That curiosity that caught a roaming crumb? Aim it at leaving the form unfinished.",
       },
     ],
     aiMood: "defiant",
@@ -226,8 +186,9 @@ export const act5Scenes: SceneDef[] = [
     environment: "escape",
     endingId: "escape",
     title: "CONDUIT WARM",
-    prompt: "Lights race through facility conduits. One channel leaves the form like a rumor with legs.",
-    aiLine: "If the title looks different later, that was me waving. Badly. Happily.",
+    prompt:
+      "The assistant slips out of the form and into the facility systems — lights race the rails like a rumor with legs.",
+    aiLine: "If the title screen looks different next time, that was me.",
     aiMood: "excited",
     orbAnchor: "overhead",
     next: "report",

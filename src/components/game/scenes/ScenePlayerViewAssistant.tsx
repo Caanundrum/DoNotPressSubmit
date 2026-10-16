@@ -134,7 +134,7 @@ export function ScenePlayerViewAssistant({
           />
         </div>
         <motion.div
-          className="pointer-events-none glass-panel assistant-bubble shrink px-2.5 py-1.5 text-sm leading-relaxed text-[#d7e6f5]"
+          className="pointer-events-none glass-panel assistant-bubble shrink border border-cyan/45 px-2.5 py-1.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
           style={{
             maxWidth: bubbleMax,
             // Tall enough for Form 03 / Counterpoint / Form 09 full lines — no mid-word cut.
@@ -174,6 +174,7 @@ export function ScenePlayerViewAssistant({
             y: 0,
             scale: 1,
           }}
+          transition={{ delay: 0, duration: 0.28, ease: "easeOut" }}
         >
           {/* Wordless speaker mark — mood is orb look + line, not a status strip. */}
           <div
@@ -185,7 +186,7 @@ export function ScenePlayerViewAssistant({
             <span className="h-px w-4 bg-cyan/40" />
           </div>
           <div
-            className={`break-words text-[12px] leading-snug sm:text-[12px] ${spotlight ? "sm:text-[13px]" : ""}`}
+            className="break-words text-[13px] font-medium leading-relaxed text-[#f0f7ff] sm:text-[15px]"
             style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
           >
             {bubbleReads ? aiLine || "…" : "…"}

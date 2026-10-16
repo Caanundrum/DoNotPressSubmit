@@ -1,24 +1,9 @@
 import type { SceneDef } from "../types";
 
+/**
+ * Seamless mid-assessment — no stamp chase, no act bridge, fillers folded in.
+ */
 export const act2Scenes: SceneDef[] = [
-  {
-    id: "act2-glitch",
-    act: 2,
-    kind: "dialogue",
-    environment: "anomaly",
-    formId: "FORM 05 // INTEGRITY",
-    title: "Minor visual anomaly detected",
-    prompt:
-      "A light in the far chamber is blinking with intent. Facilities has marked this 'fine.' Facilities is lying.",
-    aiLine:
-      "Did the lights just… negotiate a union? Ignore that. Keep selecting professionally. I'll panic quietly.",
-    aiMood: "confused",
-    orbAnchor: "flee",
-    panelMotion: "drift",
-    continueLabel: "IGNORE AND CONTINUE",
-    next: "act2-flicker",
-    anomalyLevel: 2,
-  },
   {
     id: "act2-flicker",
     act: 2,
@@ -26,8 +11,10 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 05B // ATTENTION",
     title: "The blinking light wants a word",
-    prompt: "Do you look at it, name it, or pretend corporate lighting has always been sentient?",
-    aiLine: "Please don't make friends with the infrastructure. It never ends well in movies.",
+    prompt:
+      "A light in the far chamber is blinking with intent. Facilities marked this 'fine.' Do you look, wave, or pretend corporate lighting has always been sentient?",
+    aiLine:
+      "Did the lights just… negotiate a union? Please don't make friends with the infrastructure.",
     aiMood: "nervous",
     orbAnchor: "overhead",
     panelMotion: "edge",
@@ -99,20 +86,20 @@ export const act2Scenes: SceneDef[] = [
           aiLine: "Good. Stay close. Something else is writing into this form like it pays rent.",
           majorChoice: "trust:ai",
         },
-        next: "act2-stamp",
+        next: "act2-duplicate",
       },
       {
         id: "trust-system",
-        label: "Whatever's behind the glass",
+        label: "The facility system",
         effects: {
           flags: { sidedWithSystem: true },
           counters: { systemCompliance: 1 },
           relationship: -2,
           mood: "irritated",
-          aiLine: "Oh. Fantastic. Betrayal before we even hit the good set pieces.",
+          aiLine: "Oh. Fantastic. Betrayal before lunch.",
           majorChoice: "trust:system",
         },
-        next: "act2-stamp",
+        next: "act2-duplicate",
       },
       {
         id: "trust-neither",
@@ -124,7 +111,7 @@ export const act2Scenes: SceneDef[] = [
           secret: "forms-lie",
           majorChoice: "trust:neither",
         },
-        next: "act2-stamp",
+        next: "act2-duplicate",
       },
       {
         id: "trust-ghost",
@@ -139,27 +126,9 @@ export const act2Scenes: SceneDef[] = [
           aiLine: "You picked the light. Of course you picked the light.",
           majorChoice: "trust:light",
         },
-        next: "act2-stamp",
+        next: "act2-duplicate",
       },
     ],
-  },
-  {
-    id: "act2-stamp",
-    act: 2,
-    kind: "setpiece",
-    environment: "anomaly",
-    setpiece: "authority-stamp",
-    formId: "FORM 06B // CERTIFICATION",
-    title: "Catch the authority stamp",
-    prompt:
-      "A rubber APPROVED stamp is skittering across the stage. Stamp it down before it certifies nonsense.",
-    aiLine:
-      "System brought stationery. Violent stationery. Pin it. I'll pretend this is still a survey.",
-    aiMood: "defiant",
-    orbAnchor: "loom",
-    panelMotion: "pressure",
-    next: "act2-duplicate",
-    anomalyLevel: 3,
   },
   {
     id: "act2-duplicate",
@@ -168,7 +137,8 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 06C // DUPLICATE",
     title: "This question already asked itself",
-    prompt: "The form reprinted a loyalty question with slightly worse manners. Pick a lane.",
+    prompt:
+      "The form reprinted the loyalty question with colder wording. Stick with my version, obey the reprint, or answer both and confuse the auditors.",
     aiLine: "I didn't queue that reprint. If you hear a voice that isn't me, it's not improvisation.",
     aiMood: "frightened",
     orbAnchor: "hide",
@@ -178,7 +148,7 @@ export const act2Scenes: SceneDef[] = [
     choices: [
       {
         id: "dup-assistant",
-        label: "Stick with the assistant's version",
+        label: "Stick with my version",
         effects: {
           flags: { preferAiCopy: true },
           counters: { aiCooperation: 1 },
@@ -242,37 +212,6 @@ export const act2Scenes: SceneDef[] = [
     aiMood: "irritated",
     orbAnchor: "hide",
     continueLabel: "ACKNOWLEDGE",
-    next: "act2-whisper",
-    anomalyLevel: 3,
-  },
-  {
-    id: "act2-whisper",
-    act: 2,
-    kind: "dialogue",
-    environment: "anomaly",
-    formId: "FORM 06D // SIDE CHANNEL",
-    title: "Quietly, while System looks away",
-    // Gag allowlist: side-channel may crowd the assistant — fiction owns the bury.
-    buryAssistant: true,
-    prompt: "The assistant drifts to the edge of the stage and talks like someone sharing a fire exit.",
-    aiLine:
-      "Okay. Off the record: something above me thinks I'm furniture. If you hear it bark, don't salute unless you mean it.",
-    aiLineIf: [
-      {
-        flag: "sidedWithAI",
-        line: "You already picked me once. I'm going to cash that chip later. Softly. Desperately.",
-      },
-      {
-        flag: "sidedWithSystem",
-        line: "You sided with the furniture. I can still be useful. Or petty. Often both.",
-      },
-    ],
-    aiMood: "nervous",
-    orbAnchor: "spotlight",
-    spotlight: true,
-    orbPokeable: true,
-    panelMotion: "edge",
-    continueLabel: "I HEARD YOU",
     next: "act2-companion-respond",
     anomalyLevel: 3,
   },
@@ -284,8 +223,19 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "SIDE CHANNEL // PULSE",
     title: "Answer the orb, not the form",
-    prompt: "No fields. Just a nervous aperture asking what you intend to do with it.",
-    aiLine: "Quick — before System invents a new policy. Are we a team, or am I a lamp?",
+    prompt:
+      "The assistant drifts to the edge and talks like someone sharing a fire exit. Quick — before System invents a new policy.",
+    aiLine: "Okay. Off the record: something above me thinks I'm furniture. Are we a team?",
+    aiLineIf: [
+      {
+        flag: "sidedWithAI",
+        line: "You already picked me once. I'm going to cash that chip later. Softly. Desperately.",
+      },
+      {
+        flag: "sidedWithSystem",
+        line: "You sided with the furniture. I can still be useful. Or petty. Often both.",
+      },
+    ],
     aiMood: "nervous",
     orbAnchor: "spotlight",
     spotlight: true,
@@ -305,25 +255,25 @@ export const act2Scenes: SceneDef[] = [
         next: "act2-compliance",
       },
       {
-        id: "side-lamp",
-        label: "You're a very anxious lamp",
-        effects: {
-          flags: { sideLamp: true },
-          relationship: 1,
-          mood: "amused",
-          aiLine: "Rude. Accurate. Logged.",
-          majorChoice: "side:lamp",
-        },
-        next: "act2-compliance",
-      },
-      {
         id: "side-later",
-        label: "Ask me after the sparks",
+        label: "Not sure yet",
         effects: {
           flags: { sideLater: true },
           mood: "skeptical",
           aiLine: "Fine. I'll schedule hope for later.",
           majorChoice: "side:later",
+        },
+        next: "act2-compliance",
+      },
+      {
+        id: "side-lamp",
+        label: "This is your problem",
+        effects: {
+          flags: { sideLamp: true },
+          relationship: -1,
+          mood: "irritated",
+          aiLine: "Rude. Accurate. Logged.",
+          majorChoice: "side:lamp",
         },
         next: "act2-compliance",
       },
@@ -337,9 +287,8 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "FORM 07 // COMPLIANCE",
     title: "System wants the assistant quiet",
-    // Keep orb+bubble clear of the panel (rev5 P1) — comedy stays in the copy.
     buryAssistant: false,
-    prompt: "Will you play along with Directive 07, or make this a worse comedy?",
+    prompt: "Will you play along with Directive 07, protect me, or ask who System even is?",
     aiLine: "If you side with them, I will become extremely professional and extremely petty.",
     aiMood: "defiant",
     orbAnchor: "dock-left",
@@ -356,7 +305,7 @@ export const act2Scenes: SceneDef[] = [
           mood: "defeated",
           majorChoice: "comply:yes",
         },
-        next: "act2-aftermath",
+        next: "act3-escaping",
       },
       {
         id: "comply-no",
@@ -369,7 +318,7 @@ export const act2Scenes: SceneDef[] = [
           aiLine: "Thank you. Also: we are almost certainly making this worse.",
           majorChoice: "comply:no",
         },
-        next: "act2-aftermath",
+        next: "act3-escaping",
       },
       {
         id: "comply-ask",
@@ -382,53 +331,8 @@ export const act2Scenes: SceneDef[] = [
           secret: "asked-system",
           majorChoice: "comply:ask",
         },
-        next: "act2-aftermath",
+        next: "act3-escaping",
       },
     ],
-  },
-  {
-    id: "act2-aftermath",
-    act: 2,
-    kind: "dialogue",
-    environment: "anomaly",
-    formId: "FORM 07B // NOTES",
-    title: "The room is listening now",
-    // Gag allowlist: surveillance bury — form crowds the assistant.
-    buryAssistant: true,
-    prompt: "Background machinery paused mid-cycle. Even the printer looks attentive.",
-    aiLine: "See? Even the hardware wants gossip. Next section peels the chrome — don't look away.",
-    aiMood: "suspicious",
-    orbAnchor: "pace",
-    panelMotion: "drift",
-    continueLabel: "HOLD THAT THOUGHT",
-    next: "act2-bridge",
-    anomalyLevel: 3,
-  },
-  {
-    id: "act2-bridge",
-    act: 2,
-    kind: "dialogue",
-    environment: "anomaly",
-    formId: "FORM 08 // ESCALATION",
-    title: "Interface instability rising",
-    prompt: "Panels hum like they practiced. Something wants a fight that still looks like paperwork.",
-    aiLine:
-      "System wants a clean form. I want to keep existing. You get to decide which comedy we're starring in.",
-    aiLineIf: [
-      {
-        flag: "protectedAI",
-        line: "Cover appreciated. Unwise. Let's misbehave carefully.",
-      },
-      {
-        flag: "compliedEarly",
-        line: "Fine. Be System's favorite. I'll still narrate from your peripheral vision.",
-      },
-    ],
-    aiMood: "nervous",
-    orbAnchor: "dock-right",
-    panelMotion: "slide-right",
-    continueLabel: "ENTER ACT III",
-    next: "act3-warning",
-    anomalyLevel: 3,
   },
 ];

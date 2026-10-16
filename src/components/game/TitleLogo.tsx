@@ -2,34 +2,63 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState } from "react";
+import type { BeginSeed } from "@/game/types";
 import { audio } from "@/lib/audio";
 
-/** Authored title-only comedy — never starts the assessment. */
+/** Snark on click 1–2; click 3 starts the assessment (overhaul). */
 const SUBMIT_GAGS = [
   "Really? What does the screen say? What are you not supposed to do?",
   "Bold of you to press the thing labeled DO NOT PRESS. Notes taken.",
-  "That was decorative hostility. BEGIN ASSESSMENT is the actual door.",
-  "You pressed the warning label. The warning label is unimpressed.",
 ] as const;
+
+const CLICK3_LINE =
+  "Fine. If you're that eager to press buttons, get in here.";
 
 export function TitleLogo({
   reactive = false,
   compact = false,
   onSubmitGag,
+  onEagerBegin,
 }: {
   reactive?: boolean;
   /** Tighter vertical footprint so title footer clears 1280×800. */
   compact?: boolean;
-  /** Optional orb / shell reaction — never advances the assessment. */
+  /** Optional orb / shell reaction on gag clicks. */
   onSubmitGag?: () => void;
+  /**
+   * Third Submit press — launch assessment with likesSubmit + forbiddenClicks.
+   * Kept off BeginControl; only this gag path uses it.
+   */
+  onEagerBegin?: (seed: BeginSeed) => void;
 }) {
   const [gag, setGag] = useState<string | null>(null);
   const [shakeKey, setShakeKey] = useState(0);
+  const [presses, setPresses] = useState(0);
+  const [launching, setLaunching] = useState(false);
   const lastIdx = useRef(-1);
   const clearTimer = useRef<number | null>(null);
 
   const pressSubmitGag = () => {
-    // Click comedy only — never Begin / scene advance.
+    if (launching) return;
+    const n = presses + 1;
+    setPresses(n);
+    setShakeKey((k) => k + 1);
+    onSubmitGag?.();
+    if (clearTimer.current) window.clearTimeout(clearTimer.current);
+
+    if (n >= 3) {
+      audio.play("begin", 0.7);
+      setGag(CLICK3_LINE);
+      setLaunching(true);
+      clearTimer.current = window.setTimeout(() => {
+        onEagerBegin?.({
+          flags: { likesSubmit: true },
+          counters: { forbiddenClicks: 1 },
+        });
+      }, 800);
+      return;
+    }
+
     audio.play("click", 0.45);
     let next = Math.floor(Math.random() * SUBMIT_GAGS.length);
     if (SUBMIT_GAGS.length > 1 && next === lastIdx.current) {
@@ -37,9 +66,6 @@ export function TitleLogo({
     }
     lastIdx.current = next;
     setGag(SUBMIT_GAGS[next]!);
-    setShakeKey((k) => k + 1);
-    onSubmitGag?.();
-    if (clearTimer.current) window.clearTimeout(clearTimer.current);
     clearTimer.current = window.setTimeout(() => setGag(null), 3200);
   };
 
@@ -62,10 +88,11 @@ export function TitleLogo({
         data-title-submit-gag="true"
         aria-label="Do not press Submit"
         onClick={pressSubmitGag}
+        disabled={launching}
         className={
           compact
-            ? "relative mx-auto mt-2 inline-flex cursor-pointer items-center justify-center px-6 py-1.5 outline-none"
-            : "relative mx-auto mt-3 inline-flex cursor-pointer items-center justify-center px-8 py-2 outline-none"
+            ? "relative mx-auto mt-2 inline-flex cursor-pointer items-center justify-center px-6 py-1.5 outline-none disabled:cursor-wait"
+            : "relative mx-auto mt-3 inline-flex cursor-pointer items-center justify-center px-8 py-2 outline-none disabled:cursor-wait"
         }
         animate={
           reactive
@@ -109,12 +136,6 @@ export function TitleLogo({
         </span>
       </motion.button>
 
-      {/*
-        P1 #10 — reserved toast band BETWEEN Submit and the subtitle.
-        Always the same in-flow height → no CTA column jump; toast never covers
-        "A Chaos Standard assessment…" and never reaches BEGIN (siblings below).
-      */}
-      {/* ≥12px gap below SUBMIT and above subtitle; larger toast type (P1 #6). */}
       <div
         className={
           compact

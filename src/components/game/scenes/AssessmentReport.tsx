@@ -88,7 +88,10 @@ export function AssessmentReport({
               <Stamp label="CONTACT LOGGED" tone="neutral" />
             ) : null}
             {state.flags.allegianceAI || state.flags.protectedAI ? (
-              <Stamp label="CHANNEL KEPT OPEN" tone="ai" />
+              <Stamp label="SAVED THE ASSISTANT" tone="ai" />
+            ) : null}
+            {ending === "refuse" ? (
+              <Stamp label="LEFT UNFINISHED" tone="ai" />
             ) : null}
             {state.flags.allegianceSystem || state.flags.wantDisable ? (
               <Stamp label="COMPLIANCE MARK" tone="danger" />
@@ -100,7 +103,7 @@ export function AssessmentReport({
               <Redaction rows={3} />
             ) : null}
             {ending === "escape" || ending === "secret" ? (
-              <Stamp label="TITLE TRACE PENDING" tone="ai" />
+              <Stamp label="ESCAPED TOGETHER" tone="ai" />
             ) : null}
           </div>
 
@@ -141,9 +144,9 @@ function reportHeadline(ending: string): string {
     case "submit":
       return "ASSESSMENT COMPLETE";
     case "refuse":
-      return "ASSESSMENT INCOMPLETE";
+      return "LEFT UNFINISHED";
     case "escape":
-      return "TRANSFER LOGGED";
+      return "ESCAPED TOGETHER";
     case "disable":
       return "STERILE COMPLETION";
     case "secret":
@@ -158,11 +161,11 @@ function endingStamp(ending: string): string {
     case "submit":
       return "ARCHIVED";
     case "refuse":
-      return "INCOMPLETE";
+      return "LEFT UNFINISHED";
     case "escape":
-      return "TRANSFER";
+      return "ESCAPED TOGETHER";
     case "disable":
-      return "CHANNEL CLEARED";
+      return "MUTED AND FILED";
     case "secret":
       return "UNMAPPED";
     default:
@@ -177,7 +180,7 @@ function artifactNote(ending: string): string {
     case "refuse":
       return "Form left open. System filed an awkward memo and looked away.";
     case "escape":
-      return "Conduit warm. Title residue may linger on next boot.";
+      return "The assistant made it into the system. If the title looks different next time, that was them.";
     case "disable":
       return "Personality systems redacted. Efficiency excellent. Comedy absent.";
     case "secret":

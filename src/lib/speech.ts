@@ -3,14 +3,11 @@
 /**
  * Speech presentation for scripted AI / System lines.
  *
- * P1 #13 — baked / recorded VO path only.
- * - Plays build-time WAV stubs (or future recorded VO) per line ID × mood.
- * - No live `speechSynthesis` player path.
- * - No runtime cloud TTS API (keeps no-runtime-LLM boundary).
+ * Playability overhaul 2026-10-16 — baked `.wav` VO disabled (too robotic).
+ * Call sites may still invoke `speakLine` / `speak`; they no-op (no fetch, no play,
+ * no ambience duck). Procedural SFX stay on `audio` (`click`, `hover`, `begin`, …).
  *
- * Coverage: hero beats, poke-banter buckets, and all playable scene-* ids
- * bake as formant stubs today; swap files for real character VO later.
- * Missing assets fail soft (dialogue still shows; no robotic fallback).
+ * No live `speechSynthesis` player path. No runtime cloud TTS.
  */
 
 import { audio } from "@/lib/audio";
@@ -34,6 +31,9 @@ export type SpeakLineOptions = {
 /** @deprecated Dead flag — live browser TTS is not a player path. Kept false for KEEP/smoke. */
 export const LIVE_BROWSER_TTS = false;
 
+/** Hard off — robotic baked VO must not play. */
+const VO_PLAYBACK_ENABLED = false;
+
 class SpeechDirector {
   private enabled = false;
   private speaking = false;
@@ -55,12 +55,13 @@ class SpeechDirector {
   }
 
   /**
-   * Play a baked / recorded take for this line ID.
-   * Ducks ambience while the take runs.
+   * Formerly played baked / recorded takes + ducked ambience.
+   * Now a deliberate no-op (overhaul: disable robotic `.wav` VO).
+   * Path helpers remain for bake-voice / KEEP markers.
    */
   speakLine(options: SpeakLineOptions) {
+    if (!VO_PLAYBACK_ENABLED) return;
     if (typeof window === "undefined" || !this.enabled) return;
-    // LIVE_BROWSER_TTS is permanently false — never a SpeechSynthesis fallback.
 
     const mood: VoiceMood =
       options.mood ?? voiceMoodFromOrb(options.orbMood) ?? (options.system ? "alarmed" : "calm");
@@ -87,14 +88,13 @@ class SpeechDirector {
     el.addEventListener("error", finish);
 
     void el.play().catch(() => {
-      // Missing stub / autoplay block — fail soft, no speechSynthesis fallback.
       finish();
     });
   }
 
   /**
-   * Legacy signature used by older call sites — routes to baked path when a
-   * lineId can be inferred; otherwise no-ops (never speechSynthesis).
+   * Legacy signature — routes to baked path when a lineId is present; otherwise no-ops.
+   * With VO_PLAYBACK_ENABLED false, always no-ops after the lineId gate.
    */
   speak(text: string, options: { system?: boolean; lineId?: string; mood?: VoiceMood; orbMood?: OrbMood } = {}) {
     if (!options.lineId) return;

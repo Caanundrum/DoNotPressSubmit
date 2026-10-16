@@ -29,13 +29,35 @@ assert(/FORM_12_SCENE_ID = "act3-checkbox"/.test(locks), "Form 12 scene id lock"
 const act3 = read("src/game/scenes/act3.ts");
 assert(act3.includes('id: "act3-checkbox"'), "act3 checkbox scene present");
 assert(act3.includes('orbAnchor: "dock-left"'), "act3 Form 12 dock-left in scene data");
-assert(act3.includes("cousin"), "popup cousin gag copy present");
-assert(act3.includes("LOOK UNDERNEATH"), "LOOK UNDERNEATH continue label");
+assert(!/Act III|Act IV|LOOK UNDERNEATH|ENGAGE THE NONSENSE/.test(act3), "act3 has no visible Act bridge copy");
+assert(!/act3-between-1/.test(act3), "duplicate blame beat act3-between-1 removed");
 assert(/fled|flees|sprint/i.test(act3), "checkbox flee comedy present");
 assert(!/It agreed, then fled/.test(act3), "Form 12 orb line is unique (no stale It agreed then fled echo)");
 
 const act1 = read("src/game/scenes/act1.ts");
 assert(/mug|Mug/.test(act1), "mug steal path still in Act I");
+assert(!/act1-handshake|act1-companion-watch|act1-bridge/.test(act1), "slow Act I fillers / bridge cut");
+assert(/act1-restless/.test(act1) && /next: "act1-restless"/.test(act1), "restless malfunction follows name");
+assert(!/Act II|WALK INTO ACT/.test(act1), "act1 has no visible Act bridge copy");
+
+const act2 = read("src/game/scenes/act2.ts");
+assert(!/act2-stamp|authority-stamp/.test(act2), "authority-stamp chase dropped from act2");
+assert(!/ENTER ACT III|act2-bridge/.test(act2), "act2 bridge removed");
+assert(/The facility system/.test(act2), "trust choice names facility system");
+assert(/We're a team|Not sure yet|This is your problem/.test(act2), "side-channel stances clarified");
+
+const endings = read("src/game/endings.ts");
+assert(/LEAVE FORM UNFINISHED/.test(endings), "climax refuse label clear");
+assert(/HELP THE ASSISTANT ESCAPE/.test(endings), "climax escape label clear");
+assert(/MUTE ASSISTANT AND FILE ALONE/.test(endings), "climax disable label clear");
+assert(/SNEAK OUT THE UNMAPPED HALL/.test(endings), "climax secret label clear");
+assert(/action === "refuse"/.test(endings) && /ending-refuse/.test(endings), "refuse routes to ending-refuse");
+assert(!/relationshipScore >= 3/.test(endings), "refuse no longer upgrades via relationship");
+
+const popupSrc = read("src/components/game/scenes/PopupWar.tsx");
+assert(/needed = 5/.test(popupSrc), "PopupWar requires 5 dismissals");
+assert(!/CHILDREN|PREGNANT|COUSIN/.test(popupSrc), "PopupWar scrubbed cousin/children/pregnant labels");
+assert(/Closed \{progress\}\/\{needed\}/.test(popupSrc), "PopupWar uses clean Closed counter");
 
 const fair = read("src/components/game/FairChaseTarget.tsx");
 assert(/hitPad|proximity|freeze/i.test(fair), "FairChaseTarget mouse-fair markers");
@@ -52,8 +74,9 @@ assert(/minHeight:\s*44/.test(popup), "PopupWar DISMISS minHeight 44");
 const speech = read("src/lib/speech.ts");
 assert(!/speechSynthesis\.speak|new SpeechSynthesisUtterance/.test(speech), "no live speechSynthesis player path");
 assert(/LIVE_BROWSER_TTS\s*=\s*false/.test(speech), "LIVE_BROWSER_TTS stays false");
-assert(/speakLine|voiceAssetPath|baked|\/audio\/vo\//i.test(speech), "baked VO speakLine path present");
-assert(/duckAmbience|unduckAmbience/.test(read("src/lib/audio.ts")), "ambience ducks under VO");
+assert(/speakLine|voiceAssetPath|baked|\/audio\/vo\//i.test(speech), "baked VO speakLine path present (disabled)");
+assert(/VO_PLAYBACK_ENABLED = false/.test(speech), "robotic WAV VO playback hard-disabled");
+assert(/duckAmbience|unduckAmbience/.test(read("src/lib/audio.ts")), "ambience duck helpers retained");
 
 const voiceIds = read("src/lib/voiceIds.ts");
 assert(/calm|petty|alarmed/.test(voiceIds), "voice moods calm/petty/alarmed");
@@ -74,9 +97,11 @@ assert(/collectSceneLineIds|scene-\$\{|sceneCoverage|formant-v2/.test(bake), "ba
 assert(/NOT recorded VO|Replace with real|stub/i.test(bake), "bake-voice documents stubs honestly");
 
 const audioCtl = read("src/components/game/AudioEnableControl.tsx");
-assert(/UNMUTE|ENABLE SOUND/i.test(audioCtl), "unmute control preserved");
-assert(/speakLine|hero-title|setEnabled\(true\)/.test(audioCtl), "unmute arms baked VO not browser TTS");
+assert(/ENABLE SOUND|SOUND ON/i.test(audioCtl), "corner sound control preserved");
+assert(/data-sound-corner/.test(audioCtl), "corner sound marker present");
+assert(/setEnabled\(true\)/.test(audioCtl), "unmute arms speech director flag");
 assert(!/speechSynthesis/.test(audioCtl), "AudioEnableControl never references speechSynthesis");
+assert(!/UNMUTE \/ ENABLE SOUND/.test(audioCtl), "title CTA unmute button removed");
 
 const nextCfg = read("next.config.ts");
 assert(nextCfg.includes('output: "standalone"'), "standalone App Hosting output");
@@ -196,8 +221,14 @@ assert(/data-title-density=\"medium\"|data-title-cta-column|data-title-orb-dock/
 assert(/calm/.test(title), "title passes calm density to ambient layers");
 assert(!/data-title-void/.test(title), "title is not the empty void card");
 assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
-assert(/AudioEnableControl/.test(title), "title keeps unmute / sound control");
+assert(!/AudioEnableControl/.test(title), "title CTA column no longer hosts unmute button");
+assert(/AudioEnableControl/.test(read("src/components/game/GameRoot.tsx")), "GameRoot hosts corner sound control");
+assert(/phase === "title"/.test(read("src/components/game/GameRoot.tsx")), "corner sound available on title");
 assert(/TitleLogo/.test(title), "title keeps brand logo");
+assert(/onEagerBegin/.test(title), "title wires third-Submit eager begin");
+assert(/goTitle|finishChaos/.test(read("src/components/game/GameRoot.tsx")), "chaos transitions toward title");
+assert(/setPhase\("hcos"\)/.test(read("src/components/game/GameRoot.tsx")), "hcos plays after Begin");
+assert(/2500/.test(read("src/components/game/HcosSplash.tsx")), "hcos splash shortened to 2500ms");
 assert(!/TITLE_IDLE_COMEDY/.test(title), "title does not park idle comedy under the orb");
 assert(!/\{\s*[\"']\/\/ residue — click me[\"']\s*\}/.test(title), "title strips idle residue click-me wallpaper");
 assert(!/ASSISTANT ONLINE/.test(title), "title orb status not idle wallpaper competing with BEGIN");
@@ -213,8 +244,10 @@ assert(!/click me/i.test(orb), "AssistantOrb has no click-me microcopy");
 const titleLogo = read("src/components/game/TitleLogo.tsx");
 assert(/data-title-submit-gag/.test(titleLogo), "title SUBMIT is a click gag");
 assert(/SUBMIT_GAGS/.test(titleLogo), "title SUBMIT has authored gag lines");
-assert(!/onBegin/.test(titleLogo), "title SUBMIT gag does not call Begin");
+assert(/onEagerBegin/.test(titleLogo), "title SUBMIT click-3 can start assessment");
+assert(/likesSubmit/.test(titleLogo), "title SUBMIT click-3 seeds likesSubmit");
 assert(/What are you not supposed to do/.test(titleLogo), "title SUBMIT gag keeps Nick line");
+assert(/Fine\. If you're that eager/.test(titleLogo), "title SUBMIT click-3 line present");
 assert(/data-title-submit-toast|absolute/.test(titleLogo), "SUBMIT gag toast is absolute (no column jump)");
 assert(/data-title-submit-toast-band/.test(titleLogo), "SUBMIT gag toast band reserved between Submit and subtitle");
 assert(/data-title-subtitle/.test(titleLogo), "title subtitle marked so gag cannot cover it");
@@ -254,9 +287,22 @@ assert(/data-title-idle-hint|data-residue-hint/.test(title), "title idle orb hin
 assert(/data-drone-memo-strip/.test(drone), "Drone memo strip marked for contrast");
 assert(/data-ambient-dust/.test(fac), "floating dust marked decorative");
 assert(/bottom-\[10%\]|data-companion-stack/.test(viewPanels), "Settle companion stack lifted for bottom margin");
-assert(/YOU SETTLED\. I NOTICED/.test(act1), "Settle CTA names the settle beat (not vague I SAW THAT)");
-assert(/honesty scale|archiving either way|Pick a rung/.test(act1), "Form 02 honesty scale / rung line present");
-assert(/1 HR brochure|court deposition/.test(act1), "Form 02 shows HR-brochure-to-court scale");
+assert(/data-companion-settle-cue|data-companion-settled|ORBIT STEADY/.test(viewPanels), "companion wait shows settle cue when ready");
+assert(/What should I call you\? Pick one/.test(act1), "name prompt uses plain human copy");
+assert(/Call me a friend/.test(act1), "friend label clarified");
+assert(/Moist cavern/.test(act1), "moist cavern option retained");
+assert(/please don't look behind the panel/.test(read("src/game/scenes/act4.ts")), "signature behind-the-panel line retained");
+assert(/Don't click the big red Submit/.test(read("src/game/scenes/act5.ts")), "climax refuse guidance matches labels");
+assert(/text-\[13px\].*sm:text-\[15px\]|sm:text-\[15px\]/.test(viewAssistant), "assistant bubble primary type size");
+assert(/delay: 0\.35/.test(read("src/components/game/scenes/SceneChoiceList.tsx")), "choices stagger after bubble");
+assert(
+  !/CHANNEL RESIDUE|ALLY RESIDUE|Title residue/.test(
+    title + read("src/components/game/scenes/AssessmentReport.tsx"),
+  ),
+  "player-facing residue wording purged",
+);
+assert(/SAVED THE ASSISTANT|ESCAPED TOGETHER|LEFT UNFINISHED/.test(read("src/components/game/scenes/AssessmentReport.tsx")), "report uses plain human outcome stamps");
+assert(/VO_PLAYBACK_ENABLED = false/.test(speech) || /speakLine/.test(speech), "VO disable path marked");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");

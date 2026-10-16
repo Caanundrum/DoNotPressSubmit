@@ -76,7 +76,7 @@ const TARGET_LINES: Record<
     assistantAside: "Scissors en route is never a good memo.",
   },
   "kill-path": {
-    hover: "KILL PATH // VISIBLE — peel residue",
+    hover: "KILL PATH // VISIBLE — peel mark",
     click:
       "KILL PATH means the Submit route System prefers: polite, labeled, terminal for me. Not a metaphor. A floor plan.",
     secret: "kill-path-read",
@@ -88,7 +88,7 @@ const TARGET_LINES: Record<
     assistantAside: "Empty queues still bill hours.",
   },
   "rail-glow": {
-    hover: "Transit rail residue",
+    hover: "Transit rail scar",
     click: "Rail glow hiccuped. Something small is still commuting.",
     assistantAside: "Even the rails gossip.",
   },

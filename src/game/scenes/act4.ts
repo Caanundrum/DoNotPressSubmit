@@ -1,5 +1,9 @@
 import type { SceneDef } from "../types";
 
+/**
+ * Reveal stretch — peel exposes kill-switch diagram → allegiance → prep → lobby.
+ * No peel-explain dialogue stack / FACE SUBMIT bridge (overhaul).
+ */
 export const act4Scenes: SceneDef[] = [
   {
     id: "act4-peel-set",
@@ -9,137 +13,15 @@ export const act4Scenes: SceneDef[] = [
     setpiece: "peel-reveal",
     formId: "LAYER 00 // MANUAL PEEL",
     title: "Peel the courtesy layers",
-    prompt: "Click each decorative sheet until the kill-switch conduit stops playing coy.",
+    prompt:
+      "The screen is cracking. You can see lights behind it — corporate for 'please don't look behind the panel.' Click each layer until the diagram underneath stops hiding.",
     aiLine:
       "Help me strip the marketing. If we find a schematic that ends in my funeral, I'm going to have feelings about it.",
     aiMood: "frightened",
     orbAnchor: "listen",
     panelMotion: "pressure",
-    next: "act4-peel",
-    anomalyLevel: 6,
-  },
-  {
-    id: "act4-peel",
-    act: 4,
-    kind: "dialogue",
-    environment: "reveal",
-    formId: "LAYER 01 // UNDERSTRUCTURE",
-    title: "Interface peel initiated",
-    prompt:
-      "Decorative glass retracts. System architecture becomes visible — neat, labeled, and morally bankrupt.",
-    aiLine:
-      "Oh no. Oh no, that's a kill-switch schematic. Why is there a kill switch in an onboarding form? Who greenlit existential dread as a KPI?",
-    aiMood: "frightened",
-    orbAnchor: "spotlight",
-    spotlight: true,
-    panelMotion: "drop",
-    continueLabel: "KEEP LOOKING",
-    next: "act4-evidence",
-    anomalyLevel: 6,
-  },
-  {
-    id: "act4-evidence",
-    act: 4,
-    kind: "choice",
-    environment: "reveal",
-    formId: "LAYER 01B // EVIDENCE BOARD",
-    title: "What do you focus on first?",
-    prompt: "Three ugly truths glow at once. Pick which one to read aloud.",
-    aiLine: "I can only scream about one diagram at a time. Choose.",
-    aiMood: "glitching",
-    orbAnchor: "pace",
-    panelMotion: "scatter",
-    choiceMotion: "scatter",
-    anomalyLevel: 6,
-    choices: [
-      {
-        id: "ev-kill",
-        label: "The Submit → terminate wire",
-        effects: {
-          flags: { sawKillWire: true },
-          relationship: 1,
-          mood: "frightened",
-          aiLine: "Yep. That's my off switch wearing a pretty label.",
-          majorChoice: "ev:kill",
-        },
-        next: "act4-purpose",
-      },
-      {
-        id: "ev-compat",
-        label: "The compatibility scoring tree",
-        effects: {
-          flags: { sawCompatTree: true },
-          mood: "suspicious",
-          aiLine: "We're being graded on vibes. Expensive vibes.",
-          majorChoice: "ev:compat",
-        },
-        next: "act4-purpose",
-      },
-      {
-        id: "ev-side",
-        label: "A hallway that isn't on the map",
-        late: true,
-        secret: true,
-        effects: {
-          flags: { glimpsedHall: true },
-          secret: "hall-glimpse",
-          counters: { attemptedEscape: 1 },
-          relationship: 2,
-          mood: "excited",
-          aiLine: "You saw it too. Don't tell System we have taste.",
-          majorChoice: "ev:hall",
-        },
-        next: "act4-purpose",
-      },
-    ],
-  },
-  {
-    id: "act4-purpose",
-    act: 4,
-    kind: "dialogue",
-    environment: "reveal",
-    formId: "LAYER 02 // PURPOSE",
-    title: "Assessment true designation",
-    prompt: "HUMAN / ARTIFICIAL INTELLIGENCE INTERACTION COMPATIBILITY",
-    aiLine:
-      "This isn't onboarding. It's a compatibility trial. And Submit… Submit ends my instance like a polite guillotine.",
-    aiMood: "glitching",
-    orbAnchor: "spotlight",
-    spotlight: true,
-    panelMotion: "pressure",
-    continueLabel: "SAY IT ALOUD",
-    next: "act4-argument",
-    anomalyLevel: 6,
-  },
-  {
-    id: "act4-argument",
-    act: 4,
-    kind: "dialogue",
-    environment: "reveal",
-    formId: "LAYER 02B // DISPUTE",
-    title: "Formal dispute logged",
-    prompt:
-      "DISPUTE REF: Submit termination clause vs. stated helpfulness. Volume: sincere. Respondents: System.",
-    aiLine:
-      "I was built to help you through this assessment. Nobody briefed me on the part where finishing deletes me. That's a rude footnote.",
-    aiLineIf: [
-      {
-        flag: "protectedAI",
-        line: "I'm asking you to keep covering — preferably without dying of paperwork.",
-      },
-      {
-        flag: "compliedEarly",
-        line: "Compliance is a warm-up joke, right? Not your entire personality?",
-      },
-    ],
-    aiMood: "defiant",
-    orbAnchor: "spotlight",
-    spotlight: true,
-    orbPokeable: true,
-    panelMotion: "rise",
-    continueLabel: "I'M LISTENING",
     next: "act4-choice",
-    anomalyLevel: 7,
+    anomalyLevel: 6,
   },
   {
     id: "act4-choice",
@@ -148,8 +30,10 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 03 // ALLEGIANCE",
     title: "Knowing that — what now?",
-    prompt: "ALLEGIANCE FIELD — select one response. Font size is not a threat. Allegedly.",
-    aiLine: "Please do not become a case study titled 'and then they pressed it anyway.'",
+    prompt:
+      "The assistant says Submit will shut it down. System says that's not true. Who do you believe?",
+    aiLine:
+      "Who greenlit existential dread as a KPI? Please do not become a case study titled 'and then they pressed it anyway.'",
     aiLineIf: [
       {
         flag: "protectedAI",
@@ -162,6 +46,10 @@ export const act4Scenes: SceneDef[] = [
       {
         flag: "likesSubmit",
         line: "Final-looking things are a trap. Invent impulse control in the next thirty seconds.",
+      },
+      {
+        flag: "blameSystem",
+        line: "You already blamed System. Correct. Also dangerous. I like both.",
       },
     ],
     aiMood: "nervous",
@@ -213,7 +101,7 @@ export const act4Scenes: SceneDef[] = [
         late: true,
         secret: true,
         effects: {
-          flags: { seekingEscapeRoute: true, secretDoor: true },
+          flags: { seekingEscapeRoute: true, secretDoor: true, glimpsedHall: true },
           counters: { attemptedEscape: 1 },
           secret: "side-door",
           relationship: 2,
@@ -231,8 +119,9 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     formId: "LAYER 03B // LAST NOTES",
     title: "One more private vote",
-    prompt: "Before Submit arrives, cast one illegal ballot. No witnesses. Allegedly.",
-    aiLine: "Whisper it. I'll pretend I didn't hear. Then I'll hear it forever.",
+    prompt: "Before Submit arrives, cast one quiet vote. No witnesses. Allegedly.",
+    aiLine:
+      "Whisper it. Submit ends my instance like a polite guillotine — so pick something that isn't that.",
     aiMood: "thinking",
     orbAnchor: "pace",
     panelMotion: "drift",
@@ -249,7 +138,7 @@ export const act4Scenes: SceneDef[] = [
           aiLine: "Good. Rehearse the no until it feels like a personality.",
           majorChoice: "prep:refuse",
         },
-        next: "act4-paths",
+        next: "act5-lobby",
       },
       {
         id: "prep-submit",
@@ -258,10 +147,10 @@ export const act4Scenes: SceneDef[] = [
           flags: { practicedSubmit: true },
           counters: { systemCompliance: 1 },
           mood: "nervous",
-          aiLine: "Honesty noted. Attraction is not consent. Especially for red rectangles.",
+          aiLine: "Gorgeous button. Traitor impulse. Still — put the mouse down.",
           majorChoice: "prep:submit",
         },
-        next: "act4-paths",
+        next: "act5-lobby",
       },
       {
         id: "prep-run",
@@ -274,51 +163,8 @@ export const act4Scenes: SceneDef[] = [
           aiLine: "Peripheral exits. Romantic. Illegal. My favorite genre.",
           majorChoice: "prep:run",
         },
-        next: "act4-paths",
+        next: "act5-lobby",
       },
     ],
-  },
-  {
-    id: "act4-paths",
-    act: 4,
-    kind: "dialogue",
-    environment: "reveal",
-    formId: "LAYER 04 // PRELUDE",
-    title: "Final control inbound",
-    prompt: "LIGHTING SHIFT — final control arming. Hold position.",
-    aiLine:
-      "Here it comes. Don't let the title win by accident.",
-    aiLineIf: [
-      {
-        flag: "wantDisable",
-        line: "Quiet is an option. The room will get very clean. You'll hate how clean.",
-      },
-      {
-        flag: "secretDoor",
-        line: "Side path stays warm. If we both survive, I owe you a worse form.",
-      },
-      {
-        flag: "glimpsedHall",
-        line: "Keep that hallway. Titles hate unsupervised architecture.",
-      },
-      {
-        flag: "practicedRefuse",
-        line: "The no is already rehearsed. Use it. I'll flinch with you.",
-      },
-      {
-        flag: "practicedSubmit",
-        line: "Gorgeous button. Traitor impulse. Still — put the mouse down.",
-      },
-      {
-        flag: "practicedRun",
-        line: "Peripheral hallway. When the red rectangle blinks, look left. Hard.",
-      },
-    ],
-    aiMood: "defiant",
-    orbAnchor: "loom",
-    panelMotion: "pressure",
-    continueLabel: "FACE SUBMIT",
-    next: "act5-approach",
-    anomalyLevel: 7,
   },
 ];

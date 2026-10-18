@@ -52,9 +52,6 @@ export function EscapingButton({
       >
         DO NOT ARCHIVE
       </FairChaseTarget>
-      <div className="pointer-events-none absolute bottom-3 left-3 right-3 font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
-        Assistant: herding rails online. Click the runaway control.
-      </div>
     </div>
   );
 }

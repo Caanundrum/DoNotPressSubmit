@@ -14,7 +14,7 @@ export const act3Scenes: SceneDef[] = [
     formId: "CONTAINMENT",
     title: "Contain the unauthorized control",
     prompt: "Pin the fleeing button before it leaves its assigned region.",
-    aiLine: "Things are starting to go wrong. Three hits archives the runaway. Go.",
+    aiLine: "It's getting away. Three hits.",
     aiMood: "defiant",
     orbAnchor: "dock-left",
     orbPokeable: true,

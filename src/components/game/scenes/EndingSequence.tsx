@@ -198,8 +198,13 @@ function endingPresence(endingId: EndingId): Presence {
         mood: "defeated",
         label: "",
         exitCaption: "",
-        exitDuration: 1.6,
-        exitMotion: { opacity: [1, 0.7, 0], scale: [1, 0.6, 0.15], y: [0, 8, 20] },
+        // Visible archive fade — hold, then ease out so it doesn't read as a glitch pop.
+        exitDuration: 2.4,
+        exitMotion: {
+          opacity: [1, 1, 0.8, 0.35, 0],
+          scale: [1, 1, 0.98, 0.95, 0.9],
+          y: [0, 0, 2, 6, 12],
+        },
         silentLine: "ASSISTANT CHANNEL: DISSOLVED",
       };
     case "disable":

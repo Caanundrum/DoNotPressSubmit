@@ -561,5 +561,58 @@ assert(!/lawyer-ups|cry in binary|regrets character development|escalate this in
 ), "holdover machine-voice lines stay gone");
 assert(/top:\s*"48%"/.test(read("src/game/motion.ts")), "hide-dock orb raised ≥24px inside frame");
 
+// Punch list rev13 locks
+assert(
+  /data-companion-scene/.test(read("src/components/game/scenes/ScenePlayerView.tsx")) &&
+    /data-companion-scene="true"/.test(globals),
+  "mobile Side Channel docks orb above companion answers",
+);
+assert(
+  !/drifts to the edge and talks like someone sharing a fire exit/.test(act2),
+  "Side Channel prompt drops show-don't-tell scene narration",
+);
+assert(
+  /It's getting away\. Three hits\./.test(act3) &&
+    !/Things are starting to go wrong\. Three hits archives the runaway/.test(act3),
+  "Containment orb line is short and human",
+);
+assert(
+  !/herding rails online/.test(read("src/components/game/scenes/EscapingButton.tsx")),
+  "Containment drops Assistant herding-rails footer",
+);
+assert(
+  /data-bubble-tail="true"/.test(read("src/components/game/scenes/ScenePlayerViewAssistant.tsx")) &&
+    /\[data-bubble-dock="beside"\]/.test(globals),
+  "form bubbles use tailed speech treatment",
+);
+assert(/data-restless-hint-pad="12"/.test(restless), "Drift hint keeps ≥12px pad from panel edge");
+assert(
+  /calc\(100% - min\(200px, 48%\) - 8px\)/.test(read("src/components/game/scenes/PopupWar.tsx")),
+  "popup cards clamp inside arena so DISMISS stays hittable",
+);
+assert(
+  /Personality systems redacted\. Efficiency excellent\./.test(reportSrc) &&
+    !/Comedy absent\./.test(reportSrc),
+  "mute report note drops Comedy absent wink",
+);
+assert(
+  /ending === "refuse"/.test(reportSrc) && /NOTHING FILED/.test(reportSrc),
+  "NOTHING FILED only when refuse ledger is empty",
+);
+assert(
+  /Someone keeps printing my complaints with a smiley face\./.test(title) &&
+    !/Refuse memo reprinted with a smiley/.test(title),
+  "title poke 2 is human (smiley complaints)",
+);
+assert(
+  /left:\s*48px/.test(globals) && /title-poke-bubble\[data-bubble-tail/.test(globals),
+  "title poke bubble tail aims at orb center",
+);
+assert(
+  /exitDuration:\s*2\.4/.test(ending) &&
+    /opacity:\s*\[1,\s*1,\s*0\.8,\s*0\.35,\s*0\]/.test(ending),
+  "submit ending orb uses a visible archive fade-out",
+);
+
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

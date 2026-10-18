@@ -120,9 +120,11 @@ export function PopupWar({
           return (
             <motion.div
               key={p.id}
-              className="absolute w-[min(220px,46%)] border bg-black/92 p-3 shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+              className="absolute w-[min(200px,48%)] border bg-black/92 p-3 shadow-[0_0_24px_rgba(255,255,255,0.12)]"
+              data-popup-card="true"
               style={{
-                left: `${p.x}%`,
+                // Keep DISMISS inside the arena — never run past the right edge on ~390px.
+                left: `min(${p.x}%, calc(100% - min(200px, 48%) - 8px))`,
                 top: `${p.y}%`,
                 zIndex: p.z,
                 borderColor: isPrimary

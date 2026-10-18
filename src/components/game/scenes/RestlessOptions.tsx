@@ -76,9 +76,10 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative flex h-[min(48vh,380px)] w-full flex-col overflow-hidden border border-cyan/25 bg-black/40 max-sm:h-[min(50vh,380px)]"
+      className="relative flex h-[min(48vh,380px)] w-full flex-col border border-cyan/25 bg-black/40 max-sm:h-[min(50vh,380px)]"
       data-restless-options="true"
       data-restless-pin-lanes="true"
+      data-restless-arena-border="true"
     >
       <div className="shrink-0 px-3 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
         Pinned {pins}/3
@@ -131,8 +132,9 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
         })}
       </div>
       <div
-        className="pointer-events-none shrink-0 border-t border-white/5 bg-black/70 px-3 py-2.5 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4]"
+        className="pointer-events-none shrink-0 border-t border-white/5 bg-black/70 px-3 pb-3 pt-3 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4] max-sm:pb-3.5 max-sm:pt-3"
         data-restless-hint="true"
+        data-restless-hint-pad="12"
       >
         Catch each answer to pin it.
       </div>

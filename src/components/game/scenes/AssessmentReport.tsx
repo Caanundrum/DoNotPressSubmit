@@ -9,6 +9,7 @@ import { BackgroundGags } from "../BackgroundGags";
 /**
  * Report as in-world artifacts — stamps / redactions / changed title —
  * never a "WHAT YOU DID" / mood / trust recap (rev5 P0).
+ * Stamps must not repeat the report title.
  */
 export function AssessmentReport({
   state,
@@ -88,12 +89,9 @@ export function AssessmentReport({
               <Stamp label="CONTACT LOGGED" tone="neutral" />
             ) : null}
             {/* Tags must match the ending — never "SAVED" on archive/mute paths. */}
-            {(ending === "escape" || ending === "secret" || ending === "refuse") &&
+            {(ending === "escape" || ending === "refuse") &&
             (state.flags.allegianceAI || state.flags.protectedAI) ? (
               <Stamp label="SAVED THE ASSISTANT" tone="ai" />
-            ) : null}
-            {ending === "refuse" ? (
-              <Stamp label="LEFT UNFINISHED" tone="ai" />
             ) : null}
             {(ending === "submit" || ending === "disable") &&
             (state.flags.allegianceSystem || state.flags.wantDisable) ? (
@@ -104,9 +102,6 @@ export function AssessmentReport({
             ) : null}
             {ending === "disable" ? (
               <Redaction rows={3} />
-            ) : null}
-            {ending === "escape" || ending === "secret" ? (
-              <Stamp label="ESCAPED TOGETHER" tone="ai" />
             ) : null}
           </div>
 
@@ -159,18 +154,19 @@ function reportHeadline(ending: string): string {
   }
 }
 
+/** Outcome stamp — must differ from the report title (no repeats). */
 function endingStamp(ending: string): string {
   switch (ending) {
     case "submit":
       return "ARCHIVED";
     case "refuse":
-      return "LEFT UNFINISHED";
+      return "NONCOMPLIANT";
     case "escape":
-      return "ESCAPED TOGETHER";
+      return "TRANSFER COMPLETE";
     case "disable":
       return "MUTED AND FILED";
     case "secret":
-      return "UNMAPPED";
+      return "OUTSIDE THE FORM";
     default:
       return "FILED";
   }
@@ -179,15 +175,15 @@ function endingStamp(ending: string): string {
 function artifactNote(ending: string): string {
   switch (ending) {
     case "submit":
-      return "The assistant was archived. The facility is quiet now.";
+      return "Archived. No further questions.";
     case "refuse":
-      return "Form left open. System filed an awkward memo and looked away.";
+      return "Form left open. The facility noted the gap and moved on.";
     case "escape":
       return "The assistant made it into the system. If the title looks different next time, that was them.";
     case "disable":
       return "Personality systems redacted. Efficiency excellent. Comedy absent.";
     case "secret":
-      return "Hallway dust on the ledger. Grammar objected. File kept anyway.";
+      return "An unmapped hall took traffic. The file kept the footprints.";
     default:
       return "Local file only. No cloud. No mercy.";
   }

@@ -37,9 +37,8 @@ export const GAG_DEPART: Record<
   drone: {
     id: "replacement-failed",
     secret: "drone-memo",
-    touched: "Your replacement drone filed itself out. Still failed. Logged.",
-    missed:
-      "Your replacement drone left the frame. Status remained FAILED. Logged.",
+    touched: "Your replacement drone filed itself out. Still failed.",
+    missed: "Your replacement drone left the frame. Still failed.",
   },
   coffee: {
     id: "coffee-mug",

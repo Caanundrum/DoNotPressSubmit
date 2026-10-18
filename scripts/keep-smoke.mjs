@@ -306,10 +306,19 @@ assert(/Call me a friend/.test(act1), "friend label clarified");
 assert(/Moist cavern/.test(act1), "moist cavern option retained");
 assert(/please don't look behind the panel/.test(read("src/game/scenes/act4.ts")), "signature behind-the-panel line retained");
 const act5 = read("src/game/scenes/act5.ts");
-assert(/Don't click the big red Submit/.test(act5), "climax refuse guidance matches labels");
+assert(/Please don't press it\./.test(act5), "climax refuse is a plea without naming the option");
+assert(!/Don't click the big red Submit/.test(act5), "climax no longer names the Submit option");
 assert(!/act5-system-push|SYSTEM DIRECTIVE/.test(act5), "SYSTEM DIRECTIVE continue filler removed");
 assert(!/Then the red rectangle gets loud/.test(act5), "lobby no longer narrates the red rectangle");
-assert(!/Leave it unfinished if you have to/.test(act5), "refuse guidance uses big-red line consistently");
+assert(!/Leave it unfinished if you have to|Try leaving the form unfinished/.test(act5), "refuse guidance does not name unfinished option");
+assert(/Duty called\. I'm still asking\./.test(act5), "duty climax line shipped");
+assert(!/Grammar broke|hallway behind the stylesheet|souvenir dust|Hallway dust on the ledger/.test(act5), "hall ending jargon purged");
+assert(
+  !/embarrassed negotiation|embarrassed pause|awkward memo/.test(
+    act5 + read("src/game/state.ts") + read("src/components/game/scenes/AssessmentReport.tsx"),
+  ),
+  "unfinished ending narration purged",
+);
 const act4 = read("src/game/scenes/act4.ts");
 assert(!/cast one quiet vote|Whisper it/.test(act4), "prep vote copy clarified; whisper muddle cut");
 assert(/polite guillotine/.test(act4), "polite guillotine signature retained");
@@ -330,22 +339,29 @@ assert(
 );
 const reportSrc = read("src/components/game/scenes/AssessmentReport.tsx");
 assert(/SAVED THE ASSISTANT|ESCAPED TOGETHER|LEFT UNFINISHED/.test(reportSrc), "report uses plain human outcome stamps");
+assert(/NONCOMPLIANT|TRANSFER COMPLETE|OUTSIDE THE FORM|ARCHIVED/.test(reportSrc), "report stamps match ending outcomes without title repeats");
 assert(
-  /ending === "escape" \|\| ending === "secret" \|\| ending === "refuse"/.test(reportSrc),
-  "SAVED THE ASSISTANT stamp gated to non-archive endings",
+  /ending === "escape" \|\| ending === "refuse"/.test(reportSrc) &&
+    !/ending === "escape" \|\| ending === "secret" \|\| ending === "refuse"/.test(reportSrc),
+  "SAVED THE ASSISTANT stamp gated to escape/refuse (not hall)",
 );
+assert(/Archived\. No further questions\./.test(reportSrc), "submit report note is distinct from ending blurb");
 assert(
-  /The assistant was archived\. The facility is quiet now\./.test(reportSrc),
-  "submit report note uses plain words",
+  /The assistant was archived\. The facility is quiet now\./.test(read("src/game/state.ts")),
+  "submit ending blurb keeps plain archive words",
 );
 assert(!/Instance stamp applied|One channel blanked/.test(reportSrc), "submit jargon purged from report");
 assert(!/Softly\. Desperately\.|Quietly\. Urgently\./.test(act2 + act5), "triple-beat cadence purged from callback + Decision");
-assert(/THE TITLE REMEMBERS/.test(title), "title escape memory reads as intentional beat");
-assert(/MEMORY TRACE/.test(title), "title top line uses memory framing (not bare ESCAPED leftover)");
-assert(!/waving \? " · ESCAPED TOGETHER"/.test(title), "title top line no longer appends bare ESCAPED TOGETHER");
+assert(!/THE TITLE REMEMBERS|MEMORY TRACE|MERCY TRACE/.test(title), "title memory chrome wording removed — orb carries the beat");
+assert(/data-title-memory/.test(title), "title marks last-ending memory for look");
+assert(/Something pokes back\./.test(title), "escape poke line shortened");
+assert(!/Transfer channel giggles|softly, happily|stop socializing with escaped/.test(title), "rev8 poke leftovers removed");
+assert(/SYSTEM: Stop encouraging it\./.test(title), "escape poke system line shipped");
 assert(/id: "coffee-mug"/.test(act1), "Pressure keeps unauthorized facility mug option");
 assert(/data-choice-count/.test(read("src/components/game/scenes/SceneChoiceList.tsx")), "choice list marks count for mobile density");
-assert(/68dvh|choice-count="5"/.test(read("src/app/globals.css")), "mobile panel tall enough for five Pressure options");
+assert(/62dvh|68dvh|choice-count="5"/.test(read("src/app/globals.css")), "mobile panel tall enough for five Pressure options");
+assert(/rememberTitleEnding|TITLE_MEMORY_KEY/.test(read("src/game/storage.ts")), "title memory persists most recent ending");
+assert(/lineSceneId|data-bubble-scene/.test(scenePlayer + viewAssistant), "orb bubble updates per scene");
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
 assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
 assert(
@@ -361,9 +377,11 @@ assert(/z-\[42\]|z-\[28\]/.test(viewAll), "safe layering z-index stack (assistan
 
 const ending = read("src/components/game/scenes/EndingSequence.tsx");
 assert(!/HCOS \/\/ ASSESSMENT FACILITY|HCOS \/\/ CHAMBER|ENDING \/\/ /.test(title + ending), "title/ending structure chrome purged");
-assert(/TRANSFER COMPLETE/.test(ending), "escape ending keeps TRANSFER COMPLETE orb label");
+assert(/TRANSFER COMPLETE/.test(ending + read("src/game/state.ts") + reportSrc), "escape ending keeps TRANSFER COMPLETE outcome");
 assert(/case \"escape\"[\s\S]*mode:\s*\"present\"/.test(ending), "escape ending orb stays present (not exit-vanish)");
 assert(/data-ending-orb=\"present\"/.test(ending), "ending orb present marker");
+assert(!/\/\/ev:outside/.test(ending), "hall backdrop drops //ev:outside chrome");
+assert(!/STILL HERE \/\/ GRATEFUL|STILL HERE \/\/ WRONG ANGLE/.test(ending), "ending orb captions drop X // Y mood labels");
 
 assert(/YOUR REPLACEMENT|STATUS: FAILED/.test(drone), "drone gag self-explanatory YOUR REPLACEMENT / FAILED");
 assert(/RETRY \/\/ ALSO FAILED/.test(drone), "drone gag keeps RETRY // ALSO FAILED punchline");

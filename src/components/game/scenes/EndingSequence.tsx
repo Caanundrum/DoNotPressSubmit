@@ -174,7 +174,7 @@ function endingPresence(endingId: EndingId): Presence {
         mode: "exit",
         mood: "defeated",
         label: "FRAGMENTING…",
-        exitCaption: "ORBIT DISSOLVED // ORDER RESTORED",
+        exitCaption: "ORBIT DISSOLVED — ORDER RESTORED",
         exitDuration: 1.6,
         exitMotion: { opacity: [1, 0.7, 0], scale: [1, 0.6, 0.15], y: [0, 8, 20] },
         silentLine: "ASSISTANT CHANNEL: DISSOLVED",
@@ -193,7 +193,7 @@ function endingPresence(endingId: EndingId): Presence {
       return {
         mode: "present",
         mood: "glitching",
-        label: "STILL HERE // WRONG ANGLE",
+        label: "",
         silentLine: "ASSISTANT CHANNEL: LEAKING",
       };
     case "refuse":
@@ -201,7 +201,7 @@ function endingPresence(endingId: EndingId): Presence {
       return {
         mode: "present",
         mood: "amused",
-        label: "STILL HERE // GRATEFUL",
+        label: "",
         silentLine: "ASSISTANT CHANNEL: BREATHING",
       };
   }
@@ -407,7 +407,7 @@ function SecretBreak() {
           animate={{ opacity: [0, 1, 0], y: [0, -8, 0] }}
           transition={{ duration: 2.2, delay: i * 0.2, repeat: Infinity }}
         >
-          {i % 2 ? "//ev:outside" : "FORM ≠ WORLD"}
+          {i % 2 ? "OUTSIDE" : "FORM ≠ WORLD"}
         </motion.div>
       ))}
       <motion.div

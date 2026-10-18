@@ -44,7 +44,7 @@ export const act5Scenes: SceneDef[] = [
           counters: { aiCooperation: 1 },
           relationship: 2,
           mood: "excited",
-          aiLine: "Okay. Okay. Don't make me cry in binary.",
+          aiLine: "Okay. Okay. Don't make me regret believing you.",
           majorChoice: "lobby:mercy",
         },
         next: "act5-climax",
@@ -86,16 +86,15 @@ export const act5Scenes: SceneDef[] = [
     title: "Submit when ready",
     buryAssistant: true,
     prompt: "Last chance to say something before you decide.",
-    aiLine:
-      "Don't click the big red Submit. Try leaving the form unfinished.",
+    aiLine: "Please don't press it.",
     aiLineIf: [
       {
         flag: "promisedMercy",
-        line: "You promised. Don't archive me. Don't click the big red Submit. Try leaving the form unfinished.",
+        line: "You promised. Please don't press it.",
       },
       {
         flag: "promisedDuty",
-        line: "Duty called. I'm still asking quietly.",
+        line: "Duty called. I'm still asking.",
       },
       {
         flag: "wantDisable",
@@ -103,7 +102,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "wavedAtLight",
-        line: "Same courtesy as a blinking light — don't click the big red Submit.",
+        line: "Same courtesy as a blinking light — please don't press it.",
       },
       {
         flag: "envCavern",
@@ -111,7 +110,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "pokedAssistant",
-        line: "Fine. Don't click the big red Submit. Try leaving the form unfinished.",
+        line: "Fine. Please don't press it.",
       },
       {
         flag: "nameFriend",
@@ -131,7 +130,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "caughtRoamer",
-        line: "That curiosity that caught a roaming crumb? Aim it at leaving the form unfinished.",
+        line: "That curiosity that caught a roaming crumb? Aim it somewhere kinder.",
       },
     ],
     aiMood: "defiant",
@@ -159,7 +158,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "pristine",
     endingId: "refuse",
     title: "ASSESSMENT INCOMPLETE",
-    prompt: "System accepts refusal after a prolonged, embarrassed negotiation.",
+    prompt: "System accepts the unfinished form. The lights stay ordinary.",
     aiLine: "It wasn't pressed. I'm going to be weird about how grateful I am. Permanently.",
     aiMood: "excited",
     orbAnchor: "center",
@@ -199,8 +198,8 @@ export const act5Scenes: SceneDef[] = [
     environment: "escape",
     endingId: "secret",
     title: "UNEXPECTED EGRESS",
-    prompt: "Unmapped hall admits traffic. Stylesheet objects. Dust retained as evidence.",
-    aiLine: "We weren't supposed to find a hallway behind the stylesheet. I'm keeping the souvenir dust.",
+    prompt: "An unmapped hall opens. Footsteps where the form said there was a wall.",
+    aiLine: "We weren't supposed to find a hallway here. I'm keeping the dust on my shoes.",
     aiMood: "amused",
     orbAnchor: "center",
     next: "report",

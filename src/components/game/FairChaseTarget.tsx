@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -16,7 +17,8 @@ type Pos = { x: number; y: number };
  * Mischievous moving control that stays mouse-fair:
  * smooth patterned motion (never teleports), padded hitbox,
  * hover freeze + near-pointer slowdown, light magnetism.
- * Visual chrome is always clamped fully inside the interaction frame.
+ * Visual chrome is always clamped fully inside the interaction frame
+ * with at least `edgeInsetPx` clearance on every edge (Consent ≥12px).
  */
 export function FairChaseTarget({
   children,
@@ -56,6 +58,7 @@ export function FairChaseTarget({
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const halfPctRef = useRef({ x: 8, y: 10 });
   const edgePctRef = useRef({ x: 4, y: 4 });
+  const posRef = useRef(pos);
 
   useEffect(() => {
     hoverRef.current = hovering;
@@ -65,6 +68,10 @@ export function FairChaseTarget({
     nearRef.current = near;
   }, [near]);
 
+  useEffect(() => {
+    posRef.current = pos;
+  }, [pos]);
+
   const measureHalfPct = useCallback(() => {
     const wrap = wrapRef.current;
     const btn = btnRef.current;
@@ -72,9 +79,9 @@ export function FairChaseTarget({
     if (!wrap || !btn || !parent) return halfPctRef.current;
     const pr = parent.getBoundingClientRect();
     if (pr.width <= 0 || pr.height <= 0) return halfPctRef.current;
-    // Bordered button box (padding paints with the chrome).
-    const paintedW = Math.max(24, btn.offsetWidth);
-    const paintedH = Math.max(24, btn.offsetHeight);
+    // Prefer live painted box (includes hitPad) so clamp tracks real chrome.
+    const paintedW = Math.max(24, btn.getBoundingClientRect().width || btn.offsetWidth);
+    const paintedH = Math.max(24, btn.getBoundingClientRect().height || btn.offsetHeight);
     const next = {
       x: (paintedW / 2 / pr.width) * 100,
       y: (paintedH / 2 / pr.height) * 100,
@@ -102,6 +109,37 @@ export function FairChaseTarget({
     [arenaPadding, measureHalfPct],
   );
 
+  /** Hard pixel inset — corrects negative-margin / magnet / resize drift. */
+  const enforcePixelInset = useCallback(() => {
+    const wrap = wrapRef.current;
+    const btn = btnRef.current;
+    const parent = wrap?.offsetParent as HTMLElement | null;
+    if (!wrap || !btn || !parent) return;
+    const pr = parent.getBoundingClientRect();
+    const br = btn.getBoundingClientRect();
+    if (pr.width <= 0 || pr.height <= 0 || br.width <= 0) return;
+
+    let dx = 0;
+    let dy = 0;
+    const leftGap = br.left - pr.left;
+    const rightGap = pr.right - br.right;
+    const topGap = br.top - pr.top;
+    const bottomGap = pr.bottom - br.bottom;
+    if (leftGap < edgeInsetPx) dx += edgeInsetPx - leftGap;
+    if (rightGap < edgeInsetPx) dx -= edgeInsetPx - rightGap;
+    if (topGap < edgeInsetPx) dy += edgeInsetPx - topGap;
+    if (bottomGap < edgeInsetPx) dy -= edgeInsetPx - bottomGap;
+    if (dx === 0 && dy === 0) return;
+
+    setPos((p) =>
+      clampPos({
+        x: p.x + (dx / pr.width) * 100,
+        y: p.y + (dy / pr.height) * 100,
+      }),
+    );
+    setMagnet({ x: 0, y: 0 });
+  }, [clampPos, edgeInsetPx]);
+
   const clampMagnet = useCallback(
     (rawPos: Pos, mag: { x: number; y: number }) => {
       const wrap = wrapRef.current;
@@ -114,16 +152,17 @@ export function FairChaseTarget({
       const cy = (rawPos.y / 100) * pr.height;
       const halfPxX = (half.x / 100) * pr.width;
       const halfPxY = (half.y / 100) * pr.height;
-      const maxX = Math.max(0, pr.width - halfPxX - cx);
-      const minX = Math.min(0, halfPxX - cx);
-      const maxY = Math.max(0, pr.height - halfPxY - cy);
-      const minY = Math.min(0, halfPxY - cy);
+      // Magnet must also respect edgeInset — otherwise chrome kisses the rim.
+      const maxX = Math.max(0, pr.width - halfPxX - edgeInsetPx - cx);
+      const minX = Math.min(0, halfPxX + edgeInsetPx - cx);
+      const maxY = Math.max(0, pr.height - halfPxY - edgeInsetPx - cy);
+      const minY = Math.min(0, halfPxY + edgeInsetPx - cy);
       return {
         x: Math.min(maxX, Math.max(minX, mag.x)),
         y: Math.min(maxY, Math.max(minY, mag.y)),
       };
     },
-    [measureHalfPct],
+    [edgeInsetPx, measureHalfPct],
   );
 
   const nextWaypoint = useCallback(() => {
@@ -143,10 +182,20 @@ export function FairChaseTarget({
     setMagnet({ x: 0, y: 0 });
   }, [arenaPadding, clampPos, hits, measureHalfPct]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     measureHalfPct();
     setPos((p) => clampPos(p));
   }, [clampPos, hits, measureHalfPct]);
+
+  // After layout/paint (label length changes post-catch), hard-nudge into inset.
+  useEffect(() => {
+    const id = window.requestAnimationFrame(() => {
+      enforcePixelInset();
+      window.setTimeout(enforcePixelInset, 40);
+      window.setTimeout(enforcePixelInset, 180);
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [hits, pos, magnet, enforcePixelInset]);
 
   useEffect(() => {
     if (done || hovering) return;
@@ -176,7 +225,7 @@ export function FairChaseTarget({
         const dx = ((e.clientX - cx) / dist) * pull;
         const dy = ((e.clientY - cy) / dist) * pull;
         setMagnet(
-          clampMagnet(pos, {
+          clampMagnet(posRef.current, {
             x: Math.max(-14, Math.min(14, dx)),
             y: Math.max(-12, Math.min(12, dy)),
           }),
@@ -187,7 +236,7 @@ export function FairChaseTarget({
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
-  }, [clampMagnet, done, pos]);
+  }, [clampMagnet, done]);
 
   const handleHit = () => {
     if (done) return;
@@ -207,6 +256,7 @@ export function FairChaseTarget({
         }),
       );
       setMagnet({ x: 0, y: 0 });
+      window.requestAnimationFrame(() => enforcePixelInset());
     }, 0);
   };
 
@@ -221,6 +271,7 @@ export function FairChaseTarget({
       ref={wrapRef}
       className="absolute"
       style={{ margin: 0, padding: 0 }}
+      data-chase-edge-inset={edgeInsetPx}
       animate={{
         left: `${pos.x}%`,
         top: `${pos.y}%`,
@@ -235,6 +286,7 @@ export function FairChaseTarget({
         y: { duration: hovering ? 0.2 : 0.28, ease: "easeOut" },
         scale: { duration: 0.16 },
       }}
+      onAnimationComplete={() => enforcePixelInset()}
     >
       <button
         ref={btnRef}
@@ -263,12 +315,14 @@ export function FairChaseTarget({
                   y: ((er.top + er.height / 2 - pr.top) / pr.height) * 100,
                 }),
               );
+              window.requestAnimationFrame(() => enforcePixelInset());
             }
           }
         }}
         onMouseLeave={() => {
           setHovering(false);
           setMagnet({ x: 0, y: 0 });
+          window.requestAnimationFrame(() => enforcePixelInset());
         }}
         onPointerMove={(e) => {
           if (done) return;
@@ -278,7 +332,7 @@ export function FairChaseTarget({
           const dx = (e.clientX - cx) * 0.22;
           const dy = (e.clientY - cy) * 0.22;
           setMagnet(
-            clampMagnet(pos, {
+            clampMagnet(posRef.current, {
               x: Math.max(-12, Math.min(12, dx)),
               y: Math.max(-10, Math.min(10, dy)),
             }),

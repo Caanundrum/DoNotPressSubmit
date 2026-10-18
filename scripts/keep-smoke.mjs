@@ -562,7 +562,7 @@ assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-\[5\.75rem\]/.test(t
 assert(/Catch each answer to pin it\./.test(restless), "Drift hint shortened for mobile");
 assert(/--title-sound-clearance:\s*12px/.test(globals), "SOUND ON clears DO NOT PRESS by ≥12px on mobile");
 assert(/Still here\. Still on your side\./.test(title), "refuse poke drops Ally channel readout");
-assert(/TALKED TO THE ORB|NOTHING FILED/.test(reportSrc), "report stamps use plain human tags");
+assert(/TALKED TO THE ORB|KEPT TALKING TO IT|NOTHING FILED/.test(reportSrc), "report stamps use plain human tags");
 assert(!/LEDGER CLEAN|SIDE CHANNEL ×/.test(reportSrc), "report drops internal SIDE CHANNEL / LEDGER tags");
 assert(!/lawyer-ups|cry in binary|regrets character development|escalate this into feelings/.test(
   act1 + act2 + act3 + act4 + act5 + title + ending + read("src/components/game/scenes/sceneAmbient.ts"),
@@ -651,6 +651,37 @@ assert(
   "Last Notes/Words drift stays inside mobile safe area",
 );
 assert(/edgeInsetPx/.test(fair), "FairChaseTarget enforces pixel edge inset");
+
+// Punch list rev15 locks
+assert(
+  /enforcePixelInset|data-chase-edge-inset/.test(fair),
+  "Consent chase hard-clamps chrome ≥edgeInset after catch/magnet",
+);
+assert(
+  /CHOICE_ARM_MS|data-choices-armed/.test(read("src/components/game/scenes/SceneChoiceList.tsx")),
+  "Choice list arms after settle so Allegiance early clicks miss nothing",
+);
+assert(
+  /REDACTED/.test(reportSrc) && /data-report-redaction-stamp/.test(reportSrc),
+  "Submit report redaction reads as intentional stamp",
+);
+assert(
+  /data-restless-straining|STRAIN_WARN_MS|HOLDING…/.test(restless),
+  "Drift pin release wobbles before letting go",
+);
+assert(
+  /opacity:\s*\{\s*duration:\s*0\.18/.test(read("src/components/game/scenes/PeelReveal.tsx")),
+  "Courtesy Layers peel fades title faster than the slide",
+);
+assert(
+  /KEPT TALKING TO IT/.test(reportSrc) && !/TALKED TO THE ORB ×|TALKED TO THE ORB TWICE/.test(reportSrc),
+  "Orb talk tag stays human — no ×N counter",
+);
+assert(
+  /Good\. Keep practicing that no\./.test(act4) &&
+    !/Rehearse the no until it feels like a personality/.test(act4),
+  "Prep refuse line trimmed to Keep practicing that no",
+);
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

@@ -195,7 +195,7 @@ export function TitleScreen({
       {/* Ending memory is orb mood / wave only — no banner chrome. */}
 
       <div
-        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-[13.5rem] max-sm:pt-8"
+        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-3 max-sm:pt-8"
         data-title-main-column="true"
       >
         <motion.div
@@ -208,7 +208,7 @@ export function TitleScreen({
           ASSESSMENT FACILITY 01
         </motion.div>
 
-        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8 max-sm:justify-start max-sm:pt-2 max-sm:pb-2">
+        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8 max-sm:justify-start max-sm:pt-2 max-sm:pb-[7.5rem]">
           <motion.div
             className="pointer-events-auto shrink-0"
             initial={{ opacity: 0, y: 24 }}
@@ -247,7 +247,7 @@ export function TitleScreen({
         </div>
 
         <motion.div
-          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[12px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[9px] sm:tracking-[0.2em]"
+          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[12px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[9px] sm:tracking-[0.2em] max-sm:relative max-sm:z-[46] max-sm:mt-auto max-sm:pb-[0.35rem]"
           style={{ textShadow: "0 1px 2px rgba(0,0,0,0.85)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -321,8 +321,8 @@ export function TitleScreen({
       <motion.div
         className={
           escaped
-            ? "absolute bottom-24 right-6 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-48"
-            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-48"
+            ? "absolute bottom-24 right-6 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-[5.75rem]"
+            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-[5.75rem]"
         }
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"

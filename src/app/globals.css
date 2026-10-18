@@ -506,6 +506,12 @@ button {
     padding-bottom: 0.25rem;
   }
 
+  /* Footer sits under the raised orb dock — keep brand line readable. */
+  [data-title-cinematic="true"] [data-title-footer="true"] {
+    position: relative;
+    z-index: 46;
+  }
+
   [data-facility-mark="true"] {
     font-size: 12px;
   }

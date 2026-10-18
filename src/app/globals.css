@@ -373,14 +373,10 @@ button {
     max-width: 100%;
   }
 
-  /* Keep the tiny DO NOT PRESS robot off the centered title wordmark on phones. */
-  [data-title-cinematic="true"] [data-roam-egg="do-not-press"] {
+  /* Keep decorative title props off the centered PRESS SUBMIT wordmark on phones. */
+  [data-title-cinematic="true"] [data-roam-egg="do-not-press"],
+  [data-title-cinematic="true"] [data-title-gag-layer="true"] {
     display: none !important;
-  }
-
-  [data-title-cinematic="true"] [data-title-gag-layer="true"] [data-ambient-roam="true"] > * {
-    /* Side-margin gags only — never paint over the PRESS SUBMIT stack. */
-    max-width: 28vw;
   }
 
   [data-mobile-bubble-dock="true"] [data-assistant-safe-dock="true"] {

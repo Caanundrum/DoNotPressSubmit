@@ -378,7 +378,9 @@ assert(/lineSceneId|data-bubble-scene/.test(scenePlayer + viewAssistant), "orb b
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
 assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
 assert(
-  /w-\[min\(220px,calc\(100%-56px\)\)\]|calc\(100%-56px\)|calc\(100%-48px\)/.test(checkbox),
+  /data-consent-playfield|data-consent-inset="12"|calc\(100%-8px\)|calc\(100%-56px\)|calc\(100%-48px\)/.test(
+    checkbox,
+  ),
   "Consent chase target stays inside panel with 12px side budget",
 );
 assert(/closedRef/.test(popupSrc), "PopupWar closed counter uses monotonic ref");

@@ -27,7 +27,7 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
       </div>
       {/* Hard 12px playfield — chase target cannot paint outside this inset box. */}
       <div
-        className="absolute inset-[12px]"
+        className="absolute inset-[12px] overflow-hidden"
         data-consent-playfield="true"
         data-consent-inset="12"
       >

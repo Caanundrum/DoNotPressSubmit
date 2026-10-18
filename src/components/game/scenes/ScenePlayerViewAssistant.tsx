@@ -134,7 +134,7 @@ export function ScenePlayerViewAssistant({
           />
         </div>
         <motion.div
-          className="pointer-events-none glass-panel assistant-bubble shrink border border-cyan/45 px-2.5 py-1.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
+          className="pointer-events-none glass-panel assistant-bubble relative shrink border border-cyan/45 px-2.5 py-1.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
           style={{
             maxWidth: bubbleMax,
             // Tall enough for Form 03 / Counterpoint / Form 09 full lines — no mid-word cut.
@@ -161,6 +161,7 @@ export function ScenePlayerViewAssistant({
           data-bubble-dock={
             dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
           }
+          data-bubble-tail="true"
           data-bubble-no-clip="true"
           initial={{
             opacity: 0,

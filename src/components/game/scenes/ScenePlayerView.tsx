@@ -136,6 +136,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       data-assistant-safe={buryAssistant ? "gag" : safeSide}
       data-bury-assistant={buryAssistant ? "true" : "false"}
       data-mobile-bubble-dock="true"
+      data-companion-scene={companion ? "true" : "false"}
     >
       <SceneTransition
         key={scene.id}

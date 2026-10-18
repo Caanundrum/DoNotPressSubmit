@@ -252,11 +252,11 @@ button {
   );
 }
 
-/* Title poke: real speech bubble with a tail that points at the orb above. */
+/* Title poke: tail aims at orb center (~96px orb → ~48px), not mid-bubble. */
 .title-poke-bubble[data-bubble-tail="true"]::before {
   content: "";
   position: absolute;
-  left: 50%;
+  left: 48px;
   top: -7px;
   width: 12px;
   height: 12px;
@@ -266,6 +266,61 @@ button {
   border-top: 1px solid rgba(0, 229, 255, 0.45);
   transform: rotate(45deg);
   pointer-events: none;
+}
+
+/* Escape title docks right — keep tail under the (still left-stacked) orb. */
+[data-title-orb-escape="true"] .title-poke-bubble[data-bubble-tail="true"]::before {
+  left: 54px;
+}
+
+/* Form-screen bubbles: same tailed treatment as title, aimed at the orb. */
+.assistant-bubble[data-bubble-tail="true"]:not(.title-poke-bubble)::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(5, 7, 10, 0.96);
+  border-color: rgba(0, 229, 255, 0.45);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Bubble below orb (default / floor dock). */
+.assistant-bubble[data-bubble-tail="true"][data-bubble-dock="below"]:not(.title-poke-bubble)::before {
+  left: 50%;
+  top: -7px;
+  margin-left: -6px;
+  border-left: 1px solid rgba(0, 229, 255, 0.45);
+  border-top: 1px solid rgba(0, 229, 255, 0.45);
+  transform: rotate(45deg);
+}
+
+/* Bubble above orb. */
+.assistant-bubble[data-bubble-tail="true"][data-bubble-dock="above"]:not(.title-poke-bubble)::before {
+  left: 50%;
+  bottom: -7px;
+  margin-left: -6px;
+  border-right: 1px solid rgba(0, 229, 255, 0.45);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.45);
+  transform: rotate(45deg);
+}
+
+/* Bubble to the right of orb (beside / spotlight). */
+.assistant-bubble[data-bubble-tail="true"][data-bubble-dock="beside"]:not(.title-poke-bubble)::before {
+  left: -7px;
+  top: 22px;
+  border-left: 1px solid rgba(0, 229, 255, 0.45);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.45);
+  transform: rotate(45deg);
+}
+
+/* Bubble to the left of orb (right-edge docks). */
+.assistant-bubble[data-bubble-tail="true"][data-bubble-dock="left"]:not(.title-poke-bubble)::before {
+  right: -7px;
+  top: 22px;
+  border-right: 1px solid rgba(0, 229, 255, 0.45);
+  border-top: 1px solid rgba(0, 229, 255, 0.45);
+  transform: rotate(45deg);
 }
 
 .text-glow {
@@ -439,6 +494,49 @@ button {
     z-index: 44 !important;
   }
 
+  /*
+   * Side Channel / companion: dock orb+bubble ABOVE the answer stack so
+   * the bottom strip never covers "We're a team" / wait CTAs (rev13 P0).
+   */
+  [data-mobile-bubble-dock="true"][data-companion-scene="true"] [data-assistant-safe-dock="true"] {
+    top: calc(0.75rem + 33px + 10px) !important;
+    bottom: auto !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 0.55rem 0.75rem 0.65rem !important;
+    background: linear-gradient(
+      180deg,
+      rgba(5, 7, 10, 0.96) 0%,
+      rgba(5, 7, 10, 0.88) 70%,
+      rgba(5, 7, 10, 0) 100%
+    );
+    z-index: 44 !important;
+  }
+
+  [data-mobile-bubble-dock="true"][data-companion-scene="true"] [data-orb-hit-layer="true"] {
+    margin-right: 0 !important;
+  }
+
+  [data-mobile-bubble-dock="true"][data-companion-scene="true"] .assistant-bubble {
+    max-width: min(92vw, 340px) !important;
+    flex: 0 1 auto !important;
+    margin-left: 0 !important;
+    max-height: min(22vh, 140px) !important;
+    text-align: center;
+  }
+
+  /* Companion answers sit under the top orb dock — never under a bottom strip. */
+  [data-mobile-bubble-dock="true"][data-companion-scene="true"] [data-companion-stack="true"] {
+    top: auto !important;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)) !important;
+    max-height: min(46vh, 360px) !important;
+    z-index: 40 !important;
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
   [data-mobile-bubble-dock="true"] [data-orb-hit-layer="true"] {
     flex: 0 0 auto !important;
     margin-right: 4px !important;
@@ -456,6 +554,36 @@ button {
     font-size: 12px !important;
     position: relative;
     z-index: 2;
+  }
+
+  /* Mobile bottom strip is always orb → bubble row — aim the tail left at the orb. */
+  [data-mobile-bubble-dock="true"][data-companion-scene="false"]
+    .assistant-bubble[data-bubble-tail="true"]:not(.title-poke-bubble)::before {
+    left: -7px !important;
+    right: auto !important;
+    top: 18px !important;
+    bottom: auto !important;
+    margin-left: 0 !important;
+    border-left: 1px solid rgba(0, 229, 255, 0.45) !important;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.45) !important;
+    border-right: none !important;
+    border-top: none !important;
+    transform: rotate(45deg) !important;
+  }
+
+  /* Companion top stack is orb → bubble column — aim the tail up at the orb. */
+  [data-mobile-bubble-dock="true"][data-companion-scene="true"]
+    .assistant-bubble[data-bubble-tail="true"]:not(.title-poke-bubble)::before {
+    left: 50% !important;
+    right: auto !important;
+    top: -7px !important;
+    bottom: auto !important;
+    margin-left: -6px !important;
+    border-left: 1px solid rgba(0, 229, 255, 0.45) !important;
+    border-top: 1px solid rgba(0, 229, 255, 0.45) !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    transform: rotate(45deg) !important;
   }
 
   [data-mobile-bubble-dock="true"] .assessment-panel.facility-hud {

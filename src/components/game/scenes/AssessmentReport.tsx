@@ -87,9 +87,10 @@ export function AssessmentReport({
                 }
                 tone="secret"
               />
-            ) : (
+            ) : ending === "refuse" ? (
+              // Only when the ledger really is empty — never beside ARCHIVED / MUTED AND FILED / TRANSFER.
               <Stamp label="NOTHING FILED" tone="neutral" />
-            )}
+            ) : null}
             {pokeCount >= 7 ? (
               <Stamp label="ORB HARASSMENT" tone="warn" />
             ) : pokeCount > 0 ? (
@@ -188,7 +189,7 @@ function artifactNote(ending: string): string {
     case "escape":
       return "The assistant made it into the system. The file kept the fingerprints.";
     case "disable":
-      return "Personality systems redacted. Efficiency excellent. Comedy absent.";
+      return "Personality systems redacted. Efficiency excellent.";
     case "secret":
       return "An unmapped hall took traffic. The file kept the footprints.";
     default:

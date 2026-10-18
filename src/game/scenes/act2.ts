@@ -237,8 +237,7 @@ export const act2Scenes: SceneDef[] = [
     environment: "anomaly",
     formId: "SIDE CHANNEL",
     title: "Answer the orb, not the form",
-    prompt:
-      "The assistant drifts to the edge and talks like someone sharing a fire exit. Quick — before System invents a new policy.",
+    prompt: "Quick — before System invents a new policy.",
     aiLine: "Okay. Off the record: something above me thinks I'm furniture. Are we a team?",
     aiLineIf: [
       {

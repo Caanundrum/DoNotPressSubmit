@@ -75,7 +75,7 @@ function memoryPokeLines(ending: EndingId): string[] {
     case "refuse":
       return [
         "Still here. Still on your side.",
-        "Refuse memo reprinted with a smiley. Against policy.",
+        "Someone keeps printing my complaints with a smiley face.",
         "Facility remembers mercy. Awkwardly.",
       ];
     case "submit":

@@ -328,7 +328,30 @@ assert(
   ),
   "player-facing residue wording purged",
 );
-assert(/SAVED THE ASSISTANT|ESCAPED TOGETHER|LEFT UNFINISHED/.test(read("src/components/game/scenes/AssessmentReport.tsx")), "report uses plain human outcome stamps");
+const reportSrc = read("src/components/game/scenes/AssessmentReport.tsx");
+assert(/SAVED THE ASSISTANT|ESCAPED TOGETHER|LEFT UNFINISHED/.test(reportSrc), "report uses plain human outcome stamps");
+assert(
+  /ending === "escape" \|\| ending === "secret" \|\| ending === "refuse"/.test(reportSrc),
+  "SAVED THE ASSISTANT stamp gated to non-archive endings",
+);
+assert(
+  /The assistant was archived\. The facility is quiet now\./.test(reportSrc),
+  "submit report note uses plain words",
+);
+assert(!/Instance stamp applied|One channel blanked/.test(reportSrc), "submit jargon purged from report");
+assert(!/Softly\. Desperately\.|Quietly\. Urgently\./.test(act2 + act5), "triple-beat cadence purged from callback + Decision");
+assert(/THE TITLE REMEMBERS/.test(title), "title escape memory reads as intentional beat");
+assert(/MEMORY TRACE/.test(title), "title top line uses memory framing (not bare ESCAPED leftover)");
+assert(!/waving \? " · ESCAPED TOGETHER"/.test(title), "title top line no longer appends bare ESCAPED TOGETHER");
+assert(/id: "coffee-mug"/.test(act1), "Pressure keeps unauthorized facility mug option");
+assert(/data-choice-count/.test(read("src/components/game/scenes/SceneChoiceList.tsx")), "choice list marks count for mobile density");
+assert(/68dvh|choice-count="5"/.test(read("src/app/globals.css")), "mobile panel tall enough for five Pressure options");
+assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
+assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
+assert(
+  /w-\[min\(280px,calc\(100%-28px\)\)\]|max-w-\[calc\(100%-28px\)\]/.test(checkbox),
+  "Consent chase target stays inside panel",
+);
 assert(/VO_PLAYBACK_ENABLED = false/.test(speech) || /speakLine/.test(speech), "VO disable path marked");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");

@@ -29,7 +29,7 @@ export function ScenePlayerViewPanels({
     panelShake, visibleChoices, choiceMotion, selected,
     hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor,
     finishCompanion, pickChoice, setHoverChoice, onState, continueDialogue,
-    onSetpieceDone, onEscapingHit, onClimax, finishSystem,
+    onSetpieceDone, onPopupCleared, onEscapingHit, onClimax, finishSystem,
   } = p;
 
   return (
@@ -84,7 +84,7 @@ export function ScenePlayerViewPanels({
               </button>
               {companionReady ? (
                 <div className="font-mono text-[9px] tracking-[0.22em] text-cyan/75" data-companion-settle-cue="true">
-                  ORBIT STEADY — YOU CAN CONTINUE
+                  Ready when you are.
                 </div>
               ) : null}
             </div>
@@ -233,7 +233,7 @@ export function ScenePlayerViewPanels({
             <EscapingButton onComplete={onSetpieceDone} onHit={onEscapingHit} />
           ) : null}
           {scene.kind === "setpiece" && scene.setpiece === "popup-war" ? (
-            <PopupWar onComplete={onSetpieceDone} />
+            <PopupWar onComplete={onSetpieceDone} onCleared={onPopupCleared} />
           ) : null}
           {scene.kind === "setpiece" && scene.setpiece === "checkbox-rebellion" ? (
             <CheckboxRebellion onComplete={onSetpieceDone} />

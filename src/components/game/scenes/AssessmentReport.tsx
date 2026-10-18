@@ -166,7 +166,7 @@ function endingStamp(ending: string): string {
     case "disable":
       return "MUTED AND FILED";
     case "secret":
-      return "OUTSIDE THE FORM";
+      return "UNMAPPED PATH";
     default:
       return "FILED";
   }
@@ -179,7 +179,7 @@ function artifactNote(ending: string): string {
     case "refuse":
       return "Form left open. The facility noted the gap and moved on.";
     case "escape":
-      return "The assistant made it into the system. If the title looks different next time, that was them.";
+      return "The assistant made it into the system. The file kept the fingerprints.";
     case "disable":
       return "Personality systems redacted. Efficiency excellent. Comedy absent.";
     case "secret":

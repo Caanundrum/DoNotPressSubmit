@@ -255,17 +255,41 @@ export function TitleScreen({
         fullStage
       />
 
+      {/* Escape tell: orb waves from a new dock + a small prop out of place (show, don't tell). */}
+      {escaped ? (
+        <motion.div
+          className="pointer-events-none absolute left-[8%] top-[18%] z-[12] select-none"
+          data-title-escape-prop="true"
+          initial={{ opacity: 0, rotate: -8, y: 8 }}
+          animate={{ opacity: 0.95, rotate: [-6, -2, -7], y: [0, -3, 0] }}
+          transition={{ delay: 0.4, duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+          aria-hidden
+        >
+          <div
+            className="border border-cyan/35 bg-black/55 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.18em] text-cyan/85 shadow-[0_0_18px_rgba(80,255,200,0.18)]"
+            style={{ transform: "rotate(-8deg)" }}
+          >
+            MUG // MISFILED
+          </div>
+        </motion.div>
+      ) : null}
+
       <motion.div
-        className="absolute bottom-8 left-8 z-20 select-none"
+        className={
+          escaped
+            ? "absolute bottom-10 right-8 z-20 select-none sm:bottom-12 sm:right-12"
+            : "absolute bottom-8 left-8 z-20 select-none"
+        }
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"
+        data-title-orb-escape={escaped ? "true" : "false"}
         style={{ userSelect: "none" }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.55 }}
       >
         <AssistantOrb
-          size={96}
+          size={escaped ? 108 : 96}
           mood={titleOrbMood(lastEnding, orbMood, gagReact, pokeFlinch)}
           wave={escaped}
           flinch={gagReact || pokeFlinch}
@@ -289,7 +313,7 @@ export function TitleScreen({
               aria-hidden
             />
             <div
-              className="select-none font-mono text-[8px] tracking-[0.16em] text-cyan/70"
+              className="select-none font-mono text-[12px] tracking-[0.16em] text-cyan/80 sm:text-[11px]"
               style={{ userSelect: "none", textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
               data-title-orb-hint-copy="true"
             >
@@ -299,10 +323,11 @@ export function TitleScreen({
         ) : null}
         {memoryLine ? (
           <motion.div
-            className="mt-1.5 max-w-[200px] border border-cyan/25 bg-black/45 px-2 py-1 text-center font-mono text-[8px] tracking-[0.1em] text-[#d0dcec]/85"
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 0.9, y: 0 }}
+            className="glass-panel assistant-bubble mt-2 max-w-[min(240px,70vw)] border border-cyan/40 bg-black/70 px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.06em] text-[#e8eef8] shadow-[0_0_18px_rgba(110,231,255,0.16)] sm:text-[13px]"
+            initial={{ opacity: 0, y: 6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
             data-residue-toast="true"
+            data-title-poke-bubble="true"
           >
             {memoryLine}
           </motion.div>

@@ -74,6 +74,7 @@ export type ScenePlayerViewProps = {
   onState: (next: GameState) => void;
   continueDialogue: () => void;
   onSetpieceDone: () => void;
+  onPopupCleared?: () => void;
   onEscapingHit?: (hits: number) => void;
   onClimax: (action: "submit" | "refuse" | "escape" | "disable" | "secret") => void;
   finishSystem: () => void;

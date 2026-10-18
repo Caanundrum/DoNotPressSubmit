@@ -5,7 +5,7 @@ import { useState } from "react";
 import { audio } from "@/lib/audio";
 
 const LAYERS = [
-  { id: "glass", label: "Decorative glass", hint: "Pretty. Expensive. Lying." },
+  { id: "glass", label: "Decorative glass", hint: "Looks expensive. Doesn't help." },
   { id: "chrome", label: "Chrome courtesy layer", hint: "Corporate smile sheet." },
   { id: "cable", label: "Kill-switch conduit", hint: "Ah. There it is." },
 ];
@@ -92,7 +92,7 @@ export function PeelReveal({ onComplete }: { onComplete: () => void }) {
           >
             <div className="text-lg tracking-[0.14em] text-white">{layer.label}</div>
             <div className="mt-1 font-mono text-[10px] tracking-[0.16em] text-[#d2dceb]">
-              {peeled === i ? `CLICK TO PEEL — ${layer.hint}` : layer.hint}
+              {layer.hint}
             </div>
           </motion.button>
         );

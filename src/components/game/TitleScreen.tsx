@@ -195,7 +195,7 @@ export function TitleScreen({
       {/* Ending memory is orb mood / wave only — no banner chrome. */}
 
       <div
-        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-[9.5rem] max-sm:pt-8"
+        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-[13.5rem] max-sm:pt-8"
         data-title-main-column="true"
       >
         <motion.div
@@ -321,8 +321,8 @@ export function TitleScreen({
       <motion.div
         className={
           escaped
-            ? "absolute bottom-24 right-6 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-28"
-            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-28"
+            ? "absolute bottom-24 right-6 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-48"
+            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-48"
         }
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"

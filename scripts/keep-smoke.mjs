@@ -435,7 +435,7 @@ assert(
   /0\.75rem \+ 33px \+ 8px/.test(read("src/app/globals.css")),
   "mobile form top clears SOUND ON by ≥8px",
 );
-assert(/max-sm:pb-\[9\.5rem\]|data-title-main-column/.test(title), "mobile title clears orb from AWAITING COMMITMENT");
+assert(/max-sm:pb-\[13\.5rem\]|data-title-main-column/.test(title), "mobile title clears orb from AWAITING COMMITMENT");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
@@ -547,7 +547,7 @@ assert(!/systemTitle:\s*"SYSTEM MESSAGE"/.test(act2), "SYSTEM MESSAGE modal titl
 assert(/data-bubble-tail|title-poke-bubble/.test(title + globals), "title poke bubble has a tail");
 assert(/data-title-mug-shape|Mug misfiled/.test(title), "escape mug is shape-first; label click-only");
 assert(!/poke soft/.test(title), "title drops poke soft helper caption");
-assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-28/.test(title), "title orb clears footer on mobile");
+assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-48/.test(title), "title orb clears footer on mobile");
 assert(/Catch each answer to pin it\./.test(restless), "Drift hint shortened for mobile");
 assert(/--title-sound-clearance:\s*12px/.test(globals), "SOUND ON clears DO NOT PRESS by ≥12px on mobile");
 assert(/Still here\. Still on your side\./.test(title), "refuse poke drops Ally channel readout");

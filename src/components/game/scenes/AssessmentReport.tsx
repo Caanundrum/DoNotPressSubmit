@@ -79,9 +79,16 @@ export function AssessmentReport({
               }
             />
             {secretCount > 0 ? (
-              <Stamp label={secretCount === 1 ? "SIDE CHANNEL" : `SIDE CHANNEL ×${secretCount}`} tone="secret" />
+              <Stamp
+                label={
+                  secretCount === 1
+                    ? "TALKED TO THE ORB"
+                    : `TALKED TO THE ORB ${secretCount === 2 ? "TWICE" : `×${secretCount}`}`
+                }
+                tone="secret"
+              />
             ) : (
-              <Stamp label="LEDGER CLEAN" tone="neutral" />
+              <Stamp label="NOTHING FILED" tone="neutral" />
             )}
             {pokeCount >= 7 ? (
               <Stamp label="ORB HARASSMENT" tone="warn" />

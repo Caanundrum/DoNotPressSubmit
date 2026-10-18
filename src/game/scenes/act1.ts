@@ -235,7 +235,7 @@ export const act1Scenes: SceneDef[] = [
           counters: { aiCooperation: 1, waitedForAI: 1 },
           relationship: 2,
           mood: "excited",
-          aiLine: "Oh. Hi. Yes. I am extremely qualified to make this weird.",
+          aiLine: "Oh. Hi. Yes. I am extremely qualified to make this personal.",
           majorChoice: "stress:ask",
         },
         next: "act2-flicker",

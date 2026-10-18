@@ -74,7 +74,7 @@ function memoryPokeLines(ending: EndingId): string[] {
       ];
     case "refuse":
       return [
-        "Ally channel: still incomplete, still grateful.",
+        "Still here. Still on your side.",
         "Refuse memo reprinted with a smiley. Against policy.",
         "Facility remembers mercy. Awkwardly.",
       ];
@@ -121,8 +121,10 @@ export function TitleScreen({
   const [titlePokes, setTitlePokes] = useState(0);
   const [glassPhase, setGlassPhase] = useState<GlassPhase>("idle");
   const [pokeFlinch, setPokeFlinch] = useState(false);
+  const [mugLabelOn, setMugLabelOn] = useState(false);
   const glassTimer = useRef<number | null>(null);
   const pokeLineTimer = useRef<number | null>(null);
+  const mugLabelTimer = useRef<number | null>(null);
 
   const onSubmitGag = () => {
     setGagReact(true);
@@ -193,7 +195,7 @@ export function TitleScreen({
       {/* Ending memory is orb mood / wave only — no banner chrome. */}
 
       <div
-        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-[7.5rem]"
+        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-[9.5rem] max-sm:pt-8"
         data-title-main-column="true"
       >
         <motion.div
@@ -273,40 +275,68 @@ export function TitleScreen({
         fullStage
       />
 
-      {/* Escape tell: orb waves from a new dock + a small prop out of place (show, don't tell). */}
+      {/* Escape tell: wordless mug shape; label only on click. */}
       {escaped ? (
-        <motion.div
-          className="pointer-events-none absolute left-[8%] top-[18%] z-[12] select-none"
+        <motion.button
+          type="button"
+          className="pointer-events-auto absolute left-[8%] top-[18%] z-[12] select-none border-0 bg-transparent p-0"
           data-title-escape-prop="true"
+          data-title-mug-shape="true"
           initial={{ opacity: 0, rotate: -8, y: 8 }}
           animate={{ opacity: 0.95, rotate: [-6, -2, -7], y: [0, -3, 0] }}
           transition={{ delay: 0.4, duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-          aria-hidden
+          aria-label="Misfiled mug"
+          onClick={() => {
+            audio.play("click", 0.3);
+            setMugLabelOn(true);
+            if (mugLabelTimer.current != null) window.clearTimeout(mugLabelTimer.current);
+            mugLabelTimer.current = window.setTimeout(() => {
+              mugLabelTimer.current = null;
+              setMugLabelOn(false);
+            }, 2200);
+          }}
         >
           <div
-            className="border border-cyan/35 bg-black/55 px-2.5 py-1.5 font-mono text-[11px] tracking-[0.14em] text-cyan/85 shadow-[0_0_18px_rgba(80,255,200,0.18)]"
+            className="relative flex h-11 w-9 items-end justify-center"
             style={{ transform: "rotate(-8deg)" }}
+            aria-hidden
           >
-            Mug misfiled
+            <span className="absolute right-[-5px] top-3 h-4 w-2 rounded-r-full border border-cyan/40 bg-transparent" />
+            <span className="h-9 w-7 rounded-b-[10px] rounded-t-[4px] border border-cyan/40 bg-black/55 shadow-[0_0_18px_rgba(80,255,200,0.18)]" />
           </div>
-        </motion.div>
+          {mugLabelOn ? (
+            <motion.div
+              className="mt-1 border border-cyan/35 bg-black/75 px-2 py-1 font-mono text-[11px] tracking-[0.14em] text-cyan/90"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              data-title-mug-label="true"
+            >
+              Mug misfiled
+            </motion.div>
+          ) : null}
+        </motion.button>
       ) : null}
 
       {/* z-[45]: above gag layer (z-30) + crack/stitch so the moved orb never sits under a prop. */}
       <motion.div
         className={
           escaped
-            ? "absolute bottom-10 right-8 z-[45] select-none sm:bottom-12 sm:right-12"
-            : "absolute bottom-8 left-8 z-[45] select-none"
+            ? "absolute bottom-24 right-6 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-28"
+            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-28"
         }
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"
         data-title-orb-escape={escaped ? "true" : "false"}
         data-title-orb-above-props="true"
+        data-title-orb-above-footer="true"
         style={{ userSelect: "none" }}
         initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.55 }}
+        animate={
+          pokeFlinch
+            ? { opacity: 1, y: [0, -10, 2, 0], x: [0, 3, -2, 0] }
+            : { opacity: 1, y: 0, x: 0 }
+        }
+        transition={pokeFlinch ? { duration: 0.45 } : { delay: 0.55 }}
       >
         <AssistantOrb
           size={escaped ? 108 : 96}
@@ -329,23 +359,17 @@ export function TitleScreen({
               data-title-idle-hint="true"
               aria-hidden
             />
-            <div
-              className="select-none font-mono text-[12px] tracking-[0.16em] text-cyan/80 sm:text-[11px]"
-              style={{ userSelect: "none", textShadow: "0 1px 2px rgba(0,0,0,0.9)" }}
-              data-title-orb-hint-copy="true"
-            >
-              poke soft
-            </div>
           </div>
         ) : null}
         {pokeLine ? (
           <motion.div
-            className="glass-panel assistant-bubble mt-2 max-w-[min(260px,72vw)] border border-cyan/45 bg-black/75 px-2.5 py-1.5 text-left text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
+            className="glass-panel assistant-bubble title-poke-bubble relative mt-3 max-w-[min(260px,72vw)] border border-cyan/45 bg-black/75 px-2.5 py-1.5 text-left text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
             initial={{ opacity: 0, y: 6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             data-residue-toast="true"
             data-title-poke-bubble="true"
             data-assistant-bubble="true"
+            data-bubble-tail="true"
           >
             <div
               className="mb-1 flex select-none items-center gap-1.5"

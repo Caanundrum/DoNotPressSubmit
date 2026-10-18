@@ -312,7 +312,8 @@ assert(!/Don't click the big red Submit/.test(act5), "climax no longer names the
 assert(!/act5-system-push|SYSTEM DIRECTIVE/.test(act5), "SYSTEM DIRECTIVE continue filler removed");
 assert(!/Then the red rectangle gets loud/.test(act5), "lobby no longer narrates the red rectangle");
 assert(!/Leave it unfinished if you have to|Try leaving the form unfinished/.test(act5), "refuse guidance does not name unfinished option");
-assert(/Duty called\. I'm still asking\./.test(act5), "duty climax line shipped");
+assert(/I know\. I'm still asking\./.test(act5), "duty climax line shipped");
+assert(!/Duty called\. I'm still asking\./.test(act5), "duty climax drops stiff Duty called");
 assert(!/Grammar broke|hallway behind the stylesheet|souvenir dust|Hallway dust on the ledger/.test(act5), "hall ending jargon purged");
 assert(
   !/embarrassed negotiation|embarrassed pause|awkward memo/.test(
@@ -434,7 +435,7 @@ assert(
   /0\.75rem \+ 33px \+ 8px/.test(read("src/app/globals.css")),
   "mobile form top clears SOUND ON by ≥8px",
 );
-assert(/max-sm:pb-\[7\.5rem\]|data-title-main-column/.test(title), "mobile title clears orb from AWAITING COMMITMENT");
+assert(/max-sm:pb-\[9\.5rem\]|data-title-main-column/.test(title), "mobile title clears orb from AWAITING COMMITMENT");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
@@ -518,6 +519,44 @@ assert(!/src\/chaosBrand|src\/brand\//.test(chaosSplash), "ChaosSplash must not 
 const layout = read("src/app/layout.tsx");
 assert(/Space_Grotesk|Space Grotesk/.test(layout), "display font is Space Grotesk (Chaos Standard)");
 assert(/JetBrains_Mono|JetBrains Mono/.test(layout), "mono font is JetBrains Mono (Chaos Standard)");
+
+// Punch list rev12 locks
+assert(
+  /The form came back perfectly clean\./.test(read("src/game/state.ts")),
+  "mute ending blurb show-don't-tell (no joke explain)",
+);
+assert(
+  !/That was the joke|ASSISTANT CHANNEL: OFFLINE \(ON PURPOSE\)|PERSONALITY CHANNEL/.test(
+    ending + read("src/game/state.ts"),
+  ),
+  "mute ending drops show-don't-tell channel chrome",
+);
+assert(/label:\s*"…okay\."/.test(ending), "mute exit orb keeps a small last line");
+assert(/endingKicker|UNMAPPED/.test(ending), "hall ending kicker is UNMAPPED (not ESCAPE)");
+assert(!/environment\.toUpperCase\(\)/.test(ending), "ending kickers are not raw environment strings");
+assert(!/FORM ≠ WORLD|FORM != WORLD/.test(ending), "hall backdrop drops readable theme words");
+assert(/data-hall-shape/.test(ending), "hall backdrop uses wordless shapes");
+assert(
+  /kind:\s*"choice"/.test(act2) &&
+    /id:\s*"act2-system-rebuke"[\s\S]*?kind:\s*"choice"/.test(act2) &&
+    /Let it talk anyway/.test(act2) &&
+    /Acknowledge/.test(act2),
+  "SYSTEM MESSAGE filler is a real choice (Acknowledge / Let it talk anyway)",
+);
+assert(!/systemTitle:\s*"SYSTEM MESSAGE"/.test(act2), "SYSTEM MESSAGE modal title removed from act2");
+assert(/data-bubble-tail|title-poke-bubble/.test(title + globals), "title poke bubble has a tail");
+assert(/data-title-mug-shape|Mug misfiled/.test(title), "escape mug is shape-first; label click-only");
+assert(!/poke soft/.test(title), "title drops poke soft helper caption");
+assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-28/.test(title), "title orb clears footer on mobile");
+assert(/Catch each answer to pin it\./.test(restless), "Drift hint shortened for mobile");
+assert(/--title-sound-clearance:\s*12px/.test(globals), "SOUND ON clears DO NOT PRESS by ≥12px on mobile");
+assert(/Still here\. Still on your side\./.test(title), "refuse poke drops Ally channel readout");
+assert(/TALKED TO THE ORB|NOTHING FILED/.test(reportSrc), "report stamps use plain human tags");
+assert(!/LEDGER CLEAN|SIDE CHANNEL ×/.test(reportSrc), "report drops internal SIDE CHANNEL / LEDGER tags");
+assert(!/lawyer-ups|cry in binary|regrets character development|escalate this into feelings/.test(
+  act1 + act2 + act3 + act4 + act5 + title + ending + read("src/components/game/scenes/sceneAmbient.ts"),
+), "holdover machine-voice lines stay gone");
+assert(/top:\s*"48%"/.test(read("src/game/motion.ts")), "hide-dock orb raised ≥24px inside frame");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

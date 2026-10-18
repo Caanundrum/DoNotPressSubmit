@@ -141,7 +141,7 @@ export function endingBlurb(id: EndingId): string {
     case "escape":
       return "The assistant slipped into the facility systems. The rails are still humming.";
     case "disable":
-      return "Assistant channel cleared. The form became perfectly clean. That was the joke.";
+      return "The form came back perfectly clean.";
     case "secret":
       return "An unmapped hall let you through. The form never planned for doors like that.";
   }

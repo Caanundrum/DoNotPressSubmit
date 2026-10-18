@@ -79,7 +79,7 @@ const escaping = read("src/components/game/scenes/EscapingButton.tsx");
 assert(escaping.includes("hitPad={26}"), "EscapingButton hitPad 26");
 
 const checkbox = read("src/components/game/scenes/CheckboxRebellion.tsx");
-assert(checkbox.includes("hitPad={10}"), "CheckboxRebellion hitPad 10 (keeps chrome inside arena)");
+assert(checkbox.includes("hitPad={8}"), "CheckboxRebellion hitPad 8 (keeps chrome inside arena)");
 assert(/edgeInsetPx=\{12\}/.test(checkbox), "Consent chase keeps ≥12px edge inset");
 
 const popup = read("src/components/game/scenes/PopupWar.tsx");
@@ -375,7 +375,7 @@ assert(/lineSceneId|data-bubble-scene/.test(scenePlayer + viewAssistant), "orb b
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
 assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
 assert(
-  /w-\[min\(260px,calc\(100%-24px\)\)\]|calc\(100%-24px\)/.test(checkbox),
+  /w-\[min\(240px,calc\(100%-48px\)\)\]|calc\(100%-48px\)/.test(checkbox),
   "Consent chase target stays inside panel with 12px side budget",
 );
 assert(/closedRef/.test(popupSrc), "PopupWar closed counter uses monotonic ref");

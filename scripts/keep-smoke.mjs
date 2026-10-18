@@ -430,7 +430,10 @@ assert(/Glass complains\. That fingerprint is yours\./.test(title), "title third
 assert(/titlePokeLine|FRESH_POKE_LINES|CRACK_POKE_LINE/.test(title), "title poke banter always bubbles");
 assert(/data-title-orb-above-props|z-\[45\]/.test(title), "title orb stays above crack/gag props");
 assert(/data-restless-pin-lanes|ROWS = \[4, 38, 72\]/.test(restless), "Drift pinned lanes spaced for mobile");
-assert(/3\.45rem/.test(read("src/app/globals.css")), "mobile form top clears SOUND ON by ≥8px");
+assert(
+  /0\.75rem \+ 33px \+ 8px/.test(read("src/app/globals.css")),
+  "mobile form top clears SOUND ON by ≥8px",
+);
 assert(/max-sm:pb-\[7\.5rem\]|data-title-main-column/.test(title), "mobile title clears orb from AWAITING COMMITMENT");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
@@ -462,7 +465,10 @@ assert(/Three hits archives|All 3 hits/.test(act3) || /onHit/.test(escaping), "F
 
 const globals = read("src/app/globals.css");
 assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");
-assert(/3\.45rem/.test(globals), "SOUND ON / form gap locked in globals");
+assert(
+  /0\.75rem \+ 33px \+ 8px/.test(globals),
+  "SOUND ON / form gap locked in globals",
+);
 
 // Chaos Standard brand — public PNG masters (no TS base64 embeds).
 assert(/--cs-hazard-orange:\s*#ff6a00|--cs-hazard-orange:\s*#FF6A00/i.test(globals), "CS hazard orange token");

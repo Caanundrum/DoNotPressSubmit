@@ -429,13 +429,16 @@ button {
   [data-mobile-bubble-dock="true"] .assessment-panel.facility-hud {
     left: 0.4rem !important;
     right: 0.4rem !important;
-    /* SOUND ON bottom + ≥8px air (was ~2px at 2.85rem). */
-    top: 3.45rem !important;
+    /*
+     * SOUND corner is top:0.75rem + ~33px tall. Keep ≥8px air under it
+     * even when slide/rise panel motion still carries a translate.
+     */
+    top: calc(0.75rem + 33px + 8px + 18px) !important;
     bottom: auto !important;
     width: auto !important;
     max-width: none !important;
     /* Tall enough for Pressure's five options (incl. late mug) without wrapping clip. */
-    max-height: min(66dvh, calc(100dvh - 9.25rem)) !important;
+    max-height: min(64dvh, calc(100dvh - 10rem)) !important;
   }
 
   [data-mobile-bubble-dock="true"] .assessment-panel[data-panel-safe="gag-overlap"] {

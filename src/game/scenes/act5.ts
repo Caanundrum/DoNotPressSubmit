@@ -95,7 +95,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "promisedDuty",
-        line: "Duty called. I'm still asking.",
+        line: "I know. I'm still asking.",
       },
       {
         flag: "wantDisable",

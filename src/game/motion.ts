@@ -95,8 +95,8 @@ export function orbStageStyle(
       // Act III hazard etc. — full orb+bubble inside frame at 1280×800.
       return { right: "2.5%", top: "16%", transform: "none", size: 118 };
     case "hide":
-      // Buried corner — gag allowlist only; still keep bubble on-screen.
-      return { left: "3%", top: "62%", transform: "none", size: 72 };
+      // Buried corner — gag allowlist only; ≥24px inside frame so rings never clip.
+      return { left: "3%", top: "48%", transform: "none", size: 72 };
     case "overhead":
       // Form 03B — right/high; ≥24px edge pad for rings + bubble.
       return { right: "2.5%", top: "12%", transform: "none", size: 92 };

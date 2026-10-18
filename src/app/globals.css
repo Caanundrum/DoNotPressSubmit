@@ -252,6 +252,22 @@ button {
   );
 }
 
+/* Title poke: real speech bubble with a tail that points at the orb above. */
+.title-poke-bubble[data-bubble-tail="true"]::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  background: rgba(5, 7, 10, 0.96);
+  border-left: 1px solid rgba(0, 229, 255, 0.45);
+  border-top: 1px solid rgba(0, 229, 255, 0.45);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
 .text-glow {
   text-shadow: 0 0 18px rgba(0, 229, 255, 0.45);
 }
@@ -378,6 +394,22 @@ button {
     overflow: visible !important;
   }
 
+  /*
+   * SOUND corner (top:0.75rem + ~33px) needs ≥12px air above DO NOT PRESS wordmark.
+   * Push the logo stack down so the gap never collapses to ~7px on 390px.
+   */
+  [data-title-cinematic="true"] [data-title-logo="true"] {
+    margin-top: 0.85rem !important;
+  }
+
+  [data-sound-corner="true"] {
+    top: 0.75rem !important;
+  }
+
+  [data-title-cinematic="true"] {
+    --title-sound-clearance: 12px;
+  }
+
   /* Keep decorative title props off the centered PRESS SUBMIT wordmark on phones. */
   [data-title-cinematic="true"] [data-roam-egg="do-not-press"],
   [data-title-cinematic="true"] [data-title-gag-layer="true"] {
@@ -472,6 +504,12 @@ button {
 
   [data-title-cinematic="true"] [data-title-cta-column="true"] {
     padding-bottom: 0.25rem;
+  }
+
+  /* Footer sits under the raised orb dock — keep brand line readable. */
+  [data-title-cinematic="true"] [data-title-footer="true"] {
+    position: relative;
+    z-index: 46;
   }
 
   [data-facility-mark="true"] {

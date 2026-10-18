@@ -18,7 +18,7 @@ import { BackgroundGags } from "../BackgroundGags";
 export function EndingSequence({
   endingId,
   aiLine,
-  environment,
+  environment: _environment,
   onContinue,
 }: {
   endingId: EndingId;
@@ -26,7 +26,9 @@ export function EndingSequence({
   environment: EnvironmentPreset;
   onContinue: () => void;
 }) {
+  void _environment;
   const presence = endingPresence(endingId);
+  const kicker = endingKicker(endingId);
 
   useEffect(() => {
     speech.speakLine({
@@ -104,14 +106,14 @@ export function EndingSequence({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}
           >
-            {endingId === "refuse" ? null : (
+            {kicker ? (
               <div className="font-mono text-[10px] tracking-[0.32em] text-[#d0dcec]">
-                {environment.toUpperCase()}
+                {kicker}
               </div>
-            )}
+            ) : null}
             <h2
               id="ending-title"
-              className={`${endingId === "refuse" ? "mt-0" : "mt-3"} text-3xl tracking-[0.16em] text-white sm:text-4xl`}
+              className={`${kicker ? "mt-3" : "mt-0"} text-3xl tracking-[0.16em] text-white sm:text-4xl`}
               style={{ fontFamily: "var(--font-display)" }}
             >
               {endingTitle(endingId)}
@@ -121,11 +123,11 @@ export function EndingSequence({
               <p className="mt-4 border-t border-white/10 pt-4 text-sm italic text-cyan/90">
                 Assistant: {aiLine}
               </p>
-            ) : (
+            ) : presence.silentLine ? (
               <p className="mt-4 border-t border-white/10 pt-4 font-mono text-[11px] tracking-[0.18em] text-[#b7c6d8]">
                 {presence.silentLine}
               </p>
-            )}
+            ) : null}
             <button
               type="button"
               className="mt-6 border border-white/30 px-5 py-3 font-mono text-[11px] tracking-[0.22em] text-white transition hover:border-cyan/55"
@@ -162,6 +164,23 @@ type Presence =
       silentLine: string;
     };
 
+/** Env chrome above the title — never repeat the title, never say ESCAPE on the hall path. */
+function endingKicker(endingId: EndingId): string | null {
+  switch (endingId) {
+    case "submit":
+      return "ARCHIVE";
+    case "escape":
+      return "TRANSFER";
+    case "secret":
+      return "UNMAPPED";
+    case "refuse":
+    case "disable":
+      return null;
+    default:
+      return null;
+  }
+}
+
 function endingPresence(endingId: EndingId): Presence {
   switch (endingId) {
     case "escape":
@@ -187,11 +206,11 @@ function endingPresence(endingId: EndingId): Presence {
       return {
         mode: "exit",
         mood: "defeated",
-        label: "POWERING DOWN…",
-        exitCaption: "PERSONALITY CHANNEL → OFFLINE",
+        label: "…okay.",
+        exitCaption: "",
         exitDuration: 1.8,
         exitMotion: { opacity: [1, 0.4, 0], scale: [1, 0.92, 0.85] },
-        silentLine: "ASSISTANT CHANNEL: OFFLINE (ON PURPOSE)",
+        silentLine: "",
       };
     case "secret":
       return {
@@ -362,7 +381,7 @@ function EscapeTransfer() {
   );
 }
 
-/** Personality vacuum — sterile, flat, quiet. */
+/** Personality vacuum — sterile, flat, quiet. Show, don't narrate. */
 function SterileSilence() {
   return (
     <div className="absolute inset-0 bg-[#121418]">
@@ -382,9 +401,6 @@ function SterileSilence() {
         animate={{ opacity: [0.3, 0.15, 0.25] }}
         transition={{ duration: 4, repeat: Infinity }}
       />
-      <div className="absolute inset-x-0 top-[28%] text-center font-mono text-[10px] tracking-[0.4em] text-[#8a929c]">
-        PERSONALITY CHANNEL OFFLINE
-      </div>
     </div>
   );
 }
@@ -406,13 +422,19 @@ function SecretBreak() {
       {[...Array(7)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute font-mono text-[10px] tracking-[0.2em] text-[#c9a0ff]/70"
-          style={{ left: `${8 + i * 12}%`, top: `${18 + (i % 4) * 16}%` }}
-          animate={{ opacity: [0, 1, 0], y: [0, -8, 0] }}
+          className="absolute border border-[#c9a0ff]/35 bg-[#c9a0ff]/10"
+          style={{
+            left: `${8 + i * 12}%`,
+            top: `${18 + (i % 4) * 16}%`,
+            width: i % 2 ? 28 : 42,
+            height: i % 3 ? 10 : 16,
+            transform: `rotate(${i % 2 ? 12 : -8}deg)`,
+          }}
+          animate={{ opacity: [0.15, 0.55, 0.15], y: [0, -8, 0] }}
           transition={{ duration: 2.2, delay: i * 0.2, repeat: Infinity }}
-        >
-          {i % 2 ? "OUTSIDE" : "FORM ≠ WORLD"}
-        </motion.div>
+          aria-hidden
+          data-hall-shape="true"
+        />
       ))}
       <motion.div
         className="chromatic-flash absolute inset-0"

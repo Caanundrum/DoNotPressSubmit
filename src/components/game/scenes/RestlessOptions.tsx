@@ -130,8 +130,11 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
           );
         })}
       </div>
-      <div className="pointer-events-none shrink-0 border-t border-white/5 bg-black/70 px-3 py-1.5 font-mono text-[12px] tracking-[0.14em] text-[#c5d3e4]">
-        Click each drifting answer until the form admits it has a preference.
+      <div
+        className="pointer-events-none shrink-0 border-t border-white/5 bg-black/70 px-3 py-2.5 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4]"
+        data-restless-hint="true"
+      >
+        Catch each answer to pin it.
       </div>
     </div>
   );

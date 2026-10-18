@@ -29,11 +29,11 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
         hits={checks}
         maxHits={needed}
         moveMs={1500}
-        // hitPad paints with the chrome — leave 24px side budget + 2×hitPad in the width.
+        // hitPad is laid out (no negative margin) — keep width budget for ≥12px inset each side.
         hitPad={8}
         arenaPadding={14}
         edgeInsetPx={12}
-        className="absolute flex w-[min(240px,calc(100%-48px))] min-w-[10rem] items-center gap-2 border border-white/25 bg-[#0c1420]/92 px-2.5 py-2"
+        className="absolute flex w-[min(220px,calc(100%-56px))] min-w-[9.5rem] items-center gap-2 border border-white/25 bg-[#0c1420]/92 px-2.5 py-2"
         onHit={() => {
           audio.play("click", 0.45);
           const next = checks + 1;

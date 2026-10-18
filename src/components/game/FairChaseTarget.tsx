@@ -293,8 +293,9 @@ export function FairChaseTarget({
         type="button"
         className={className}
         style={{
+          // Hit pad expands the laid-out chrome (no negative margin) so
+          // left%/top% centering and edgeInset clamps share the same box.
           padding: hitPad,
-          margin: -hitPad,
           boxSizing: "content-box",
           ...style,
         }}

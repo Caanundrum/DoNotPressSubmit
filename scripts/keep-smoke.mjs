@@ -80,7 +80,10 @@ assert(escaping.includes("hitPad={26}"), "EscapingButton hitPad 26");
 
 const checkbox = read("src/components/game/scenes/CheckboxRebellion.tsx");
 assert(checkbox.includes("hitPad={8}"), "CheckboxRebellion hitPad 8 (keeps chrome inside arena)");
-assert(/edgeInsetPx=\{12\}/.test(checkbox), "Consent chase keeps ≥12px edge inset");
+assert(
+  /data-consent-inset="12"|edgeInsetPx=\{12\}/.test(checkbox),
+  "Consent chase keeps ≥12px edge inset",
+);
 
 const popup = read("src/components/game/scenes/PopupWar.tsx");
 assert(/minHeight:\s*44/.test(popup), "PopupWar DISMISS minHeight 44");

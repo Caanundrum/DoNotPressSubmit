@@ -18,7 +18,10 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
   const needed = 3;
 
   return (
-    <div className="relative h-[min(42vh,340px)] w-full overflow-hidden border border-cyan/25 bg-black/35">
+    <div
+      className="relative h-[min(42vh,340px)] w-full overflow-hidden border border-cyan/25 bg-black/35"
+      data-consent-arena="true"
+    >
       <div className="absolute left-3 top-3 z-10 font-mono text-[10px] tracking-[0.22em] text-cyan">
         Caught {checks}/{needed}
       </div>
@@ -26,9 +29,11 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
         hits={checks}
         maxHits={needed}
         moveMs={1500}
-        hitPad={24}
+        // Small hitPad — large pad used to paint past the arena rim on ~390px.
+        hitPad={10}
         arenaPadding={14}
-        className="absolute flex w-[min(280px,calc(100%-28px))] min-w-[11rem] items-center gap-2 border border-white/25 bg-[#0c1420]/92 px-2.5 py-2"
+        edgeInsetPx={12}
+        className="absolute flex w-[min(260px,calc(100%-24px))] min-w-[10.5rem] items-center gap-2 border border-white/25 bg-[#0c1420]/92 px-2.5 py-2"
         onHit={() => {
           audio.play("click", 0.45);
           const next = checks + 1;

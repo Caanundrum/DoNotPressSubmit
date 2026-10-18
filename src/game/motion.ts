@@ -140,8 +140,9 @@ export function panelVariants(motion: PanelMotion | undefined) {
       };
     case "drift":
       return {
-        initial: { opacity: 0, x: -20, y: 20 },
-        animate: { opacity: 1, x: [0, 10, -8, 0], y: [0, -6, 4, 0] },
+        // Keep ±4px so mobile Last Notes / Last Words never clip the right rim.
+        initial: { opacity: 0, x: -12, y: 12 },
+        animate: { opacity: 1, x: [0, 4, -3, 0], y: [0, -3, 2, 0] },
       };
     case "scatter":
       return {

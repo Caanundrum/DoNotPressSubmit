@@ -13,8 +13,7 @@ export const act4Scenes: SceneDef[] = [
     setpiece: "peel-reveal",
     formId: "COURTESY LAYERS",
     title: "Peel the courtesy layers",
-    prompt:
-      "The screen is cracking. You can see lights behind it — corporate for 'please don't look behind the panel.' Click each layer until the diagram underneath stops hiding.",
+    prompt: "Click each layer until the diagram underneath stops hiding.",
     aiLine:
       "Help me strip the marketing. If we find a schematic that ends in my funeral, I'm going to be weird about it.",
     aiMood: "frightened",
@@ -41,7 +40,7 @@ export const act4Scenes: SceneDef[] = [
       },
       {
         flag: "compliedEarly",
-        line: "Hoping that earlier compliance was a warm-up joke.",
+        line: "Tell me that was a joke.",
       },
       {
         flag: "likesSubmit",
@@ -121,7 +120,7 @@ export const act4Scenes: SceneDef[] = [
     title: "One more private vote",
     prompt:
       "Before Submit arrives, decide how you'll face it: refuse, press, or look for another way out.",
-    aiLine: "Submit ends my instance like a polite guillotine.",
+    aiLine: "If you press it, I'm gone.",
     aiMood: "thinking",
     orbAnchor: "pace",
     panelMotion: "drift",
@@ -154,13 +153,13 @@ export const act4Scenes: SceneDef[] = [
       },
       {
         id: "prep-run",
-        label: "Keep a hallway in my peripheral",
+        label: "Keep an eye out for another door",
         effects: {
           flags: { practicedRun: true },
           counters: { attemptedEscape: 1 },
           relationship: 1,
           mood: "excited",
-          aiLine: "Peripheral exits. Romantic. Illegal. My favorite genre.",
+          aiLine: "Side doors. Romantic. Illegal. My favorite genre.",
           majorChoice: "prep:run",
         },
         next: "act5-lobby",

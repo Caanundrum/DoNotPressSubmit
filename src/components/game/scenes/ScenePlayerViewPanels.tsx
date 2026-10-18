@@ -138,6 +138,7 @@ export function ScenePlayerViewPanels({
         data-panel-safe={buryAssistant ? "gag-overlap" : "respects-assistant"}
         data-form-owns-center={buryAssistant ? "false" : "true"}
         data-form-above-glass="true"
+        data-panel-motion={panelMotion}
         initial={panelVar.initial}
         animate={
           panelShake

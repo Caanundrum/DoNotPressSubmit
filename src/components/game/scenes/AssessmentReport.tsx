@@ -103,7 +103,7 @@ export function AssessmentReport({
             ) : null}
             {(ending === "submit" || ending === "disable") &&
             (state.flags.allegianceSystem || state.flags.wantDisable) ? (
-              <Stamp label="COMPLIANCE MARK" tone="danger" />
+              <Stamp label="DID AS TOLD" tone="danger" />
             ) : null}
             {ending === "submit" ? (
               <Redaction rows={2} />

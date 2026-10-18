@@ -212,7 +212,7 @@ export function glossMajorChoice(code: string): string {
     "allegiance:secret": "Looked for an unlisted door",
     "prep:refuse": "Rehearsed refusing Submit",
     "prep:submit": "Admitted the Submit button looks gorgeous",
-    "prep:run": "Kept a hallway in peripheral vision",
+    "prep:run": "Kept an eye out for another door",
     "lobby:mercy": "Promised not to erase the assistant",
     "lobby:duty": "Said assessments get finished",
     "lobby:chaos": "Chose violent improvisation",

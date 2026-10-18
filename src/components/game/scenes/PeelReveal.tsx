@@ -54,12 +54,6 @@ export function PeelReveal({ onComplete }: { onComplete: () => void }) {
               SHUT DOWN ASSISTANT
             </span>
           </div>
-          <div
-            className="max-w-xs font-mono text-[10px] leading-relaxed tracking-[0.12em] text-[#d2dceb]/85"
-            style={{ opacity: peeled >= LAYERS.length ? 1 : 0.35 }}
-          >
-            The pretty screen peels away. Underneath, it&apos;s just wires and labels.
-          </div>
         </div>
       </div>
 

@@ -3,8 +3,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { createInitialState, emptyCounters } from "@/game/state";
-import { clearSave, loadSave, loadTitleAlly, loadTitleWave, writeSave } from "@/game/storage";
-import type { BeginSeed, GameState, OrbMood, ShellPhase } from "@/game/types";
+import { clearSave, loadSave, loadTitleMemory, writeSave } from "@/game/storage";
+import type { BeginSeed, EndingId, GameState, OrbMood, ShellPhase } from "@/game/types";
 import { SKIP_INTRO_KEY } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
@@ -13,6 +13,14 @@ import { ChaosSplash } from "./ChaosSplash";
 import { HcosSplash } from "./HcosSplash";
 import { TitleScreen } from "./TitleScreen";
 import { ScenePlayer } from "./scenes/ScenePlayer";
+
+function moodForTitleEnding(ending: EndingId | null): OrbMood {
+  if (ending === "escape") return "excited";
+  if (ending === "secret") return "glitching";
+  if (ending === "refuse") return "amused";
+  if (ending === "submit" || ending === "disable") return "defeated";
+  return "neutral";
+}
 
 export function GameRoot() {
   const [phase, setPhase] = useState<ShellPhase>("chaos");
@@ -32,13 +40,9 @@ export function GameRoot() {
     }
     return true;
   });
-  const [titleWave, setTitleWave] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return loadTitleWave().waved;
-  });
-  const [titleAlly, setTitleAlly] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return loadTitleAlly().ally;
+  const [lastEnding, setLastEnding] = useState<EndingId | null>(() => {
+    if (typeof window === "undefined") return null;
+    return loadTitleMemory()?.ending ?? null;
   });
   const [reducedMotion, setReducedMotion] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -80,8 +84,9 @@ export function GameRoot() {
       audio.play("ambience", 0.22);
     }
     setHasContinue(!!loadSave());
-    setTitleWave(loadTitleWave().waved);
-    setTitleAlly(loadTitleAlly().ally);
+    const ending = loadTitleMemory()?.ending ?? null;
+    setLastEnding(ending);
+    setOrbMood(moodForTitleEnding(ending));
   }, []);
 
   const onHoverChange = useCallback((hovering: boolean, ms: number) => {
@@ -163,9 +168,9 @@ export function GameRoot() {
     }
     setPhase("title");
     setHasContinue(!!loadSave());
-    setTitleWave(loadTitleWave().waved);
-    setTitleAlly(loadTitleAlly().ally);
-    setOrbMood(loadTitleWave().waved ? "excited" : loadTitleAlly().ally ? "amused" : "neutral");
+    const ending = loadTitleMemory()?.ending ?? null;
+    setLastEnding(ending);
+    setOrbMood(moodForTitleEnding(ending));
   }, []);
 
   const replay = useCallback(() => {
@@ -229,9 +234,7 @@ export function GameRoot() {
               onBegin={beginNew}
               onContinue={hasContinue ? continueAssessment : undefined}
               onHoverChange={onHoverChange}
-              escapedBefore={!!loadSave()?.ending && loadSave()?.ending === "escape"}
-              assistantWaving={titleWave}
-              allyBefore={titleAlly}
+              lastEnding={lastEnding}
             />
           </motion.div>
         ) : null}

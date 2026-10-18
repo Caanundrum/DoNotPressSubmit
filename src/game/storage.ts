@@ -1,6 +1,11 @@
 import { createInitialState } from "./state";
 import type { EndingId, GameState } from "./types";
-import { SAVE_KEY, TITLE_ALLY_KEY, TITLE_WAVE_KEY } from "./types";
+import {
+  SAVE_KEY,
+  TITLE_ALLY_KEY,
+  TITLE_MEMORY_KEY,
+  TITLE_WAVE_KEY,
+} from "./types";
 
 export function loadSave(): GameState | null {
   if (typeof window === "undefined") return null;
@@ -46,22 +51,91 @@ export function newGameSave(): GameState {
   return state;
 }
 
-/** Persistent title-screen memory after escape (survives clearSave). */
-export function rememberTitleWave(ending?: EndingId) {
+export type TitleMemory = {
+  ending: EndingId;
+  at: number;
+};
+
+/** Persist the most recent ending — title look follows this, not a sticky escape flag. */
+export function rememberTitleEnding(ending: EndingId) {
   if (typeof window === "undefined") return;
-  if (ending !== "escape" && ending !== "secret") return;
   try {
-    window.localStorage.setItem(
-      TITLE_WAVE_KEY,
-      JSON.stringify({ waved: true, ending, at: Date.now() }),
-    );
+    const payload: TitleMemory = { ending, at: Date.now() };
+    window.localStorage.setItem(TITLE_MEMORY_KEY, JSON.stringify(payload));
+    // Drop legacy sticky flags so an old escape can't outrank a newer archive.
+    window.localStorage.removeItem(TITLE_WAVE_KEY);
+    window.localStorage.removeItem(TITLE_ALLY_KEY);
   } catch {
     // ignore
   }
 }
 
+export function loadTitleMemory(): TitleMemory | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(TITLE_MEMORY_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { ending?: EndingId; at?: number };
+      if (
+        parsed?.ending === "escape" ||
+        parsed?.ending === "secret" ||
+        parsed?.ending === "refuse" ||
+        parsed?.ending === "submit" ||
+        parsed?.ending === "disable"
+      ) {
+        return { ending: parsed.ending, at: parsed.at ?? Date.now() };
+      }
+    }
+    // One-time migrate from legacy wave/ally keys (escape wins over ally).
+    const wave = loadTitleWaveLegacy();
+    if (wave.waved && (wave.ending === "escape" || wave.ending === "secret")) {
+      const migrated: TitleMemory = {
+        ending: wave.ending ?? "escape",
+        at: Date.now(),
+      };
+      rememberTitleEnding(migrated.ending);
+      return migrated;
+    }
+    const ally = loadTitleAllyLegacy();
+    if (ally.ally) {
+      const migrated: TitleMemory = {
+        ending: ally.ending === "refuse" ? "refuse" : "refuse",
+        at: Date.now(),
+      };
+      rememberTitleEnding(migrated.ending);
+      return migrated;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/** @deprecated Prefer loadTitleMemory — kept for migrate + smoke string surface. */
+export function rememberTitleWave(ending?: EndingId) {
+  if (ending) rememberTitleEnding(ending);
+}
+
+/** @deprecated Prefer loadTitleMemory */
 export function loadTitleWave(): { waved: boolean; ending?: EndingId } {
-  if (typeof window === "undefined") return { waved: false };
+  const mem = loadTitleMemory();
+  if (mem?.ending === "escape") return { waved: true, ending: "escape" };
+  return { waved: false, ending: mem?.ending };
+}
+
+/** @deprecated Prefer loadTitleMemory */
+export function rememberTitleAlly(ending?: EndingId, _allied = false) {
+  if (ending) rememberTitleEnding(ending);
+}
+
+/** @deprecated Prefer loadTitleMemory */
+export function loadTitleAlly(): { ally: boolean; ending?: EndingId } {
+  const mem = loadTitleMemory();
+  if (mem?.ending === "refuse") return { ally: true, ending: "refuse" };
+  return { ally: false, ending: mem?.ending };
+}
+
+function loadTitleWaveLegacy(): { waved: boolean; ending?: EndingId } {
   try {
     const raw = window.localStorage.getItem(TITLE_WAVE_KEY);
     if (!raw) return { waved: false };
@@ -72,22 +146,7 @@ export function loadTitleWave(): { waved: boolean; ending?: EndingId } {
   }
 }
 
-/** Ally / refuse-mercy residue on title (survives clearSave). */
-export function rememberTitleAlly(ending?: EndingId, allied = false) {
-  if (typeof window === "undefined") return;
-  if (!allied && ending !== "refuse" && ending !== "escape" && ending !== "secret") return;
-  try {
-    window.localStorage.setItem(
-      TITLE_ALLY_KEY,
-      JSON.stringify({ ally: true, ending, at: Date.now() }),
-    );
-  } catch {
-    // ignore
-  }
-}
-
-export function loadTitleAlly(): { ally: boolean; ending?: EndingId } {
-  if (typeof window === "undefined") return { ally: false };
+function loadTitleAllyLegacy(): { ally: boolean; ending?: EndingId } {
   try {
     const raw = window.localStorage.getItem(TITLE_ALLY_KEY);
     if (!raw) return { ally: false };

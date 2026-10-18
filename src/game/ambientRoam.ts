@@ -240,32 +240,32 @@ export const TITLE_BAR_LAYOUTS: FacilityBar[][] = [
   ],
 ];
 
-/** Title gag anchors — stay in side margins, clear of the centered CTA stack. */
+/** Title gag anchors — stay in side margins, clear of the centered CTA / PRESS SUBMIT stack. */
 export const TITLE_GAG_SLOTS: Record<string, RoamSlot[]> = {
   drone: DRONE_PATH_SLOTS.title,
   coffee: [
-    { left: "84%", top: "44%" },
-    { left: "8%", top: "52%" },
-    { left: "76%", top: "28%" },
-    { left: "10%", top: "66%" },
+    { left: "86%", top: "48%" },
+    { left: "4%", top: "56%" },
+    { left: "88%", top: "64%" },
+    { left: "2%", top: "70%" },
   ],
   printer: [
-    { left: "80%", top: "68%" },
-    { left: "6%", top: "70%" },
-    { left: "86%", top: "62%" },
-    { left: "12%", top: "74%" },
+    { left: "84%", top: "72%" },
+    { left: "4%", top: "74%" },
+    { left: "88%", top: "66%" },
+    { left: "2%", top: "68%" },
   ],
   corridor: [
-    { left: "8%", top: "58%" },
-    { left: "78%", top: "50%" },
-    { left: "4%", top: "42%" },
-    { left: "84%", top: "40%" },
+    { left: "4%", top: "62%" },
+    { left: "86%", top: "54%" },
+    { left: "2%", top: "46%" },
+    { left: "88%", top: "42%" },
   ],
   containment: [
-    { left: "80%", top: "20%" },
-    { left: "8%", top: "18%" },
-    { left: "86%", top: "32%" },
-    { left: "4%", top: "26%" },
+    { left: "86%", top: "16%" },
+    { left: "2%", top: "16%" },
+    { left: "88%", top: "28%" },
+    { left: "4%", top: "24%" },
   ],
 };
 

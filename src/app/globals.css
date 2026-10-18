@@ -64,14 +64,17 @@
 *,
 *::before,
 *::after {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
 
-*::-webkit-scrollbar {
+*::-webkit-scrollbar,
+*::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-track {
   width: 0 !important;
   height: 0 !important;
   display: none !important;
+  background: transparent !important;
 }
 
 html,
@@ -83,8 +86,9 @@ body {
   background: var(--cs-pitch-black);
   color: var(--cs-text-main);
   font-family: var(--font-ui), system-ui, sans-serif;
-  overflow: hidden;
-  overflow-x: hidden;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
   overscroll-behavior: none;
 }
 
@@ -92,6 +96,15 @@ body {
   min-height: 100%;
   max-height: 100dvh;
   position: relative;
+}
+
+/* Next root must never introduce a scrollport. */
+html,
+body,
+#__next,
+[data-nextjs-scroll-focus-boundary] {
+  overflow: hidden !important;
+  max-width: 100%;
 }
 
 button {
@@ -106,8 +119,9 @@ button {
   height: 100dvh;
   max-width: 100%;
   max-height: 100dvh;
-  overflow: hidden;
-  overflow-x: hidden;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
   background:
     radial-gradient(ellipse 80% 55% at 50% 18%, rgba(255, 106, 0, 0.07), transparent 58%),
     radial-gradient(ellipse 70% 50% at 72% 82%, rgba(0, 229, 255, 0.08), transparent 55%),
@@ -347,6 +361,28 @@ button {
     font-size: 12px;
   }
 
+  /* SOUND ON lives top-right — keep title / Identity headers clear of it. */
+  [data-sound-corner="true"] {
+    z-index: 60 !important;
+  }
+
+  [data-title-facility-line="true"] {
+    padding-left: 0.5rem !important;
+    padding-right: 6.5rem !important;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  /* Keep the tiny DO NOT PRESS robot off the centered title wordmark on phones. */
+  [data-title-cinematic="true"] [data-roam-egg="do-not-press"] {
+    display: none !important;
+  }
+
+  [data-title-cinematic="true"] [data-title-gag-layer="true"] [data-ambient-roam="true"] > * {
+    /* Side-margin gags only — never paint over the PRESS SUBMIT stack. */
+    max-width: 28vw;
+  }
+
   [data-mobile-bubble-dock="true"] [data-assistant-safe-dock="true"] {
     left: 0 !important;
     right: 0 !important;
@@ -357,7 +393,7 @@ button {
     flex-direction: row !important;
     align-items: flex-end !important;
     justify-content: flex-start !important;
-    gap: 10px !important;
+    gap: 14px !important;
     padding: 0.55rem 0.7rem calc(0.55rem + env(safe-area-inset-bottom, 0px)) !important;
     box-sizing: border-box !important;
     background: linear-gradient(
@@ -369,9 +405,16 @@ button {
     z-index: 44 !important;
   }
 
+  [data-mobile-bubble-dock="true"] [data-orb-hit-layer="true"] {
+    flex: 0 0 auto !important;
+    margin-right: 2px !important;
+  }
+
   [data-mobile-bubble-dock="true"] .assistant-bubble {
     max-width: none !important;
     flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
     max-height: min(28vh, 160px) !important;
     font-size: 12px !important;
   }
@@ -379,12 +422,13 @@ button {
   [data-mobile-bubble-dock="true"] .assessment-panel.facility-hud {
     left: 0.4rem !important;
     right: 0.4rem !important;
-    top: 0.45rem !important;
+    /* Clear SOUND ON corner (~2.6rem) + a few px gap. */
+    top: 2.85rem !important;
     bottom: auto !important;
     width: auto !important;
     max-width: none !important;
     /* Tall enough for Pressure's five options (incl. late mug) without clipping. */
-    max-height: min(68dvh, calc(100dvh - 8rem)) !important;
+    max-height: min(62dvh, calc(100dvh - 10rem)) !important;
   }
 
   [data-mobile-bubble-dock="true"] .assessment-panel[data-panel-safe="gag-overlap"] {

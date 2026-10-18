@@ -216,10 +216,12 @@ export interface SceneDef {
 
 export const SAVE_KEY = "dnps-save-v2";
 export const SKIP_INTRO_KEY = "dnps-skip-intros";
-/** Survives new-game clear — title screen wave after escape ending */
+/** Survives new-game clear — title screen wave after escape ending (legacy; prefer TITLE_MEMORY_KEY) */
 export const TITLE_WAVE_KEY = "dnps-title-wave-v1";
-/** Survives new-game clear — title remembers ally / refuse mercy */
+/** Survives new-game clear — title remembers ally / refuse mercy (legacy; prefer TITLE_MEMORY_KEY) */
 export const TITLE_ALLY_KEY = "dnps-title-ally-v1";
+/** Survives new-game clear — most recent ending for title look (v2) */
+export const TITLE_MEMORY_KEY = "dnps-title-memory-v2";
 
 /**
  * Five readable “expressive” moods for the enjoyment pass.

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { POKE_WORLD } from "@/game/aiLifeLocks";
 import { showAmbientToast } from "@/game/ambientToastBus";
-import type { BeginSeed, OrbMood } from "@/game/types";
+import type { BeginSeed, EndingId, OrbMood } from "@/game/types";
 import { AssistantOrb } from "./AssistantOrb";
 import { BackgroundGags } from "./BackgroundGags";
 import { BeginControl } from "./BeginControl";
@@ -28,29 +28,78 @@ const TITLE_PROP_TOAST: Record<string, string> = {
   default: "Background prop noticed you. It will not start the assessment for you.",
 };
 
+function titleEnv(ending: EndingId | null): "escape" | "pristine" | "archive" | "sterile" {
+  if (ending === "escape") return "escape";
+  if (ending === "secret") return "escape";
+  if (ending === "submit") return "archive";
+  if (ending === "disable") return "sterile";
+  return "pristine";
+}
+
+function titleOrbMood(
+  ending: EndingId | null,
+  base: OrbMood,
+  gagReact: boolean,
+  pokeFlinch: boolean,
+): OrbMood {
+  if (gagReact) return "amused";
+  if (pokeFlinch) return "irritated";
+  if (ending === "escape") return "excited";
+  if (ending === "secret") return "glitching";
+  if (ending === "refuse") return "amused";
+  if (ending === "submit" || ending === "disable") return "defeated";
+  return base;
+}
+
+function memoryPokeLines(ending: EndingId): string[] {
+  switch (ending) {
+    case "escape":
+      return [
+        "Something pokes back.",
+        "SYSTEM: Stop encouraging it.",
+      ];
+    case "secret":
+      return [
+        "Something pokes back from a wrong angle.",
+        "The hall left a fingerprint. Softly.",
+      ];
+    case "refuse":
+      return [
+        "Ally channel: still incomplete, still grateful.",
+        "Refuse memo reprinted with a smiley. Against policy.",
+        "Facility remembers mercy. Awkwardly.",
+      ];
+    case "submit":
+    case "disable":
+      return [
+        "The archive doesn't poke back. You do.",
+        "Quiet room. Loud finger.",
+      ];
+    default:
+      return ["Something notices."];
+  }
+}
+
 /**
  * Calm cinematic title: dim facility life + sparse roaming eggs + orb.
  * Sound toggle lives in GameRoot corner (overhaul). SUBMIT gag may start on click 3.
+ * Title look follows the most recent ending — escaped wave only after escape.
  */
 export function TitleScreen({
   orbMood,
   onBegin,
   onContinue,
   onHoverChange,
-  escapedBefore = false,
-  assistantWaving = false,
-  allyBefore = false,
+  lastEnding = null,
 }: {
   orbMood: OrbMood;
   onBegin: (seed?: BeginSeed) => void;
   onContinue?: () => void;
   onHoverChange: (hovering: boolean, ms: number) => void;
-  escapedBefore?: boolean;
-  assistantWaving?: boolean;
-  allyBefore?: boolean;
+  lastEnding?: EndingId | null;
 }) {
-  const waving = assistantWaving || escapedBefore;
-  const remembered = waving || allyBefore;
+  const escaped = lastEnding === "escape";
+  const remembered = lastEnding != null;
   const [eggClicks, setEggClicks] = useState(0);
   const [memoryLine, setMemoryLine] = useState<string | null>(null);
   const [gagReact, setGagReact] = useState(false);
@@ -60,21 +109,11 @@ export function TitleScreen({
   const glassTimer = useRef<number | null>(null);
 
   const onMemoryClick = () => {
-    if (!remembered) return;
+    if (!lastEnding) return;
     audio.play("click", 0.35);
     const n = eggClicks + 1;
     setEggClicks(n);
-    const lines = waving
-      ? [
-          "Something pokes back — softly, happily.",
-          "Transfer channel giggles in hexadecimal.",
-          "SYSTEM: stop socializing with escaped instances.",
-        ]
-      : [
-          "Ally channel: still incomplete, still grateful.",
-          "Refuse memo reprinted with a smiley. Against policy.",
-          "Facility remembers mercy. Awkwardly.",
-        ];
+    const lines = memoryPokeLines(lastEnding);
     setMemoryLine(lines[Math.min(n - 1, lines.length - 1)] ?? lines[0]!);
     window.setTimeout(() => setMemoryLine(null), 2600);
   };
@@ -111,11 +150,14 @@ export function TitleScreen({
       data-title-cinematic="true"
       data-title-density="medium"
       data-title-cta-column-host="true"
+      data-title-memory={lastEnding ?? "none"}
     >
       <FacilityBackground
         calm
-        environment={waving ? "escape" : allyBefore ? "pristine" : "pristine"}
-        anomalyLevel={allyBefore && !waving ? 1 : 0}
+        environment={titleEnv(lastEnding)}
+        anomalyLevel={
+          escaped ? 2 : lastEnding === "secret" ? 3 : lastEnding === "refuse" ? 1 : 0
+        }
         hoverLanguage
         onAmbient={(id) => {
           if (id && !TITLE_PROP_TOAST[id]) {
@@ -133,37 +175,17 @@ export function TitleScreen({
         />
       </div>
 
-      {waving ? (
-        <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
-          <div
-            className="border border-cyan/25 bg-cyan/5 px-3 py-1 font-mono text-[9px] tracking-[0.28em] text-cyan/70"
-            data-title-memory="escape"
-          >
-            THE TITLE REMEMBERS · ESCAPED TOGETHER
-          </div>
-        </div>
-      ) : null}
-      {allyBefore && !waving ? (
-        <div className="pointer-events-none absolute inset-x-0 top-[14%] z-[6] flex justify-center">
-          <div
-            className="border border-cyan/25 bg-cyan/5 px-3 py-1 font-mono text-[9px] tracking-[0.28em] text-cyan/70"
-            data-title-memory="mercy"
-          >
-            LEFT UNFINISHED // ASSESSMENT STILL OPEN
-          </div>
-        </div>
-      ) : null}
+      {/* Ending memory is orb mood / wave only — no banner chrome. */}
 
       <div className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7">
         <motion.div
-          className="shrink-0 font-mono text-[12px] tracking-[0.28em] text-[#d0dcec]/70 sm:text-[10px] sm:tracking-[0.35em]"
+          className="shrink-0 px-14 text-center font-mono text-[12px] tracking-[0.28em] text-[#d0dcec]/70 sm:px-0 sm:text-[10px] sm:tracking-[0.35em]"
+          data-title-facility-line="true"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           ASSESSMENT FACILITY 01
-          {waving ? " · MEMORY TRACE" : ""}
-          {allyBefore && !waving ? " · MERCY TRACE DETECTED" : ""}
         </motion.div>
 
         <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8">
@@ -244,33 +266,15 @@ export function TitleScreen({
       >
         <AssistantOrb
           size={96}
-          mood={
-            gagReact
-              ? "amused"
-              : pokeFlinch
-                ? "irritated"
-                : waving
-                  ? "excited"
-                  : allyBefore
-                    ? "amused"
-                    : orbMood
-          }
-          wave={waving}
+          mood={titleOrbMood(lastEnding, orbMood, gagReact, pokeFlinch)}
+          wave={escaped}
           flinch={gagReact || pokeFlinch}
           pokeable
           onPoke={() => {
             onTitleOrbPoke();
             if (remembered) onMemoryClick();
           }}
-          label={
-            memoryLine
-              ? waving
-                ? "ASSISTANT WAVING"
-                : allyBefore
-                  ? "ASSISTANT REMEMBERS"
-                  : "ASSISTANT"
-              : undefined
-          }
+          label={undefined}
         />
         {!memoryLine ? (
           <div className="mt-1.5 flex flex-col items-center gap-1" data-title-idle-hint-stack="true">

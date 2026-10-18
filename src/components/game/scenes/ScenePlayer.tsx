@@ -10,7 +10,7 @@ import {
 } from "@/game/motion";
 import { getScene } from "@/game/scenes";
 import { applyEffects, pathResidueKind, resolveAiLine } from "@/game/state";
-import { rememberTitleAlly, rememberTitleWave } from "@/game/storage";
+import { rememberTitleEnding } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
@@ -68,6 +68,8 @@ function ScenePlayerInner({
   const scene = getScene(sceneId);
   const [selected, setSelected] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
+  /** Reaction / poke lines are scene-scoped — never leak into the next beat. */
+  const [lineSceneId, setLineSceneId] = useState(sceneId);
   const [showLate, setShowLate] = useState(() => !scene?.choices?.some((c) => c.late));
   const [lateHint, setLateHint] = useState(false);
   const [panelShake, setPanelShake] = useState(false);
@@ -123,6 +125,21 @@ function ScenePlayerInner({
     };
   }, []);
 
+  // Per-scene bubble: clear sticky reaction / poke lines when the beat changes.
+  useEffect(() => {
+    setReaction(null);
+    setPokeNotice(null);
+    setSelected(null);
+    setLineSceneId(sceneId);
+    setShowLate(!getScene(sceneId)?.choices?.some((c) => c.late));
+    setLateHint(false);
+    setCompanionReady(false);
+    setWatchedPulse(false);
+    setGlassPhase("idle");
+    setChoiceFlush("neutral");
+    setChoiceGlanceBoost(0);
+  }, [sceneId]);
+
   useEffect(() => {
     if (scene?.kind !== "companion") return;
     const ready = window.setTimeout(
@@ -139,11 +156,12 @@ function ScenePlayerInner({
 
   const aiLine = useMemo(() => {
     if (!scene) return "";
+    const sceneOwned = lineSceneId === sceneId;
     // Poke reactions outrank beat openings so idle never re-reads the question-start copy.
-    if (pokeNotice) return pokeNotice;
-    if (reaction) return reaction;
+    if (sceneOwned && pokeNotice) return pokeNotice;
+    if (sceneOwned && reaction) return reaction;
     return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
-  }, [scene, reaction, pokeNotice, state.flags]);
+  }, [scene, sceneId, lineSceneId, reaction, pokeNotice, state.flags]);
 
   const spotlight = !!scene?.spotlight || scene?.kind === "companion" || scene?.orbAnchor === "spotlight";
   const orbAnchor =
@@ -270,14 +288,7 @@ function ScenePlayerInner({
           aiLine={aiLine}
           environment={scene.environment}
           onContinue={() => {
-            rememberTitleWave(scene.endingId);
-            const allied =
-              scene.endingId === "refuse" ||
-              scene.endingId === "escape" ||
-              scene.endingId === "secret" ||
-              state.relationshipScore >= 3 ||
-              !!state.flags.allegianceAI;
-            if (allied) rememberTitleAlly(scene.endingId, true);
+            if (scene.endingId) rememberTitleEnding(scene.endingId);
             go(state, "report");
           }}
         />
@@ -305,6 +316,7 @@ function ScenePlayerInner({
     stateRef.current = next;
     onState(next);
     // Sticky poke line — never clear back to beat opening while still on this scene.
+    setLineSceneId(sceneId);
     setPokeNotice(notice);
     setReaction(null);
     if (glassEvent === "crack" || glassEvent === "stitch") {
@@ -342,7 +354,10 @@ function ScenePlayerInner({
       if (choice) {
         next = applyEffects(state, choice.effects, choice.id);
         nextId = choice.next;
-        if (choice.effects?.aiLine) setReaction(choice.effects.aiLine);
+        if (choice.effects?.aiLine) {
+          setLineSceneId(sceneId);
+          setReaction(choice.effects.aiLine);
+        }
       }
     } else {
       next = {
@@ -372,6 +387,7 @@ function ScenePlayerInner({
     }, 1600);
     let next = applyEffects(state, choice.effects, choice.id);
     if (choice.effects?.aiLine) {
+      setLineSceneId(sceneId);
       setReaction(choice.effects.aiLine);
     }
     if (choice.unauthorized || choice.danger) {
@@ -407,8 +423,9 @@ function ScenePlayerInner({
   };
 
   const onEscapingHit = (hits: number) => {
+    setLineSceneId(sceneId);
     if (hits >= 3) {
-      setReaction("All 3 hits archived. The button regrets character development.");
+      setReaction("All 3 hits archived. The button finally looks embarrassed.");
     } else if (hits === 2) {
       setReaction("Two hits in. One more and we file it under fiction.");
     } else if (hits === 1) {

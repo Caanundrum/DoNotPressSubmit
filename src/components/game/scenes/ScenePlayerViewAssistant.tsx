@@ -155,8 +155,9 @@ export function ScenePlayerViewAssistant({
             // Dock-above: keep last bubble line clear of the orb during idle pulse + flinch.
             marginBottom: dockAbove && !spotlight ? 24 : 0,
           }}
-          key={aiLine || "silent"}
+          key={`${p.scene.id}:${aiLine || "silent"}`}
           data-assistant-bubble="true"
+          data-bubble-scene={p.scene.id}
           data-bubble-dock={
             dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
           }

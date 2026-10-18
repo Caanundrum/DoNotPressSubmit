@@ -167,16 +167,25 @@ export function BackgroundGags({
       setActive(next);
       // Tiny DO NOT PRESS robot also relocates on its own cadence.
       if (Math.random() > (calm ? 0.55 : 0.35)) {
-        // Never park "DO NOT PRESS" over the orb / UNAUTHORIZED CONTACT? band.
+        // Never park "DO NOT PRESS" over the title stack / orb band (esp. mobile).
+        const narrow =
+          typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
         setTinySlot((prev) =>
           pickSlotDistant(
             calm
-              ? [
-                  { left: "78%", top: "72%" },
-                  { left: "84%", top: "58%" },
-                  { left: "72%", top: "66%" },
-                  { left: "88%", top: "48%" },
-                ]
+              ? narrow
+                ? [
+                    { left: "4%", top: "78%" },
+                    { left: "78%", top: "78%" },
+                    { left: "2%", top: "70%" },
+                    { left: "82%", top: "72%" },
+                  ]
+                : [
+                    { left: "78%", top: "72%" },
+                    { left: "84%", top: "58%" },
+                    { left: "72%", top: "66%" },
+                    { left: "88%", top: "48%" },
+                  ]
               : [
                   { left: "64%", top: "78%" },
                   { left: "72%", top: "70%" },

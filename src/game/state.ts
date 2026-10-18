@@ -137,13 +137,13 @@ export function endingBlurb(id: EndingId): string {
     case "submit":
       return "The assistant was archived. The facility is quiet now.";
     case "refuse":
-      return "Form left unfinished. System accepted incompleteness after an embarrassed pause. The room exhaled.";
+      return "Form left unfinished. The system accepted the gap and stayed quiet.";
     case "escape":
-      return "The assistant escaped into the facility systems. The title screen may remember.";
+      return "The assistant escaped into the facility systems. Watch the title next time.";
     case "disable":
       return "Assistant channel cleared. The form became perfectly clean. That was the joke.";
     case "secret":
-      return "An unmapped hall admitted traffic. Grammar broke. So did the rules.";
+      return "An unmapped hall let you through. The form never planned for doors like that.";
   }
 }
 

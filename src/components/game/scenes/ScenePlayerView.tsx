@@ -179,7 +179,7 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
 
       {/* Wordless facility mark — no act/layer ids or stage mood labels (rev5 P0). */}
       <div
-        className="pointer-events-none absolute left-3 top-3 z-[5] flex items-center gap-1.5 sm:left-4 sm:top-4"
+        className="pointer-events-none absolute left-3 top-3 z-[5] flex max-w-[calc(100%-7.5rem)] items-center gap-1.5 sm:left-4 sm:top-4 sm:max-w-none"
         data-facility-mark="true"
         aria-hidden
       >

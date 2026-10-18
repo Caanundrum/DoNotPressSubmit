@@ -79,7 +79,8 @@ const escaping = read("src/components/game/scenes/EscapingButton.tsx");
 assert(escaping.includes("hitPad={26}"), "EscapingButton hitPad 26");
 
 const checkbox = read("src/components/game/scenes/CheckboxRebellion.tsx");
-assert(checkbox.includes("hitPad={24}"), "CheckboxRebellion hitPad 24");
+assert(checkbox.includes("hitPad={8}"), "CheckboxRebellion hitPad 8 (keeps chrome inside arena)");
+assert(/edgeInsetPx=\{12\}/.test(checkbox), "Consent chase keeps ≥12px edge inset");
 
 const popup = read("src/components/game/scenes/PopupWar.tsx");
 assert(/minHeight:\s*44/.test(popup), "PopupWar DISMISS minHeight 44");
@@ -305,7 +306,10 @@ assert(!/ORBIT STEADY — YOU CAN CONTINUE/.test(viewPanels), "companion settle 
 assert(/What should I call you\? Pick one/.test(act1), "name prompt uses plain human copy");
 assert(/Call me a friend/.test(act1), "friend label clarified");
 assert(/Moist cavern/.test(act1), "moist cavern option retained");
-assert(/please don't look behind the panel/.test(read("src/game/scenes/act4.ts")), "signature behind-the-panel line retained");
+assert(
+  !/corporate for 'please don't look behind the panel/.test(read("src/game/scenes/act4.ts")),
+  "Courtesy Layers drops corporate joke-explain in prompt",
+);
 const act5 = read("src/game/scenes/act5.ts");
 assert(/Please don't press it\./.test(act5), "climax refuse is a plea without naming the option");
 assert(!/Don't click the big red Submit/.test(act5), "climax no longer names the Submit option");
@@ -323,7 +327,10 @@ assert(
 );
 const act4 = read("src/game/scenes/act4.ts");
 assert(!/cast one quiet vote|Whisper it/.test(act4), "prep vote copy clarified; whisper muddle cut");
-assert(/polite guillotine/.test(act4), "polite guillotine signature retained");
+assert(/If you press it, I'm gone\./.test(act4), "prep orb line is plain (no guillotine metaphor)");
+assert(!/polite guillotine/.test(act4), "polite guillotine metaphor cut");
+assert(/Keep an eye out for another door/.test(act4), "prep run option is human voice");
+assert(/Tell me that was a joke\./.test(act4), "compliedEarly callback is human");
 assert(/decide how you'll face it/.test(act4), "prep vote says what the player is choosing");
 {
   const sceneChrome = [act1, act2, act3, act4, act5].join("\n");
@@ -368,9 +375,10 @@ assert(/lineSceneId|data-bubble-scene/.test(scenePlayer + viewAssistant), "orb b
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
 assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
 assert(
-  /w-\[min\(280px,calc\(100%-28px\)\)\]|max-w-\[calc\(100%-28px\)\]/.test(checkbox),
-  "Consent chase target stays inside panel",
+  /w-\[min\(240px,calc\(100%-48px\)\)\]|calc\(100%-48px\)/.test(checkbox),
+  "Consent chase target stays inside panel with 12px side budget",
 );
+assert(/closedRef/.test(popupSrc), "PopupWar closed counter uses monotonic ref");
 assert(/VO_PLAYBACK_ENABLED = false/.test(speech) || /speakLine/.test(speech), "VO disable path marked");
 // Punch list rev10 locks
 assert(
@@ -585,7 +593,12 @@ assert(
     /\[data-bubble-dock="beside"\]/.test(globals),
   "form bubbles use tailed speech treatment",
 );
-assert(/data-restless-hint-pad="12"/.test(restless), "Drift hint keeps ≥12px pad from panel edge");
+assert(/data-restless-hint-pad="16"/.test(restless), "Drift hint keeps ≥12px pad from panel edge");
+assert(
+  /border:\s*"1px solid rgba\(110,231,255,0\.42\)"/.test(restless) ||
+    /data-restless-arena-border="true"/.test(restless),
+  "Drift arena draws a visible bottom border",
+);
 assert(
   /calc\(100% - min\(200px, 48%\) - 8px\)/.test(read("src/components/game/scenes/PopupWar.tsx")),
   "popup cards clamp inside arena so DISMISS stays hittable",
@@ -613,6 +626,31 @@ assert(
     /opacity:\s*\[1,\s*1,\s*0\.8,\s*0\.35,\s*0\]/.test(ending),
   "submit ending orb uses a visible archive fade-out",
 );
+
+// Punch list rev14 locks
+assert(
+  /Don't touch anything\. Wait for it to settle\./.test(act3) &&
+    !/orb jitters under conflict lighting/.test(act3),
+  "Hold-still body is short show-don't-tell",
+);
+assert(
+  !/pretty screen peels away|wires and labels/.test(
+    read("src/components/game/scenes/PeelReveal.tsx"),
+  ),
+  "Courtesy Layers peel drops joke-explain caption",
+);
+assert(/DID AS TOLD/.test(reportSrc) && !/COMPLIANCE MARK/.test(reportSrc), "report uses DID AS TOLD not COMPLIANCE MARK");
+assert(
+  /companion/.test(read("src/components/game/scenes/ScenePlayerView.tsx")) &&
+    /Side Channel \/ Hold Still/.test(read("src/components/game/scenes/ScenePlayerView.tsx")),
+  "AmbientChrome pauses on companion so cyan dots stay off CTAs",
+);
+assert(
+  /x:\s*\[0,\s*4,\s*-3,\s*0\]/.test(read("src/game/motion.ts")) &&
+    /data-panel-motion="drift"/.test(read("src/app/globals.css")),
+  "Last Notes/Words drift stays inside mobile safe area",
+);
+assert(/edgeInsetPx/.test(fair), "FairChaseTarget enforces pixel edge inset");
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

@@ -76,12 +76,17 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative flex h-[min(48vh,380px)] w-full flex-col border border-cyan/25 bg-black/40 max-sm:h-[min(50vh,380px)]"
+      className="relative flex h-[min(48vh,380px)] w-full flex-col bg-black/40 max-sm:h-[min(48vh,360px)]"
+      style={{
+        // Explicit 1px rim — cyan/25 alone read as missing on phone screenshots.
+        border: "1px solid rgba(110,231,255,0.42)",
+        boxSizing: "border-box",
+      }}
       data-restless-options="true"
       data-restless-pin-lanes="true"
       data-restless-arena-border="true"
     >
-      <div className="shrink-0 px-3 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
+      <div className="shrink-0 px-4 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
         Pinned {pins}/3
       </div>
       <div className="relative min-h-0 flex-1 overflow-hidden pb-1">
@@ -132,9 +137,9 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
         })}
       </div>
       <div
-        className="pointer-events-none shrink-0 border-t border-white/5 bg-black/70 px-3 pb-3 pt-3 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4] max-sm:pb-3.5 max-sm:pt-3"
+        className="pointer-events-none shrink-0 border-t border-white/10 bg-black/70 px-4 pb-4 pt-3 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4]"
         data-restless-hint="true"
-        data-restless-hint-pad="12"
+        data-restless-hint-pad="16"
       >
         Catch each answer to pin it.
       </div>

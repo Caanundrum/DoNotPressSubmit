@@ -26,6 +26,7 @@ export function FairChaseTarget({
   maxHits,
   onHit,
   arenaPadding = 14,
+  edgeInsetPx = 12,
   moveMs = 1400,
   hitPad = 22,
 }: {
@@ -37,6 +38,8 @@ export function FairChaseTarget({
   onHit: () => void;
   /** Keep target inset from arena edges (percent of arena). */
   arenaPadding?: number;
+  /** Minimum chrome-to-edge gap in px (Consent must stay ≥12px inside). */
+  edgeInsetPx?: number;
   /** Base travel duration between waypoints (slower = fairer). */
   moveMs?: number;
   /** Invisible padding around the visual (px) for a larger hit region. */
@@ -52,6 +55,7 @@ export function FairChaseTarget({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const halfPctRef = useRef({ x: 8, y: 10 });
+  const edgePctRef = useRef({ x: 4, y: 4 });
 
   useEffect(() => {
     hoverRef.current = hovering;
@@ -68,22 +72,28 @@ export function FairChaseTarget({
     if (!wrap || !btn || !parent) return halfPctRef.current;
     const pr = parent.getBoundingClientRect();
     if (pr.width <= 0 || pr.height <= 0) return halfPctRef.current;
-    // Painted chrome size (button content box), not the expanded hit pad.
+    // Bordered button box (padding paints with the chrome).
     const paintedW = Math.max(24, btn.offsetWidth);
     const paintedH = Math.max(24, btn.offsetHeight);
     const next = {
       x: (paintedW / 2 / pr.width) * 100,
       y: (paintedH / 2 / pr.height) * 100,
     };
+    edgePctRef.current = {
+      x: (edgeInsetPx / pr.width) * 100,
+      y: (edgeInsetPx / pr.height) * 100,
+    };
     halfPctRef.current = next;
     return next;
-  }, []);
+  }, [edgeInsetPx]);
 
   const clampPos = useCallback(
     (raw: Pos): Pos => {
       const half = measureHalfPct();
-      const padX = Math.max(arenaPadding, half.x + 1);
-      const padY = Math.max(arenaPadding, half.y + 1);
+      const edge = edgePctRef.current;
+      // half + edgeInset keeps the painted chrome ≥edgeInsetPx from each rim.
+      const padX = Math.max(arenaPadding, half.x + edge.x);
+      const padY = Math.max(arenaPadding, half.y + edge.y);
       return {
         x: Math.min(100 - padX, Math.max(padX, raw.x)),
         y: Math.min(100 - padY, Math.max(padY, raw.y)),
@@ -118,8 +128,9 @@ export function FairChaseTarget({
 
   const nextWaypoint = useCallback(() => {
     const half = measureHalfPct();
-    const padX = Math.max(arenaPadding, half.x + 1);
-    const padY = Math.max(arenaPadding, half.y + 1);
+    const edge = edgePctRef.current;
+    const padX = Math.max(arenaPadding, half.x + edge.x);
+    const padY = Math.max(arenaPadding, half.y + edge.y);
     const spanX = Math.max(8, 100 - padX * 2);
     const spanY = Math.max(8, 100 - padY * 2);
     const step = (hits % 4) + 1;
@@ -183,8 +194,9 @@ export function FairChaseTarget({
     onHit();
     window.setTimeout(() => {
       const half = measureHalfPct();
-      const padX = Math.max(arenaPadding, half.x + 1);
-      const padY = Math.max(arenaPadding, half.y + 1);
+      const edge = edgePctRef.current;
+      const padX = Math.max(arenaPadding, half.x + edge.x);
+      const padY = Math.max(arenaPadding, half.y + edge.y);
       const spanX = Math.max(8, 100 - padX * 2);
       const spanY = Math.max(8, 100 - padY * 2);
       const step = ((hits + 1) % 4) + 1;

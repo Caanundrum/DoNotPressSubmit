@@ -49,7 +49,10 @@ export function PopupWar({
   const [hoverDismiss, setHoverDismiss] = useState<number | null>(null);
   /** Dismissed labels never respawn — no "Compliance required" zombie pile (P1). */
   const dismissedLabels = useRef(new Set<string>());
+  /** Monotonic dismiss tally — never decreases even when click handlers lag. */
+  const closedRef = useRef(0);
   const labelCursor = useRef(2);
+  const topZRef = useRef(3);
   const needed = 5;
 
   const progress = useMemo(() => Math.min(needed, closed), [closed]);
@@ -69,9 +72,12 @@ export function PopupWar({
     audio.play("click", 0.4);
     setPopups((prev) => {
       const victim = prev.find((p) => p.id === id);
-      if (victim) dismissedLabels.current.add(victim.label);
+      // Stale / double-click on an already-gone card must not rewind the counter.
+      if (!victim) return prev;
+      dismissedLabels.current.add(victim.label);
       const next = prev.filter((p) => p.id !== id);
-      const newlyClosed = closed + 1;
+      const newlyClosed = closedRef.current + 1;
+      closedRef.current = newlyClosed;
       setClosed(newlyClosed);
       // Final click clears leftovers so Closed N/5 matches an empty board.
       if (newlyClosed >= needed) {
@@ -80,16 +86,18 @@ export function PopupWar({
         return [];
       }
       // One spawn per dismiss — no mid-cascade double that leaves 3 up at 4/5.
-      const spawned: Popup[] = [];
-      let z = topZ + 1;
+      const z = topZRef.current + 1;
+      topZRef.current = z;
       const slot = slotFor(newlyClosed + next.length);
-      spawned.push({
-        id: Date.now() + Math.random(),
-        x: slot.x,
-        y: slot.y,
-        label: nextFreshLabel(),
-        z,
-      });
+      const spawned: Popup[] = [
+        {
+          id: Date.now() + Math.random(),
+          x: slot.x,
+          y: slot.y,
+          label: nextFreshLabel(),
+          z,
+        },
+      ];
       setTopZ(z);
       // Cap stack so the primary readable beat isn't buried.
       const merged = [...next, ...spawned].slice(0, 3);

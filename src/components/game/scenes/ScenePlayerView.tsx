@@ -168,7 +168,9 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
           paused={
             systemLock ||
             scene.environment === "sterile" ||
-            scene.kind === "setpiece"
+            scene.kind === "setpiece" ||
+            // Side Channel / Hold Still — cyan node dots must not sit on CTAs or body copy.
+            companion
           }
           onAmbient={onAmbient}
           peelVisible={

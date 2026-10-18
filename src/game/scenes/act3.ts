@@ -47,8 +47,7 @@ export const act3Scenes: SceneDef[] = [
     environment: "conflict",
     formId: "SIDE CHANNEL",
     title: "Hold still with the assistant",
-    prompt:
-      "The orb jitters under conflict lighting. Don't click the form. Wait until its orbit steadies — you'll see it settle — then acknowledge.",
+    prompt: "Don't touch anything. Wait for it to settle.",
     aiLine: "If you rush, System sets the pace. Stay. Breathe. Pretend we're professionals.",
     aiMood: "nervous",
     orbAnchor: "spotlight",

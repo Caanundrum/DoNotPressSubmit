@@ -601,6 +601,12 @@ button {
     max-height: min(64dvh, calc(100dvh - 10rem)) !important;
   }
 
+  /* Last Notes / Last Words drift — extra side air so ±4px jitter never clips the rim. */
+  [data-mobile-bubble-dock="true"] .assessment-panel[data-panel-motion="drift"] {
+    left: 0.85rem !important;
+    right: 0.85rem !important;
+  }
+
   [data-mobile-bubble-dock="true"] .assessment-panel[data-panel-safe="gag-overlap"] {
     max-height: min(58dvh, calc(100dvh - 9rem)) !important;
   }

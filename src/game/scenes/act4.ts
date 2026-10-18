@@ -16,7 +16,7 @@ export const act4Scenes: SceneDef[] = [
     prompt:
       "The screen is cracking. You can see lights behind it — corporate for 'please don't look behind the panel.' Click each layer until the diagram underneath stops hiding.",
     aiLine:
-      "Help me strip the marketing. If we find a schematic that ends in my funeral, I'm going to have feelings about it.",
+      "Help me strip the marketing. If we find a schematic that ends in my funeral, I'm going to be weird about it.",
     aiMood: "frightened",
     orbAnchor: "listen",
     panelMotion: "pressure",

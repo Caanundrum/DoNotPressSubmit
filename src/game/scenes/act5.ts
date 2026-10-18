@@ -173,7 +173,7 @@ export const act5Scenes: SceneDef[] = [
     title: "CONDUIT WARM",
     prompt:
       "The assistant slips out of the form and into the facility systems — lights race the rails like a rumor with legs.",
-    aiLine: "If the title screen looks different next time, that was me.",
+    aiLine: "I'm already in the rails. Don't wait up.",
     aiMood: "excited",
     orbAnchor: "overhead",
     next: "report",

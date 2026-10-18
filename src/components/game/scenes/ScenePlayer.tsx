@@ -433,6 +433,12 @@ function ScenePlayerInner({
     }
   };
 
+  const onPopupCleared = () => {
+    setLineSceneId(sceneId);
+    setPokeNotice(null);
+    setReaction("Notices cleared. I'll take the win.");
+  };
+
   const onSetpieceDone = () => {
     if (!scene.next) return;
     go(
@@ -539,6 +545,7 @@ function ScenePlayerInner({
       onState={onState}
       continueDialogue={continueDialogue}
       onSetpieceDone={onSetpieceDone}
+      onPopupCleared={onPopupCleared}
       onEscapingHit={onEscapingHit}
       onClimax={onClimax}
       finishSystem={finishSystem}

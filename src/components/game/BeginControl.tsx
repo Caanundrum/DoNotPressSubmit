@@ -75,7 +75,10 @@ export function BeginControl({
     }, 900);
   };
 
-  const engage = () => {
+  const engage = (e?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
+    // #12: never navigate / open a tab — button-only start path.
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
     setPressed(true);
     setArmed(true);
     fireBurst();
@@ -114,7 +117,12 @@ export function BeginControl({
         onHoverEnd={() => setHover(false)}
         onTapStart={() => setPressed(true)}
         onTapCancel={() => setPressed(false)}
-        onClick={engage}
+        onClick={(e) => engage(e)}
+        onAuxClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onContextMenu={(e) => e.preventDefault()}
         animate={{
           scale: pressed ? 0.97 : hovering ? 1.035 : near ? 1.015 : 1,
           y: pressed ? 3 : 0,
@@ -236,7 +244,8 @@ export function BeginControl({
 
       {/* Nearby systems power-up strip */}
       <motion.div
-        className="pointer-events-none flex items-center gap-2 font-mono text-[9px] tracking-[0.28em]"
+        className="pointer-events-none flex items-center gap-2 font-mono text-[12px] tracking-[0.22em] sm:text-[10px] sm:tracking-[0.28em]"
+        data-begin-commitment="true"
         animate={{
           opacity: armed ? 1 : hovering ? 0.95 : near ? 0.7 : 0.35,
           color: armed ? "#9ef2ff" : "#6ee7ff",

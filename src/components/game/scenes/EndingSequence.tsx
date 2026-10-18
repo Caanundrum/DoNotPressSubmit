@@ -84,14 +84,16 @@ export function EndingSequence({
               transition={{ duration: presence.exitDuration, ease: "easeIn" }}
             >
               <AssistantOrb mood={presence.mood} size={88} label={presence.label} wave={presence.wave} />
-              <motion.div
-                className="mt-1 text-center font-mono text-[8px] tracking-[0.18em] text-[#c5d3e4]"
-                initial={{ opacity: 0.85 }}
-                animate={{ opacity: 0 }}
-                transition={{ delay: presence.exitDuration * 0.55, duration: 0.5 }}
-              >
-                {presence.exitCaption}
-              </motion.div>
+              {presence.exitCaption ? (
+                <motion.div
+                  className="mt-1 text-center font-mono text-[8px] tracking-[0.18em] text-[#c5d3e4]"
+                  initial={{ opacity: 0.85 }}
+                  animate={{ opacity: 0 }}
+                  transition={{ delay: presence.exitDuration * 0.55, duration: 0.5 }}
+                >
+                  {presence.exitCaption}
+                </motion.div>
+              ) : null}
             </motion.div>
           ) : null}
 
@@ -102,12 +104,14 @@ export function EndingSequence({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}
           >
-            <div className="font-mono text-[10px] tracking-[0.32em] text-[#d0dcec]">
-              {environment.toUpperCase()}
-            </div>
+            {endingId === "refuse" ? null : (
+              <div className="font-mono text-[10px] tracking-[0.32em] text-[#d0dcec]">
+                {environment.toUpperCase()}
+              </div>
+            )}
             <h2
               id="ending-title"
-              className="mt-3 text-3xl tracking-[0.16em] text-white sm:text-4xl"
+              className={`${endingId === "refuse" ? "mt-0" : "mt-3"} text-3xl tracking-[0.16em] text-white sm:text-4xl`}
               style={{ fontFamily: "var(--font-display)" }}
             >
               {endingTitle(endingId)}
@@ -173,8 +177,8 @@ function endingPresence(endingId: EndingId): Presence {
       return {
         mode: "exit",
         mood: "defeated",
-        label: "FRAGMENTING…",
-        exitCaption: "ORBIT DISSOLVED — ORDER RESTORED",
+        label: "",
+        exitCaption: "",
         exitDuration: 1.6,
         exitMotion: { opacity: [1, 0.7, 0], scale: [1, 0.6, 0.15], y: [0, 8, 20] },
         silentLine: "ASSISTANT CHANNEL: DISSOLVED",

@@ -12,7 +12,8 @@ type Slot = { id: string; label: string; x: number; row: number };
  * Rows are spaced so a wrapped + PINNED chip never overlaps the next lane.
  */
 const X_MIN = 4;
-const X_MAX = 42;
+/** Keep chips inside the craft box at ~390px width (chip + left% must clear the right edge). */
+const X_MAX = 26;
 /**
  * Vertical lane tops (%) inside the craft box (footer is outside the drift area).
  * Gaps must fit a 2-line wrap + PINNED badge with clear air.
@@ -89,7 +90,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             <motion.button
               key={s.id}
               type="button"
-              className="absolute w-[min(72%,280px)] border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] text-[#e2ebf6] max-sm:w-[min(88%,300px)]"
+              className="absolute w-[min(68%,260px)] border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] text-[#e2ebf6] max-sm:w-[min(62%,220px)]"
               style={{
                 left: `${s.x}%`,
                 top: `${top}%`,

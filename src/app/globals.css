@@ -366,11 +366,16 @@ button {
     z-index: 60 !important;
   }
 
+  /* ENABLE SOUND must not clip "ASSESSMENT FACILITY 01" — tighter tracking + full pad. */
   [data-title-facility-line="true"] {
-    padding-left: 0.5rem !important;
-    padding-right: 6.5rem !important;
+    padding-left: 0.4rem !important;
+    padding-right: 8.25rem !important;
     box-sizing: border-box;
     max-width: 100%;
+    letter-spacing: 0.14em !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
   }
 
   /* Keep decorative title props off the centered PRESS SUBMIT wordmark on phones. */
@@ -389,7 +394,8 @@ button {
     flex-direction: row !important;
     align-items: flex-end !important;
     justify-content: flex-start !important;
-    gap: 14px !important;
+    /* Extra gap so post-answer orb scale/ring never overlaps the bubble left edge. */
+    gap: 22px !important;
     padding: 0.55rem 0.7rem calc(0.55rem + env(safe-area-inset-bottom, 0px)) !important;
     box-sizing: border-box !important;
     background: linear-gradient(
@@ -403,16 +409,21 @@ button {
 
   [data-mobile-bubble-dock="true"] [data-orb-hit-layer="true"] {
     flex: 0 0 auto !important;
-    margin-right: 2px !important;
+    margin-right: 4px !important;
+    /* Ring overflow stays in the orb column — never into the bubble. */
+    overflow: visible !important;
+    isolation: isolate;
   }
 
   [data-mobile-bubble-dock="true"] .assistant-bubble {
     max-width: none !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
-    margin-left: 0 !important;
+    margin-left: 2px !important;
     max-height: min(28vh, 160px) !important;
     font-size: 12px !important;
+    position: relative;
+    z-index: 2;
   }
 
   [data-mobile-bubble-dock="true"] .assessment-panel.facility-hud {

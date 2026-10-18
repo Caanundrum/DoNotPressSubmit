@@ -300,7 +300,8 @@ assert(/data-title-idle-hint|data-residue-hint/.test(title), "title idle orb hin
 assert(/data-drone-memo-strip/.test(drone), "Drone memo strip marked for contrast");
 assert(/data-ambient-dust/.test(fac), "floating dust marked decorative");
 assert(/bottom-\[10%\]|data-companion-stack/.test(viewPanels), "Settle companion stack lifted for bottom margin");
-assert(/data-companion-settle-cue|data-companion-settled|ORBIT STEADY/.test(viewPanels), "companion wait shows settle cue when ready");
+assert(/data-companion-settle-cue|data-companion-settled|Ready when you are/.test(viewPanels), "companion wait shows settle cue when ready");
+assert(!/ORBIT STEADY — YOU CAN CONTINUE/.test(viewPanels), "companion settle cue drops ORBIT STEADY jargon");
 assert(/What should I call you\? Pick one/.test(act1), "name prompt uses plain human copy");
 assert(/Call me a friend/.test(act1), "friend label clarified");
 assert(/Moist cavern/.test(act1), "moist cavern option retained");
@@ -339,7 +340,8 @@ assert(
 );
 const reportSrc = read("src/components/game/scenes/AssessmentReport.tsx");
 assert(/SAVED THE ASSISTANT|ESCAPED TOGETHER|LEFT UNFINISHED/.test(reportSrc), "report uses plain human outcome stamps");
-assert(/NONCOMPLIANT|TRANSFER COMPLETE|OUTSIDE THE FORM|ARCHIVED/.test(reportSrc), "report stamps match ending outcomes without title repeats");
+assert(/NONCOMPLIANT|TRANSFER COMPLETE|UNMAPPED PATH|ARCHIVED/.test(reportSrc), "report stamps match ending outcomes without title repeats");
+assert(!/OUTSIDE THE FORM/.test(reportSrc), "hall report stamp does not repeat ending title OUTSIDE THE FORM");
 assert(
   /ending === "escape" \|\| ending === "refuse"/.test(reportSrc) &&
     !/ending === "escape" \|\| ending === "secret" \|\| ending === "refuse"/.test(reportSrc),
@@ -369,6 +371,49 @@ assert(
   "Consent chase target stays inside panel",
 );
 assert(/VO_PLAYBACK_ENABLED = false/.test(speech) || /speakLine/.test(speech), "VO disable path marked");
+// Punch list rev10 locks
+assert(
+  !/Watch the title next time|looks different next time/.test(
+    act5 + read("src/game/state.ts") + reportSrc,
+  ),
+  "escape promise-title copy cut",
+);
+assert(
+  /rails are still humming|I'm already in the rails|file kept the fingerprints/.test(
+    act5 + read("src/game/state.ts") + reportSrc,
+  ),
+  "escape copy show-don't-tell",
+);
+assert(
+  !/FRAGMENTING|ORBIT DISSOLVED — ORDER RESTORED/.test(
+    read("src/components/game/scenes/EndingSequence.tsx"),
+  ),
+  "submit ending drops FRAGMENTING / ORBIT DISSOLVED labels",
+);
+assert(
+  !/HERDING CONTROLS/.test(read("src/components/game/effects/SceneTransition.tsx")),
+  "mechanical transition drops HERDING CONTROLS",
+);
+assert(
+  !/CLICK TO PEEL —|Pretty\. Expensive\. Lying/.test(
+    read("src/components/game/scenes/PeelReveal.tsx"),
+  ),
+  "peel jargon cut",
+);
+assert(!/Interface arguing with itself/.test(checkbox), "checkbox drops Interface arguing narrator");
+assert(!/Select a narrative you can live with/.test(act3), "blame prompt drops Select a narrative");
+assert(/data-title-orb-escape|data-title-escape-prop/.test(title), "escape title leaves visible orb/prop difference");
+assert(
+  /onAuxClick|preventDefault/.test(read("src/components/game/BeginControl.tsx")),
+  "BEGIN ASSESSMENT blocks aux/new-tab path",
+);
+assert(
+  /Notices cleared\. I'll take the win/.test(popupSrc + scenePlayer),
+  "popup war swaps Diplomacy failed for done line",
+);
+assert(!/lawyer-ups/.test(act3), "checkbox drops lawyer-ups machine-voice");
+assert(/data-title-poke-bubble/.test(title), "title poke lines use readable bubble");
+assert(/X_MAX = 26/.test(restless), "Drift X_MAX leaves room at 390px");
 
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");

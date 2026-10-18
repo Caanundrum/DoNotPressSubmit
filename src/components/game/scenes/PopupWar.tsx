@@ -31,7 +31,14 @@ const SLOTS: { x: number; y: number }[] = [
   { x: 50, y: 60 },
 ];
 
-export function PopupWar({ onComplete }: { onComplete: () => void }) {
+export function PopupWar({
+  onComplete,
+  onCleared,
+}: {
+  onComplete: () => void;
+  /** Fires when the board empties — swap the stale "Diplomacy failed…" bubble. */
+  onCleared?: () => void;
+}) {
   const [popups, setPopups] = useState<Popup[]>(() => [
     { id: 1, x: SLOTS[0]!.x, y: SLOTS[0]!.y, label: LABELS[0]!, z: 1 },
     { id: 2, x: SLOTS[1]!.x, y: SLOTS[1]!.y, label: LABELS[1]!, z: 2 },
@@ -68,7 +75,8 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
       setClosed(newlyClosed);
       // Final click clears leftovers so Closed N/5 matches an empty board.
       if (newlyClosed >= needed) {
-        setTimeout(onComplete, 400);
+        onCleared?.();
+        setTimeout(onComplete, 700);
         return [];
       }
       // One spawn per dismiss — no mid-cascade double that leaves 3 up at 4/5.
@@ -168,8 +176,11 @@ export function PopupWar({ onComplete }: { onComplete: () => void }) {
         })}
       </AnimatePresence>
       {popups.length === 0 ? (
-        <div className="absolute inset-0 flex items-center justify-center font-mono text-[11px] tracking-[0.2em] text-[#c5d3e4]">
-          CASCADE CLEARED
+        <div
+          className="absolute inset-0 flex items-center justify-center font-mono text-[11px] tracking-[0.2em] text-[#c5d3e4]"
+          data-popup-cleared="true"
+        >
+          Notices cleared. I'll take the win.
         </div>
       ) : null}
     </div>

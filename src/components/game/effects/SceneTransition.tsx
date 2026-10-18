@@ -38,7 +38,8 @@ export function transitionForEnvironment(
 }
 
 const STATUS: Record<TransitionFamily, string> = {
-  mechanical: "HERDING CONTROLS…",
+  // Punch rev10: mechanical handoff stays quiet — no jargon stamp line.
+  mechanical: "",
   glass: "RESEATING THE VIEW…",
   glitch: "CONTAINMENT RECALIBRATING…",
   blackout: "LOADING COMPLIANCE…",
@@ -48,6 +49,8 @@ const STATUS: Record<TransitionFamily, string> = {
 };
 
 function StatusLine({ family }: { family: TransitionFamily }) {
+  const text = STATUS[family];
+  if (!text) return null;
   return (
     <motion.div
       className="pointer-events-none absolute inset-x-0 bottom-[18%] z-[49] flex justify-center"
@@ -57,7 +60,7 @@ function StatusLine({ family }: { family: TransitionFamily }) {
       aria-hidden
     >
       <span className="border border-cyan/35 bg-black/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.22em] text-cyan/90">
-        {STATUS[family]}
+        {text}
       </span>
     </motion.div>
   );

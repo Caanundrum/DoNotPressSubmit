@@ -84,7 +84,8 @@ export const act5Scenes: SceneDef[] = [
     setpiece: "submit-button",
     formId: "DECISION",
     title: "Submit when ready",
-    buryAssistant: true,
+    // Plea bubble must stay clear of the Decision panel (rev11 P0) — never bury it.
+    buryAssistant: false,
     prompt: "Last chance to say something before you decide.",
     aiLine: "Please don't press it.",
     aiLineIf: [

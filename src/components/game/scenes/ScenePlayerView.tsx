@@ -96,12 +96,20 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
   // Spotlight / Counterpoint / Settle: bubble beside the orb so enlargement never covers it.
   const dockBeside = dialogueDocksBeside(orbAnchor) || spotlight;
   // System directive: keep orb+bubble ABOVE the overlay (readable), not buried under z-50.
+  // Climax: always above Decision — never let bury/legacy overlap hide the plea.
   const assistantZ = systemLock
     ? "z-[52]"
-    : buryAssistant
-      ? "z-[15]"
-      : "z-[42]";
-  const panelZ = buryAssistant || scene.kind === "setpiece" ? "z-30" : "z-[28]";
+    : scene.kind === "climax"
+      ? "z-[42]"
+      : buryAssistant
+        ? "z-[15]"
+        : "z-[42]";
+  const panelZ =
+    scene.kind === "climax"
+      ? "z-[28]"
+      : buryAssistant || scene.kind === "setpiece"
+        ? "z-30"
+        : "z-[28]";
   const assistantLayout = dockLeft
     ? "flex-row-reverse items-start"
     : dockBeside

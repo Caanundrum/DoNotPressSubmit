@@ -103,7 +103,8 @@ export function orbStageStyle(
     case "center":
       return { left: "3%", top: "22%", transform: "none", size: 132 };
     case "avoid-submit":
-      return { left: "3%", top: "58%", transform: "none", size: 104 };
+      // Mid-left dock — bubble above stays in the climax safe column (not under Decision).
+      return { left: "3%", top: "42%", transform: "none", size: 104 };
     case "dock-left":
     default:
       return {
@@ -174,7 +175,8 @@ export function panelVariants(motion: PanelMotion | undefined) {
 /**
  * Assessment panel stage layout.
  * Non-gag forms never enter the reserved assistant safe region.
- * buryAssistant=true: intentional fiction (System silencing / burying / climax).
+ * buryAssistant=true: intentional fiction (System silencing / burying the assistant).
+ * Climax is NOT bury — the plea bubble must stay readable beside Decision.
  */
 export function panelLayoutClass(
   motion: PanelMotion | undefined,
@@ -185,9 +187,10 @@ export function panelLayoutClass(
   const side = opts?.safeSide ?? "left";
   const climax = !!opts?.climax;
 
-  // Climax: reclaim nearly the full stage so every ending fits in one glance @ 1280×800.
+  // Climax: Decision panel leaves a left column for the avoid-submit orb + plea bubble.
+  // Full-bleed used to cover "You promised…" / "Please don't press it." (rev11 P0).
   if (climax) {
-    return "left-[1.5%] right-[1.5%] top-[7%] bottom-[2%] mx-auto w-[min(97%,1100px)] max-h-[min(90dvh,720px)]";
+    return "left-[min(36vw,380px)] right-[1.5%] top-[7%] bottom-[2%] w-auto max-w-[min(62vw,900px)] max-h-[min(90dvh,720px)]";
   }
 
   if (bury) {

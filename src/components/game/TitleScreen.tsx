@@ -51,6 +51,15 @@ function titleOrbMood(
   return base;
 }
 
+/** Fresh-title poke banter — real bubble lines (not a grey caption). */
+const FRESH_POKE_LINES = [
+  "The archive doesn't poke back. You do.",
+  "Quiet room. Loud finger.",
+];
+
+/** Third poke always cracks — must speak, not silent FX. */
+const CRACK_POKE_LINE = "Glass complains. That fingerprint is yours.";
+
 function memoryPokeLines(ending: EndingId): string[] {
   switch (ending) {
     case "escape":
@@ -80,6 +89,14 @@ function memoryPokeLines(ending: EndingId): string[] {
   }
 }
 
+function titlePokeLine(ending: EndingId | null, pokeN: number): string {
+  if (pokeN === POKE_WORLD.crack) return CRACK_POKE_LINE;
+  const pool = ending ? memoryPokeLines(ending) : FRESH_POKE_LINES;
+  // Skip the crack slot in the pool so click 1–2 stay distinct from click 3.
+  const idx = pokeN > POKE_WORLD.crack ? pokeN - 2 : pokeN - 1;
+  return pool[Math.max(0, Math.min(idx, pool.length - 1))] ?? pool[0]!;
+}
+
 /**
  * Calm cinematic title: dim facility life + sparse roaming eggs + orb.
  * Sound toggle lives in GameRoot corner (overhaul). SUBMIT gag may start on click 3.
@@ -99,24 +116,13 @@ export function TitleScreen({
   lastEnding?: EndingId | null;
 }) {
   const escaped = lastEnding === "escape";
-  const remembered = lastEnding != null;
-  const [eggClicks, setEggClicks] = useState(0);
-  const [memoryLine, setMemoryLine] = useState<string | null>(null);
+  const [pokeLine, setPokeLine] = useState<string | null>(null);
   const [gagReact, setGagReact] = useState(false);
   const [titlePokes, setTitlePokes] = useState(0);
   const [glassPhase, setGlassPhase] = useState<GlassPhase>("idle");
   const [pokeFlinch, setPokeFlinch] = useState(false);
   const glassTimer = useRef<number | null>(null);
-
-  const onMemoryClick = () => {
-    if (!lastEnding) return;
-    audio.play("click", 0.35);
-    const n = eggClicks + 1;
-    setEggClicks(n);
-    const lines = memoryPokeLines(lastEnding);
-    setMemoryLine(lines[Math.min(n - 1, lines.length - 1)] ?? lines[0]!);
-    window.setTimeout(() => setMemoryLine(null), 2600);
-  };
+  const pokeLineTimer = useRef<number | null>(null);
 
   const onSubmitGag = () => {
     setGagReact(true);
@@ -128,6 +134,15 @@ export function TitleScreen({
     setTitlePokes(n);
     setPokeFlinch(true);
     window.setTimeout(() => setPokeFlinch(false), 520);
+    audio.play("click", 0.35);
+    // Always a real in-game bubble — including the silent-looking crack beat.
+    const line = titlePokeLine(lastEnding, n);
+    setPokeLine(line);
+    if (pokeLineTimer.current != null) window.clearTimeout(pokeLineTimer.current);
+    pokeLineTimer.current = window.setTimeout(() => {
+      pokeLineTimer.current = null;
+      setPokeLine(null);
+    }, 2800);
     if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
     if (n === POKE_WORLD.crack) {
       setGlassPhase("crack");
@@ -177,7 +192,10 @@ export function TitleScreen({
 
       {/* Ending memory is orb mood / wave only — no banner chrome. */}
 
-      <div className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7">
+      <div
+        className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-[7.5rem]"
+        data-title-main-column="true"
+      >
         <motion.div
           className="shrink-0 px-14 text-center font-mono text-[12px] tracking-[0.28em] text-[#d0dcec]/70 sm:px-0 sm:text-[10px] sm:tracking-[0.35em]"
           data-title-facility-line="true"
@@ -188,7 +206,7 @@ export function TitleScreen({
           ASSESSMENT FACILITY 01
         </motion.div>
 
-        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8">
+        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8 max-sm:justify-start max-sm:pt-2 max-sm:pb-2">
           <motion.div
             className="pointer-events-auto shrink-0"
             initial={{ opacity: 0, y: 24 }}
@@ -266,23 +284,25 @@ export function TitleScreen({
           aria-hidden
         >
           <div
-            className="border border-cyan/35 bg-black/55 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.18em] text-cyan/85 shadow-[0_0_18px_rgba(80,255,200,0.18)]"
+            className="border border-cyan/35 bg-black/55 px-2.5 py-1.5 font-mono text-[11px] tracking-[0.14em] text-cyan/85 shadow-[0_0_18px_rgba(80,255,200,0.18)]"
             style={{ transform: "rotate(-8deg)" }}
           >
-            MUG // MISFILED
+            Mug misfiled
           </div>
         </motion.div>
       ) : null}
 
+      {/* z-[45]: above gag layer (z-30) + crack/stitch so the moved orb never sits under a prop. */}
       <motion.div
         className={
           escaped
-            ? "absolute bottom-10 right-8 z-20 select-none sm:bottom-12 sm:right-12"
-            : "absolute bottom-8 left-8 z-20 select-none"
+            ? "absolute bottom-10 right-8 z-[45] select-none sm:bottom-12 sm:right-12"
+            : "absolute bottom-8 left-8 z-[45] select-none"
         }
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"
         data-title-orb-escape={escaped ? "true" : "false"}
+        data-title-orb-above-props="true"
         style={{ userSelect: "none" }}
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -294,13 +314,10 @@ export function TitleScreen({
           wave={escaped}
           flinch={gagReact || pokeFlinch}
           pokeable
-          onPoke={() => {
-            onTitleOrbPoke();
-            if (remembered) onMemoryClick();
-          }}
+          onPoke={onTitleOrbPoke}
           label={undefined}
         />
-        {!memoryLine ? (
+        {!pokeLine ? (
           <div className="mt-1.5 flex flex-col items-center gap-1" data-title-idle-hint-stack="true">
             <motion.div
               className="h-1.5 w-7 rounded-full bg-cyan/55"
@@ -321,15 +338,26 @@ export function TitleScreen({
             </div>
           </div>
         ) : null}
-        {memoryLine ? (
+        {pokeLine ? (
           <motion.div
-            className="glass-panel assistant-bubble mt-2 max-w-[min(240px,70vw)] border border-cyan/40 bg-black/70 px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.06em] text-[#e8eef8] shadow-[0_0_18px_rgba(110,231,255,0.16)] sm:text-[13px]"
+            className="glass-panel assistant-bubble mt-2 max-w-[min(260px,72vw)] border border-cyan/45 bg-black/75 px-2.5 py-1.5 text-left text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
             initial={{ opacity: 0, y: 6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             data-residue-toast="true"
             data-title-poke-bubble="true"
+            data-assistant-bubble="true"
           >
-            {memoryLine}
+            <div
+              className="mb-1 flex select-none items-center gap-1.5"
+              aria-hidden
+              data-bubble-speaker-mark="true"
+            >
+              <span className="h-1 w-1 rounded-full bg-cyan/75" />
+              <span className="h-px w-4 bg-cyan/40" />
+            </div>
+            <div className="break-words text-[13px] font-medium leading-relaxed text-[#f0f7ff] sm:text-[15px]">
+              {pokeLine}
+            </div>
           </motion.div>
         ) : null}
       </motion.div>

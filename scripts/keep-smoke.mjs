@@ -361,7 +361,7 @@ assert(!/Transfer channel giggles|softly, happily|stop socializing with escaped/
 assert(/SYSTEM: Stop encouraging it\./.test(title), "escape poke system line shipped");
 assert(/id: "coffee-mug"/.test(act1), "Pressure keeps unauthorized facility mug option");
 assert(/data-choice-count/.test(read("src/components/game/scenes/SceneChoiceList.tsx")), "choice list marks count for mobile density");
-assert(/62dvh|68dvh|choice-count="5"/.test(read("src/app/globals.css")), "mobile panel tall enough for five Pressure options");
+assert(/62dvh|66dvh|68dvh|choice-count="5"/.test(read("src/app/globals.css")), "mobile panel tall enough for five Pressure options");
 assert(/rememberTitleEnding|TITLE_MEMORY_KEY/.test(read("src/game/storage.ts")), "title memory persists most recent ending");
 assert(/lineSceneId|data-bubble-scene/.test(scenePlayer + viewAssistant), "orb bubble updates per scene");
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
@@ -415,6 +415,27 @@ assert(!/lawyer-ups/.test(act3), "checkbox drops lawyer-ups machine-voice");
 assert(/data-title-poke-bubble/.test(title), "title poke lines use readable bubble");
 assert(/X_MAX = 26/.test(restless), "Drift X_MAX leaves room at 390px");
 
+// Punch list rev11 locks
+assert(
+  /buryAssistant:\s*false/.test(act5) && /id:\s*"act5-climax"[\s\S]*?buryAssistant:\s*false/.test(act5),
+  "climax Decision does not bury the plea bubble",
+);
+assert(
+  /left-\[min\(36vw,380px\)\]/.test(read("src/game/motion.ts")),
+  "climax panel leaves left safe column for orb bubble",
+);
+assert(/Mug misfiled/.test(title), "escape prop uses Mug misfiled (no X // Y)");
+assert(!/MUG \/\/ MISFILED/.test(title), "escape prop drops MUG // MISFILED chrome");
+assert(/Glass complains\. That fingerprint is yours\./.test(title), "title third poke crack has a line");
+assert(/titlePokeLine|FRESH_POKE_LINES|CRACK_POKE_LINE/.test(title), "title poke banter always bubbles");
+assert(/data-title-orb-above-props|z-\[45\]/.test(title), "title orb stays above crack/gag props");
+assert(/data-restless-pin-lanes|ROWS = \[4, 38, 72\]/.test(restless), "Drift pinned lanes spaced for mobile");
+assert(
+  /0\.75rem \+ 33px \+ 8px/.test(read("src/app/globals.css")),
+  "mobile form top clears SOUND ON by ≥8px",
+);
+assert(/max-sm:pb-\[7\.5rem\]|data-title-main-column/.test(title), "mobile title clears orb from AWAITING COMMITMENT");
+
 assert(/data-assistant-safe-dock|data-form-above-glass/.test(viewAll), "bubble safe dock hardened");
 assert(/data-bubble-dock/.test(viewAll), "bubble dock side marked");
 assert(/data-bubble-safe-gap|data-bubble-no-clip/.test(viewAll), "bubble keeps safe gap during flinch / no mid-line clip");
@@ -444,6 +465,10 @@ assert(/Three hits archives|All 3 hits/.test(act3) || /onHit/.test(escaping), "F
 
 const globals = read("src/app/globals.css");
 assert(/data-form-above-glass[\s\S]*z-index:\s*28/.test(globals), "CSS form z below assistant (bubble above form)");
+assert(
+  /0\.75rem \+ 33px \+ 8px/.test(globals),
+  "SOUND ON / form gap locked in globals",
+);
 
 // Chaos Standard brand — public PNG masters (no TS base64 embeds).
 assert(/--cs-hazard-orange:\s*#ff6a00|--cs-hazard-orange:\s*#FF6A00/i.test(globals), "CS hazard orange token");

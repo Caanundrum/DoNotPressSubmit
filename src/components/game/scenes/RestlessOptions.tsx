@@ -16,11 +16,11 @@ const X_MIN = 4;
 const X_MAX = 26;
 /**
  * Vertical lane tops (%) inside the craft box (footer is outside the drift area).
- * Gaps must fit a 2-line wrap + PINNED badge with clear air.
+ * Gaps must fit a 2-line wrap + PINNED badge with clear air — esp. mobile ~390px.
  */
-const ROWS = [8, 36, 64];
-/** Pin parking X per row — staggered so pinned chips never share a stack. */
-const PIN_X = [4, 8, 12];
+const ROWS = [4, 38, 72];
+/** Pin parking X per row — staggered so pinned chips never share a vertical stack. */
+const PIN_X = [4, 20, 10];
 
 function clampX(x: number) {
   return Math.min(X_MAX, Math.max(X_MIN, x));
@@ -76,8 +76,9 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative flex h-[min(48vh,380px)] w-full flex-col overflow-hidden border border-cyan/25 bg-black/40 max-sm:h-[min(42vh,320px)]"
+      className="relative flex h-[min(48vh,380px)] w-full flex-col overflow-hidden border border-cyan/25 bg-black/40 max-sm:h-[min(50vh,380px)]"
       data-restless-options="true"
+      data-restless-pin-lanes="true"
     >
       <div className="shrink-0 px-3 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
         Pinned {pins}/3
@@ -90,7 +91,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             <motion.button
               key={s.id}
               type="button"
-              className="absolute w-[min(68%,260px)] border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] text-[#e2ebf6] max-sm:w-[min(62%,220px)]"
+              className="absolute w-[min(68%,260px)] border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] text-[#e2ebf6] max-sm:w-[min(58%,200px)] max-sm:py-1.5"
               style={{
                 left: `${s.x}%`,
                 top: `${top}%`,
@@ -100,10 +101,11 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
                 background: isPinned
                   ? "rgba(40,90,120,0.45)"
                   : "rgba(12,20,32,0.92)",
-                zIndex: isPinned ? 2 : 1,
+                zIndex: isPinned ? 2 + s.row : 1,
               }}
               data-restless-chip={s.id}
               data-restless-pinned={isPinned ? "true" : "false"}
+              data-restless-row={s.row}
               animate={{
                 // Pinned cards settle hard — no x-drift / jitter after pin (P1).
                 x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 2 : -2, 0],
@@ -120,7 +122,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             >
               <span className="block whitespace-normal break-words">{s.label}</span>
               {isPinned ? (
-                <span className="mt-0.5 block font-mono text-[12px] tracking-widest text-cyan">
+                <span className="mt-0.5 block font-mono text-[10px] tracking-widest text-cyan max-sm:text-[10px]">
                   PINNED
                 </span>
               ) : null}

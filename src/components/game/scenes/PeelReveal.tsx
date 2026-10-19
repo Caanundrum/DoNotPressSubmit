@@ -82,7 +82,16 @@ export function PeelReveal({ onComplete }: { onComplete: () => void }) {
                   ? { y: [0, -4, 0], opacity: 1 }
                   : { opacity: 0.55 }
             }
-            transition={{ duration: gone ? 0.55 : 1.6, repeat: gone ? 0 : Infinity }}
+            transition={
+              gone
+                ? {
+                    // Fast opacity so the title doesn't ghost over the diagram (rev15).
+                    opacity: { duration: 0.18, ease: "easeOut" },
+                    x: { duration: 0.32, ease: "easeIn" },
+                    rotate: { duration: 0.32, ease: "easeIn" },
+                  }
+                : { duration: 1.6, repeat: Infinity }
+            }
           >
             <div className="text-lg tracking-[0.14em] text-white">{layer.label}</div>
             <div className="mt-1 font-mono text-[10px] tracking-[0.16em] text-[#d2dceb]">

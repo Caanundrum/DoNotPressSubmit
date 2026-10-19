@@ -80,11 +80,7 @@ export function AssessmentReport({
             />
             {secretCount > 0 ? (
               <Stamp
-                label={
-                  secretCount === 1
-                    ? "TALKED TO THE ORB"
-                    : `TALKED TO THE ORB ${secretCount === 2 ? "TWICE" : `×${secretCount}`}`
-                }
+                label={secretCount === 1 ? "TALKED TO THE ORB" : "KEPT TALKING TO IT"}
                 tone="secret"
               />
             ) : ending === "refuse" ? (
@@ -233,10 +229,21 @@ function Stamp({
 
 function Redaction({ rows }: { rows: number }) {
   return (
-    <div className="flex min-w-[7rem] flex-col justify-center gap-1 border border-white/15 bg-black/50 px-2.5 py-1.5" data-report-redaction="true">
-      {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="h-2 rounded-sm bg-[#e8eef8]/85" style={{ width: `${70 + i * 10}%` }} />
-      ))}
+    <div
+      className="flex min-w-[7.5rem] flex-col justify-center gap-1 border border-black bg-black px-2.5 py-1.5"
+      data-report-redaction="true"
+      data-report-redaction-stamp="true"
+      aria-label="Redacted"
+    >
+      <div className="font-mono text-[11px] tracking-[0.18em] text-[#e8eef8]">
+        {"█".repeat(Math.min(4, rows + 2))} REDACTED
+      </div>
+      {rows > 1 ? (
+        <div className="h-1.5 w-full bg-[#e8eef8]/90" aria-hidden />
+      ) : null}
+      {rows > 2 ? (
+        <div className="h-1.5 w-[85%] bg-[#e8eef8]/75" aria-hidden />
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
 
 type Slot = { id: string; label: string; x: number; row: number };
@@ -22,6 +22,10 @@ const ROWS = [4, 38, 72];
 /** Pin parking X per row — staggered so pinned chips never share a vertical stack. */
 const PIN_X = [4, 20, 10];
 
+/** Wobble before an intentional pin release so it doesn't feel like a lost click. */
+const STRAIN_WARN_MS = 700;
+const STRAIN_AFTER_PIN_MS = 1600;
+
 function clampX(x: number) {
   return Math.min(X_MAX, Math.max(X_MIN, x));
 }
@@ -31,6 +35,8 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
   const [pins, setPins] = useState(0);
   const [pinned, setPinned] = useState<Record<string, boolean>>({});
   const [hoverId, setHoverId] = useState<string | null>(null);
+  const [strainingId, setStrainingId] = useState<string | null>(null);
+  const didStrain = useRef(false);
   const [slots, setSlots] = useState<Slot[]>([
     { id: "a", label: "I read the instructions", x: 8, row: 0 },
     { id: "b", label: "I skimmed them professionally", x: 26, row: 1 },
@@ -49,17 +55,46 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
     const t = window.setInterval(() => {
       setSlots((prev) =>
         prev.map((s, i) => {
-          if (pinned[s.id] || hoverId === s.id) return { ...s, x: clampX(s.x) };
+          if (pinned[s.id] || hoverId === s.id || strainingId === s.id) {
+            return { ...s, x: clampX(s.x) };
+          }
           const phase = (Date.now() / 1400 + i) % (Math.PI * 2);
           return { ...s, x: clampX(s.x + Math.sin(phase) * 0.85) };
         }),
       );
     }, 180);
     return () => window.clearInterval(t);
-  }, [pins, pinned, hoverId]);
+  }, [pins, pinned, hoverId, strainingId]);
+
+  // One intentional pin-yank: wobble first, then release (rev15 P2).
+  useEffect(() => {
+    if (didStrain.current || pins !== 1 || pins >= 3) return;
+    const pinnedIds = Object.keys(pinned).filter((id) => pinned[id]);
+    if (pinnedIds.length !== 1) return;
+    const target = pinnedIds[0];
+    const warn = window.setTimeout(() => {
+      setStrainingId(target);
+      audio.play("hover", 0.2);
+    }, STRAIN_AFTER_PIN_MS);
+    const release = window.setTimeout(() => {
+      setStrainingId(null);
+      setPinned((p) => {
+        const next = { ...p };
+        delete next[target];
+        return next;
+      });
+      setPins((p) => Math.max(0, p - 1));
+      didStrain.current = true;
+      audio.play("click", 0.25);
+    }, STRAIN_AFTER_PIN_MS + STRAIN_WARN_MS);
+    return () => {
+      window.clearTimeout(warn);
+      window.clearTimeout(release);
+    };
+  }, [pins, pinned]);
 
   const pin = (id: string) => {
-    if (pins >= 3 || pinned[id]) return;
+    if (pins >= 3 || pinned[id] || strainingId === id) return;
     audio.play("click", 0.4);
     setPinned((p) => ({ ...p, [id]: true }));
     setPins((p) => p + 1);
@@ -85,6 +120,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
       data-restless-options="true"
       data-restless-pin-lanes="true"
       data-restless-arena-border="true"
+      data-restless-strain-ms={STRAIN_WARN_MS}
     >
       <div className="shrink-0 px-4 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
         Pinned {pins}/3
@@ -92,6 +128,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
       <div className="relative min-h-0 flex-1 overflow-hidden pb-1">
         {slots.map((s, i) => {
           const isPinned = !!pinned[s.id];
+          const isStraining = strainingId === s.id;
           const top = ROWS[s.row] ?? ROWS[i] ?? 50;
           return (
             <motion.button
@@ -103,31 +140,56 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
                 top: `${top}%`,
                 fontFamily: "var(--font-display)",
                 padding: "10px 12px",
-                borderColor: isPinned ? "rgba(110,231,255,0.7)" : "rgba(200,220,240,0.28)",
-                background: isPinned
-                  ? "rgba(40,90,120,0.45)"
-                  : "rgba(12,20,32,0.92)",
-                zIndex: isPinned ? 2 + s.row : 1,
+                borderColor: isStraining
+                  ? "rgba(255,180,90,0.85)"
+                  : isPinned
+                    ? "rgba(110,231,255,0.7)"
+                    : "rgba(200,220,240,0.28)",
+                background: isStraining
+                  ? "rgba(90,50,20,0.55)"
+                  : isPinned
+                    ? "rgba(40,90,120,0.45)"
+                    : "rgba(12,20,32,0.92)",
+                zIndex: isPinned || isStraining ? 2 + s.row : 1,
               }}
               data-restless-chip={s.id}
               data-restless-pinned={isPinned ? "true" : "false"}
+              data-restless-straining={isStraining ? "true" : "false"}
               data-restless-row={s.row}
-              animate={{
-                // Pinned cards settle hard — no x-drift / jitter after pin (P1).
-                x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 2 : -2, 0],
-                scale: hoverId === s.id && !isPinned ? 1.02 : 1,
-              }}
-              transition={{
-                duration: isPinned ? 0.2 : hoverId === s.id ? 0.25 : 2.2 + i * 0.2,
-                repeat: isPinned || hoverId === s.id ? 0 : Infinity,
-              }}
+              animate={
+                isStraining
+                  ? {
+                      // Short wobble telegraph before the pin lets go.
+                      x: [0, -5, 5, -4, 4, -2, 0],
+                      rotate: [0, -2.5, 2.5, -1.5, 1.5, 0],
+                      scale: [1, 1.03, 0.98, 1.02, 1],
+                    }
+                  : {
+                      // Pinned cards settle hard — no x-drift / jitter after pin (P1).
+                      x: isPinned || hoverId === s.id ? 0 : [0, i % 2 ? 2 : -2, 0],
+                      rotate: 0,
+                      scale: hoverId === s.id && !isPinned ? 1.02 : 1,
+                    }
+              }
+              transition={
+                isStraining
+                  ? { duration: STRAIN_WARN_MS / 1000, ease: "easeInOut" }
+                  : {
+                      duration: isPinned ? 0.2 : hoverId === s.id ? 0.25 : 2.2 + i * 0.2,
+                      repeat: isPinned || hoverId === s.id ? 0 : Infinity,
+                    }
+              }
               onHoverStart={() => setHoverId(s.id)}
               onHoverEnd={() => setHoverId((h) => (h === s.id ? null : h))}
               onPointerDown={() => setHoverId(s.id)}
               onClick={() => pin(s.id)}
             >
               <span className="block whitespace-normal break-words">{s.label}</span>
-              {isPinned ? (
+              {isStraining ? (
+                <span className="mt-0.5 block font-mono text-[10px] tracking-widest text-[#ffd27a] max-sm:text-[10px]">
+                  HOLDING…
+                </span>
+              ) : isPinned ? (
                 <span className="mt-0.5 block font-mono text-[10px] tracking-widest text-cyan max-sm:text-[10px]">
                   PINNED
                 </span>

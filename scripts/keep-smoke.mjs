@@ -80,7 +80,10 @@ assert(escaping.includes("hitPad={26}"), "EscapingButton hitPad 26");
 
 const checkbox = read("src/components/game/scenes/CheckboxRebellion.tsx");
 assert(checkbox.includes("hitPad={8}"), "CheckboxRebellion hitPad 8 (keeps chrome inside arena)");
-assert(/edgeInsetPx=\{12\}/.test(checkbox), "Consent chase keeps ≥12px edge inset");
+assert(
+  /data-consent-inset="12"|edgeInsetPx=\{12\}/.test(checkbox),
+  "Consent chase keeps ≥12px edge inset",
+);
 
 const popup = read("src/components/game/scenes/PopupWar.tsx");
 assert(/minHeight:\s*44/.test(popup), "PopupWar DISMISS minHeight 44");
@@ -375,7 +378,9 @@ assert(/lineSceneId|data-bubble-scene/.test(scenePlayer + viewAssistant), "orb b
 assert(/return \[\]/.test(popupSrc), "PopupWar clears leftovers on final dismiss");
 assert(!/newlyClosed === 4 \? 2/.test(popupSrc), "PopupWar no mid-cascade double-spawn at 4/5");
 assert(
-  /w-\[min\(240px,calc\(100%-48px\)\)\]|calc\(100%-48px\)/.test(checkbox),
+  /data-consent-playfield|data-consent-inset="12"|calc\(100%-8px\)|calc\(100%-56px\)|calc\(100%-48px\)/.test(
+    checkbox,
+  ),
   "Consent chase target stays inside panel with 12px side budget",
 );
 assert(/closedRef/.test(popupSrc), "PopupWar closed counter uses monotonic ref");
@@ -562,7 +567,7 @@ assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-\[5\.75rem\]/.test(t
 assert(/Catch each answer to pin it\./.test(restless), "Drift hint shortened for mobile");
 assert(/--title-sound-clearance:\s*12px/.test(globals), "SOUND ON clears DO NOT PRESS by ≥12px on mobile");
 assert(/Still here\. Still on your side\./.test(title), "refuse poke drops Ally channel readout");
-assert(/TALKED TO THE ORB|NOTHING FILED/.test(reportSrc), "report stamps use plain human tags");
+assert(/TALKED TO THE ORB|KEPT TALKING TO IT|NOTHING FILED/.test(reportSrc), "report stamps use plain human tags");
 assert(!/LEDGER CLEAN|SIDE CHANNEL ×/.test(reportSrc), "report drops internal SIDE CHANNEL / LEDGER tags");
 assert(!/lawyer-ups|cry in binary|regrets character development|escalate this into feelings/.test(
   act1 + act2 + act3 + act4 + act5 + title + ending + read("src/components/game/scenes/sceneAmbient.ts"),
@@ -651,6 +656,37 @@ assert(
   "Last Notes/Words drift stays inside mobile safe area",
 );
 assert(/edgeInsetPx/.test(fair), "FairChaseTarget enforces pixel edge inset");
+
+// Punch list rev15 locks
+assert(
+  /enforcePixelInset|data-chase-edge-inset/.test(fair),
+  "Consent chase hard-clamps chrome ≥edgeInset after catch/magnet",
+);
+assert(
+  /CHOICE_ARM_MS|data-choices-armed/.test(read("src/components/game/scenes/SceneChoiceList.tsx")),
+  "Choice list arms after settle so Allegiance early clicks miss nothing",
+);
+assert(
+  /REDACTED/.test(reportSrc) && /data-report-redaction-stamp/.test(reportSrc),
+  "Submit report redaction reads as intentional stamp",
+);
+assert(
+  /data-restless-straining|STRAIN_WARN_MS|HOLDING…/.test(restless),
+  "Drift pin release wobbles before letting go",
+);
+assert(
+  /opacity:\s*\{\s*duration:\s*0\.18/.test(read("src/components/game/scenes/PeelReveal.tsx")),
+  "Courtesy Layers peel fades title faster than the slide",
+);
+assert(
+  /KEPT TALKING TO IT/.test(reportSrc) && !/TALKED TO THE ORB ×|TALKED TO THE ORB TWICE/.test(reportSrc),
+  "Orb talk tag stays human — no ×N counter",
+);
+assert(
+  /Good\. Keep practicing that no\./.test(act4) &&
+    !/Rehearse the no until it feels like a personality/.test(act4),
+  "Prep refuse line trimmed to Keep practicing that no",
+);
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

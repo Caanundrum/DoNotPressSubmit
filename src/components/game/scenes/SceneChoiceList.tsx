@@ -1,9 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { choiceEnter } from "@/game/motion";
 import type { ChoiceDef, ChoiceMotion, GameState } from "@/game/types";
 import { audio } from "@/lib/audio";
+
+/** Ignore clicks while the panel/choices finish settling (Allegiance mis-clicks). */
+const CHOICE_ARM_MS = 320;
 
 export function SceneChoiceList({
   choices,
@@ -24,6 +28,15 @@ export function SceneChoiceList({
   onHover: (id: string | null) => void;
   onState: (s: GameState) => void;
 }) {
+  const [armed, setArmed] = useState(false);
+  const choiceKey = choices.map((c) => c.id).join("|");
+
+  useEffect(() => {
+    setArmed(false);
+    const t = window.setTimeout(() => setArmed(true), CHOICE_ARM_MS);
+    return () => window.clearTimeout(t);
+  }, [choiceKey]);
+
   return (
     <div
       className={
@@ -32,6 +45,8 @@ export function SceneChoiceList({
           : "grid gap-1.5 overflow-visible pb-1 sm:gap-2"
       }
       data-choice-count={choices.length}
+      data-choices-armed={armed ? "true" : "false"}
+      data-choice-arm-ms={CHOICE_ARM_MS}
     >
       <AnimatePresence>
         {choices.map((opt, index) => {
@@ -40,14 +55,18 @@ export function SceneChoiceList({
           const enter = choiceEnter(choiceMotion, index);
           const motionPaused =
             !!selected || isHover || choiceMotion === "static" || choiceMotion === "scatter";
+          const locked = !!selected || !armed;
           return (
             <motion.button
               key={opt.id}
               type="button"
-              disabled={!!selected}
-              onClick={() => onPick(opt)}
+              disabled={locked}
+              onClick={() => {
+                if (!armed || selected) return;
+                onPick(opt);
+              }}
               onHoverStart={() => {
-                if (selected) return;
+                if (selected || !armed) return;
                 onHover(opt.id);
                 audio.play("hover", 0.25);
                 if (state.aiMood === "neutral") {
@@ -55,7 +74,7 @@ export function SceneChoiceList({
                 }
               }}
               onHoverEnd={() => onHover(null)}
-              className="group relative overflow-visible border px-3 py-2.5 text-left transition disabled:cursor-default sm:px-4 sm:py-3.5"
+              className="group relative overflow-visible border px-3 py-2.5 text-left transition disabled:cursor-default disabled:opacity-100 sm:px-4 sm:py-3.5"
               style={{
                 // Teal hover border ONLY under the pointer (P1 #15) — danger/unauthorized
                 // get a quiet default tell, never a permanent "hovered" cyan rim.

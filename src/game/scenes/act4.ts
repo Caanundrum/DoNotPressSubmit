@@ -134,7 +134,7 @@ export const act4Scenes: SceneDef[] = [
           counters: { aiCooperation: 1 },
           relationship: 1,
           mood: "defiant",
-          aiLine: "Good. Rehearse the no until it feels like a personality.",
+          aiLine: "Good. Keep practicing that no.",
           majorChoice: "prep:refuse",
         },
         next: "act5-lobby",

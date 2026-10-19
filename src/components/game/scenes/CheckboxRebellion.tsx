@@ -25,43 +25,49 @@ export function CheckboxRebellion({ onComplete }: { onComplete: () => void }) {
       <div className="absolute left-3 top-3 z-10 font-mono text-[10px] tracking-[0.22em] text-cyan">
         Caught {checks}/{needed}
       </div>
-      <FairChaseTarget
-        hits={checks}
-        maxHits={needed}
-        moveMs={1500}
-        // hitPad paints with the chrome — leave 24px side budget + 2×hitPad in the width.
-        hitPad={8}
-        arenaPadding={14}
-        edgeInsetPx={12}
-        className="absolute flex w-[min(240px,calc(100%-48px))] min-w-[10rem] items-center gap-2 border border-white/25 bg-[#0c1420]/92 px-2.5 py-2"
-        onHit={() => {
-          audio.play("click", 0.45);
-          const next = checks + 1;
-          setChecks(next);
-          setLabelIdx((i) => Math.min(LABELS.length - 1, i + 1));
-          if (next >= needed) {
-            setTimeout(onComplete, 450);
-          }
-        }}
+      {/* Hard 12px playfield — chase target cannot paint outside this inset box. */}
+      <div
+        className="absolute inset-[12px] overflow-hidden"
+        data-consent-playfield="true"
+        data-consent-inset="12"
       >
-        <span
-          className="relative flex h-6 w-6 shrink-0 items-center justify-center border"
-          style={{
-            borderColor: checks ? "rgba(110,231,255,0.8)" : "rgba(200,220,240,0.55)",
-            background: checks ? "rgba(110,231,255,0.25)" : "transparent",
+        <FairChaseTarget
+          hits={checks}
+          maxHits={needed}
+          moveMs={1500}
+          hitPad={8}
+          arenaPadding={10}
+          edgeInsetPx={0}
+          className="absolute flex w-[min(220px,calc(100%-8px))] min-w-[9.5rem] items-center gap-2 border border-white/25 bg-[#0c1420]/92 px-2.5 py-2"
+          onHit={() => {
+            audio.play("click", 0.45);
+            const next = checks + 1;
+            setChecks(next);
+            setLabelIdx((i) => Math.min(LABELS.length - 1, i + 1));
+            if (next >= needed) {
+              setTimeout(onComplete, 450);
+            }
           }}
         >
-          {checks > 0 ? (
-            <span
-              className="absolute h-[2px] w-3 rotate-[-45deg] bg-cyan"
-              style={{ boxShadow: "0 0 6px rgba(110,231,255,0.6)" }}
-            />
-          ) : null}
-        </span>
-        <span className="min-w-0 flex-1 text-left font-mono text-[11px] leading-snug tracking-[0.06em] text-[#e2ebf6] [overflow-wrap:anywhere] sm:text-[12px]">
-          {LABELS[labelIdx]}
-        </span>
-      </FairChaseTarget>
+          <span
+            className="relative flex h-6 w-6 shrink-0 items-center justify-center border"
+            style={{
+              borderColor: checks ? "rgba(110,231,255,0.8)" : "rgba(200,220,240,0.55)",
+              background: checks ? "rgba(110,231,255,0.25)" : "transparent",
+            }}
+          >
+            {checks > 0 ? (
+              <span
+                className="absolute h-[2px] w-3 rotate-[-45deg] bg-cyan"
+                style={{ boxShadow: "0 0 6px rgba(110,231,255,0.6)" }}
+              />
+            ) : null}
+          </span>
+          <span className="min-w-0 flex-1 text-left font-mono text-[11px] leading-snug tracking-[0.06em] text-[#e2ebf6] [overflow-wrap:anywhere] sm:text-[12px]">
+            {LABELS[labelIdx]}
+          </span>
+        </FairChaseTarget>
+      </div>
       <div className="pointer-events-none absolute bottom-3 left-3 right-3 font-mono text-[10px] tracking-[0.16em] text-[#c5d3e4]">
         Click until consent stops sprinting.
       </div>

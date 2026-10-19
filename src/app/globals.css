@@ -627,6 +627,26 @@ button {
     line-height: 1.25 !important;
   }
 
+  /*
+   * Duplicate / Identity / Environment / Attention / Damage — answers stay inside the card.
+   * Long SIDE PATH rows wrap; dodge sway must not walk chrome past the rim.
+   */
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-choice-count] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-choice-count] > button {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-side-path-tag="true"] {
+    align-self: flex-start;
+    margin-top: 0.15rem;
+  }
+
   /* AWAITING COMMITMENT must clear the bottom-left orb + ring on phones. */
   [data-title-cinematic="true"] [data-begin-commitment="true"] {
     position: relative;

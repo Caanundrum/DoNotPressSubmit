@@ -74,7 +74,7 @@ export function SceneChoiceList({
                 }
               }}
               onHoverEnd={() => onHover(null)}
-              className="group relative overflow-visible border px-3 py-2.5 text-left transition disabled:cursor-default disabled:opacity-100 sm:px-4 sm:py-3.5"
+              className="group relative max-w-full overflow-visible border px-3 py-2.5 text-left transition disabled:cursor-default disabled:opacity-100 sm:px-4 sm:py-3.5"
               style={{
                 // Teal hover border ONLY under the pointer (P1 #15) — danger/unauthorized
                 // get a quiet default tell, never a permanent "hovered" cyan rim.
@@ -98,6 +98,7 @@ export function SceneChoiceList({
                 color: "#f4f7fb",
               }}
               data-choice-hover={isHover ? "true" : "false"}
+              data-choice-id={opt.id}
               initial={opt.late ? { opacity: 0, y: 8, scale: 0.98 } : enter.initial}
               animate={
                 isSelected
@@ -110,7 +111,7 @@ export function SceneChoiceList({
                         scale: isHover ? 1.015 : 1,
                       }
                     : opt.late
-                      ? { opacity: 1, y: 0, scale: 1 }
+                      ? { opacity: 1, y: 0, scale: 1, x: 0 }
                       : {
                           // Keep opacity locked at 1 during restless/dodge loops.
                           ...enter.animate,
@@ -128,12 +129,12 @@ export function SceneChoiceList({
                   !motionPaused && choiceMotion === "dodge" ? Infinity : 0,
                 repeatType: "loop",
               }}
-              whileHover={!selected ? { x: 2 } : undefined}
+              whileHover={!selected ? { x: 1 } : undefined}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
                 <span
-                  className="text-[15px] font-medium tracking-[0.08em] text-[#f4f7fb] sm:text-lg"
-                  style={{ fontFamily: "var(--font-display)" }}
+                  className="min-w-0 flex-1 whitespace-normal break-words text-[15px] font-medium leading-snug tracking-[0.08em] text-[#f4f7fb] sm:text-lg"
+                  style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere" }}
                 >
                   {opt.label}
                 </span>

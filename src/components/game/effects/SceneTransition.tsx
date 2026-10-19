@@ -43,7 +43,8 @@ const STATUS: Record<TransitionFamily, string> = {
   glass: "RESEATING THE VIEW…",
   glitch: "CONTAINMENT RECALIBRATING…",
   blackout: "LOADING COMPLIANCE…",
-  push: "PUSHING THE NEXT FORM…",
+  // Quiet handoff — no outbound narration stamp on the climax push.
+  push: "",
   dissolve: "SWEEPING RESIDUE…",
   "system-force": "SYSTEM OVERRIDE IN PROGRESS…",
 };

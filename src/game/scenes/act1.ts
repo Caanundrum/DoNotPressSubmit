@@ -76,8 +76,7 @@ export const act1Scenes: SceneDef[] = [
     setpiece: "restless-options",
     formId: "DRIFT",
     title: "Pin the wandering answers",
-    prompt:
-      "Calibration fields are drifting. Click each restless option until the form admits it has feelings.",
+    prompt: "These answers won't sit still. Catch them.",
     aiLine:
       "Don't look at me — I didn't teach the answers to walk. Pin them. Pretend this is still onboarding.",
     aiMood: "confused",

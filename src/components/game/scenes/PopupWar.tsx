@@ -49,6 +49,8 @@ export function PopupWar({
   const [hoverDismiss, setHoverDismiss] = useState<number | null>(null);
   /** Dismissed labels never respawn — no "Compliance required" zombie pile (P1). */
   const dismissedLabels = useRef(new Set<string>());
+  /** Ids already counted — Strict Mode / double-click must not rewind or double-bump. */
+  const countedIds = useRef(new Set<number>());
   /** Monotonic dismiss tally — never decreases even when click handlers lag. */
   const closedRef = useRef(0);
   const labelCursor = useRef(2);
@@ -73,14 +75,16 @@ export function PopupWar({
     setPopups((prev) => {
       const victim = prev.find((p) => p.id === id);
       // Stale / double-click on an already-gone card must not rewind the counter.
-      if (!victim) return prev;
+      if (!victim || countedIds.current.has(id)) return prev;
+      countedIds.current.add(id);
       dismissedLabels.current.add(victim.label);
       const next = prev.filter((p) => p.id !== id);
-      const newlyClosed = closedRef.current + 1;
-      closedRef.current = newlyClosed;
-      setClosed(newlyClosed);
+      const advanced = closedRef.current + 1;
+      closedRef.current = advanced;
+      // Never decrease — Math.max guards any out-of-order setState.
+      setClosed((c) => Math.max(c, advanced));
       // Final click clears leftovers so Closed N/5 matches an empty board.
-      if (newlyClosed >= needed) {
+      if (advanced >= needed) {
         onCleared?.();
         setTimeout(onComplete, 700);
         return [];
@@ -88,7 +92,7 @@ export function PopupWar({
       // One spawn per dismiss — no mid-cascade double that leaves 3 up at 4/5.
       const z = topZRef.current + 1;
       topZRef.current = z;
-      const slot = slotFor(newlyClosed + next.length);
+      const slot = slotFor(advanced + next.length);
       const spawned: Popup[] = [
         {
           id: Date.now() + Math.random(),
@@ -118,7 +122,12 @@ export function PopupWar({
 
   return (
     <div className="relative h-[min(48vh,380px)] w-full overflow-hidden border border-white/25 bg-black/40">
-      <div className="pointer-events-none absolute left-3 top-3 z-30 font-mono text-[10px] tracking-[0.22em] text-system-warn">
+      <div
+        className="pointer-events-none absolute left-3 top-3 z-30 font-mono text-[10px] tracking-[0.22em] text-system-warn"
+        data-popup-closed={progress}
+        data-popup-needed={needed}
+        data-popup-counter-monotonic="true"
+      >
         Closed {progress}/{needed}
       </div>
       <AnimatePresence>

@@ -166,10 +166,10 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
               animate={
                 isStraining
                   ? {
-                      // Loud chip wobble on the answer itself — not just a border tint.
-                      x: [0, -10, 10, -8, 8, -5, 5, -2, 0],
-                      rotate: [0, -4, 4, -3.5, 3.5, -2, 2, 0],
-                      scale: [1, 1.06, 0.96, 1.05, 0.98, 1.03, 1],
+                      // Loud chip wobble on the answer itself — keep ±6 so 390px left rim stays clear.
+                      x: [0, -6, 6, -5, 5, -3, 3, -1, 0],
+                      rotate: [0, -3.5, 3.5, -3, 3, -2, 2, 0],
+                      scale: [1, 1.05, 0.97, 1.04, 0.98, 1.02, 1],
                     }
                   : {
                       // Pinned cards settle hard — no x-drift / jitter after pin (P1).

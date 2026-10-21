@@ -22,7 +22,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "practicedRun",
-        line: "You're watching for another door. Good. Edges first — Submit second.",
+        line: "You're watching for another door. Good. Keep looking.",
       },
       {
         flag: "practicedSubmit",

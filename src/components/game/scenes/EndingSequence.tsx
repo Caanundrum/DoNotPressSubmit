@@ -102,7 +102,14 @@ export function EndingSequence({
 
           <motion.div
             className="ending-shell no-scroll overflow-hidden border px-5 py-5 text-center"
-            style={panelStyle(endingId)}
+            style={{
+              ...panelStyle(endingId),
+              // Fail closed: never open a scrollport on ending panels (rev17 P1).
+              overflow: "hidden",
+              maxHeight: "min(82dvh, 100%)",
+            }}
+            data-ending-panel={endingId}
+            data-ending-no-scroll="true"
             initial={{ opacity: 0, y: 22, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 20 }}

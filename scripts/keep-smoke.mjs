@@ -732,5 +732,54 @@ assert(
   "Title orb stays inside the mobile frame",
 );
 
+// Punch list rev17 locks
+assert(
+  /lockedRef|data-restless-locked/.test(restless) &&
+    /pinsRef\.current >= 3/.test(restless) &&
+    /never unpin after a 3\/3 lock|Fail closed: never unpin/.test(restless),
+  "Drift 3/3 locks pins — never regresses to 2/3",
+);
+assert(
+  /STRAIN_WARN_MS = 2000/.test(restless) &&
+    /STRAIN_AFTER_PIN_MS = 2800/.test(restless) &&
+    /HOLDING…/.test(restless),
+  "Drift HOLDING telegraph is long enough to read",
+);
+assert(
+  /ROWS = \[2, 30, 58\]/.test(restless) &&
+    /data-restless-arena/.test(restless),
+  "Drift third card lanes clear of hint footer",
+);
+assert(
+  /You're watching for another door\. Good\. Keep looking\./.test(act5) &&
+    !/Edges first — Submit second/.test(act5),
+  "Last Words door pick uses Keep looking line",
+);
+assert(
+  /Names help\. I'm better at small talk when I know who I'm talking to\./.test(act1),
+  "Identity name line is humanized",
+);
+assert(
+  /Did the lights just blink at you\? Don't blink back\./.test(act2) &&
+    !/negotiate a union/.test(act2) &&
+    !/poltergeist/.test(act2),
+  "Attention / Loyalty prompts drop machine-voice leftovers",
+);
+assert(
+  /I'm going to take that personally\./.test(act4) &&
+    !/I'm going to be weird about it/.test(act4) &&
+    /I'm going to be weird about how grateful I am/.test(act5),
+  "Weird-about copy kept for Leave Unfinished ending only",
+);
+assert(
+  /If you press it, I'm gone\./.test(act4) && !/If you push it/.test(act4),
+  "Last Notes orb line uses press not push",
+);
+assert(
+  /data-ending-no-scroll/.test(ending) &&
+    /overflow:\s*"hidden"/.test(ending),
+  "Leave Unfinished ending panel forces zero scroll",
+);
+
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

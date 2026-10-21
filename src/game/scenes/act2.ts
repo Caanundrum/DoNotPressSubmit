@@ -14,7 +14,7 @@ export const act2Scenes: SceneDef[] = [
     prompt:
       "A light in the far chamber is blinking with intent. Facilities marked this 'fine.' Do you look, wave, or pretend corporate lighting has always been sentient?",
     aiLine:
-      "Did the lights just… negotiate a union? Please don't make friends with the infrastructure.",
+      "Did the lights just blink at you? Don't blink back. Please don't make friends with the infrastructure.",
     aiMood: "nervous",
     orbAnchor: "overhead",
     panelMotion: "edge",
@@ -67,7 +67,7 @@ export const act2Scenes: SceneDef[] = [
     formId: "LOYALTY",
     title: "Who do you trust more right now?",
     prompt:
-      "An option I deleted came back with better lighting. Do not encourage software that moonlights as a poltergeist.",
+      "An option I deleted came back with better lighting. Do not encourage deleted software to haunt the form.",
     aiLine: "I removed an option. It returned. That is not how code is supposed to work. That's how hauntings work.",
     aiMood: "suspicious",
     // dock-left — pace sway clips the orb on mobile Loyalty (rev16 P2).

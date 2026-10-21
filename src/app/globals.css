@@ -135,7 +135,8 @@ button {
 
 /* Compact assessment panel: scale to fit, never scroll */
 .assessment-panel {
-  overflow: hidden;
+  /* Visible so late SIDE PATH rows aren't cropped mid-reveal on phones. */
+  overflow: visible;
   max-height: min(78vh, 100%);
   max-width: 100%;
 }
@@ -151,7 +152,8 @@ button {
   gap: 0.45rem;
   max-height: 100%;
   min-height: 0;
-  overflow: hidden;
+  /* Late secret rows must paint fully — clipping read as a mobile bug (rev16). */
+  overflow: visible;
 }
 
 /* System / report overlays must never introduce scrollbars */
@@ -625,6 +627,42 @@ button {
     padding-bottom: 0.38rem !important;
     font-size: 12px !important;
     line-height: 1.25 !important;
+  }
+
+  /*
+   * Duplicate / Identity / Environment / Attention / Damage — answers stay inside the card.
+   * Long SIDE PATH rows wrap; late third option must not clip under the bubble dock.
+   */
+  [data-mobile-bubble-dock="true"] .assessment-panel.facility-hud {
+    /* Extra headroom so a late SIDE PATH row fits under the prompt on 390×844. */
+    max-height: min(68dvh, calc(100dvh - 9.25rem)) !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel-inner {
+    overflow: visible !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-choice-count] {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-choice-count] > button {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-choice-count="3"] button {
+    padding-top: 0.42rem !important;
+    padding-bottom: 0.42rem !important;
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+  }
+
+  [data-mobile-bubble-dock="true"] .assessment-panel [data-side-path-tag="true"] {
+    align-self: flex-start;
+    margin-top: 0.15rem;
   }
 
   /* AWAITING COMMITMENT must clear the bottom-left orb + ring on phones. */

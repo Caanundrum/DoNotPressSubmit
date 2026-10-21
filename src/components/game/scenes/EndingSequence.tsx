@@ -68,10 +68,11 @@ export function EndingSequence({
               transition={{ delay: 0.35, type: "spring", stiffness: 160, damping: 18 }}
               data-ending-orb="present"
               data-ending-orb-real="true"
+              data-ending-orb-until-report={endingId === "disable" ? "true" : "false"}
             >
               <AssistantOrb
                 mood={presence.mood}
-                size={endingId === "escape" ? 128 : 104}
+                size={endingId === "escape" ? 128 : endingId === "disable" ? 96 : 104}
                 label={presence.label}
                 wave={presence.wave}
               />
@@ -208,13 +209,11 @@ function endingPresence(endingId: EndingId): Presence {
         silentLine: "ASSISTANT CHANNEL: DISSOLVED",
       };
     case "disable":
+      // Stay visible through the beat until VIEW ASSESSMENT REPORT (rev16 P2).
       return {
-        mode: "exit",
+        mode: "present",
         mood: "defeated",
         label: "…okay.",
-        exitCaption: "",
-        exitDuration: 1.8,
-        exitMotion: { opacity: [1, 0.4, 0], scale: [1, 0.92, 0.85] },
         silentLine: "",
       };
     case "secret":

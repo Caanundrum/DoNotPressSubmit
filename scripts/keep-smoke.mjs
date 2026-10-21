@@ -688,5 +688,49 @@ assert(
   "Prep refuse line trimmed to Keep practicing that no",
 );
 
+// Punch list rev16 locks
+assert(
+  /practicedRefuse/.test(act5) &&
+    /You muted it in your head\. Loudly\./.test(act5) &&
+    !/with my whole remaining runtime/.test(act5),
+  "Last Words reacts to Mute pick before Allegiance leftovers",
+);
+assert(
+  /These answers won't sit still\. Catch them\./.test(act1) &&
+    !/Calibration fields are drifting/.test(act1),
+  "Drift body copy is human catch-them line",
+);
+assert(
+  !/PUSHING THE NEXT FORM/.test(read("src/components/game/effects/SceneTransition.tsx")),
+  "Climax push transition drops PUSHING THE NEXT FORM narration",
+);
+assert(
+  /data-restless-chip-wobble|strainTick|HOLDING…/.test(restless),
+  "Drift pin strain wobbles the answer chip itself",
+);
+assert(
+  /panelMotion:\s*"settle"/.test(act2) &&
+    /choiceMotion:\s*"restless"/.test(act2) &&
+    /formId:\s*"DUPLICATE"[\s\S]*?choiceMotion:\s*"restless"/.test(act2),
+  "Duplicate uses settle/restless so mobile answers stay in-frame",
+);
+assert(
+  /formId:\s*"LOYALTY"[\s\S]*?orbAnchor:\s*"dock-left"/.test(act2),
+  "Loyalty orb docks left — no pace clip on mobile",
+);
+assert(
+  /data-popup-counter-monotonic|countedIds|Math\.max\(c,\s*advanced\)/.test(popupSrc),
+  "Popup counter is monotonic — never decreases",
+);
+assert(
+  /case "disable"[\s\S]*?mode:\s*"present"/.test(ending) &&
+    /data-ending-orb-until-report/.test(ending),
+  "Mute ending orb stays present until report CTA",
+);
+assert(
+  /data-title-orb-in-frame|max-sm:right-8/.test(title),
+  "Title orb stays inside the mobile frame",
+);
+
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

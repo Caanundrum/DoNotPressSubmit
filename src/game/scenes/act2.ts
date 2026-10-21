@@ -70,7 +70,8 @@ export const act2Scenes: SceneDef[] = [
       "An option I deleted came back with better lighting. Do not encourage software that moonlights as a poltergeist.",
     aiLine: "I removed an option. It returned. That is not how code is supposed to work. That's how hauntings work.",
     aiMood: "suspicious",
-    orbAnchor: "pace",
+    // dock-left — pace sway clips the orb on mobile Loyalty (rev16 P2).
+    orbAnchor: "dock-left",
     panelMotion: "scatter",
     choiceMotion: "scatter",
     anomalyLevel: 2,
@@ -142,8 +143,9 @@ export const act2Scenes: SceneDef[] = [
     aiLine: "I didn't queue that reprint. If you hear a voice that isn't me, it's not improvisation.",
     aiMood: "frightened",
     orbAnchor: "hide",
-    panelMotion: "reanchor",
-    choiceMotion: "dodge",
+    // settle — reanchor/dodge walked answers past the card rim on mobile (rev16 P1).
+    panelMotion: "settle",
+    choiceMotion: "restless",
     anomalyLevel: 3,
     choices: [
       {

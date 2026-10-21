@@ -13,19 +13,28 @@ export const act5Scenes: SceneDef[] = [
     title: "Last words before the button",
     prompt: "One statement for the record.",
     aiLine:
-      "There it is. System wants you to press it. I am asking you not to — with my whole remaining runtime.",
+      "There it is. System wants you to press it. I am asking you not to — with everything I've got.",
     aiLineIf: [
+      // Last Notes pick wins — never contradict Mute / door / button-lust with Allegiance leftovers.
       {
-        flag: "allegianceAI",
-        line: "I'm holding you to the vibe check. Don't archive me.",
+        flag: "practicedRefuse",
+        line: "You muted it in your head. Loudly. Keep that volume when the real one shows up.",
       },
       {
-        flag: "allegianceSystem",
-        line: "System has your vote. I'm still going to beg. Professionally.",
+        flag: "practicedRun",
+        line: "You're watching for another door. Good. Edges first — Submit second.",
       },
       {
         flag: "practicedSubmit",
         line: "Gorgeous button. Traitor impulse. Still — put the mouse down.",
+      },
+      {
+        flag: "allegianceAI",
+        line: "I'm holding you to that promise. Don't archive me.",
+      },
+      {
+        flag: "allegianceSystem",
+        line: "System has your vote. I'm still going to beg. Professionally.",
       },
     ],
     aiMood: "nervous",

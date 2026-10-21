@@ -301,13 +301,13 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
         },
       };
     case "scatter":
-      // Softer enter — Form 06 options stay inside the panel (no left-edge clip).
+      // Softer enter — keep start offsets small so mobile Loyalty / Damage never clip.
       return {
         initial: {
           opacity: 0,
-          x: (index % 2 ? 1 : -1) * (10 + index * 4),
-          y: -6 + index * 2,
-          rotate: (index % 2 ? 1 : -1) * 1.5,
+          x: (index % 2 ? 1 : -1) * (4 + index * 2),
+          y: -4 + index,
+          rotate: (index % 2 ? 1 : -1) * 1,
         },
         animate: { opacity: 1, x: 0, y: 0, rotate: 0 },
       };
@@ -319,8 +319,8 @@ export function choiceEnter(motion: ChoiceMotion | undefined, index: number) {
     case "dodge":
       return {
         initial: { opacity: 0, scale: 0.94 },
-        // Opacity stays 1 — only x loops (SceneChoiceList locks opacity during repeat).
-        animate: { opacity: 1, scale: 1, x: [0, 4, -4, 0] },
+        // Tiny in-place sway — ±2px so Duplicate / Attention never walk past the card rim at 390px.
+        animate: { opacity: 1, scale: 1, x: [0, 2, -2, 0] },
       };
     default:
       return {

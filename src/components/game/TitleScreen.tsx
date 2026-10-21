@@ -321,19 +321,21 @@ export function TitleScreen({
       <motion.div
         className={
           escaped
-            ? "absolute bottom-24 right-6 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-[5.75rem]"
-            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-[5.75rem]"
+            ? "absolute bottom-24 right-8 z-[45] select-none sm:bottom-12 sm:right-12 max-sm:bottom-[5.75rem] max-sm:right-8"
+            : "absolute bottom-24 left-6 z-[45] select-none sm:bottom-8 sm:left-8 max-sm:bottom-[5.75rem] max-sm:left-6"
         }
         data-title-orb-dock="true"
         data-title-orb-edge-pad="32"
         data-title-orb-escape={escaped ? "true" : "false"}
         data-title-orb-above-props="true"
         data-title-orb-above-footer="true"
+        data-title-orb-in-frame="true"
         style={{ userSelect: "none" }}
         initial={{ opacity: 0, y: 12 }}
         animate={
           pokeFlinch
-            ? { opacity: 1, y: [0, -10, 2, 0], x: [0, 3, -2, 0] }
+            ? // Keep flinch inside the frame — never shove rings past the right rim on 390px.
+              { opacity: 1, y: [0, -8, 2, 0], x: escaped ? [0, -2, 1, 0] : [0, 2, -1, 0] }
             : { opacity: 1, y: 0, x: 0 }
         }
         transition={pokeFlinch ? { duration: 0.45 } : { delay: 0.55 }}

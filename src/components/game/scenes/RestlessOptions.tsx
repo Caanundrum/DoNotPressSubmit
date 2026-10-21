@@ -23,7 +23,7 @@ const ROWS = [4, 38, 72];
 const PIN_X = [4, 20, 10];
 
 /** Wobble before an intentional pin release so it doesn't feel like a lost click. */
-const STRAIN_WARN_MS = 700;
+const STRAIN_WARN_MS = 900;
 const STRAIN_AFTER_PIN_MS = 1600;
 
 function clampX(x: number) {
@@ -36,6 +36,8 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
   const [pinned, setPinned] = useState<Record<string, boolean>>({});
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [strainingId, setStrainingId] = useState<string | null>(null);
+  /** Bumps when strain starts so Framer restarts the chip keyframe (not just a border tint). */
+  const [strainTick, setStrainTick] = useState(0);
   const didStrain = useRef(false);
   const [slots, setSlots] = useState<Slot[]>([
     { id: "a", label: "I read the instructions", x: 8, row: 0 },
@@ -66,7 +68,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
     return () => window.clearInterval(t);
   }, [pins, pinned, hoverId, strainingId]);
 
-  // One intentional pin-yank: wobble first, then release (rev15 P2).
+  // One intentional pin-yank: wobble the answer chip itself first, then release.
   useEffect(() => {
     if (didStrain.current || pins !== 1 || pins >= 3) return;
     const pinnedIds = Object.keys(pinned).filter((id) => pinned[id]);
@@ -74,6 +76,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
     const target = pinnedIds[0];
     const warn = window.setTimeout(() => {
       setStrainingId(target);
+      setStrainTick((n) => n + 1);
       audio.play("hover", 0.2);
     }, STRAIN_AFTER_PIN_MS);
     const release = window.setTimeout(() => {
@@ -132,7 +135,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
           const top = ROWS[s.row] ?? ROWS[i] ?? 50;
           return (
             <motion.button
-              key={s.id}
+              key={isStraining ? `${s.id}-strain-${strainTick}` : s.id}
               type="button"
               className="absolute w-[min(68%,260px)] border px-3 py-2 text-left font-mono text-[12px] leading-snug tracking-[0.12em] text-[#e2ebf6] max-sm:w-[min(58%,200px)] max-sm:py-1.5"
               style={{
@@ -141,28 +144,32 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
                 fontFamily: "var(--font-display)",
                 padding: "10px 12px",
                 borderColor: isStraining
-                  ? "rgba(255,180,90,0.85)"
+                  ? "rgba(255,120,90,0.95)"
                   : isPinned
                     ? "rgba(110,231,255,0.7)"
                     : "rgba(200,220,240,0.28)",
                 background: isStraining
-                  ? "rgba(90,50,20,0.55)"
+                  ? "rgba(110,40,24,0.72)"
                   : isPinned
                     ? "rgba(40,90,120,0.45)"
                     : "rgba(12,20,32,0.92)",
+                boxShadow: isStraining
+                  ? "0 0 0 1px rgba(255,140,100,0.55), 0 0 18px rgba(255,90,60,0.35)"
+                  : undefined,
                 zIndex: isPinned || isStraining ? 2 + s.row : 1,
               }}
               data-restless-chip={s.id}
               data-restless-pinned={isPinned ? "true" : "false"}
               data-restless-straining={isStraining ? "true" : "false"}
+              data-restless-chip-wobble={isStraining ? "true" : "false"}
               data-restless-row={s.row}
               animate={
                 isStraining
                   ? {
-                      // Short wobble telegraph before the pin lets go.
-                      x: [0, -5, 5, -4, 4, -2, 0],
-                      rotate: [0, -2.5, 2.5, -1.5, 1.5, 0],
-                      scale: [1, 1.03, 0.98, 1.02, 1],
+                      // Loud chip wobble on the answer itself — keep ±6 so 390px left rim stays clear.
+                      x: [0, -6, 6, -5, 5, -3, 3, -1, 0],
+                      rotate: [0, -3.5, 3.5, -3, 3, -2, 2, 0],
+                      scale: [1, 1.05, 0.97, 1.04, 0.98, 1.02, 1],
                     }
                   : {
                       // Pinned cards settle hard — no x-drift / jitter after pin (P1).
@@ -186,7 +193,10 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
             >
               <span className="block whitespace-normal break-words">{s.label}</span>
               {isStraining ? (
-                <span className="mt-0.5 block font-mono text-[10px] tracking-widest text-[#ffd27a] max-sm:text-[10px]">
+                <span
+                  className="mt-0.5 block font-mono text-[10px] tracking-widest text-[#ffb090] max-sm:text-[10px]"
+                  data-restless-strain-label="true"
+                >
                   HOLDING…
                 </span>
               ) : isPinned ? (

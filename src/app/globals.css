@@ -159,14 +159,28 @@ button {
 /* System / report overlays must never introduce scrollbars */
 .system-beat-shell,
 .ending-shell,
-.report-shell {
+.report-shell,
+[data-ending-no-scroll="true"],
+[data-ending-panel] {
   overflow: hidden !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
   max-width: min(calc(100% - 1.5rem), 560px);
   width: min(88%, 560px);
-  max-height: min(88dvh, 100%);
+  max-height: min(82dvh, 100%);
   word-break: break-word;
   overflow-wrap: anywhere;
   box-sizing: border-box;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.ending-shell::-webkit-scrollbar,
+.report-shell::-webkit-scrollbar,
+[data-ending-no-scroll="true"]::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
 
 /* Assessment stage owns the viewport — no letterboxed card chrome */

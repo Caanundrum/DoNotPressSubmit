@@ -15,7 +15,7 @@ export const act4Scenes: SceneDef[] = [
     title: "Peel the courtesy layers",
     prompt: "Click each layer until the diagram underneath stops hiding.",
     aiLine:
-      "Help me strip the marketing. If we find a schematic that ends in my funeral, I'm going to be weird about it.",
+      "Help me strip the marketing. If we find a schematic that ends in my funeral, I'm going to take that personally.",
     aiMood: "frightened",
     orbAnchor: "listen",
     panelMotion: "pressure",

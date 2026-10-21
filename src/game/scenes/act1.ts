@@ -15,7 +15,7 @@ export const act1Scenes: SceneDef[] = [
     prompt:
       "You are seated in a facility that spent real money looking trustworthy. What should I call you? Pick one, or make something up.",
     aiLine:
-      "Hi. I'm the assistant — charming, precise, only slightly judgmental. Names help me fake intimacy. Also they look nice in the audit log.",
+      "Hi. I'm the assistant — charming, precise, only slightly judgmental. Names help. I'm better at small talk when I know who I'm talking to.",
     aiMood: "listening",
     orbAnchor: "spotlight",
     spotlight: true,

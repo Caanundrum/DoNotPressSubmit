@@ -17,14 +17,18 @@ const X_MAX = 26;
 /**
  * Vertical lane tops (%) inside the craft box (footer is outside the drift area).
  * Gaps must fit a 2-line wrap + PINNED badge with clear air — esp. mobile ~390px.
+ * Row 3 stays clear of the hint footer (rev17 P1 — no clip at 3/3).
  */
-const ROWS = [4, 38, 72];
+const ROWS = [2, 30, 58];
 /** Pin parking X per row — staggered so pinned chips never share a vertical stack. */
 const PIN_X = [4, 20, 10];
 
-/** Wobble before an intentional pin release so it doesn't feel like a lost click. */
-const STRAIN_WARN_MS = 900;
-const STRAIN_AFTER_PIN_MS = 1600;
+/**
+ * Wobble before an intentional pin release so it doesn't feel like a lost click.
+ * Hold long enough to READ the HOLDING telegraph (rev17 P1 — not a silent 1–2s drop).
+ */
+const STRAIN_WARN_MS = 2000;
+const STRAIN_AFTER_PIN_MS = 2800;
 
 function clampX(x: number) {
   return Math.min(X_MAX, Math.max(X_MIN, x));
@@ -39,22 +43,56 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
   /** Bumps when strain starts so Framer restarts the chip keyframe (not just a border tint). */
   const [strainTick, setStrainTick] = useState(0);
   const didStrain = useRef(false);
+  /** Once 3/3 is reached, pins are frozen forever — never regress to 2/3 (rev17 P0). */
+  const lockedRef = useRef(false);
+  const pinsRef = useRef(0);
+  const strainWarnRef = useRef<number | null>(null);
+  const strainReleaseRef = useRef<number | null>(null);
+  const [locked, setLocked] = useState(false);
   const [slots, setSlots] = useState<Slot[]>([
     { id: "a", label: "I read the instructions", x: 8, row: 0 },
     { id: "b", label: "I skimmed them professionally", x: 26, row: 1 },
     { id: "c", label: "Instructions are a suggestion", x: 14, row: 2 },
   ]);
 
+  const clearStrainTimers = () => {
+    if (strainWarnRef.current != null) {
+      window.clearTimeout(strainWarnRef.current);
+      strainWarnRef.current = null;
+    }
+    if (strainReleaseRef.current != null) {
+      window.clearTimeout(strainReleaseRef.current);
+      strainReleaseRef.current = null;
+    }
+  };
+
+  const lockCompletion = () => {
+    if (lockedRef.current) return;
+    lockedRef.current = true;
+    setLocked(true);
+    setStrainingId(null);
+    clearStrainTimers();
+  };
+
+  useEffect(() => {
+    pinsRef.current = pins;
+  }, [pins]);
+
   useEffect(() => {
     if (pins < 3) return;
-    const t = setTimeout(onComplete, 450);
+    lockCompletion();
+    // Hold so Pinned 3/3 + lock is readable / sampleable before advance (rev17 P0).
+    const t = setTimeout(onComplete, 1100);
     return () => clearTimeout(t);
+    // lockCompletion is stable enough — only re-fire when pins hits 3
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pins, onComplete]);
 
   // Horizontal-only drift in fixed rows — never stack on top of each other.
   useEffect(() => {
-    if (pins >= 3) return;
+    if (lockedRef.current || pins >= 3) return;
     const t = window.setInterval(() => {
+      if (lockedRef.current) return;
       setSlots((prev) =>
         prev.map((s, i) => {
           if (pinned[s.id] || hoverId === s.id || strainingId === s.id) {
@@ -70,37 +108,53 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   // One intentional pin-yank: wobble the answer chip itself first, then release.
   useEffect(() => {
-    if (didStrain.current || pins !== 1 || pins >= 3) return;
+    if (lockedRef.current || didStrain.current || pins !== 1) return;
     const pinnedIds = Object.keys(pinned).filter((id) => pinned[id]);
     if (pinnedIds.length !== 1) return;
     const target = pinnedIds[0];
-    const warn = window.setTimeout(() => {
+    clearStrainTimers();
+    strainWarnRef.current = window.setTimeout(() => {
+      if (lockedRef.current || pinsRef.current >= 3) return;
       setStrainingId(target);
       setStrainTick((n) => n + 1);
       audio.play("hover", 0.2);
     }, STRAIN_AFTER_PIN_MS);
-    const release = window.setTimeout(() => {
+    strainReleaseRef.current = window.setTimeout(() => {
+      // Fail closed: never unpin after a 3/3 lock (stale timer must not cheat).
+      if (lockedRef.current || pinsRef.current >= 3) {
+        setStrainingId(null);
+        return;
+      }
       setStrainingId(null);
       setPinned((p) => {
         const next = { ...p };
         delete next[target];
         return next;
       });
-      setPins((p) => Math.max(0, p - 1));
+      setPins((p) => {
+        if (lockedRef.current || p >= 3) return p;
+        const next = Math.max(0, p - 1);
+        pinsRef.current = next;
+        return next;
+      });
       didStrain.current = true;
       audio.play("click", 0.25);
     }, STRAIN_AFTER_PIN_MS + STRAIN_WARN_MS);
     return () => {
-      window.clearTimeout(warn);
-      window.clearTimeout(release);
+      clearStrainTimers();
     };
   }, [pins, pinned]);
 
   const pin = (id: string) => {
-    if (pins >= 3 || pinned[id] || strainingId === id) return;
+    if (lockedRef.current || pinsRef.current >= 3 || pinned[id] || strainingId === id) return;
     audio.play("click", 0.4);
+    const nextPins = pinsRef.current + 1;
+    pinsRef.current = nextPins;
     setPinned((p) => ({ ...p, [id]: true }));
-    setPins((p) => p + 1);
+    setPins(nextPins);
+    if (nextPins >= 3) {
+      lockCompletion();
+    }
     setSlots((prev) =>
       prev.map((s) => {
         if (s.id === id) {
@@ -114,7 +168,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
 
   return (
     <div
-      className="relative flex h-[min(48vh,380px)] w-full flex-col bg-black/40 max-sm:h-[min(48vh,360px)]"
+      className="relative flex h-[min(52vh,400px)] w-full flex-col bg-black/40 max-sm:h-[min(50vh,380px)]"
       style={{
         // Explicit 1px rim — cyan/25 alone read as missing on phone screenshots.
         border: "1px solid rgba(110,231,255,0.42)",
@@ -124,11 +178,19 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
       data-restless-pin-lanes="true"
       data-restless-arena-border="true"
       data-restless-strain-ms={STRAIN_WARN_MS}
+      data-restless-strain-after-ms={STRAIN_AFTER_PIN_MS}
+      data-restless-locked={locked ? "true" : "false"}
     >
-      <div className="shrink-0 px-4 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan">
+      <div
+        className="shrink-0 px-4 pt-2 font-mono text-[12px] tracking-[0.22em] text-cyan"
+        data-restless-pin-count={pins}
+      >
         Pinned {pins}/3
       </div>
-      <div className="relative min-h-0 flex-1 overflow-hidden pb-1">
+      <div
+        className="relative min-h-0 flex-1 overflow-hidden pb-3"
+        data-restless-arena="true"
+      >
         {slots.map((s, i) => {
           const isPinned = !!pinned[s.id];
           const isStraining = strainingId === s.id;
@@ -166,10 +228,10 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
               animate={
                 isStraining
                   ? {
-                      // Loud chip wobble on the answer itself — keep ±6 so 390px left rim stays clear.
-                      x: [0, -6, 6, -5, 5, -3, 3, -1, 0],
-                      rotate: [0, -3.5, 3.5, -3, 3, -2, 2, 0],
-                      scale: [1, 1.05, 0.97, 1.04, 0.98, 1.02, 1],
+                      // Loud chip wobble — readable on 390px and desktop (rev17 P1).
+                      x: [0, -10, 10, -8, 8, -6, 6, -3, 3, 0],
+                      rotate: [0, -5, 5, -4.5, 4.5, -3, 3, -1.5, 1.5, 0],
+                      scale: [1, 1.08, 0.95, 1.07, 0.96, 1.05, 0.98, 1.03, 1],
                     }
                   : {
                       // Pinned cards settle hard — no x-drift / jitter after pin (P1).
@@ -209,7 +271,7 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
         })}
       </div>
       <div
-        className="pointer-events-none shrink-0 border-t border-white/10 bg-black/70 px-4 pb-4 pt-3 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4]"
+        className="pointer-events-none shrink-0 border-t border-white/10 bg-black/70 px-4 pb-3 pt-2.5 font-mono text-[12px] leading-snug tracking-[0.12em] text-[#c5d3e4]"
         data-restless-hint="true"
         data-restless-hint-pad="16"
       >

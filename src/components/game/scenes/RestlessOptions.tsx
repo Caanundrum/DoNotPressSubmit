@@ -81,7 +81,8 @@ export function RestlessOptions({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     if (pins < 3) return;
     lockCompletion();
-    const t = setTimeout(onComplete, 320);
+    // Hold so Pinned 3/3 + lock is readable / sampleable before advance (rev17 P0).
+    const t = setTimeout(onComplete, 1100);
     return () => clearTimeout(t);
     // lockCompletion is stable enough — only re-fire when pins hits 3
     // eslint-disable-next-line react-hooks/exhaustive-deps

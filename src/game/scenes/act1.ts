@@ -11,6 +11,7 @@ export const act1Scenes: SceneDef[] = [
     kind: "choice",
     environment: "pristine",
     formId: "IDENTITY",
+    progressLabel: "QUESTION 1 OF 5",
     title: "What should I call you?",
     prompt:
       "You are seated in a facility that spent real money looking trustworthy. What should I call you? Pick one, or make something up.",
@@ -75,6 +76,7 @@ export const act1Scenes: SceneDef[] = [
     environment: "pristine",
     setpiece: "restless-options",
     formId: "DRIFT",
+    progressLabel: "QUESTION 2 OF 5",
     title: "Pin the wandering answers",
     prompt: "These answers won't sit still. Catch them.",
     aiLine:
@@ -91,6 +93,7 @@ export const act1Scenes: SceneDef[] = [
     kind: "choice",
     environment: "pristine",
     formId: "ENVIRONMENT",
+    progressLabel: "QUESTION 3 OF 5",
     title: "Where do you actually get work done?",
     prompt: "Be honest. Or entertaining. The form pretends those are different.",
     aiLine: "Quiet office, collaborative zoo, remote cave, or… wait.",
@@ -170,6 +173,7 @@ export const act1Scenes: SceneDef[] = [
     kind: "choice",
     environment: "pristine",
     formId: "PRESSURE",
+    progressLabel: "QUESTION 4 OF 5",
     title: "Deadlines circling. Big buttons glowing. You…",
     prompt:
       "Pick how you cope — and how you feel about glowing final-looking buttons. Wrong answers are still comedy.",

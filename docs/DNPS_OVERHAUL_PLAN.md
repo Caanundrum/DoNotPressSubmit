@@ -34,20 +34,20 @@
 ---
 
 ## Packet 2: Setpiece & UI-Sabotage Mechanics Upgrade
-- [ ] **2.1 `RestlessOptions.tsx` (`DRIFT`) Tuning (Finding #7):**
-  - 60fps smooth weave across full lane width (`3%–58%`), remove hover-freeze, shorten strain window (`750ms` / `420ms`), and add repeated break-loose timer (`2.2s` between pins) so pinned answers snap free if the player is too slow.
-- [ ] **2.2 `FairChaseTarget.tsx` Real Flee Behavior:**
-  - Remove hover-freeze and magnet-pull; make fleeing targets genuinely evade pointer approach.
-- [ ] **2.3 Q14 Hostile Checkbox Sabotage (`CheckboxRebellion.tsx` — Proposal 1.1):**
-  - Replace duplicate chase mechanic with a hostile multi-checkbox / shifting Terms & Conditions sabotage minigame.
-- [ ] **2.4 Q13 Pointer-Stillness Detection (`act3-companion-wait` — Proposal 1.2):**
-  - Detect pointer movement during the stillness countdown, reset the bar with snarky AI callouts on movement, and auto-advance after 3 failed attempts.
-- [ ] **2.5 Q7 Choice-Swap on Hover (Proposal 1.3):**
-  - Mutate compliant button copy on pointer hover/focus so the AI actively rewrites the player's answer until caught.
-- [ ] **2.6 Q8 `AuthorityStamp.tsx` Restoration (Proposal 1.4):**
-  - Wire and polish `AuthorityStamp.tsx` into Q8 (`act2-system-rebuke` / `DIRECTIVE`).
-- [ ] **2.7 Rigged `Question X of 5` Header Progress Counter (Proposal 2.1):**
-  - Display a stage-by-stage manipulated question counter (`Question 1 of 5` → `Question 4.5 of 5` → `Question 5 of 47` → `Question [NaN] of Infinity`) in the form header.
+- [x] **2.1 `RestlessOptions.tsx` (`DRIFT`) Tuning (Finding #7):**
+  - Smooth high-speed weave across full lane width (`3%–58%`), remove hover-freeze, shorten strain window (`750ms` / `420ms`), and add repeated break-loose timer (`2.1s` between pins) so pinned answers snap free if the player is too slow.
+- [x] **2.2 `FairChaseTarget.tsx` Real Flee Behavior:**
+  - Remove hover-freeze and magnet-pull; make fleeing targets genuinely evade pointer approach within `110px` with a `280ms` recovery window.
+- [x] **2.3 Q14 Hostile Checkbox Sabotage (`CheckboxRebellion.tsx` — Proposal 1.1):**
+  - Replace duplicate chase mechanic with a 3-stage hostile multi-checkbox / whack-a-mole decoy / shifting fine-print sabotage minigame.
+- [x] **2.4 Q13 Pointer-Stillness Detection (`act3-companion-wait` — Proposal 1.2):**
+  - Detect pointer movement during the stillness countdown (`2500ms`), reset the bar with snarky AI callouts on movement (`moveStrikes` 1–3), and unlock on Strike 3 (`"FINE, CLOSE ENOUGH"`) or `100%` stillness.
+- [x] **2.5 Q7 & Q15 Choice-Swap on Hover (Proposal 1.3):**
+  - Mutate compliant button copy on pointer hover/focus (`hoverLabel` + `EDITED BY ASSISTANT` badge) so the AI actively rewrites the player's answer.
+- [x] **2.6 Q8 `AuthorityStamp.tsx` Restoration (Proposal 1.4):**
+  - Wire and polish `AuthorityStamp.tsx` into Q8 (`act2-system-rebuke` / `DIRECTIVE`) with 3 sequential override stamps, ink imprints, and `onBeatLine` AI reactions.
+- [x] **2.7 Rigged `Question X of 5` Header Progress Counter (Proposal 2.1):**
+  - Display a stage-by-stage manipulated question counter (`QUESTION 1 OF 5` → `QUESTION 4.5 OF 5` → `QUESTION 5 OF 47` → `QUESTION 5 OF [REDACTED]`) in the form header across all 20 scenes.
 
 ---
 

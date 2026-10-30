@@ -141,6 +141,10 @@ export interface GameState {
 export interface ChoiceDef {
   id: string;
   label: string;
+  /** Optional sabotage label swapped in when the player hovers or focuses this choice. */
+  hoverLabel?: string;
+  /** Optional badge displayed alongside hoverLabel (defaults to "EDITED BY ASSISTANT"). */
+  hoverBadge?: string;
   /** Appears after a short delay */
   late?: boolean;
   unauthorized?: boolean;
@@ -169,6 +173,8 @@ export interface SceneDef {
   kind: SceneKind;
   environment: EnvironmentPreset;
   formId?: string;
+  /** Rigged progress header counter ("QUESTION 1 OF 5" -> "QUESTION 4.999 OF 5" -> "QUESTION 5 OF 47"). */
+  progressLabel?: string;
   title?: string;
   prompt?: string;
   aiLine?: string;

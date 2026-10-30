@@ -45,10 +45,11 @@ assert(/act1-restless/.test(act1) && /next: "act1-restless"/.test(act1), "restle
 assert(!/Act II|WALK INTO ACT/.test(act1), "act1 has no visible Act bridge copy");
 
 const act2 = read("src/game/scenes/act2.ts");
-assert(!/act2-stamp|authority-stamp/.test(act2), "authority-stamp chase dropped from act2");
+assert(/setpiece:\s*"authority-stamp"/.test(act2), "authority-stamp restored on act2-system-rebuke (Proposal 1.4)");
 assert(!/ENTER ACT III|act2-bridge/.test(act2), "act2 bridge removed");
 assert(/The facility system/.test(act2), "trust choice names facility system");
 assert(/We're a team|Not sure yet|This is your problem/.test(act2), "side-channel stances clarified");
+assert(/hoverLabel:/.test(act2) && /hoverLabel:/.test(act3), "hoverLabel sabotage wired on Q7 and Q15 (Proposal 1.3)");
 
 const endings = read("src/game/endings.ts");
 assert(/LEAVE FORM UNFINISHED/.test(endings), "climax refuse label clear");
@@ -79,10 +80,15 @@ const escaping = read("src/components/game/scenes/EscapingButton.tsx");
 assert(escaping.includes("hitPad={26}"), "EscapingButton hitPad 26");
 
 const checkbox = read("src/components/game/scenes/CheckboxRebellion.tsx");
-assert(checkbox.includes("hitPad={8}"), "CheckboxRebellion hitPad 8 (keeps chrome inside arena)");
+assert(
+  /data-checkbox-rebellion="hostile-sabotage"/.test(checkbox) &&
+    /I authorize HelperBot to add 500 bonus questions/.test(checkbox) &&
+    /data-consent-fine-print/.test(checkbox),
+  "CheckboxRebellion uses 3-stage hostile consent checkbox sabotage (Proposal 1.1)",
+);
 assert(
   /data-consent-inset="12"|edgeInsetPx=\{12\}/.test(checkbox),
-  "Consent chase keeps ≥12px edge inset",
+  "Consent playfield keeps ≥12px edge inset marker",
 );
 
 const popup = read("src/components/game/scenes/PopupWar.tsx");
@@ -430,7 +436,13 @@ assert(
 );
 assert(!/lawyer-ups/.test(act3), "checkbox drops lawyer-ups machine-voice");
 assert(/data-title-poke-bubble/.test(title), "title poke lines use readable bubble");
-assert(/X_MAX = 26/.test(restless), "Drift X_MAX leaves room at 390px");
+assert(
+  /X_MAX = 58/.test(restless) &&
+    /STRAIN_AFTER_PIN_MS = 750/.test(restless) &&
+    /STRAIN_WARN_MS = 420/.test(restless) &&
+    /BREAK_LOOSE_WINDOW_MS = 2100/.test(restless),
+  "Drift upgraded with full-lane X_MAX=58, 750ms/420ms strain, and 2100ms repeated break-loose (Finding #7)",
+);
 
 // Punch list rev11 locks
 assert(
@@ -554,18 +566,16 @@ assert(!/environment\.toUpperCase\(\)/.test(ending), "ending kickers are not raw
 assert(!/FORM ≠ WORLD|FORM != WORLD/.test(ending), "hall backdrop drops readable theme words");
 assert(/data-hall-shape/.test(ending), "hall backdrop uses wordless shapes");
 assert(
-  /kind:\s*"choice"/.test(act2) &&
-    /id:\s*"act2-system-rebuke"[\s\S]*?kind:\s*"choice"/.test(act2) &&
-    /Let it talk anyway/.test(act2) &&
-    /Acknowledge/.test(act2),
-  "SYSTEM MESSAGE filler is a real choice (Acknowledge / Let it talk anyway)",
+  /kind:\s*"setpiece"/.test(act2) &&
+    /id:\s*"act2-system-rebuke"[\s\S]*?setpiece:\s*"authority-stamp"/.test(act2),
+  "act2-system-rebuke uses restored authority-stamp setpiece (Proposal 1.4)",
 );
 assert(!/systemTitle:\s*"SYSTEM MESSAGE"/.test(act2), "SYSTEM MESSAGE modal title removed from act2");
 assert(/data-bubble-tail|title-poke-bubble/.test(title + globals), "title poke bubble has a tail");
 assert(!/Mug misfiled/.test(title), "title removes escaped mug prop clutter (Finding #1)");
 assert(!/poke soft/.test(title), "title drops poke soft helper caption");
 assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-\[5\.75rem\]/.test(title), "title orb clears footer on mobile");
-assert(/Catch each answer to pin it\./.test(restless), "Drift hint shortened for mobile");
+assert(/Catch each moving answer to pin it/.test(restless), "Drift hint explains moving pin pressure");
 assert(/--title-sound-clearance:\s*12px/.test(globals), "SOUND ON clears DO NOT PRESS by ≥12px on mobile");
 assert(/Still here\. Still on your side\./.test(title), "refuse poke drops Ally channel readout");
 assert(/TALKED TO THE ORB|KEPT TALKING TO IT|NOTHING FILED/.test(reportSrc), "report stamps use plain human tags");
@@ -731,6 +741,18 @@ assert(
 assert(
   /data-title-orb-in-frame|max-sm:right-8/.test(title),
   "Title orb stays inside the mobile frame",
+);
+assert(
+  /CompanionWaitStillness|STILLNESS_REQUIRED_MS = 2500|FINE, CLOSE ENOUGH/.test(viewPanels),
+  "Q13 CompanionWaitStillness detects pointer movement with 3-strike unlock (Proposal 1.2)",
+);
+assert(
+  /DEFAULT_PROGRESS_LABELS|data-progress-header/.test(viewPanels) &&
+    /QUESTION 1 OF 5/.test(act1) &&
+    /QUESTION 4\.75 OF 5/.test(act2) &&
+    /QUESTION 5 OF 47/.test(act3) &&
+    /QUESTION 5 OF \[REDACTED\]/.test(act4),
+  "Rigged Question X of 5 progress header wired across all acts (Proposal 2.1)",
 );
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");

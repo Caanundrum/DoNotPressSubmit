@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 const LAYERS = [
   { id: "glass", label: "Decorative glass", hint: "Looks expensive. Doesn't help." },
@@ -12,6 +13,7 @@ const LAYERS = [
 
 /** Peel layers → expose SUBMIT → SHUT DOWN ASSISTANT diagram, then advance. */
 export function PeelReveal({ onComplete }: { onComplete: () => void }) {
+  const timers = useTimerRegistry();
   const [peeled, setPeeled] = useState(0);
 
   const peel = () => {
@@ -19,7 +21,7 @@ export function PeelReveal({ onComplete }: { onComplete: () => void }) {
     const next = peeled + 1;
     setPeeled(next);
     if (next >= LAYERS.length) {
-      setTimeout(onComplete, 1100);
+      timers.schedule("complete", onComplete, 1100);
     }
   };
 

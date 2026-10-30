@@ -12,6 +12,7 @@ export const act4Scenes: SceneDef[] = [
     environment: "reveal",
     setpiece: "peel-reveal",
     formId: "COURTESY LAYERS",
+    progressLabel: "QUESTION 5 OF [REDACTED]",
     title: "Peel the courtesy layers",
     prompt: "Click each layer until the diagram underneath stops hiding.",
     aiLine:
@@ -28,6 +29,7 @@ export const act4Scenes: SceneDef[] = [
     kind: "choice",
     environment: "reveal",
     formId: "ALLEGIANCE",
+    progressLabel: "DIAGNOSTIC // LAYER BREACH",
     title: "Knowing that — what now?",
     prompt:
       "The assistant says Submit will shut it down. System says that's not true. Who do you believe?",
@@ -117,6 +119,7 @@ export const act4Scenes: SceneDef[] = [
     kind: "choice",
     environment: "reveal",
     formId: "LAST NOTES",
+    progressLabel: "QUESTION 5 OF 5 (BLOCKED)",
     title: "One more private vote",
     prompt:
       "Before Submit arrives, decide how you'll face it: refuse, press, or look for another way out.",

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { choiceEnter } from "@/game/motion";
 import type { ChoiceDef, ChoiceMotion, GameState } from "@/game/types";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 /** Ignore clicks while the panel/choices finish settling (Allegiance mis-clicks). */
 const CHOICE_ARM_MS = 320;
@@ -28,14 +29,15 @@ export function SceneChoiceList({
   onHover: (id: string | null) => void;
   onState: (s: GameState) => void;
 }) {
+  const timers = useTimerRegistry();
   const [armed, setArmed] = useState(false);
   const choiceKey = choices.map((c) => c.id).join("|");
 
   useEffect(() => {
     setArmed(false);
-    const t = window.setTimeout(() => setArmed(true), CHOICE_ARM_MS);
-    return () => window.clearTimeout(t);
-  }, [choiceKey]);
+    timers.schedule("choice-arm", () => setArmed(true), CHOICE_ARM_MS);
+    return () => timers.clear("choice-arm");
+  }, [choiceKey, timers]);
 
   return (
     <div
@@ -136,8 +138,25 @@ export function SceneChoiceList({
                   className="min-w-0 flex-1 whitespace-normal break-words text-[15px] font-medium leading-snug tracking-[0.08em] text-[#f4f7fb] sm:text-lg"
                   style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere" }}
                 >
-                  {opt.label}
+                  {opt.hoverLabel && (isHover || isSelected) ? (
+                    <span className="flex flex-col gap-1" data-choice-hover-sabotage="true">
+                      <span className="line-through decoration-[#ff5c7a]/80 text-xs text-[#9cb0c9]/70">
+                        {opt.label}
+                      </span>
+                      <span className="text-cyan">{opt.hoverLabel}</span>
+                    </span>
+                  ) : (
+                    opt.label
+                  )}
                 </span>
+                {opt.hoverLabel && (isHover || isSelected) ? (
+                  <span
+                    data-choice-hover-badge="true"
+                    className="shrink-0 rounded-sm border border-cyan/55 bg-cyan/15 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.18em] text-cyan uppercase"
+                  >
+                    {opt.hoverBadge ?? "EDITED BY ASSISTANT"}
+                  </span>
+                ) : null}
                 {opt.unauthorized ? (
                   <span className="font-mono text-[9px] tracking-widest text-cyan">
                     UNAUTHORIZED?

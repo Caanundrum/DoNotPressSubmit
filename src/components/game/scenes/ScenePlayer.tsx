@@ -157,17 +157,35 @@ function ScenePlayerInner({
 
   useEffect(() => {
     if (scene?.kind !== "companion") return;
-    timers.schedule(
-      "companion-ready",
-      () => setCompanionReady(true),
-      scene.companion === "wait" ? 2200 : 1400,
-    );
+    // Q13 ("wait") is unlocked by the real Pointer-Stillness Detector in ScenePlayerViewPanels.
+    if (scene.companion !== "wait") {
+      timers.schedule("companion-ready", () => setCompanionReady(true), 1400);
+    }
     timers.schedule("companion-pulse", () => setWatchedPulse(true), 650);
     return () => {
       timers.clear("companion-ready");
       timers.clear("companion-pulse");
     };
   }, [scene, timers]);
+
+  const onBeatLine = useCallback(
+    (line: string, mood?: OrbMood) => {
+      setLineSceneId(sceneId);
+      setPokeNotice(null);
+      timers.clear("poke-notice");
+      setReaction(line);
+      if (mood) {
+        const next = { ...stateRef.current, aiMood: mood };
+        stateRef.current = next;
+        onState(next);
+      }
+    },
+    [onState, sceneId, timers],
+  );
+
+  const onCompanionReady = useCallback(() => {
+    setCompanionReady(true);
+  }, []);
 
   const aiLine = useMemo(() => {
     if (!scene) return "";
@@ -607,6 +625,8 @@ function ScenePlayerInner({
       onSetpieceDone={onSetpieceDone}
       onPopupCleared={onPopupCleared}
       onEscapingHit={onEscapingHit}
+      onBeatLine={onBeatLine}
+      onCompanionReady={onCompanionReady}
       onClimax={onClimax}
       finishSystem={finishSystem}
     />

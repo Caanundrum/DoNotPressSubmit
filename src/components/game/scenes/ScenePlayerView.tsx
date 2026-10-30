@@ -12,6 +12,7 @@ import type {
   ChoiceMotion,
   GameState,
   OrbAnchor,
+  OrbMood,
   PanelMotion,
   SceneDef,
 } from "@/game/types";
@@ -80,6 +81,8 @@ export type ScenePlayerViewProps = {
   onSetpieceDone: () => void;
   onPopupCleared?: () => void;
   onEscapingHit?: (hits: number) => void;
+  onBeatLine?: (line: string, mood?: OrbMood) => void;
+  onCompanionReady?: () => void;
   onClimax: (action: "submit" | "refuse" | "escape" | "disable" | "secret") => void;
   finishSystem: () => void;
 };

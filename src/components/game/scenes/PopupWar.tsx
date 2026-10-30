@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 type Popup = { id: number; x: number; y: number; label: string; z: number };
 
@@ -39,6 +40,7 @@ export function PopupWar({
   /** Fires when the board empties — swap the stale "Diplomacy failed…" bubble. */
   onCleared?: () => void;
 }) {
+  const timers = useTimerRegistry();
   const [popups, setPopups] = useState<Popup[]>(() => [
     { id: 1, x: SLOTS[0]!.x, y: SLOTS[0]!.y, label: LABELS[0]!, z: 1 },
     { id: 2, x: SLOTS[1]!.x, y: SLOTS[1]!.y, label: LABELS[1]!, z: 2 },
@@ -86,7 +88,7 @@ export function PopupWar({
       // Final click clears leftovers so Closed N/5 matches an empty board.
       if (advanced >= needed) {
         onCleared?.();
-        setTimeout(onComplete, 700);
+        timers.schedule("complete", onComplete, 700);
         return [];
       }
       // One spawn per dismiss — no mid-cascade double that leaves 3 up at 4/5.

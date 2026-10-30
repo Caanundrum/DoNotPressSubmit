@@ -10,6 +10,7 @@ export const act5Scenes: SceneDef[] = [
     kind: "choice",
     environment: "climax",
     formId: "LAST WORDS",
+    progressLabel: "FINAL STEP // DO NOT PRESS",
     title: "Last words before the button",
     prompt: "One statement for the record.",
     aiLine:
@@ -92,6 +93,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "climax",
     setpiece: "submit-button",
     formId: "DECISION",
+    progressLabel: "QUESTION 5 OF 5 // SUBMIT READY",
     title: "Submit when ready",
     // Plea bubble must stay clear of the Decision panel (rev11 P0) — never bury it.
     buryAssistant: false,

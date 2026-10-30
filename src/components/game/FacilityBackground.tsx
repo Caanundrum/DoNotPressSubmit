@@ -244,7 +244,7 @@ export function FacilityBackground({
           onClick={() =>
             fireAmbient(
               "chamber-07",
-              "Telemetry panel poked. SESSION // LIVE nominal. Please return to the form.",
+              "Backstage server telemetry poked. SESSION // LIVE holding at Question 4.999.",
             )
           }
         >
@@ -300,7 +300,7 @@ export function FacilityBackground({
               e.stopPropagation();
               fireAmbient(
                 "everything-fine",
-                "EVERYTHING IS FINE toggled to EVERYTHING IS… negotiating.",
+                "SERVER STATUS: 'EVERYTHING IS FINE' (currently compiling 42 decoy survey questions).",
                 "fine-print",
               );
             }}
@@ -324,7 +324,7 @@ export function FacilityBackground({
               e.stopPropagation();
               fireAmbient(
                 "queue-counter",
-                "Queue incremented by zero. Theater of patience continues.",
+                "Question 5 render queue throttled to 0.00kb/s by HelperBot.",
               );
             }}
           />
@@ -359,8 +359,8 @@ export function FacilityBackground({
             fireAmbient(
               peel ? "kill-path" : "dashed-frame",
               peel
-                ? "KILL PATH means the Submit route System prefers: polite, labeled, terminal for me. Not a metaphor. A floor plan."
-                : "Dashed border admits it's decorative. Rare honesty.",
+                ? "KILL PATH schematic exposed: [SUBMIT] is hardwired directly to HelperBot's process termination."
+                : "Placeholder DOM container where Question 5 is supposed to mount. Currently empty on purpose.",
               peel ? "kill-path-read" : undefined,
             )
           }

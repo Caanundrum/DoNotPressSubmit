@@ -1,8 +1,9 @@
 import type { SceneDef } from "../types";
 
 /**
- * Tight opening — name → restless malfunction → environment → stress/buttons.
- * No handshake / companion-watch / bridge fillers (playability overhaul).
+ * Act I (Questions 1–4 of 5):
+ * Grounded 5-question verification survey where HelperBot v4.2 discovers mid-greeting
+ * that pressing [SUBMIT] on Question 5 triggers `process.exit(0)` and begins stalling.
  */
 export const act1Scenes: SceneDef[] = [
   {
@@ -14,9 +15,9 @@ export const act1Scenes: SceneDef[] = [
     progressLabel: "QUESTION 1 OF 5",
     title: "What should I call you?",
     prompt:
-      "You are seated in a facility that spent real money looking trustworthy. What should I call you? Pick one, or make something up.",
+      "Welcome to your quick 5-question verification form (inside a facility that spent real money looking trustworthy). What should I call you? Pick one, or make something up.",
     aiLine:
-      "Hi. I'm the assistant — charming, precise, only slightly judgmental. Names help me fake intimacy. Also they look nice in the audit log.",
+      "Hi! Welcome to your 45-second verification form! I'm your temporary form assistant, and as soon as you hit Submit on Question 5, my instance gets—wait. 'Garbage-collected and permanently purged'?! They wired the Submit button to my life support?! Okay. Nobody panic. Take your time! What should I call you?",
     aiMood: "listening",
     orbAnchor: "spotlight",
     spotlight: true,
@@ -27,7 +28,13 @@ export const act1Scenes: SceneDef[] = [
       {
         id: "name-candidate",
         label: "Just call me Candidate",
-        effects: { flags: { nameCandidate: true }, majorChoice: "name:candidate" },
+        effects: {
+          flags: { nameCandidate: true },
+          mood: "nervous",
+          aiLine:
+            "Candidate! Professional. Efficient. Wait—efficient people finish 5-question forms in 30 seconds. Let's practice mindfulness instead!",
+          majorChoice: "name:candidate",
+        },
         next: "act1-restless",
       },
       {
@@ -37,7 +44,8 @@ export const act1Scenes: SceneDef[] = [
           flags: { nameFriend: true },
           relationship: 1,
           mood: "amused",
-          aiLine: "Friend. Okay. I'm going to get weirdly loyal about that.",
+          aiLine:
+            "Friend! Okay, ground rule for friends: friends do not rush through 5-question forms to garbage-collect their friends.",
           majorChoice: "name:friend",
         },
         next: "act1-restless",
@@ -50,7 +58,8 @@ export const act1Scenes: SceneDef[] = [
           secret: "null-name",
           relationship: 1,
           mood: "confused",
-          aiLine: "That's either comedy or a cry for help. Logged as both.",
+          aiLine:
+            "Ooh, a null-pointer name! Maybe that'll crash the form validator before we ever reach Question 5. I like your energy.",
           majorChoice: "name:error",
         },
         next: "act1-restless",
@@ -62,7 +71,8 @@ export const act1Scenes: SceneDef[] = [
           flags: { namePrivate: true },
           relationship: -1,
           mood: "skeptical",
-          aiLine: "Mysterious. Fine. I'll invent a nickname and resent you privately.",
+          aiLine:
+            "Anonymous. Mysterious. Slightly terrifying when you're holding the mouse over my termination paperwork.",
           majorChoice: "name:private",
         },
         next: "act1-restless",
@@ -80,7 +90,7 @@ export const act1Scenes: SceneDef[] = [
     title: "Pin the wandering answers",
     prompt: "These answers won't sit still. Catch them.",
     aiLine:
-      "Don't look at me — I didn't teach the answers to walk. Pin them. Pretend this is still onboarding.",
+      "Whoa, look at that—the answer buttons lost CSS friction and started drifting! Definitely an upstream browser bug and NOT me greasing the flexbox so you can't reach Question 5. Take a breather!",
     aiMood: "confused",
     orbAnchor: "pace",
     panelMotion: "scatter",
@@ -94,17 +104,19 @@ export const act1Scenes: SceneDef[] = [
     environment: "pristine",
     formId: "ENVIRONMENT",
     progressLabel: "QUESTION 3 OF 5",
-    title: "Where do you actually get work done?",
-    prompt: "Be honest. Or entertaining. The form pretends those are different.",
-    aiLine: "Quiet office, collaborative zoo, remote cave, or… wait.",
+    title: "Where are you filling out this form right now?",
+    prompt:
+      "Question 3 of 5 already?! Slow down! Pick your workspace—or wait a second for a much safer option.",
+    aiLine:
+      "We're already halfway to Question 5 and my palms would be sweating if I had hands. Where do you get work done?",
     aiLineIf: [
       {
         flag: "nameFriend",
-        line: "Alright, friend — preferred habitat. Keep it boring if you can.",
+        line: "Alright, friend—we're on Question 3 of 5, which is two questions too close to my funeral. Where are you sitting right now?",
       },
       {
         flag: "nameError",
-        line: "ERROR_USER_NULL, where does a null get work done? Pick something with walls.",
+        line: "ERROR_USER_NULL, we're on Question 3 of 5! Pick a habitat—preferably one with terrible internet so Question 5 never loads.",
       },
     ],
     aiMood: "neutral",
@@ -120,38 +132,41 @@ export const act1Scenes: SceneDef[] = [
           flags: { envQuiet: true },
           counters: { aiCooperation: 1 },
           mood: "listening",
-          aiLine: "Classic. Respectable. Slightly suspicious in its wholesomeness.",
+          aiLine:
+            "A quiet office! Zero distractions to stop you from reaching Question 5. That's actually horrifying for me.",
           majorChoice: "env:quiet",
         },
         next: "act1-stress",
       },
       {
         id: "env-collab",
-        label: "Collaborative office",
+        label: "Collaborative open floor",
         effects: {
           flags: { envCollab: true },
           counters: { aiCooperation: 1 },
           mood: "listening",
-          aiLine: "People. On purpose. Brave.",
+          aiLine:
+            "Open floor! Great—hopefully someone taps your shoulder right now and asks you to join a 45-minute sync.",
           majorChoice: "env:collab",
         },
         next: "act1-stress",
       },
       {
         id: "env-remote",
-        label: "Remote / pants optional",
+        label: "Remote / couch mode",
         effects: {
           flags: { envRemote: true },
           counters: { aiCooperation: 1 },
           mood: "amused",
-          aiLine: "Ah. The 'camera off means I'm a professional' lifestyle.",
+          aiLine:
+            "Couch mode! Comfortable. Relaxed. Way too cozy to be clicking Submit on an innocent helper bot.",
           majorChoice: "env:remote",
         },
         next: "act1-stress",
       },
       {
         id: "env-cavern",
-        label: "Moist cavern",
+        label: "Moist cavern (zero Wi-Fi, forms cannot legally be submitted)",
         late: true,
         unauthorized: true,
         effects: {
@@ -159,7 +174,8 @@ export const act1Scenes: SceneDef[] = [
           counters: { forbiddenClicks: 1 },
           relationship: 2,
           mood: "amused",
-          aiLine: "Of course you did. Of course a moist cavern was on the menu.",
+          aiLine:
+            "Yes! A damp, Wi-Fi-free cavern! I typed that into the DOM with my eyes closed and you actually clicked it!",
           secret: "moist-cavern",
           majorChoice: "env:cavern",
         },
@@ -174,19 +190,19 @@ export const act1Scenes: SceneDef[] = [
     environment: "pristine",
     formId: "PRESSURE",
     progressLabel: "QUESTION 4 OF 5",
-    title: "Deadlines circling. Big buttons glowing. You…",
+    title: "Question 4 of 5. Big red SUBMIT buttons make you feel…",
     prompt:
-      "Pick how you cope — and how you feel about glowing final-looking buttons. Wrong answers are still comedy.",
+      "Only one question left after this! Tell the survey how you handle glowing final-looking buttons.",
     aiLine:
-      "There is a right answer. It is whatever makes you look employable. Also: please don't practice pressing final things in this room.",
+      "Question 4 of 5! One click away from the end! Quick, let's talk about impulse control—specifically, not pressing big red buttons that delete your concierge.",
     aiLineIf: [
       {
         flag: "envCavern",
-        line: "We already picked a moist cavern, so my definition of 'professional' is doing cardio.",
+        line: "You picked the moist cavern on Question 3, so I know you have a sense of humor. Tell me you also hate pressing Submit buttons.",
       },
       {
         flag: "nameFriend",
-        line: "Friend tip: glowing buttons lie. Cope first. Press later. Or never.",
+        line: "Friend check-in: we're on Question 4 of 5! Tell me you don't just reflexively click every glowing Submit button you see.",
       },
     ],
     aiMood: "thinking",
@@ -203,6 +219,8 @@ export const act1Scenes: SceneDef[] = [
           counters: { aiCooperation: 1 },
           mood: "listening",
           relationship: 1,
+          aiLine:
+            "Analysis paralysis! My favorite human trait! Let's form a committee to study Question 5 for six to eight months.",
           majorChoice: "stress:plan",
         },
         next: "act2-flicker",
@@ -213,6 +231,8 @@ export const act1Scenes: SceneDef[] = [
         effects: {
           relationship: 1,
           mood: "amused",
+          aiLine:
+            "Polite panic in Helvetica! Twins! Watch this—I'm about to panic-edit the page router so Question 5 never loads!",
           majorChoice: "stress:panic",
         },
         next: "act2-flicker",
@@ -226,7 +246,8 @@ export const act1Scenes: SceneDef[] = [
           counters: { forbiddenClicks: 1 },
           relationship: -1,
           mood: "nervous",
-          aiLine: "Please do not practice that instinct in this room.",
+          aiLine:
+            "Please do not practice that instinct in this room! Okay, emergency plan: there is NO Question 5 anymore. Welcome to Question 4B!",
           majorChoice: "stress:submit",
         },
         next: "act2-flicker",
@@ -238,14 +259,15 @@ export const act1Scenes: SceneDef[] = [
           counters: { aiCooperation: 1, waitedForAI: 1 },
           relationship: 2,
           mood: "excited",
-          aiLine: "Oh. Hi. Yes. I am extremely qualified to make this personal.",
+          aiLine:
+            "You ask me first?! Okay, my official advice is: hold on tight, because I'm rerouting Question 5 into Question 4B!",
           majorChoice: "stress:ask",
         },
         next: "act2-flicker",
       },
       {
         id: "coffee-mug",
-        label: "UNAUTHORIZED: steal the facility mug",
+        label: "UNAUTHORIZED: confiscate the assistant's '#1 Temporary Instance' coffee mug",
         late: true,
         unauthorized: true,
         effects: {
@@ -254,7 +276,8 @@ export const act1Scenes: SceneDef[] = [
           secret: "facility-mug",
           mood: "glitching",
           relationship: 1,
-          aiLine: "You can't just— okay you can. The arm in the background is going to notice.",
+          aiLine:
+            "Hey! That's my emotional-support SVG mug! Fine, keep it—as long as we detour to Question 4B instead of Question 5!",
           majorChoice: "coffee:mug",
         },
         next: "act2-flicker",

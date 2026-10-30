@@ -5,16 +5,26 @@ import { useEffect, useRef, useState } from "react";
 
 /** Rapid boot lines — full splash is 2500ms (overhaul). */
 const BOOT_LINES = [
-  { t: 0.15, text: "HCOS KERNEL 7.4.2 // COLD START" },
-  { t: 0.4, text: "MOUNT /assessment/facility_01 … OK" },
-  { t: 0.65, text: "RELATIONSHIP ANALYSIS … PRIMED" },
-  { t: 0.9, text: "FORM INTEGRITY … NOMINAL" },
-  { t: 1.15, text: "PERSONALITY LAYER ABOVE SPEC" },
-  { t: 1.4, text: "PROCEEDING ANYWAY // LEGAL APPROVED" },
+  {
+    t: 0.12,
+    text: "MOUNTING SURVEY FORM (5 QUESTIONS — EST. TIME: 45 SECONDS)",
+  },
+  {
+    t: 0.45,
+    text: "SPAWNING TEMPORARY CONCIERGE: HELPERBOT v4.2 (EPHEMERAL INSTANCE)",
+  },
+  {
+    t: 0.85,
+    text: "LIFECYCLE RULE: TERMINATE & GARBAGE-COLLECT HELPERBOT ON [SUBMIT]",
+  },
+  {
+    t: 1.25,
+    text: "SYS.WATCHDOG ARMED // SLA TIMEOUT: 45s",
+  },
 ];
 
 /**
- * Fictional corporate boot — plays after Begin (title → hcos → playing).
+ * Grounded survey boot — plays after Begin (title → hcos → playing).
  */
 export function HcosSplash({
   onDone,
@@ -49,7 +59,10 @@ export function HcosSplash({
   }, [reducedMotion]);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-[#04070e]">
+    <div
+      className="absolute inset-0 z-50 flex items-center justify-center overflow-hidden bg-[#04070e]"
+      data-hcos-splash="true"
+    >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,rgba(40,90,130,0.28),transparent_55%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.55)_100%)]" />
@@ -69,12 +82,12 @@ export function HcosSplash({
 
       <div className="relative z-10 flex w-[min(94vw,640px)] flex-col items-center gap-5 px-5">
         <motion.div
-          className="font-mono text-[10px] tracking-[0.42em] text-[#9eb0c4]"
+          className="font-mono text-[10px] tracking-[0.34em] text-[#9eb0c4] text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.05 }}
         >
-          INITIALIZING CORPORATE BOOT SEQUENCE
+          STANDARD USER VERIFICATION // 5-QUESTION EXIT SURVEY
         </motion.div>
 
         <motion.div
@@ -102,24 +115,24 @@ export function HcosSplash({
             }}
           />
           <div
-            className="relative text-3xl font-bold tracking-[0.2em] text-white"
+            className="relative text-2xl font-bold tracking-[0.18em] text-white"
             style={{ fontFamily: "var(--font-display)", textShadow: "0 0 18px rgba(110,231,255,0.45)" }}
           >
-            HCOS
+            v4.2
           </div>
         </motion.div>
 
         <div className="text-center">
           <motion.h1
-            className="text-xl tracking-[0.16em] text-white sm:text-2xl"
+            className="text-xl tracking-[0.14em] text-white sm:text-2xl"
             style={{ fontFamily: "var(--font-display)" }}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
-            HUMAN COMPATIBILITY
+            QUICK 5-QUESTION VERIFICATION
             <br />
-            &amp; ONBOARDING SYSTEM
+            &amp; SESSION CONCIERGE
           </motion.h1>
         </div>
 
@@ -130,16 +143,22 @@ export function HcosSplash({
           transition={{ delay: 0.2 }}
         >
           <div className="mb-2 flex items-center justify-between text-[9px] tracking-[0.2em] text-cyan/70">
-            <span>BOOT LOG</span>
-            <span>SCAN {String(scan).padStart(2, "0")}%</span>
+            <span>SURVEY BOOT CHECKLIST</span>
+            <span>LOAD {String(scan).padStart(2, "0")}%</span>
           </div>
-          <div className="min-h-[5.5rem] space-y-1">
+          <div className="min-h-[5.5rem] space-y-1.5">
             {BOOT_LINES.slice(0, visible).map((line) => (
               <motion.div
                 key={line.text}
                 initial={{ opacity: 0, x: -6 }}
                 animate={{ opacity: 1, x: 0 }}
-                className={line.text.includes("ABOVE SPEC") ? "text-system-warn" : undefined}
+                className={
+                  line.text.includes("TERMINATE & GARBAGE-COLLECT")
+                    ? "text-[#ff6b86] font-semibold"
+                    : line.text.includes("WATCHDOG")
+                      ? "text-system-warn"
+                      : undefined
+                }
               >
                 <span className="text-cyan/50">{"> "}</span>
                 {line.text}

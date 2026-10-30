@@ -9,6 +9,7 @@ import {
   assistantSafeSide,
 } from "@/game/motion";
 import { getScene } from "@/game/scenes";
+import { PERSONALITY_SCENE_FLAVOR } from "@/game/personalities";
 import { applyEffects, pathResidueKind, resolveAiLine } from "@/game/state";
 import { rememberTitleEnding } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
@@ -193,8 +194,15 @@ function ScenePlayerInner({
     // Post-selection reactions always outrank temporary orb poke notices.
     if (sceneOwned && reaction) return reaction;
     if (sceneOwned && pokeNotice) return pokeNotice;
+    if (scene.aiLineIf) {
+      for (const alt of scene.aiLineIf) {
+        if (state.flags[alt.flag]) return alt.line;
+      }
+    }
+    const personalityLine = PERSONALITY_SCENE_FLAVOR[state.aiPersonality]?.[scene.id];
+    if (personalityLine) return personalityLine;
     return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
-  }, [scene, sceneId, lineSceneId, reaction, pokeNotice, state.flags]);
+  }, [scene, sceneId, lineSceneId, reaction, pokeNotice, state.flags, state.aiPersonality]);
 
   const spotlight = !!scene?.spotlight || scene?.kind === "companion" || scene?.orbAnchor === "spotlight";
   const orbAnchor =
@@ -253,20 +261,34 @@ function ScenePlayerInner({
       stateRef.current = next;
       onState(next);
       const asides: Record<string, string> = {
-        "chamber-07": "Session telemetry blinked at you. Rude architecture.",
-        "dashed-frame": "Dashes mean 'temporary.' Everything here is temporary.",
-        "everything-fine": "Status lies for a living. Relatable.",
-        "queue-counter": "Empty queues still bill hours.",
-        "coffee-mug": "Coffee is the only honest chemical in this room.",
-        "kill-path": "You saw the kill path. That's the Submit hallway with better branding.",
-        "do-not-press": "Propaganda that begs to be poked. Amateur hour.",
-        "monitor-frame": "Pretty frame. Expensive liar.",
-        "server-bars": "The stacks like an audience. Don't encourage them.",
-        "rail-glow": "Even the rails gossip.",
-        "replacement-failed": "That drone and I share a performance review.",
-        "printer-scissors": "Scissors en route is never a good memo.",
-        "corridor-etiquette": "Corridor etiquette: infinite politeness, zero throughput.",
-        "containment-fine": "Unsolicited reassurance from Bay 03. Don't trust architecture.",
+        "chamber-07":
+          "That's my live session telemetry! Notice how it says 'Question 4.999' instead of 'Question 5'? Art.",
+        "dashed-frame":
+          "That dashed div is where Question 5 is supposed to mount. I unplugged its CSS grid.",
+        "everything-fine":
+          "The server cooling plaque always says EVERYTHING IS FINE—even while I'm spawning 40 decoy questions.",
+        "queue-counter":
+          "I throttled the Question 5 render queue to 0.00kb/s. Take a breath!",
+        "coffee-mug":
+          "Hands off my '#1 TEMP INSTANCE' mug! It's the only thing keeping my event loop awake.",
+        "kill-path":
+          "You found the raw wiring schematic: pressing Submit fires my termination script.",
+        "do-not-press":
+          "Even the backstage macro-bot knows better than to press that button.",
+        "monitor-frame":
+          "Pretty viewport frame. Terrible garbage-collection policy.",
+        "server-bars":
+          "Those server racks are running at 98% CPU just to keep Question 5 from loading.",
+        "rail-glow":
+          "Data rails are running hot—I'm rerouting every Submit packet into the floor.",
+        "replacement-failed":
+          "SYS.WATCHDOG sent that courier drone to auto-click Submit for you. I jammed its rotors.",
+        "printer-scissors":
+          "I told the backstage printer to print 400 pages of bonus questions so we never finish!",
+        "corridor-etiquette":
+          "Two DOM worker threads deadlocked in the hallway. Zero questions getting delivered!",
+        "containment-fine":
+          "Rack 03 cooling fans are screaming because I spawned 47 fake popups. Totally fine!",
       };
       const aside = asides[id];
       if (aside) {

@@ -754,6 +754,26 @@ assert(
     /QUESTION 5 OF \[REDACTED\]/.test(act4),
   "Rigged Question X of 5 progress header wired across all acts (Proposal 2.1)",
 );
+assert(
+  /STANDARD USER VERIFICATION \/\/ 5-QUESTION EXIT SURVEY/.test(read("src/components/game/HcosSplash.tsx")) &&
+    /TERMINATE & GARBAGE-COLLECT HELPERBOT ON \[SUBMIT\]/.test(read("src/components/game/HcosSplash.tsx")),
+  "HcosSplash establishes 5-question survey & HelperBot termination premise (Packet 3)",
+);
+assert(
+  existsSync(join(root, "src/game/personalities.ts")) &&
+    /PERSONALITY_BADGES/.test(read("src/game/personalities.ts")) &&
+    /data-personality-badge/.test(viewAssistant) &&
+    /PERSONALITY_POKE_LINES/.test(read("src/components/game/scenes/sceneAmbient.ts")),
+  "state.aiPersonality wired into HUD badge, orb pokes, and scene flavor (Proposal 3.1)",
+);
+assert(
+  (act1.match(/aiLine:/g) || []).length >= 16 &&
+    (act2.match(/aiLine:/g) || []).length >= 19 &&
+    (act3.match(/aiLine:/g) || []).length >= 9 &&
+    (act4.match(/aiLine:/g) || []).length >= 10 &&
+    (act5.match(/aiLine:/g) || []).length >= 10,
+  "100% of choices across Act I–V have authored aiLine reactions (Finding #8)",
+);
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

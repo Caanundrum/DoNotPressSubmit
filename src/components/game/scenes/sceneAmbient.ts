@@ -1,5 +1,6 @@
 import type { GameState, OrbMood } from "@/game/types";
 import { POKE_WORLD } from "@/game/aiLifeLocks";
+import { PERSONALITY_POKE_LINES } from "@/game/personalities";
 import { audio } from "@/lib/audio";
 
 /** Explicit ack lines — only after the variety pool is genuinely exhausted. */
@@ -165,10 +166,12 @@ export function applyOrbPoke(
   }
 
   if (!notice) {
+    const personalityLines = PERSONALITY_POKE_LINES[state.aiPersonality] ?? [];
     const actLines = ACT_SPICE[state.act] ?? [];
     const moodLine = MOOD_SPICE[state.aiMood];
     const majorLine = lastMajorHint(state);
     const escalated = [
+      ...personalityLines,
       ...(pokes <= 2 ? POKE_POOL.slice(0, 4) : []),
       ...(pokes >= POKE_WORLD.crack && pokes < POKE_WORLD.stitch ? POKE_POOL.slice(2, 12) : []),
       ...(pokes >= POKE_WORLD.stitch && pokes < POKE_WORLD.ticket ? POKE_POOL.slice(8, 20) : []),

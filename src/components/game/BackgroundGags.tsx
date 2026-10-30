@@ -311,7 +311,7 @@ export function BackgroundGags({
                     e.stopPropagation();
                     audio.play("click", 0.3);
                     showAmbientToast(
-                      "Tiny robot pressed DO NOT PRESS. Facility filed an irony incident.",
+                      "Backstage macro bot tried to test-press DO NOT PRESS. HelperBot unplugged its USB.",
                       2200,
                     );
                     onAmbient?.("do-not-press", "bg-propaganda");

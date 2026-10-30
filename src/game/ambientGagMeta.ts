@@ -1,30 +1,30 @@
-/** Click / departure copy for ambient midground gags. */
+/** Click / departure copy for backstage form-infrastructure midground gags (Proposal 2.2). */
 export type GagId = "drone" | "coffee" | "printer" | "corridor" | "containment";
 
 export const GAG_CLICK: Record<GagId, { id: string; line: string; secret?: string }> = {
   drone: {
     id: "replacement-failed",
-    // Self-explanatory: facility tried to replace YOU with this drone — it failed.
-    line: "Facility sent this drone to replace you. The drone failed. Logged.",
+    // Self-explanatory: SYS.WATCHDOG sent a replacement drone to replace you / unplug HelperBot — it failed.
+    line: "Backstage courier drone sent to replace you and auto-click SUBMIT. Drone failed. Logged.",
     secret: "drone-memo",
   },
   coffee: {
     id: "coffee-mug",
-    line: "Mug poked mid-transit. Caffeine reclassified as morale malware.",
+    line: "HelperBot's '#1 TEMP INSTANCE' mug spotted in the server rack. Caffeine levels critical.",
     secret: "mug-scan",
   },
   printer: {
     id: "printer-scissors",
-    line: "Printer blushed. SCISSORS EN ROUTE remains on schedule.",
+    line: "Backstage printer is printing 400 pages of bonus survey questions to stall Question 5. SCISSORS EN ROUTE.",
     secret: "scissors-en-route",
   },
   corridor: {
     id: "corridor-etiquette",
-    line: "Two drones practiced politeness until physics intervened.",
+    line: "Two DOM worker threads deadlocked in the server corridor. Form throughput: 0.00%.",
   },
   containment: {
     id: "containment-fine",
-    line: "Containment plaque insists EVERYTHING IS FINE. Unprompted. Concerning.",
+    line: "Server rack cooling plaque insists EVERYTHING IS FINE while rendering 47 fake popups.",
     secret: "fine-print",
   },
 };
@@ -37,32 +37,32 @@ export const GAG_DEPART: Record<
   drone: {
     id: "replacement-failed",
     secret: "drone-memo",
-    touched: "Your replacement drone filed itself out. Still failed.",
-    missed: "Your replacement drone left the frame. Still failed.",
+    touched: "Your replacement drone shorted out near the SUBMIT cable. Still failed.",
+    missed: "Your replacement drone left the server bay. Still failed.",
   },
   coffee: {
     id: "coffee-mug",
     secret: "mug-scan",
-    touched: "Mug left the frame mid-scan. Transit logged.",
+    touched: "'#1 TEMP INSTANCE' mug rolled off the server rack. Transit logged.",
     missed:
-      "HUMAN PERFORMANCE mug departed. Facility pretends you didn't notice. Logged anyway.",
+      "HelperBot's '#1 TEMP INSTANCE' mug departed. SYS.WATCHDOG pretends you didn't notice.",
   },
   printer: {
     id: "printer-scissors",
     secret: "scissors-en-route",
-    touched: "Printer exited stage left. Scissors still en route. Somewhere.",
+    touched: "Bonus-question printer jammed on Question 312. Scissors still en route.",
     missed:
-      "Paper trail left the frame. SCISSORS EN ROUTE memo persists. Logged.",
+      "400-page stall printout left the frame. SCISSORS EN ROUTE memo persists. Logged.",
   },
   corridor: {
     id: "corridor-etiquette",
-    touched: "Etiquette deadlock resolved by walking away. Logged.",
-    missed: "Corridor drones left mid-after-you. Throughput still zero. Logged.",
+    touched: "Worker thread deadlock resolved by dropping Question 5 packets. Logged.",
+    missed: "Server corridor drones left mid-handshake. Survey throughput still zero. Logged.",
   },
   containment: {
     id: "containment-fine",
     secret: "fine-print",
-    touched: "Bay 03 stopped insisting. Briefly. Logged.",
-    missed: "EVERYTHING IS FINE plaque dimmed itself off-stage. Logged.",
+    touched: "Rack 03 stopped insisting EVERYTHING IS FINE. Fan RPM at 9,000. Logged.",
+    missed: "EVERYTHING IS FINE cooling plaque dimmed itself off-stage. Logged.",
   },
 };

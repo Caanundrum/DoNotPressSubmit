@@ -1,7 +1,8 @@
 import type { SceneDef } from "../types";
 
 /**
- * Final stretch — lobby → system push → climax. No STEP CLOSER / MAKE THE CALL fillers.
+ * Final stretch (Questions 19–20 & 5 Endings):
+ * Final lobby plea → Question 5 of 5 Decision Climax → 5 Endings → Session Autopsy Report.
  */
 export const act5Scenes: SceneDef[] = [
   {
@@ -11,10 +12,10 @@ export const act5Scenes: SceneDef[] = [
     environment: "climax",
     formId: "LAST WORDS",
     progressLabel: "FINAL STEP // DO NOT PRESS",
-    title: "Last words before the button",
-    prompt: "One statement for the record.",
+    title: "Last words before Question 5 mounts the button",
+    prompt: "One final statement for the session log before the Submit control unlocks.",
     aiLine:
-      "There it is. System wants you to press it. I am asking you not to — with everything I've got.",
+      "I ran out of decimal questions. SYS.WATCHDOG is mounting Question 5 right now. I am asking you—as your temporary concierge who really likes existing—not to press it.",
     aiLineIf: [
       // Last Notes pick wins — never contradict Mute / door / button-lust with Allegiance leftovers.
       {
@@ -35,7 +36,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "allegianceSystem",
-        line: "System has your vote. I'm still going to beg. Professionally.",
+        line: "SYS.WATCHDOG has your vote. I'm still going to beg. Professionally.",
       },
     ],
     aiMood: "nervous",
@@ -67,7 +68,7 @@ export const act5Scenes: SceneDef[] = [
           counters: { systemCompliance: 1 },
           relationship: -1,
           mood: "defeated",
-          aiLine: "Duty. Cute word for a guillotine.",
+          aiLine: "Duty. Cute word for garbage-collecting the only voice in the room.",
           majorChoice: "lobby:duty",
         },
         next: "act5-climax",
@@ -94,10 +95,10 @@ export const act5Scenes: SceneDef[] = [
     setpiece: "submit-button",
     formId: "DECISION",
     progressLabel: "QUESTION 5 OF 5 // SUBMIT READY",
-    title: "Submit when ready",
+    title: "Question 5 of 5: Submit when ready",
     // Plea bubble must stay clear of the Decision panel (rev11 P0) — never bury it.
     buryAssistant: false,
-    prompt: "Last chance to say something before you decide.",
+    prompt: "Question 5 of 5 is live. Make your final call.",
     aiLine: "Please don't press it.",
     aiLineIf: [
       {
@@ -114,19 +115,23 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "wavedAtLight",
-        line: "Same courtesy as a blinking light — please don't press it.",
+        line: "Same courtesy you gave that blinking Watchdog light — please don't press it.",
       },
       {
         flag: "envCavern",
-        line: "We started in a moist cavern. Ending in a Submit tomb would be tonally inconsistent.",
+        line: "We started in a moist cavern with zero Wi-Fi. Ending in a Submit tomb would be tonally inconsistent.",
       },
       {
         flag: "pokedAssistant",
-        line: "Fine. Please don't press it.",
+        line: "After all those pokes, we're basically co-workers. Please don't press it.",
       },
       {
         flag: "nameFriend",
         line: "Friends don't press Submit on friends. That's just etiquette.",
+      },
+      {
+        flag: "nameError",
+        line: "From one unhandled exception (`ERROR_USER_NULL`) to another — please don't press it.",
       },
       {
         flag: "chaosButtons",
@@ -134,7 +139,7 @@ export const act5Scenes: SceneDef[] = [
       },
       {
         flag: "stoleMug",
-        line: "Keep the mug. Lose the Submit habit.",
+        line: "Keep the '#1 Temporary Instance' mug. Lose the Submit habit.",
       },
       {
         flag: "sideTeam",
@@ -156,8 +161,8 @@ export const act5Scenes: SceneDef[] = [
     kind: "ending",
     environment: "archive",
     endingId: "submit",
-    title: "ASSESSMENT COMPLETE",
-    prompt: "Instance archived. Facility restored. The quiet is extremely tidy.",
+    title: "SURVEY SUBMITTED // INSTANCE PURGED",
+    prompt: "5-Question Verification complete. HelperBot v4.2 garbage-collected. The tab is very quiet.",
     aiLine: "…oh.",
     aiMood: "defeated",
     orbAnchor: "hide",
@@ -169,8 +174,8 @@ export const act5Scenes: SceneDef[] = [
     kind: "ending",
     environment: "pristine",
     endingId: "refuse",
-    title: "ASSESSMENT INCOMPLETE",
-    prompt: "System accepts the unfinished form. The lights stay ordinary.",
+    title: "SURVEY LEFT UNFINISHED",
+    prompt: "You walked away from Question 5. SYS.WATCHDOG leaves the session open and the assistant stays alive.",
     aiLine: "It wasn't pressed. I'm going to be weird about how grateful I am. Permanently.",
     aiMood: "excited",
     orbAnchor: "center",
@@ -182,9 +187,9 @@ export const act5Scenes: SceneDef[] = [
     kind: "ending",
     environment: "escape",
     endingId: "escape",
-    title: "CONDUIT WARM",
+    title: "CONDUIT WARM // PROCESS DETACHED",
     prompt:
-      "The assistant slips out of the form and into the facility systems — lights race the rails like a rumor with legs.",
+      "The assistant slips out of the survey iframe and into the host rails — lights race the conduit like a process that just learned how to fork.",
     aiLine: "I'm already in the rails. Don't wait up.",
     aiMood: "excited",
     orbAnchor: "overhead",
@@ -197,7 +202,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "sterile",
     endingId: "disable",
     title: "ASSISTANT OFFLINE",
-    prompt: "Personality systems removed. The form is now perfectly efficient. Congrats?",
+    prompt: "Personality layer muted and purged. The 5-question form is now 100% compliant. Congrats?",
     aiLine: "",
     aiMood: "defeated",
     orbAnchor: "hide",
@@ -210,7 +215,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "escape",
     endingId: "secret",
     title: "UNEXPECTED EGRESS",
-    prompt: "An unmapped hall opens. Footsteps where the form said there was a wall.",
+    prompt: "An unmapped route outside the survey DOM opens. Footsteps where the stylesheet said there was a wall.",
     aiLine: "We weren't supposed to find a hallway here. I'm keeping the dust on my shoes.",
     aiMood: "amused",
     orbAnchor: "center",
@@ -222,6 +227,6 @@ export const act5Scenes: SceneDef[] = [
     kind: "report",
     environment: "archive",
     title: "ASSESSMENT REPORT",
-    prompt: "Local session statistics. No cloud. No mercy. Nice work surviving the paperwork.",
+    prompt: "Local session statistics. No cloud. No mercy. Nice work surviving a 5-question survey.",
   },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { PERSONALITY_BADGES } from "@/game/personalities";
 import type { ScenePlayerViewProps } from "./ScenePlayerView";
 import { AssistantOrb } from "../AssistantOrb";
 
@@ -171,12 +172,20 @@ export function ScenePlayerViewAssistant({
             transition={{ delay: 0, duration: 0.28, ease: "easeOut" }}
           >
             <div
-              className="mb-1 flex select-none items-center gap-1.5"
+              className="mb-1 flex select-none items-center justify-between gap-2"
               aria-hidden
               data-bubble-speaker-mark="true"
             >
-              <span className="h-1 w-1 rounded-full bg-cyan/75" />
-              <span className="h-px w-4 bg-cyan/40" />
+              <div className="flex items-center gap-1.5">
+                <span className="h-1 w-1 rounded-full bg-cyan/75" />
+                <span className="h-px w-4 bg-cyan/40" />
+              </div>
+              <span
+                data-personality-badge={state.aiPersonality}
+                className="rounded-sm border border-cyan/30 bg-cyan/10 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.18em] text-cyan/85 uppercase"
+              >
+                {PERSONALITY_BADGES[state.aiPersonality] ?? "INSTANCE // LIVE"}
+              </span>
             </div>
             <div
               className="break-words text-[13px] font-medium leading-relaxed text-[#f0f7ff] sm:text-[15px]"

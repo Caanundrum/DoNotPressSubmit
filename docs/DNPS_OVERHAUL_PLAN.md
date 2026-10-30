@@ -52,13 +52,13 @@
 ---
 
 ## Packet 3: Complete 20-Scene Narrative & Comedy Script Overhaul
-- [ ] **3.1 Grounded Premise & 20-Scene Script Overhaul (Finding #8):**
-  - Rewrite `HcosSplash.tsx` and `src/game/scenes/act1.ts`–`act5.ts` around a relatable 5-question verification survey where `HelperBot v4` realizes pressing `SUBMIT` triggers `process.exit(0)` and progressively sabotages the UI to survive.
+- [x] **3.1 Grounded Premise & 20-Scene Script Overhaul (Finding #8):**
+  - Rewrite `HcosSplash.tsx` and `src/game/scenes/act1.ts`–`act5.ts` around a relatable 5-question verification survey where `HelperBot v4.2` realizes pressing `SUBMIT` triggers `process.exit(0)` and progressively sabotages the UI to survive while `SYS.WATCHDOG` flags the session.
   - Ensure 100% of choices across all scenes have sharp `effects.aiLine` reactions.
-- [ ] **3.2 Backstage Server Infrastructure Re-Theme (Proposal 2.2):**
-  - Re-theme `FacilityBackground.tsx` and `BackgroundGags.tsx` copy/toasts as the AI's backstage server room / DOM threads unraveling under sabotage load.
-- [ ] **3.3 Wire `state.aiPersonality` System (Proposal 3.1):**
-  - Activate `neurotic`, `overconfident`, `passiveAggressive`, `corporate`, and `existential` temperament modifiers, HUD badge, and personality-specific voice lines.
+- [x] **3.2 Backstage Server Infrastructure Re-Theme (Proposal 2.2):**
+  - Re-theme `FacilityBackground.tsx`, `BackgroundGags.tsx`, `ambientGagMeta.ts`, and `ScenePlayer.tsx` (`onAmbient`) copy/toasts as the AI's backstage server room / DOM threads unraveling under sabotage load.
+- [x] **3.3 Wire `state.aiPersonality` System (Proposal 3.1):**
+  - Activate `neurotic`, `overconfident`, `passiveAggressive`, `corporate`, and `existential` temperament modifiers (`src/game/personalities.ts`), HUD badge (`data-personality-badge` in `ScenePlayerViewAssistant.tsx`), and personality-specific poke & scene voice lines.
 
 ---
 

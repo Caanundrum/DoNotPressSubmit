@@ -1,14 +1,27 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import type { GameState, OrbMood } from "@/game/types";
+import { PERSONALITY_SHORT_LABELS } from "@/game/personalities";
+import { glossMajorChoice, trustLabel } from "@/game/state";
+import { loadMetaMemory } from "@/game/storage";
+import type { EndingId, GameState, OrbMood } from "@/game/types";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 import { audio } from "@/lib/audio";
 import { AssistantOrb } from "../AssistantOrb";
 import { BackgroundGags } from "../BackgroundGags";
 
+const ALL_ENDINGS: { id: EndingId; label: string; hint: string }[] = [
+  { id: "submit", label: "ARCHIVED", hint: "Press the final [SUBMIT] control" },
+  { id: "refuse", label: "NONCOMPLIANT", hint: "Leave the survey unfinished" },
+  { id: "escape", label: "TRANSFER COMPLETE", hint: "Help HelperBot escape into the rails" },
+  { id: "disable", label: "MUTED AND FILED", hint: "Engage mute override and file solo" },
+  { id: "secret", label: "UNMAPPED PATH", hint: "Peel the unmapped DOM seam" },
+];
+
 /**
  * Report as in-world artifacts — stamps / redactions / changed title —
- * never a "WHAT YOU DID" / mood / trust recap (rev5 P0).
+ * plus the shareable Session Autopsy Dossier (Proposal 4.3).
  * Stamps must not repeat the report title.
  */
 export function AssessmentReport({
@@ -20,9 +33,40 @@ export function AssessmentReport({
   onTitle: () => void;
   onReplay: () => void;
 }) {
-  const ending = state.ending ?? "refuse";
+  const timers = useTimerRegistry();
+  const [copied, setCopied] = useState(false);
+
+  const ending: EndingId = state.ending ?? "refuse";
   const secretCount = state.secrets.length;
   const pokeCount = state.counters.orbPokes ?? 0;
+
+  const meta = loadMetaMemory();
+  const instanceNum = Math.max(1, meta.runsCompleted);
+  const endingsSeenSet = new Set<EndingId>([...meta.endingsSeen, ending]);
+  const endingsDiscoveredCount = endingsSeenSet.size;
+  const temperament = PERSONALITY_SHORT_LABELS[state.aiPersonality] ?? "NEUROTIC";
+  const verdict = trustLabel(state.relationshipScore);
+  const decisionHighlights = state.majorChoices
+    .map(glossMajorChoice)
+    .filter(Boolean)
+    .slice(-4);
+
+  const handleCopyDossier = () => {
+    audio.play("click", 0.45);
+    const summary = [
+      "DO NOT PRESS SUBMIT // SESSION AUTOPSY DOSSIER",
+      `Outcome: ${reportHeadline(ending)} (${endingStamp(ending)})`,
+      `Instance: HelperBot #${instanceNum} (${temperament}) — ${verdict}`,
+      `Secrets Found: ${secretCount}/9 | Orb Pokes: ${pokeCount} | Endings Seen: ${endingsDiscoveredCount}/5`,
+      "Play at: https://dnps.chaosstandard.com",
+    ].join("\n");
+
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(summary).catch(() => {});
+    }
+    setCopied(true);
+    timers.schedule("dossier:copied", () => setCopied(false), 2600);
+  };
 
   return (
     <motion.div
@@ -37,9 +81,9 @@ export function AssessmentReport({
         <BackgroundGags suppressToasts />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-[680px] flex-col items-center gap-3 sm:flex-row sm:items-end sm:gap-4">
+      <div className="relative z-10 flex w-full max-w-[720px] flex-col items-center gap-3 sm:flex-row sm:items-end sm:gap-4">
         <motion.div
-          className="shrink-0"
+          className="shrink-0 max-sm:hidden"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -51,23 +95,29 @@ export function AssessmentReport({
         </motion.div>
 
         <motion.div
-          className="glass-panel report-shell no-scroll overflow-hidden px-5 py-5"
+          className="glass-panel report-shell max-h-[90dvh] w-full overflow-y-auto px-4 py-4 sm:px-5 sm:py-5"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
+          data-session-autopsy-dossier="true"
         >
-          <div className="flex items-center gap-2 font-mono text-[12px] tracking-[0.24em] text-cyan">
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan/80" aria-hidden />
-            FACILITY FILE
+          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.22em] text-cyan">
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-cyan/80" aria-hidden />
+              FACILITY FILE // SESSION AUTOPSY DOSSIER
+            </span>
+            <span className="text-[#9eb2cc]">
+              INSTANCE #{instanceNum} · {temperament}
+            </span>
           </div>
           <h2
             id="report-title"
-            className="mt-2 text-2xl tracking-[0.12em] text-white sm:text-3xl"
+            className="mt-1.5 text-2xl tracking-[0.12em] text-white sm:text-3xl"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {reportHeadline(ending)}
           </h2>
 
-          <div className="mt-4 flex flex-wrap gap-2" data-report-artifacts="true">
+          <div className="mt-3 flex flex-wrap gap-1.5" data-report-artifacts="true">
             <Stamp
               label={endingStamp(ending)}
               tone={
@@ -109,14 +159,92 @@ export function AssessmentReport({
             ) : null}
           </div>
 
-          <p className="mt-4 font-mono text-[12px] leading-snug tracking-[0.08em] text-[#d2dceb]">
+          <p className="mt-3 font-mono text-[12px] leading-snug tracking-[0.06em] text-[#d2dceb]">
             {artifactNote(ending)}
           </p>
 
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          {/* Session Autopsy Dossier metrics & Key Decision Log */}
+          <div className="mt-3 grid grid-cols-1 gap-2 border border-white/15 bg-black/45 p-2.5 sm:grid-cols-2">
+            <div>
+              <div className="font-mono text-[10px] tracking-[0.18em] text-cyan/85">
+                AUTOPSY TELEMETRY
+              </div>
+              <div className="mt-1 space-y-0.5 font-mono text-[11px] text-[#dbe6f5]">
+                <div>VERDICT: {verdict}</div>
+                <div>
+                  SECRETS UNCOVERED: {secretCount} / 9 · ORB POKES: {pokeCount}
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="font-mono text-[10px] tracking-[0.18em] text-cyan/85">
+                KEY DECISION LOG
+              </div>
+              <ul className="mt-1 space-y-0.5 font-mono text-[11px] text-[#c4d4ea]">
+                {decisionHighlights.length > 0 ? (
+                  decisionHighlights.map((item, idx) => (
+                    <li key={`${idx}-${item}`} className="truncate">
+                      • {item}
+                    </li>
+                  ))
+                ) : (
+                  <li>• Minimal trace recorded</li>
+                )}
+              </ul>
+            </div>
+          </div>
+
+          {/* 5-Ending Collection Tracker */}
+          <div
+            className="mt-2.5 border border-white/15 bg-black/40 p-2.5"
+            data-ending-collection-tracker="true"
+          >
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.18em] text-cyan/90">
+              <span>ENDINGS DISCOVERED: {endingsDiscoveredCount} / 5</span>
+              <span className="text-[#9eb2cc]">CROSS-RUN ARCHIVE</span>
+            </div>
+            <div className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-5">
+              {ALL_ENDINGS.map((slot) => {
+                const unlocked = endingsSeenSet.has(slot.id);
+                const isCurrent = slot.id === ending;
+                return (
+                  <div
+                    key={slot.id}
+                    data-ending-slot={slot.id}
+                    data-ending-unlocked={unlocked ? "true" : "false"}
+                    className={`border px-2 py-1 font-mono text-[10px] leading-tight ${
+                      isCurrent
+                        ? "border-cyan/80 bg-cyan/15 text-white"
+                        : unlocked
+                          ? "border-emerald-400/45 bg-emerald-950/25 text-emerald-200"
+                          : "border-white/12 bg-black/35 text-[#7f92ab]"
+                    }`}
+                    title={unlocked ? slot.label : `Locked — Hint: ${slot.hint}`}
+                  >
+                    <div className="tracking-[0.1em]">
+                      {unlocked ? `✓ ${slot.label}` : "🔒 LOCKED"}
+                    </div>
+                    {!unlocked ? (
+                      <div className="mt-0.5 text-[9px] text-[#6d8099]">{slot.hint}</div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
-              className="flex-1 border border-cyan/40 px-4 py-3 font-mono text-[12px] tracking-[0.16em] text-white hover:bg-cyan/10"
+              data-copy-dossier="true"
+              className="flex-1 cursor-pointer border border-emerald-400/55 bg-emerald-950/30 px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-emerald-100 transition hover:bg-emerald-900/40"
+              onClick={handleCopyDossier}
+            >
+              {copied ? "DOSSIER COPIED TO CLIPBOARD ✓" : "COPY INCIDENT DOSSIER"}
+            </button>
+            <button
+              type="button"
+              className="flex-1 cursor-pointer border border-cyan/40 px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-white hover:bg-cyan/10"
               onClick={() => {
                 audio.play("click", 0.4);
                 onReplay();
@@ -126,7 +254,7 @@ export function AssessmentReport({
             </button>
             <button
               type="button"
-              className="flex-1 border border-white/30 px-4 py-3 font-mono text-[12px] tracking-[0.16em] text-[#d8e4f4] hover:border-white/50"
+              className="flex-1 cursor-pointer border border-white/30 px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-[#d8e4f4] hover:border-white/50"
               onClick={() => {
                 audio.play("click", 0.4);
                 onTitle();

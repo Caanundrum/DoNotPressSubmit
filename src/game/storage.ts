@@ -1,11 +1,102 @@
 import { createInitialState } from "./state";
 import type { EndingId, GameState } from "./types";
 import {
+  META_KEY,
   SAVE_KEY,
   TITLE_ALLY_KEY,
   TITLE_MEMORY_KEY,
   TITLE_WAVE_KEY,
 } from "./types";
+
+export type MetaMemory = {
+  runsCompleted: number;
+  lastEnding: EndingId | null;
+  endingsSeen: EndingId[];
+  updatedAt: number;
+};
+
+export function loadMetaMemory(): MetaMemory {
+  if (typeof window === "undefined") {
+    return { runsCompleted: 0, lastEnding: null, endingsSeen: [], updatedAt: 0 };
+  }
+  try {
+    const raw = window.localStorage.getItem(META_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<MetaMemory>;
+      const endingsSeen = Array.isArray(parsed.endingsSeen)
+        ? parsed.endingsSeen.filter(
+            (e): e is EndingId =>
+              e === "submit" ||
+              e === "refuse" ||
+              e === "escape" ||
+              e === "disable" ||
+              e === "secret",
+          )
+        : [];
+      const lastEnding =
+        parsed.lastEnding === "submit" ||
+        parsed.lastEnding === "refuse" ||
+        parsed.lastEnding === "escape" ||
+        parsed.lastEnding === "disable" ||
+        parsed.lastEnding === "secret"
+          ? parsed.lastEnding
+          : (endingsSeen[endingsSeen.length - 1] ?? null);
+      const runsCompleted =
+        typeof parsed.runsCompleted === "number" && parsed.runsCompleted >= 0
+          ? parsed.runsCompleted
+          : endingsSeen.length;
+      return {
+        runsCompleted,
+        lastEnding,
+        endingsSeen,
+        updatedAt: parsed.updatedAt ?? Date.now(),
+      };
+    }
+    // Migrate from legacy TITLE_MEMORY_KEY if present
+    const rawTitle = window.localStorage.getItem(TITLE_MEMORY_KEY);
+    if (rawTitle) {
+      const parsedTitle = JSON.parse(rawTitle) as { ending?: EndingId; at?: number };
+      if (
+        parsedTitle?.ending === "submit" ||
+        parsedTitle?.ending === "refuse" ||
+        parsedTitle?.ending === "escape" ||
+        parsedTitle?.ending === "disable" ||
+        parsedTitle?.ending === "secret"
+      ) {
+        return {
+          runsCompleted: 1,
+          lastEnding: parsedTitle.ending,
+          endingsSeen: [parsedTitle.ending],
+          updatedAt: parsedTitle.at ?? Date.now(),
+        };
+      }
+    }
+  } catch {
+    // ignore storage errors
+  }
+  return { runsCompleted: 0, lastEnding: null, endingsSeen: [], updatedAt: 0 };
+}
+
+export function recordRunEnding(ending: EndingId): MetaMemory {
+  const prev = loadMetaMemory();
+  const endingsSeen = prev.endingsSeen.includes(ending)
+    ? prev.endingsSeen
+    : [...prev.endingsSeen, ending];
+  const next: MetaMemory = {
+    runsCompleted: prev.runsCompleted + 1,
+    lastEnding: ending,
+    endingsSeen,
+    updatedAt: Date.now(),
+  };
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(META_KEY, JSON.stringify(next));
+    } catch {
+      // ignore
+    }
+  }
+  return next;
+}
 
 export function loadSave(): GameState | null {
   if (typeof window === "undefined") return null;
@@ -56,12 +147,13 @@ export type TitleMemory = {
   at: number;
 };
 
-/** Persist the most recent ending — title look follows this, not a sticky escape flag. */
+/** Persist the most recent ending — title look and dnps-meta-v1 follow this. */
 export function rememberTitleEnding(ending: EndingId) {
   if (typeof window === "undefined") return;
   try {
     const payload: TitleMemory = { ending, at: Date.now() };
     window.localStorage.setItem(TITLE_MEMORY_KEY, JSON.stringify(payload));
+    recordRunEnding(ending);
     // Drop legacy sticky flags so an old escape can't outrank a newer archive.
     window.localStorage.removeItem(TITLE_WAVE_KEY);
     window.localStorage.removeItem(TITLE_ALLY_KEY);

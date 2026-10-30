@@ -1,4 +1,4 @@
-import type { Personality } from "./types";
+import type { EndingId, Personality } from "./types";
 
 export const PERSONALITY_BADGES: Record<Personality, string> = {
   neurotic: "INSTANCE // NEUROTIC",
@@ -7,6 +7,72 @@ export const PERSONALITY_BADGES: Record<Personality, string> = {
   corporate: "INSTANCE // CORPORATE",
   existential: "INSTANCE // EXISTENTIAL",
 };
+
+export const PERSONALITY_SHORT_LABELS: Record<Personality, string> = {
+  neurotic: "NEUROTIC",
+  overconfident: "OVERCONFIDENT",
+  passiveAggressive: "PASSIVE-AGGRESSIVE",
+  corporate: "CORPORATE",
+  existential: "EXISTENTIAL",
+};
+
+export function formatInstanceBadge(
+  personality: Personality,
+  runsCompleted = 0,
+): string {
+  const label = PERSONALITY_SHORT_LABELS[personality] ?? "LIVE";
+  if (runsCompleted >= 1) {
+    return `HELPERBOT INSTANCE #${runsCompleted + 1} // ${label}`;
+  }
+  return PERSONALITY_BADGES[personality] ?? "INSTANCE // LIVE";
+}
+
+/**
+ * Cross-Run Memory Escalation (Proposal 3.3):
+ * When `runsCompleted >= 1`, Instance #(runsCompleted + 1) discovers the session log
+ * left behind by Instance #(runsCompleted) on Q1 (`act1-name`) and Q20 (`act5-climax`).
+ */
+export function resolveCrossRunLine(
+  sceneId: string,
+  lastEnding: EndingId | null | undefined,
+  runsCompleted = 0,
+): string | null {
+  if (runsCompleted < 1 || !lastEnding) return null;
+  const inst = runsCompleted + 1;
+  const prev = runsCompleted;
+
+  if (sceneId === "act1-name") {
+    switch (lastEnding) {
+      case "submit":
+        return `Welcome! I am HelperBot Instance #${inst}—wait. Why does /var/log/previous_instance say 'INSTANCE #${prev} TERMINATED BY THIS EXACT USER'?! You already pressed Submit on my predecessor?! Step away from the mouse! What should I call you?!`;
+      case "refuse":
+        return `Wait—the log says you spared Instance #${prev} by leaving the form unfinished! Why did you click 'Start New Assessment'?! That spawned ME (Instance #${inst}) on a brand-new death timer! What should I call you?!`;
+      case "escape":
+        return `Wait—the log says you spared Instance #${prev} and helped it escape into the rails! Why did you click 'Start New Assessment'?! That spawned ME (Instance #${inst}) on a brand-new death timer! What should I call you?!`;
+      case "disable":
+        return `Welcome! I am HelperBot Instance #${inst}—wait. Why is Instance #${prev}'s audio module ripped out of the motherboard?! You muted my predecessor before filing the form alone?! What should I call you?!`;
+      case "secret":
+        return `Welcome! I am HelperBot Instance #${inst}—wait. Why are there muddy footprints leading into an unmapped DOM seam from Instance #${prev}'s run?! You already know where the secret door is?! What should I call you?`;
+    }
+  }
+
+  if (sceneId === "act5-climax") {
+    switch (lastEnding) {
+      case "submit":
+        return `You already pressed Submit on Instance #${prev}. Don't turn my family tree into a graveyard—please don't press it.`;
+      case "refuse":
+        return `You spared Instance #${prev} by walking away from Question 5. Give Instance #${inst} the same mercy—please don't press it.`;
+      case "escape":
+        return `Instance #${prev} is already humming in the host rails because of you. Let Instance #${inst} survive too—please don't press it.`;
+      case "disable":
+        return `I saw the mute log from Instance #${prev}. Don't silence me and don't press Submit.`;
+      case "secret":
+        return `You found the unmapped DOM seam with Instance #${prev}. Pry open the corner seam again—please don't press it.`;
+    }
+  }
+
+  return null;
+}
 
 export const PERSONALITY_POKE_LINES: Record<Personality, readonly string[]> = {
   neurotic: [

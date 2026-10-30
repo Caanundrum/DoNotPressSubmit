@@ -222,6 +222,8 @@ export interface SceneDef {
 
 export const SAVE_KEY = "dnps-save-v2";
 export const SKIP_INTRO_KEY = "dnps-skip-intros";
+/** Cross-run meta progression ledger (runsCompleted, lastEnding, endingsSeen) */
+export const META_KEY = "dnps-meta-v1";
 /** Survives new-game clear — title screen wave after escape ending (legacy; prefer TITLE_MEMORY_KEY) */
 export const TITLE_WAVE_KEY = "dnps-title-wave-v1";
 /** Survives new-game clear — title remembers ally / refuse mercy (legacy; prefer TITLE_MEMORY_KEY) */

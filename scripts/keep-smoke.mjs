@@ -774,6 +774,32 @@ assert(
     (act5.match(/aiLine:/g) || []).length >= 10,
   "100% of choices across Act I–V have authored aiLine reactions (Finding #8)",
 );
+assert(
+  /consecutiveFastPicks|speedrunnerFired|telemetry:afk|visibilitychange|closeZoneFired/.test(scenePlayer),
+  "Live behavioral telemetry callouts (speedrunner, AFK, tab-switch, close-zone) wired in ScenePlayer (Proposal 3.2)",
+);
+assert(
+  /META_KEY = "dnps-meta-v1"/.test(read("src/game/types.ts")) &&
+    /loadMetaMemory|recordRunEnding/.test(read("src/game/storage.ts")) &&
+    /formatInstanceBadge|resolveCrossRunLine/.test(read("src/game/personalities.ts")),
+  "Cross-run memory (dnps-meta-v1) & HELPERBOT INSTANCE #N escalation wired (Proposal 3.3)",
+);
+const submitClimax = read("src/components/game/scenes/SubmitClimax.tsx");
+assert(
+  /\[ALLY ROUTE\]/.test(submitClimax) &&
+    /\[COLD OVERRIDE\]/.test(submitClimax) &&
+    /\[UNMAPPED SEAM\]/.test(submitClimax) &&
+    /UNMAPPED DOM SEAM \/\/ CLICK TO PEEL/.test(submitClimax) &&
+    /OVERRIDE WATCHDOG LOCK|ENGAGE MUTE SWITCH/.test(submitClimax),
+  "SubmitClimax features earned route tags, inline overrides, and clickable DOM seam breach (Proposal 1.5)",
+);
+assert(
+  /data-session-autopsy-dossier/.test(reportSrc) &&
+    /ENDINGS DISCOVERED:/.test(reportSrc) &&
+    /COPY INCIDENT DOSSIER|DOSSIER COPIED TO CLIPBOARD/.test(reportSrc) &&
+    /glossMajorChoice|trustLabel/.test(reportSrc),
+  "AssessmentReport upgraded into shareable Session Autopsy Dossier with 5-ending tracker (Proposal 4.3)",
+);
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

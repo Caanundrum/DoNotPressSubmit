@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { PERSONALITY_BADGES } from "@/game/personalities";
+import { formatInstanceBadge, PERSONALITY_BADGES } from "@/game/personalities";
 import type { ScenePlayerViewProps } from "./ScenePlayerView";
 import { AssistantOrb } from "../AssistantOrb";
 
@@ -182,9 +182,11 @@ export function ScenePlayerViewAssistant({
               </div>
               <span
                 data-personality-badge={state.aiPersonality}
+                data-instance-number={(p.runsCompleted ?? 0) + 1}
                 className="rounded-sm border border-cyan/30 bg-cyan/10 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.18em] text-cyan/85 uppercase"
               >
-                {PERSONALITY_BADGES[state.aiPersonality] ?? "INSTANCE // LIVE"}
+                {formatInstanceBadge(state.aiPersonality, p.runsCompleted ?? 0) ||
+                  PERSONALITY_BADGES[state.aiPersonality]}
               </span>
             </div>
             <div

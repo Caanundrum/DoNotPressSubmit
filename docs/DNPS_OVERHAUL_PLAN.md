@@ -63,13 +63,13 @@
 ---
 
 ## Packet 4: Illusion of Sentience Telemetry & Endings Polish
-- [ ] **4.1 Live Behavioral Telemetry Callouts (Proposal 3.2):**
-  - Detect speedclicking (`<1.8s`), AFK hesitation (`>18s`), `visibilitychange` tab-switching, and top-edge browser-close hover (`clientY < 16`) with custom AI reactions.
-- [ ] **4.2 Cross-Run Memory Escalation (`dnps-meta-v1` — Proposal 3.3):**
-  - Have subsequent runs react to prior run outcomes (e.g., Instance #2 discovering Instance #1's termination log after `ending-submit`).
-- [ ] **4.3 Earned / Discoverable Climax Endings (`SubmitClimax.tsx` — Proposal 1.5):**
-  - Gate or visually distinguish special endings with redacted unlock hints and in-scene discovery.
-- [ ] **4.4 Shareable Session Autopsy Dossier (`AssessmentReport.tsx` — Proposal 4.3):**
-  - Wire `glossMajorChoice` and `trustLabel`, add `Endings Discovered: X / 5`, and add a 1-click `COPY INCIDENT REPORT` button.
-- [ ] **4.5 Final Smoke Test & Full Build Certification:**
+- [x] **4.1 Live Behavioral Telemetry Callouts (Proposal 3.2):**
+  - Detect speedclicking (`<1.8s`), AFK hesitation (`>18s`), `visibilitychange` tab-switching, and top-edge browser-close hover (`clientY <= 10`) with custom AI reactions via `ambientAside`.
+- [x] **4.2 Cross-Run Memory Escalation (`dnps-meta-v1` — Proposal 3.3):**
+  - Have subsequent runs react to prior run outcomes (e.g., Instance #2 discovering Instance #1's termination log after `ending-submit`, HUD badge updating to `HELPERBOT INSTANCE #N // TEMPERAMENT`).
+- [x] **4.3 Earned / Discoverable Climax Endings (`SubmitClimax.tsx` — Proposal 1.5):**
+  - Visually distinguish specialized endings with `[ALLY ROUTE]`, `[COLD OVERRIDE]`, and `[UNMAPPED SEAM]` tags, session-earned unlock checks, inline override switches (`OVERRIDE WATCHDOG LOCK`, `ENGAGE MUTE SWITCH`), and an in-scene `"UNMAPPED DOM SEAM // CLICK TO PEEL"` corner breach.
+- [x] **4.4 Shareable Session Autopsy Dossier (`AssessmentReport.tsx` — Proposal 4.3):**
+  - Wire `glossMajorChoice` and `trustLabel`, add `ENDINGS DISCOVERED: X / 5` collection tracker (`meta.endingsSeen`), and add a 1-click `COPY INCIDENT DOSSIER` button with clipboard confirmation.
+- [x] **4.5 Final Smoke Test & Full Build Certification:**
   - Update `scripts/keep-smoke.mjs`, run `npx tsc --noEmit` and `npm run build`, and certify all 4 packets.

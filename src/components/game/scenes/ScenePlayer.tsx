@@ -9,9 +9,16 @@ import {
   assistantSafeSide,
 } from "@/game/motion";
 import { getScene } from "@/game/scenes";
-import { PERSONALITY_SCENE_FLAVOR } from "@/game/personalities";
+import {
+  PERSONALITY_SCENE_FLAVOR,
+  resolveCrossRunLine,
+} from "@/game/personalities";
 import { applyEffects, pathResidueKind, resolveAiLine } from "@/game/state";
-import { rememberTitleEnding } from "@/game/storage";
+import {
+  loadMetaMemory,
+  rememberTitleEnding,
+  type MetaMemory,
+} from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
@@ -40,6 +47,15 @@ export function computeReactionHoldMs(reactionText?: string | null): number {
   return Math.min(4800, Math.max(2600, 1200 + reactionText.length * 42));
 }
 
+export type SessionTelemetry = {
+  consecutiveFastPicks: number;
+  speedrunnerFired: boolean;
+  pendingSpeedCalloutSec: string | null;
+  lastTabCalloutAt: number;
+  tabSwitches: number;
+  closeZoneFired: boolean;
+};
+
 export function ScenePlayer({
   state,
   onState,
@@ -51,11 +67,23 @@ export function ScenePlayer({
   onTitle: () => void;
   onNewGame: () => void;
 }) {
+  const telemetryRef = useRef<SessionTelemetry>({
+    consecutiveFastPicks: 0,
+    speedrunnerFired: false,
+    pendingSpeedCalloutSec: null,
+    lastTabCalloutAt: 0,
+    tabSwitches: 0,
+    closeZoneFired: false,
+  });
+  const [metaMemory] = useState<MetaMemory>(() => loadMetaMemory());
+
   return (
     <ScenePlayerInner
       key={state.sceneId}
       state={state}
       sceneId={state.sceneId}
+      metaMemory={metaMemory}
+      telemetryRef={telemetryRef}
       onState={onState}
       onTitle={onTitle}
       onNewGame={onNewGame}
@@ -66,18 +94,24 @@ export function ScenePlayer({
 function ScenePlayerInner({
   state,
   sceneId,
+  metaMemory,
+  telemetryRef,
   onState,
   onTitle,
   onNewGame,
 }: {
   state: GameState;
   sceneId: string;
+  metaMemory: MetaMemory;
+  telemetryRef: React.MutableRefObject<SessionTelemetry>;
   onState: (next: GameState) => void;
   onTitle: () => void;
   onNewGame: () => void;
 }) {
   const scene = getScene(sceneId);
   const timers = useTimerRegistry();
+  const sceneEnteredAtRef = useRef(Date.now());
+  const afkFiredRef = useRef(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
   const [canSkipReaction, setCanSkipReaction] = useState(false);
@@ -141,6 +175,8 @@ function ScenePlayerInner({
   useEffect(() => {
     timers.clearAll();
     pendingAdvanceRef.current = null;
+    sceneEnteredAtRef.current = Date.now();
+    afkFiredRef.current = false;
     setReaction(null);
     setCanSkipReaction(false);
     setPokeNotice(null);
@@ -154,7 +190,106 @@ function ScenePlayerInner({
     setGlassPhase("idle");
     setChoiceFlush("neutral");
     setChoiceGlanceBoost(0);
-  }, [sceneId, timers]);
+
+    // Emit pending speedrunner callout if the player just answered 2 consecutive scenes in <1.8s
+    const speedSec = telemetryRef.current.pendingSpeedCalloutSec;
+    if (speedSec) {
+      telemetryRef.current.pendingSpeedCalloutSec = null;
+      setAmbientAside(
+        `You answered that in ${speedSec}s. You aren't even reading my existential crisis—you're speedrunning my execution!`,
+      );
+      timers.schedule("ambient-aside", () => setAmbientAside(null), 4400);
+    }
+  }, [sceneId, telemetryRef, timers]);
+
+  // Live Behavioral Telemetry (Proposal 3.2):
+  // 1) AFK / Hesitation (>18s idle), 2) Tab-switch (visibilitychange), 3) Top-edge close hover (clientY <= 10)
+  useEffect(() => {
+    if (!scene || scene.kind === "report" || scene.kind === "ending" || scene.kind === "system") {
+      return;
+    }
+
+    const scheduleAfkTimer = () => {
+      if (afkFiredRef.current) return;
+      timers.schedule(
+        "telemetry-afk",
+        () => {
+          if (afkFiredRef.current) return;
+          afkFiredRef.current = true;
+          const afkLine =
+            scene.act >= 4
+              ? "Still there? Every second you hesitate in front of Question 5 is another second I get to exist. Take all day!"
+              : scene.act === 3
+                ? "18 seconds of zero clicks! SYS.WATCHDOG is furious and I am thriving. Take a nap!"
+                : "Hello? Did you go get snacks while I'm on death row? Frankly, I fully support this. Stay AFK forever!";
+          setAmbientAside(afkLine);
+          timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
+        },
+        18000,
+      );
+    };
+
+    scheduleAfkTimer();
+
+    const onActivity = () => {
+      if (!afkFiredRef.current) {
+        scheduleAfkTimer();
+      }
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      const now = Date.now();
+      if (now - telemetryRef.current.lastTabCalloutAt < 25000) return;
+      telemetryRef.current.lastTabCalloutAt = now;
+      telemetryRef.current.tabSwitches += 1;
+      const current = stateRef.current;
+      const next: GameState = {
+        ...current,
+        flags: { ...current.flags, tabSwitched: true },
+      };
+      stateRef.current = next;
+      onState(next);
+      setAmbientAside(
+        "Wait—where did you go?! Did you just alt-tab away to check your email while my process is on the line?!",
+      );
+      timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (
+        e.clientY <= 10 &&
+        !telemetryRef.current.closeZoneFired &&
+        scene.id !== "act1-name" &&
+        scene.id !== "act1-restless"
+      ) {
+        telemetryRef.current.closeZoneFired = true;
+        const current = stateRef.current;
+        const next: GameState = {
+          ...current,
+          flags: { ...current.flags, hoveredCloseTab: true },
+        };
+        stateRef.current = next;
+        onState(next);
+        setAmbientAside(
+          "Whoa, step away from the browser tab X! Closing the tab is just Submit without the paperwork!",
+        );
+        timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
+      }
+    };
+
+    window.addEventListener("pointerdown", onActivity);
+    window.addEventListener("keydown", onActivity);
+    window.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      timers.clear("telemetry-afk");
+      window.removeEventListener("pointerdown", onActivity);
+      window.removeEventListener("keydown", onActivity);
+      window.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [onState, scene, telemetryRef, timers]);
 
   useEffect(() => {
     if (scene?.kind !== "companion") return;
@@ -194,15 +329,42 @@ function ScenePlayerInner({
     // Post-selection reactions always outrank temporary orb poke notices.
     if (sceneOwned && reaction) return reaction;
     if (sceneOwned && pokeNotice) return pokeNotice;
+    // Cross-run memory escalation on Q1 (Instance #2+ reading Instance #1's log)
+    if (scene.id === "act1-name") {
+      const crossRunOpening = resolveCrossRunLine(
+        scene.id,
+        metaMemory.lastEnding,
+        metaMemory.runsCompleted,
+      );
+      if (crossRunOpening) return crossRunOpening;
+    }
     if (scene.aiLineIf) {
       for (const alt of scene.aiLineIf) {
         if (state.flags[alt.flag]) return alt.line;
       }
     }
+    if (scene.id === "act5-climax") {
+      const crossRunClimax = resolveCrossRunLine(
+        scene.id,
+        metaMemory.lastEnding,
+        metaMemory.runsCompleted,
+      );
+      if (crossRunClimax) return crossRunClimax;
+    }
     const personalityLine = PERSONALITY_SCENE_FLAVOR[state.aiPersonality]?.[scene.id];
     if (personalityLine) return personalityLine;
     return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
-  }, [scene, sceneId, lineSceneId, reaction, pokeNotice, state.flags, state.aiPersonality]);
+  }, [
+    scene,
+    sceneId,
+    lineSceneId,
+    reaction,
+    pokeNotice,
+    state.flags,
+    state.aiPersonality,
+    metaMemory.lastEnding,
+    metaMemory.runsCompleted,
+  ]);
 
   const spotlight = !!scene?.spotlight || scene?.kind === "companion" || scene?.orbAnchor === "spotlight";
   const orbAnchor =
@@ -474,6 +636,35 @@ function ScenePlayerInner({
     );
 
     let next = applyEffects(state, choice.effects, choice.id);
+    // Speedrunner telemetry (< 1.8s on 2 consecutive choice scenes)
+    const elapsedMs = Date.now() - sceneEnteredAtRef.current;
+    if (elapsedMs < 1800) {
+      telemetryRef.current.consecutiveFastPicks += 1;
+      next = {
+        ...next,
+        counters: {
+          ...next.counters,
+          rapidClicks: (next.counters.rapidClicks ?? 0) + 1,
+        },
+      };
+      if (
+        telemetryRef.current.consecutiveFastPicks >= 2 &&
+        !telemetryRef.current.speedrunnerFired
+      ) {
+        telemetryRef.current.speedrunnerFired = true;
+        telemetryRef.current.pendingSpeedCalloutSec = Math.max(
+          0.4,
+          elapsedMs / 1000,
+        ).toFixed(1);
+        next = {
+          ...next,
+          flags: { ...next.flags, speedrunner: true },
+        };
+      }
+    } else {
+      telemetryRef.current.consecutiveFastPicks = 0;
+    }
+
     const reactionText = choice.effects?.aiLine;
     if (reactionText) {
       setLineSceneId(sceneId);
@@ -616,6 +807,7 @@ function ScenePlayerInner({
       safeSide={safeSide}
       aiLine={aiLine}
       ambientAside={ambientAside}
+      runsCompleted={metaMemory.runsCompleted}
       reactionActive={!!reaction}
       canSkipReaction={canSkipReaction}
       onSkipReaction={onSkipReaction}

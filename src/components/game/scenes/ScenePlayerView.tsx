@@ -50,6 +50,7 @@ export type ScenePlayerViewProps = {
   safeSide: AssistantSafeSide;
   aiLine: string;
   ambientAside?: string | null;
+  runsCompleted?: number;
   reactionActive?: boolean;
   canSkipReaction?: boolean;
   onSkipReaction?: () => void;

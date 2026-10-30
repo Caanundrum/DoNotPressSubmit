@@ -19,6 +19,7 @@ import {
 import type { EnvironmentPreset } from "@/game/types";
 import { showAmbientToast } from "@/game/ambientToastBus";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 const GRADE: Record<EnvironmentPreset, string> = {
   pristine: "hue-rotate(0deg) saturate(1)",
@@ -74,6 +75,7 @@ export function FacilityBackground({
   /** Title calm: only one midground panel visible at a time. */
   const [panelFocus, setPanelFocus] = useState<"chamber" | "dashed">("chamber");
   const live = !!onAmbient && !systemLock;
+  const timers = useTimerRegistry();
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -124,7 +126,7 @@ export function FacilityBackground({
     showAmbientToast(line, 2400);
     setTinted(id);
     onAmbient?.(id, secret);
-    window.setTimeout(() => setTinted((t) => (t === id ? null : t)), 900);
+    timers.schedule("clear-tint", () => setTinted((t) => (t === id ? null : t)), 900);
   };
 
   return (
@@ -233,7 +235,8 @@ export function FacilityBackground({
             opacity: calm ? 0.55 : 0.72,
           }}
           data-roam-egg="chamber-07"
-          aria-label={live ? "Inspect CHAMBER 07" : undefined}
+          data-session-badge="SESSION // LIVE"
+          aria-label={live ? "Inspect SESSION // LIVE telemetry" : undefined}
           tabIndex={live ? 0 : -1}
           onMouseEnter={() => {
             if (live) audio.play("hover", 0.12);
@@ -241,13 +244,16 @@ export function FacilityBackground({
           onClick={() =>
             fireAmbient(
               "chamber-07",
-              "Left panel poked. CHAMBER 07 still empty. Facility pretends that is fine.",
+              "Telemetry panel poked. SESSION // LIVE nominal. Please return to the form.",
             )
           }
         >
-          {/* Wordless chamber silhouette — readable gag only via click toast (#12). */}
+          {/* Grounded session telemetry silhouette — readable gag via click toast. */}
           <div className="m-2 flex h-full flex-col border border-cyan/20 bg-[#0a1524]/70 p-2">
-            <div className="h-1.5 w-10 rounded-full bg-cyan/45" />
+            <div className="font-mono text-[7px] tracking-[0.18em] text-cyan/60">
+              SESSION // LIVE
+            </div>
+            <div className="mt-1 h-1.5 w-10 rounded-full bg-cyan/45" />
             <motion.div
               className="mt-3 h-2.5 w-full rounded-sm"
               style={{

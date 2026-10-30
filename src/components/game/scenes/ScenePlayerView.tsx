@@ -48,6 +48,10 @@ export type ScenePlayerViewProps = {
   buryAssistant: boolean;
   safeSide: AssistantSafeSide;
   aiLine: string;
+  ambientAside?: string | null;
+  reactionActive?: boolean;
+  canSkipReaction?: boolean;
+  onSkipReaction?: () => void;
   glance: number;
   pokeFlinch: boolean;
   companionReady: boolean;
@@ -82,21 +86,15 @@ export type ScenePlayerViewProps = {
 
 export function ScenePlayerView(p: ScenePlayerViewProps) {
   const {
-    scene, state, systemLock, companion, hoverLanguage, residue, pokeable,
-    orbStyle, orbAnchor, spotlight, buryAssistant, safeSide, aiLine, pokeFlinch,
-    companionReady, watchedPulse, panelMotion, panelVar, panelShake,
-    visibleChoices, choiceMotion, selected, hoverChoice,
+    scene, state, systemLock, companion, hoverLanguage, residue,
+    orbAnchor, spotlight, buryAssistant, safeSide,
     glassPhase, showTicket,
-    onAmbient, onRoamer, onOrbPoke, finishCompanion, pickChoice, setHoverChoice,
-    onState, continueDialogue, onSetpieceDone, onClimax, finishSystem,
+    onAmbient, onRoamer,
   } = p;
 
   const dockAbove = dialogueDocksAbove(orbAnchor) && !spotlight;
   const dockLeft = dialogueDocksLeft(orbAnchor);
-  // Spotlight / Counterpoint / Settle: bubble beside the orb so enlargement never covers it.
   const dockBeside = dialogueDocksBeside(orbAnchor) || spotlight;
-  // System directive: keep orb+bubble ABOVE the overlay (readable), not buried under z-50.
-  // Climax: always above Decision — never let bury/legacy overlap hide the plea.
   const assistantZ = systemLock
     ? "z-[52]"
     : scene.kind === "climax"
@@ -117,7 +115,6 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
       : dockAbove
         ? "flex-col-reverse items-center"
         : "flex-col items-center";
-  // Wide enough that Form 03 / Final Counterpoint / Form 09 never ellipsize mid-word.
   const bubbleMax = spotlight
     ? "min(340px, 44vw)"
     : dockLeft
@@ -127,7 +124,6 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         : dockAbove
           ? "min(320px, 42vw)"
           : "min(240px, 30vw)";
-  // Mood rides on orb look + voice — no stage/mood status chrome (rev5 P0).
   const orbStatusLabel = undefined;
 
   return (
@@ -161,7 +157,6 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         onAmbient={onAmbient}
       />
       <PathResidue kind={residue} />
-      <GlassStitchOverlay phase={glassPhase} ticket={showTicket} />
       {!systemLock && scene.kind !== "climax" ? (
         <AmbientChrome
           act={scene.act}
@@ -169,7 +164,6 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
             systemLock ||
             scene.environment === "sterile" ||
             scene.kind === "setpiece" ||
-            // Side Channel / Hold Still — cyan node dots must not sit on CTAs or body copy.
             companion
           }
           onAmbient={onAmbient}
@@ -189,14 +183,25 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         />
       ) : null}
 
-      {/* Wordless facility mark — no act/layer ids or stage mood labels (rev5 P0). */}
+      {/* Top-left studio attribution mark — persistent clickable link to Chaos Standard */}
       <div
-        className="pointer-events-none absolute left-3 top-3 z-[5] flex max-w-[calc(100%-7.5rem)] items-center gap-1.5 sm:left-4 sm:top-4 sm:max-w-none"
+        className="pointer-events-auto absolute left-3 top-3 z-[35] flex max-w-[calc(100%-7.5rem)] items-center gap-2 sm:left-4 sm:top-4 sm:max-w-none"
         data-facility-mark="true"
-        aria-hidden
       >
-        <span className="h-1.5 w-1.5 rounded-full bg-cyan/70 shadow-[0_0_6px_rgba(110,231,255,0.45)]" />
-        <span className="h-px w-6 bg-cyan/35" />
+        <span
+          className="h-1.5 w-1.5 rounded-full bg-cyan/70 shadow-[0_0_6px_rgba(110,231,255,0.45)]"
+          aria-hidden
+        />
+        <span className="h-px w-4 bg-cyan/35" aria-hidden />
+        <a
+          href="https://chaosstandard.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-chaos-brand-header="true"
+          className="font-mono text-[9px] tracking-[0.22em] text-[#c5d4e8]/65 uppercase transition-colors hover:text-cyan"
+        >
+          CHAOS STANDARD
+        </a>
       </div>
 
       <ScenePlayerViewAssistant
@@ -210,6 +215,14 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         orbStatusLabel={orbStatusLabel}
       />
       <ScenePlayerViewPanels p={p} panelZ={panelZ} />
+
+      {/* Top-of-stack broken screen overlay — renders above form panel & AI speech bubble */}
+      <GlassStitchOverlay
+        phase={glassPhase}
+        ticket={showTicket}
+        layerClass="z-[9999]"
+        fullStage
+      />
     </div>
   );
 }

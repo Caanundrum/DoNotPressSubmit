@@ -3,6 +3,7 @@
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 type Burst = { id: number; x: number; y: number };
 
@@ -25,6 +26,7 @@ export function BeginControl({
   const [armed, setArmed] = useState(false);
   const [bursts, setBursts] = useState<Burst[]>([]);
   const burstId = useRef(0);
+  const timers = useTimerRegistry();
 
   const prox = useMotionValue(0);
   const proxSpring = useSpring(prox, { stiffness: 160, damping: 22 });
@@ -70,20 +72,21 @@ export function BeginControl({
   const fireBurst = () => {
     const id = ++burstId.current;
     setBursts((b) => [...b, { id, x: 0, y: 0 }]);
-    window.setTimeout(() => {
+    timers.schedule(`burst-${id}`, () => {
       setBursts((b) => b.filter((p) => p.id !== id));
     }, 900);
   };
 
   const engage = (e?: { preventDefault?: () => void; stopPropagation?: () => void }) => {
-    // #12: never navigate / open a tab — button-only start path.
+    // Never navigate / open a tab — button-only start path; guard against double-click.
     e?.preventDefault?.();
     e?.stopPropagation?.();
+    if (armed) return;
     setPressed(true);
     setArmed(true);
     fireBurst();
     audio.play("begin", 0.7);
-    window.setTimeout(() => onBegin(), 180);
+    timers.schedule("engage-begin", () => onBegin(), 180);
   };
 
   const heat = hovering ? 1 : near ? 0.55 : 0;
@@ -102,7 +105,8 @@ export function BeginControl({
 
       <motion.button
         type="button"
-        className="relative isolate overflow-visible px-14 py-5 text-lg tracking-[0.3em] text-white outline-none"
+        disabled={armed}
+        className="relative isolate overflow-visible px-14 py-5 text-lg tracking-[0.3em] text-white outline-none disabled:cursor-wait"
         style={{
           fontFamily: "var(--font-display)",
           minWidth: 300,
@@ -259,7 +263,7 @@ export function BeginControl({
           }}
         />
         {armed
-          ? "FACILITY POWERING ASSESSMENT BAY"
+          ? "INITIALIZING ONBOARDING SESSION"
           : hoverMs > 4500
             ? "COMMITMENT ISSUES DETECTED"
             : hovering

@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState } from "react";
 import type { BeginSeed } from "@/game/types";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 /** Snark on click 1–2; click 3 starts the assessment (overhaul). */
 const SUBMIT_GAGS = [
@@ -36,7 +37,7 @@ export function TitleLogo({
   const [presses, setPresses] = useState(0);
   const [launching, setLaunching] = useState(false);
   const lastIdx = useRef(-1);
-  const clearTimer = useRef<number | null>(null);
+  const timers = useTimerRegistry();
 
   const pressSubmitGag = () => {
     if (launching) return;
@@ -44,13 +45,12 @@ export function TitleLogo({
     setPresses(n);
     setShakeKey((k) => k + 1);
     onSubmitGag?.();
-    if (clearTimer.current) window.clearTimeout(clearTimer.current);
 
     if (n >= 3) {
       audio.play("begin", 0.7);
       setGag(CLICK3_LINE);
       setLaunching(true);
-      clearTimer.current = window.setTimeout(() => {
+      timers.schedule("eager-begin", () => {
         onEagerBegin?.({
           flags: { likesSubmit: true },
           counters: { forbiddenClicks: 1 },
@@ -66,7 +66,7 @@ export function TitleLogo({
     }
     lastIdx.current = next;
     setGag(SUBMIT_GAGS[next]!);
-    clearTimer.current = window.setTimeout(() => setGag(null), 3200);
+    timers.schedule("gag-clear", () => setGag(null), 3200);
   };
 
   return (
@@ -173,7 +173,17 @@ export function TitleLogo({
         }
         data-title-subtitle="true"
       >
-        <span className="text-[var(--cs-hazard-orange)]">A Chaos Standard</span> assessment.
+        A{" "}
+        <a
+          href="https://chaosstandard.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-chaos-brand-subtitle="true"
+          className="text-[var(--cs-hazard-orange)] underline decoration-[var(--cs-hazard-orange)]/40 underline-offset-4 transition-colors hover:text-cyan hover:decoration-cyan"
+        >
+          Chaos Standard
+        </a>{" "}
+        interactive experience.
         <br />
         Try not to press Submit.
       </p>

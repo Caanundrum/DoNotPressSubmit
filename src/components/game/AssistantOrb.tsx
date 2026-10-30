@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { expressiveMood } from "@/game/state";
 import type { OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 export type ChoiceFlush = "ally" | "obey" | "chaos" | "neutral";
 
@@ -102,6 +103,7 @@ export function AssistantOrb({
   const [showPokeHint, setShowPokeHint] = useState(false);
   const pokedOnce = useRef(false);
   const dragOrigin = useRef<{ x: number; y: number } | null>(null);
+  const timers = useTimerRegistry();
   const showingFlinch = flinch || localFlinch;
   const flushCore = FLUSH_CORE[choiceFlush];
   const coreColor = flushCore ?? m.core;
@@ -121,11 +123,11 @@ export function AssistantOrb({
     if (!pokedOnce.current) {
       pokedOnce.current = true;
       setShowPokeHint(true);
-      window.setTimeout(() => setShowPokeHint(false), 900);
+      timers.schedule("poke-hint", () => setShowPokeHint(false), 900);
     }
     audio.playMoodCue("poke");
     onPoke();
-    window.setTimeout(() => setLocalFlinch(false), 520);
+    timers.schedule("local-flinch", () => setLocalFlinch(false), 520);
   };
 
   const brightness =
@@ -237,7 +239,7 @@ export function AssistantOrb({
                 e.preventDefault();
                 setNervousSpin(true);
                 audio.playMoodCue("poke");
-                window.setTimeout(() => setNervousSpin(false), 900);
+                timers.schedule("nervous-spin", () => setNervousSpin(false), 900);
               }
             : undefined
         }
@@ -268,7 +270,7 @@ export function AssistantOrb({
             ? () => {
                 dragOrigin.current = null;
                 // Spring home slowly
-                window.setTimeout(() => setDrag({ x: 0, y: 0 }), 80);
+                timers.schedule("drag-home", () => setDrag({ x: 0, y: 0 }), 80);
               }
             : undefined
         }

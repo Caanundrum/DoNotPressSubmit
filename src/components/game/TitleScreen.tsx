@@ -1,40 +1,18 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { POKE_WORLD } from "@/game/aiLifeLocks";
-import { showAmbientToast } from "@/game/ambientToastBus";
 import type { BeginSeed, EndingId, OrbMood } from "@/game/types";
 import { AssistantOrb } from "./AssistantOrb";
-import { BackgroundGags } from "./BackgroundGags";
 import { BeginControl } from "./BeginControl";
-import { FacilityBackground } from "./FacilityBackground";
 import { TitleLogo } from "./TitleLogo";
 import {
   GlassStitchOverlay,
   type GlassPhase,
 } from "./scenes/GlassStitchOverlay";
 import { audio } from "@/lib/audio";
-
-/** Title prop click payoffs — obvious joke, no backstory (P0 gag clarity). */
-const TITLE_PROP_TOAST: Record<string, string> = {
-  "coffee-mug": "Title mug: still empty, still judgmental. Facility filed a thirst incident.",
-  "do-not-press": "Tiny robot pressed DO NOT PRESS on the title. Irony ticket printed.",
-  "chamber-07": "CHAMBER 07 panel blinked. It has opinions. None of them help BEGIN.",
-  "replacement-failed": "Your title-screen replacement drone failed. You remain the protagonist.",
-  "printer-scissors": "Title printer queued scissors. BEGIN is still the real door.",
-  "corridor-etiquette": "Corridor drones on the title practiced after-you. Throughput: zero.",
-  "containment-fine": "EVERYTHING IS FINE plaque on title. Unprompted. Still concerning.",
-  default: "Background prop noticed you. It will not start the assessment for you.",
-};
-
-function titleEnv(ending: EndingId | null): "escape" | "pristine" | "archive" | "sterile" {
-  if (ending === "escape") return "escape";
-  if (ending === "secret") return "escape";
-  if (ending === "submit") return "archive";
-  if (ending === "disable") return "sterile";
-  return "pristine";
-}
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 
 function titleOrbMood(
   ending: EndingId | null,
@@ -76,7 +54,7 @@ function memoryPokeLines(ending: EndingId): string[] {
       return [
         "Still here. Still on your side.",
         "Someone keeps printing my complaints with a smiley face.",
-        "Facility remembers mercy. Awkwardly.",
+        "Session remembers mercy. Awkwardly.",
       ];
     case "submit":
     case "disable":
@@ -98,9 +76,8 @@ function titlePokeLine(ending: EndingId | null, pokeN: number): string {
 }
 
 /**
- * Calm cinematic title: dim facility life + sparse roaming eggs + orb.
- * Sound toggle lives in GameRoot corner (overhaul). SUBMIT gag may start on click 3.
- * Title look follows the most recent ending — escaped wave only after escape.
+ * Clean cinematic title screen (Findings #1, #2, #3, #5):
+ * Focused opening UI without background prop clutter (background props begin at Q1).
  */
 export function TitleScreen({
   orbMood,
@@ -121,43 +98,51 @@ export function TitleScreen({
   const [titlePokes, setTitlePokes] = useState(0);
   const [glassPhase, setGlassPhase] = useState<GlassPhase>("idle");
   const [pokeFlinch, setPokeFlinch] = useState(false);
-  const [mugLabelOn, setMugLabelOn] = useState(false);
-  const glassTimer = useRef<number | null>(null);
-  const pokeLineTimer = useRef<number | null>(null);
-  const mugLabelTimer = useRef<number | null>(null);
+  const timers = useTimerRegistry();
 
   const onSubmitGag = () => {
     setGagReact(true);
-    window.setTimeout(() => setGagReact(false), 700);
+    timers.schedule("gag-react", () => setGagReact(false), 700);
   };
 
   const onTitleOrbPoke = () => {
     const n = titlePokes + 1;
     setTitlePokes(n);
     setPokeFlinch(true);
-    window.setTimeout(() => setPokeFlinch(false), 520);
+    timers.schedule("poke-flinch", () => setPokeFlinch(false), 520);
     audio.play("click", 0.35);
-    // Always a real in-game bubble — including the silent-looking crack beat.
+
     const line = titlePokeLine(lastEnding, n);
     setPokeLine(line);
-    if (pokeLineTimer.current != null) window.clearTimeout(pokeLineTimer.current);
-    pokeLineTimer.current = window.setTimeout(() => {
-      pokeLineTimer.current = null;
-      setPokeLine(null);
-    }, 2800);
-    if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
+    timers.schedule("poke-line", () => setPokeLine(null), 3200);
+
     if (n === POKE_WORLD.crack) {
       setGlassPhase("crack");
-      glassTimer.current = window.setTimeout(() => {
-        glassTimer.current = null;
-        setGlassPhase((p) => (p === "crack" ? "idle" : p));
-      }, 2400);
-    } else if (n === POKE_WORLD.stitch || n === POKE_WORLD.ticket) {
+      timers.schedule(
+        "glass-phase",
+        () => {
+          setGlassPhase((p) => (p === "crack" ? "idle" : p));
+        },
+        4500,
+      );
+    } else if (n === POKE_WORLD.stitch) {
       setGlassPhase("stitch");
-      glassTimer.current = window.setTimeout(() => {
-        glassTimer.current = null;
-        setGlassPhase("idle");
-      }, 4200);
+      timers.schedule(
+        "glass-phase",
+        () => {
+          setGlassPhase("idle");
+        },
+        6500,
+      );
+    } else if (n >= POKE_WORLD.ticket) {
+      setGlassPhase("stitch");
+      timers.schedule(
+        "glass-phase",
+        () => {
+          setGlassPhase("idle");
+        },
+        5500,
+      );
     }
   };
 
@@ -165,55 +150,30 @@ export function TitleScreen({
     <div
       className="absolute inset-0 z-20 overflow-hidden"
       data-title-cinematic="true"
-      data-title-density="medium"
+      data-title-density="clean"
       data-title-cta-column-host="true"
       data-title-memory={lastEnding ?? "none"}
     >
-      <FacilityBackground
-        calm
-        environment={titleEnv(lastEnding)}
-        anomalyLevel={
-          escaped ? 2 : lastEnding === "secret" ? 3 : lastEnding === "refuse" ? 1 : 0
-        }
-        hoverLanguage
-        onAmbient={(id) => {
-          if (id && !TITLE_PROP_TOAST[id]) {
-            showAmbientToast(TITLE_PROP_TOAST.default!, 2200);
-          }
+      {/* Subtle atmospheric title gradient — zero background prop clutter */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 50% 42%, rgba(18, 38, 60, 0.45) 0%, rgba(8, 15, 26, 0.85) 62%, #050911 100%)",
         }}
+        aria-hidden
       />
-      <div className="pointer-events-none absolute inset-0 z-30" data-title-gag-layer="true">
-        <BackgroundGags
-          calm
-          hoverLanguage
-          onAmbient={() => {
-            // react() already shows the gag toast — keep interactive live.
-          }}
-        />
-      </div>
-
-      {/* Ending memory is orb mood / wave only — no banner chrome. */}
 
       <div
         className="pointer-events-none relative z-10 flex h-full min-h-0 flex-col items-center px-5 pb-3 pt-5 sm:px-6 sm:pb-4 sm:pt-7 max-sm:pb-3 max-sm:pt-8"
         data-title-main-column="true"
       >
-        <motion.div
-          className="shrink-0 px-14 text-center font-mono text-[12px] tracking-[0.28em] text-[#d0dcec]/70 sm:px-0 sm:text-[10px] sm:tracking-[0.35em]"
-          data-title-facility-line="true"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          ASSESSMENT FACILITY 01
-        </motion.div>
-
-        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8 max-sm:justify-start max-sm:pt-2 max-sm:pb-[7.5rem]">
+        <div className="flex min-h-0 w-full max-w-xl flex-1 flex-col items-center justify-center gap-6 overflow-hidden py-3 sm:gap-8 max-sm:justify-start max-sm:pt-6 max-sm:pb-[7.5rem]">
           <motion.div
             className="pointer-events-auto shrink-0"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.7 }}
+            transition={{ delay: 0.2, duration: 0.7 }}
           >
             <TitleLogo
               reactive
@@ -228,7 +188,7 @@ export function TitleScreen({
             data-title-cta-column="true"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.45 }}
           >
             <BeginControl onBegin={() => onBegin()} onHoverChange={onHoverChange} />
             {onContinue ? (
@@ -247,77 +207,27 @@ export function TitleScreen({
         </div>
 
         <motion.div
-          className="flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-0.5 font-mono text-[12px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[9px] sm:tracking-[0.2em] max-sm:relative max-sm:z-[46] max-sm:mt-auto max-sm:pb-[0.35rem]"
+          className="pointer-events-auto flex shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-1 font-mono text-[12px] tracking-[0.16em] text-[#c5d4e8]/78 sm:text-[10px] sm:tracking-[0.22em] max-sm:relative max-sm:z-[46] max-sm:mt-auto max-sm:pb-[0.35rem]"
           style={{ textShadow: "0 1px 2px rgba(0,0,0,0.85)" }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 0.7 }}
           data-title-footer="true"
         >
-          <span
-            title="Chaos Standard production mark"
-            className="tracking-[0.2em] text-[var(--cs-hazard-orange)]"
+          <a
+            href="https://chaosstandard.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Visit Chaos Standard"
+            className="tracking-[0.22em] text-[var(--cs-hazard-orange)] transition-colors hover:text-cyan"
             data-chaos-brand-footer="true"
           >
             CHAOS STANDARD
-          </span>
-          <span className="text-[var(--cs-slate-dim)]">/</span>
-          <span title="Facility chamber" className="text-[var(--cs-slate-standard)]">
-            CHAMBER 07
-          </span>
+          </a>
         </motion.div>
       </div>
 
-      <GlassStitchOverlay
-        phase={glassPhase}
-        ticket={titlePokes >= POKE_WORLD.ticket && glassPhase === "stitch"}
-        layerClass="z-[8]"
-        fullStage
-      />
-
-      {/* Escape tell: wordless mug shape; label only on click. */}
-      {escaped ? (
-        <motion.button
-          type="button"
-          className="pointer-events-auto absolute left-[8%] top-[18%] z-[12] select-none border-0 bg-transparent p-0"
-          data-title-escape-prop="true"
-          data-title-mug-shape="true"
-          initial={{ opacity: 0, rotate: -8, y: 8 }}
-          animate={{ opacity: 0.95, rotate: [-6, -2, -7], y: [0, -3, 0] }}
-          transition={{ delay: 0.4, duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-          aria-label="Misfiled mug"
-          onClick={() => {
-            audio.play("click", 0.3);
-            setMugLabelOn(true);
-            if (mugLabelTimer.current != null) window.clearTimeout(mugLabelTimer.current);
-            mugLabelTimer.current = window.setTimeout(() => {
-              mugLabelTimer.current = null;
-              setMugLabelOn(false);
-            }, 2200);
-          }}
-        >
-          <div
-            className="relative flex h-11 w-9 items-end justify-center"
-            style={{ transform: "rotate(-8deg)" }}
-            aria-hidden
-          >
-            <span className="absolute right-[-5px] top-3 h-4 w-2 rounded-r-full border border-cyan/40 bg-transparent" />
-            <span className="h-9 w-7 rounded-b-[10px] rounded-t-[4px] border border-cyan/40 bg-black/55 shadow-[0_0_18px_rgba(80,255,200,0.18)]" />
-          </div>
-          {mugLabelOn ? (
-            <motion.div
-              className="mt-1 border border-cyan/35 bg-black/75 px-2 py-1 font-mono text-[11px] tracking-[0.14em] text-cyan/90"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              data-title-mug-label="true"
-            >
-              Mug misfiled
-            </motion.div>
-          ) : null}
-        </motion.button>
-      ) : null}
-
-      {/* z-[45]: above gag layer (z-30) + crack/stitch so the moved orb never sits under a prop. */}
+      {/* Assistant Orb dock */}
       <motion.div
         className={
           escaped
@@ -334,8 +244,7 @@ export function TitleScreen({
         initial={{ opacity: 0, y: 12 }}
         animate={
           pokeFlinch
-            ? // Keep flinch inside the frame — never shove rings past the right rim on 390px.
-              { opacity: 1, y: [0, -8, 2, 0], x: escaped ? [0, -2, 1, 0] : [0, 2, -1, 0] }
+            ? { opacity: 1, y: [0, -8, 2, 0], x: escaped ? [0, -2, 1, 0] : [0, 2, -1, 0] }
             : { opacity: 1, y: 0, x: 0 }
         }
         transition={pokeFlinch ? { duration: 0.45 } : { delay: 0.55 }}
@@ -387,6 +296,14 @@ export function TitleScreen({
           </motion.div>
         ) : null}
       </motion.div>
+
+      {/* Top-of-stack broken screen overlay — renders over title UI and orb bubble */}
+      <GlassStitchOverlay
+        phase={glassPhase}
+        ticket={titlePokes >= POKE_WORLD.ticket && glassPhase === "stitch"}
+        layerClass="z-[9999]"
+        fullStage
+      />
     </div>
   );
 }

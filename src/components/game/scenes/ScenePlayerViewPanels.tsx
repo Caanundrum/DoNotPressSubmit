@@ -28,9 +28,11 @@ export function ScenePlayerViewPanels({
     scene, state, companion, companionReady, watchedPulse, panelMotion, panelVar,
     panelShake, visibleChoices, choiceMotion, selected,
     hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor,
+    reactionActive, canSkipReaction, onSkipReaction,
     finishCompanion, pickChoice, setHoverChoice, onState, continueDialogue,
     onSetpieceDone, onPopupCleared, onEscapingHit, onClimax, finishSystem,
   } = p;
+  const skippable = !!(reactionActive && canSkipReaction && onSkipReaction);
 
   return (
     <>
@@ -177,7 +179,8 @@ export function ScenePlayerViewPanels({
                   }
                 : { type: "spring", stiffness: 120, damping: 18 }
         }
-        style={{ pointerEvents: "auto" }}
+        style={{ pointerEvents: "auto", cursor: skippable ? "pointer" : undefined }}
+        onClick={skippable ? onSkipReaction : undefined}
       >
         <div className="assessment-panel-inner">
           {scene.formId ? (

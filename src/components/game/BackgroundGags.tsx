@@ -13,7 +13,7 @@ import {
   type RoamSlot,
 } from "@/game/ambientRoam";
 import { audio } from "@/lib/audio";
-import { GAG_CLICK, GAG_DEPART, type GagId } from "@/game/ambientGagMeta";
+import { GAG_CLICK, type GagId } from "@/game/ambientGagMeta";
 import { ambientToastClassName } from "@/game/ambientToastDock";
 import { showAmbientToast, subscribeAmbientToast } from "@/game/ambientToastBus";
 
@@ -104,9 +104,7 @@ export function BackgroundGags({
     corridor: false,
     containment: false,
   });
-  const prevActive = useRef<GagId>("drone");
   const slotRef = useRef<RoamSlot>(slot);
-  const onAmbientRef = useRef(onAmbient);
   const lastBannerAt = useRef(0);
   const suppressRef = useRef(suppressToasts);
   const pathRef = useRef(path);
@@ -121,9 +119,6 @@ export function BackgroundGags({
       setForceDrone(false);
     }
   }, []);
-  useEffect(() => {
-    onAmbientRef.current = onAmbient;
-  }, [onAmbient]);
   useEffect(() => {
     suppressRef.current = suppressToasts;
   }, [suppressToasts]);
@@ -215,28 +210,6 @@ export function BackgroundGags({
     );
     return () => clearTimeout(timer);
   }, [paused, calm, slotPools, forceDrone, path]);
-
-  // Rare departure comedy — long cooldown so REPLACEMENT FAILED isn't wallpaper.
-  // When a toast does fire, Ambient fiddling still bumps (never toast-only).
-  useEffect(() => {
-    const was = prevActive.current;
-    prevActive.current = active;
-    if (!onAmbientRef.current || paused || suppressRef.current) return;
-    if (was === active) return;
-    const depart = GAG_DEPART[was];
-    const wasTouched = touched.current[was];
-    touched.current[was] = false;
-    // Player-clicked gags already toasted on click — skip auto spam.
-    if (wasTouched) return;
-    const now = Date.now();
-    const cooldown = 40000;
-    const cooled = now - lastBannerAt.current >= cooldown;
-    // Quieter: ~12% of cooled departures speak.
-    if (!cooled || Math.random() > 0.12) return;
-    lastBannerAt.current = now;
-    showAmbientToast(depart.missed, 2200);
-    onAmbientRef.current(depart.id, depart.secret);
-  }, [active, paused, calm]);
 
   const react = (gag: GagId) => {
     const meta = GAG_CLICK[gag];

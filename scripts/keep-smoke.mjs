@@ -127,7 +127,9 @@ const scenePlayer = read("src/components/game/scenes/ScenePlayer.tsx");
 assert(!scenePlayer.includes("requestAssistantFlavor"), "ScenePlayer has no assistant flavor client");
 assert(!scenePlayer.includes("flavorLine"), "ScenePlayer has no flavorLine state");
 assert(!scenePlayer.includes("@/lib/ai"), "ScenePlayer does not import lib/ai");
-assert(/glassTimer/.test(scenePlayer), "crack FX timer ref prevents rapid-poke wipe");
+assert(/useTimerRegistry|timers\.schedule\([\s\S]*"glass-phase"/.test(scenePlayer), "crack FX timer registry prevents rapid-poke wipe");
+assert(/computeReactionHoldMs|canSkipReaction/.test(scenePlayer), "post-selection reaction hold scales to text length with skip affordance");
+assert(/ambientAside/.test(scenePlayer), "background easter-egg remarks use separate ambientAside channel");
 assert(/pokeLineId|speakLine/.test(scenePlayer), "ScenePlayer routes VO through baked speakLine");
 
 assert(!existsSync(join(root, "src/app/api/assistant")), "no /api/assistant route");
@@ -158,7 +160,7 @@ const bannedParts = [
   "generateAssistantFlavor",
   "requestAssistantFlavor",
 ];
-const scanned = walk(root).filter((f) => !f.endsWith("scripts/keep-smoke.mjs"));
+const scanned = walk(root).filter((f) => !f.replace(/\\/g, "/").endsWith("scripts/keep-smoke.mjs"));
 let bannedHit = null;
 for (const file of scanned) {
   const text = readFileSync(file, "utf8");
@@ -220,7 +222,7 @@ assert(/chamberSlot|data-roam-egg=\"chamber-07\"/.test(fac), "CHAMBER 07 relocat
 assert(!/>\s*CHAMBER 07\s*</.test(fac), "FacilityBackground strips idle CHAMBER 07 wallpaper");
 assert(!/>\s*EVERYTHING IS FINE/.test(fac), "FacilityBackground strips idle EVERYTHING IS FINE wallpaper");
 assert(!/QUEUE:\s*\{/.test(fac), "FacilityBackground strips idle QUEUE wallpaper");
-assert(/Wordless chamber|wordless chamber/i.test(fac), "FacilityBackground chamber is wordless idle");
+assert(/SESSION \/\/ LIVE|Grounded session telemetry/i.test(fac), "FacilityBackground uses grounded SESSION // LIVE telemetry");
 assert(/pickBarLayout|facility-bar-/.test(fac), "tall facility bars relocate");
 assert(/pickSlotDistant/.test(fac), "facility uses distant slot picks");
 assert(/stiffness:\s*22|v \* -3|v \* -7/.test(fac), "facility parallax/motion quieted");
@@ -230,12 +232,13 @@ assert(!/>DO NOT PRESS</.test(bg), "BackgroundGags strips idle DO NOT PRESS wall
 assert(/data-do-not-press-glyph/.test(bg), "BackgroundGags uses wordless do-not-press glyph");
 
 const title = read("src/components/game/TitleScreen.tsx");
-assert(/FacilityBackground/.test(title), "title restores facility depth");
-assert(/BackgroundGags/.test(title), "title restores ambient gag eggs");
+assert(!/FacilityBackground/.test(title), "title removes background facility clutter (Finding #1)");
+assert(!/BackgroundGags/.test(title), "title removes background gag clutter (Finding #1)");
+assert(!/ASSESSMENT FACILITY 01|CHAMBER 07/.test(title), "title removes confusing facility/chamber jargon (Finding #2)");
+assert(/https:\/\/chaosstandard\.com/.test(title), "title footer links Chaos Standard to https://chaosstandard.com (Finding #3)");
 assert(/AssistantOrb/.test(title), "title keeps Assistant orb");
 assert(/data-title-cinematic|data-title-footer/.test(title), "title marks cinematic + footer");
-assert(/data-title-density=\"medium\"|data-title-cta-column|data-title-orb-dock/.test(title), "title medium density composition markers");
-assert(/calm/.test(title), "title passes calm density to ambient layers");
+assert(/data-title-density=\"clean\"|data-title-cta-column|data-title-orb-dock/.test(title), "title clean composition markers");
 assert(!/data-title-void/.test(title), "title is not the empty void card");
 assert(/BeginControl/.test(title), "title keeps Begin game-feel control");
 assert(!/AudioEnableControl/.test(title), "title CTA column no longer hosts unmute button");
@@ -287,8 +290,8 @@ assert(/orbAnchor=\{/.test(view), "ScenePlayerView passes orbAnchor to Backgroun
 
 const glass = read("src/components/game/scenes/GlassStitchOverlay.tsx");
 assert(/spiderweb|fracture|impact/i.test(glass), "crack FX reads as glass fracture");
-assert(/data-glass-behind-form|z-\[22\]/.test(glass), "crack stays behind form chrome");
-assert(/data-glass-stitch|stitching UI/.test(glass), "stitch tier present");
+assert(/data-glass-top-overlay|z-\[9999\]/.test(glass) && !/maskImage/.test(glass), "crack renders at top of stack over form and bubble without right-side mask (Finding #5)");
+assert(/data-glass-stitch|STITCHING VIEWPORT/.test(glass), "stitch tier present");
 assert(/phase === "stitch"/.test(glass) && /ticket/.test(glass), "ticket only on stitch ladder");
 
 const restless = read("src/components/game/scenes/RestlessOptions.tsx");
@@ -438,8 +441,6 @@ assert(
   /left-\[min\(36vw,380px\)\]/.test(read("src/game/motion.ts")),
   "climax panel leaves left safe column for orb bubble",
 );
-assert(/Mug misfiled/.test(title), "escape prop uses Mug misfiled (no X // Y)");
-assert(!/MUG \/\/ MISFILED/.test(title), "escape prop drops MUG // MISFILED chrome");
 assert(/Glass complains\. That fingerprint is yours\./.test(title), "title third poke crack has a line");
 assert(/titlePokeLine|FRESH_POKE_LINES|CRACK_POKE_LINE/.test(title), "title poke banter always bubbles");
 assert(/data-title-orb-above-props|z-\[45\]/.test(title), "title orb stays above crack/gag props");
@@ -561,7 +562,7 @@ assert(
 );
 assert(!/systemTitle:\s*"SYSTEM MESSAGE"/.test(act2), "SYSTEM MESSAGE modal title removed from act2");
 assert(/data-bubble-tail|title-poke-bubble/.test(title + globals), "title poke bubble has a tail");
-assert(/data-title-mug-shape|Mug misfiled/.test(title), "escape mug is shape-first; label click-only");
+assert(!/Mug misfiled/.test(title), "title removes escaped mug prop clutter (Finding #1)");
 assert(!/poke soft/.test(title), "title drops poke soft helper caption");
 assert(/data-title-orb-above-footer|bottom-24|max-sm:bottom-\[5\.75rem\]/.test(title), "title orb clears footer on mobile");
 assert(/Catch each answer to pin it\./.test(restless), "Drift hint shortened for mobile");
@@ -647,7 +648,7 @@ assert(
 assert(/DID AS TOLD/.test(reportSrc) && !/COMPLIANCE MARK/.test(reportSrc), "report uses DID AS TOLD not COMPLIANCE MARK");
 assert(
   /companion/.test(read("src/components/game/scenes/ScenePlayerView.tsx")) &&
-    /Side Channel \/ Hold Still/.test(read("src/components/game/scenes/ScenePlayerView.tsx")),
+    /scene\.kind === "setpiece"[\s\S]*companion/.test(read("src/components/game/scenes/ScenePlayerView.tsx")),
   "AmbientChrome pauses on companion so cyan dots stay off CTAs",
 );
 assert(

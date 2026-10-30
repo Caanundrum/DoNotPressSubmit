@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { ScenePlayerViewProps } from "./ScenePlayerView";
 import { AssistantOrb } from "../AssistantOrb";
 
@@ -25,34 +25,24 @@ export function ScenePlayerViewAssistant({
 }) {
   const {
     state, systemLock, orbStyle, orbAnchor, spotlight, buryAssistant,
-    aiLine, glance, pokeFlinch, choiceFlush, pokeable, onOrbPoke,
+    aiLine, ambientAside, reactionActive, canSkipReaction, onSkipReaction,
+    glance, pokeFlinch, choiceFlush, pokeable, onOrbPoke,
   } = p;
 
-  // Spotlight / Counterpoint: bubble BESIDE the orb (never above a 168px body that
-  // can enlarge/pulse into the dialogue). Keep ≥28px gap through flinch/recoil.
   const safeGap = pokeFlinch ? 36 : spotlight ? 32 : 28;
   const bubbleReads = !systemLock || !!aiLine;
+  const skippable = !!(reactionActive && canSkipReaction && onSkipReaction);
 
   return (
     <>
-      {/*
-        Assistant orb + dialogue — reserved safe zone on non-gag forms.
-        Layout rules: safe-zone dock, form owns center, bubble yields.
-        Default: pointer-events none so form CTAs stay mouse-hittable.
-        Pokeable scenes enable a tiny hit target on the orb only.
-        buryAssistant gag scenes keep the orb under/behind the form on purpose
-        EXCEPT system beats — those keep the bubble readable above the overlay.
-      */}
       <motion.div
         className={`absolute ${assistantZ} flex pointer-events-none ${assistantLayout}`}
         style={{
           left: orbStyle.right ? "auto" : (orbStyle.left ?? "2.5%"),
           right: orbStyle.right ?? "auto",
           top: orbStyle.top,
-          // FM animate x/y owns transform — do not rely on translate(-50%) for edge safety.
           transform: "none",
           gap: safeGap,
-          // Right-dock / beside / spotlight-beside: width follows content so the bubble stays inside the frame.
           width: dockLeft || dockBeside || spotlight
             ? "auto"
             : Math.max(orbStyle.size, spotlight ? 280 : 168),
@@ -65,7 +55,6 @@ export function ScenePlayerViewAssistant({
                 : dockAbove
                   ? "min(50vw, 360px)"
                   : "min(34vw, 260px)",
-          // Keep orb+rings+label+bubble inside the stage with a few px margin.
           padding: 6,
           boxSizing: "content-box",
         }}
@@ -78,8 +67,7 @@ export function ScenePlayerViewAssistant({
         data-bubble-safe-gap={pokeFlinch ? "flinch" : spotlight ? "spotlight" : "idle"}
         animate={
           orbAnchor === "pace"
-            ? // Tiny floor sway — never wander under the form answer box.
-              { x: [-2, 2, -1, 0] }
+            ? { x: [-2, 2, -1, 0] }
             : orbAnchor === "flee" || orbAnchor === "avoid-submit"
               ? { x: [0, 1, -1, 1, 0], y: [0, -1, 1, 0] }
               : spotlight
@@ -103,7 +91,6 @@ export function ScenePlayerViewAssistant({
           <motion.div
             className="pointer-events-none absolute -z-10 rounded-full"
             style={{
-              // Bound the glow to the orb hit box only — never wash over bubble/label.
               width: orbStyle.size * 1.35,
               height: orbStyle.size * 1.35,
               left: 0,
@@ -115,7 +102,6 @@ export function ScenePlayerViewAssistant({
             transition={{ duration: 3.2, repeat: Infinity }}
           />
         ) : null}
-        {/* Explicit poke hit layer — companion Hold + mid/late beats must never silently no-op. */}
         <div
           className={pokeable ? "pointer-events-auto relative z-[1] shrink-0" : "pointer-events-none relative shrink-0"}
           style={{ width: orbStyle.size }}
@@ -133,67 +119,105 @@ export function ScenePlayerViewAssistant({
             draggable={pokeable && !spotlight}
           />
         </div>
-        <motion.div
-          className="pointer-events-none glass-panel assistant-bubble relative shrink border border-cyan/45 px-2.5 py-1.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)]"
+
+        <div
+          className="flex shrink flex-col gap-2"
           style={{
             maxWidth: bubbleMax,
-            // Tall enough for Form 03 / Counterpoint / Form 09 full lines — no mid-word cut.
-            maxHeight: spotlight
-              ? "min(48vh, 320px)"
-              : dockBeside
-                ? "min(32vh, 200px)"
-                : dockAbove
-                  ? "min(40vh, 260px)"
-                  : dockLeft
-                    ? "min(40vh, 260px)"
-                    : "min(34vh, 220px)",
-            // Wrap only — never clip the last line into the orb.
-            overflow: "visible",
-            overflowWrap: "anywhere",
-            wordBreak: "break-word",
             marginTop: dockBeside || spotlight ? 4 : 0,
-            // Dock-above: keep last bubble line clear of the orb during idle pulse + flinch.
             marginBottom: dockAbove && !spotlight ? 24 : 0,
           }}
-          key={`${p.scene.id}:${aiLine || "silent"}`}
-          data-assistant-bubble="true"
-          data-bubble-scene={p.scene.id}
-          data-bubble-dock={
-            dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
-          }
-          data-bubble-tail="true"
-          data-bubble-no-clip="true"
-          initial={{
-            opacity: 0,
-            x: dockLeft ? 8 : dockBeside || spotlight ? -8 : 0,
-            y: dockLeft || dockBeside || spotlight ? 0 : dockAbove ? -8 : 8,
-            scale: 0.96,
-          }}
-          animate={{
-            // System directive must NOT faint the bubble — keep it fully readable (P0).
-            opacity: buryAssistant && !systemLock ? 0.85 : 1,
-            x: 0,
-            y: 0,
-            scale: 1,
-          }}
-          transition={{ delay: 0, duration: 0.28, ease: "easeOut" }}
         >
-          {/* Wordless speaker mark — mood is orb look + line, not a status strip. */}
-          <div
-            className="mb-1 flex select-none items-center gap-1.5"
-            aria-hidden
-            data-bubble-speaker-mark="true"
+          <motion.div
+            className={`glass-panel assistant-bubble relative shrink border border-cyan/45 px-2.5 py-1.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)] ${
+              skippable ? "pointer-events-auto cursor-pointer hover:border-cyan/80" : "pointer-events-none"
+            }`}
+            style={{
+              maxWidth: bubbleMax,
+              maxHeight: spotlight
+                ? "min(48vh, 320px)"
+                : dockBeside
+                  ? "min(32vh, 200px)"
+                  : dockAbove
+                    ? "min(40vh, 260px)"
+                    : dockLeft
+                      ? "min(40vh, 260px)"
+                      : "min(34vh, 220px)",
+              overflow: "visible",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
+            }}
+            key={`${p.scene.id}:${aiLine || "silent"}`}
+            data-assistant-bubble="true"
+            data-bubble-scene={p.scene.id}
+            data-bubble-dock={
+              dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
+            }
+            data-bubble-tail="true"
+            data-bubble-no-clip="true"
+            onClick={skippable ? onSkipReaction : undefined}
+            initial={{
+              opacity: 0,
+              x: dockLeft ? 8 : dockBeside || spotlight ? -8 : 0,
+              y: dockLeft || dockBeside || spotlight ? 0 : dockAbove ? -8 : 8,
+              scale: 0.96,
+            }}
+            animate={{
+              opacity: buryAssistant && !systemLock ? 0.85 : 1,
+              x: 0,
+              y: 0,
+              scale: 1,
+            }}
+            transition={{ delay: 0, duration: 0.28, ease: "easeOut" }}
           >
-            <span className="h-1 w-1 rounded-full bg-cyan/75" />
-            <span className="h-px w-4 bg-cyan/40" />
-          </div>
-          <div
-            className="break-words text-[13px] font-medium leading-relaxed text-[#f0f7ff] sm:text-[15px]"
-            style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
-          >
-            {bubbleReads ? aiLine || "…" : "…"}
-          </div>
-        </motion.div>
+            <div
+              className="mb-1 flex select-none items-center gap-1.5"
+              aria-hidden
+              data-bubble-speaker-mark="true"
+            >
+              <span className="h-1 w-1 rounded-full bg-cyan/75" />
+              <span className="h-px w-4 bg-cyan/40" />
+            </div>
+            <div
+              className="break-words text-[13px] font-medium leading-relaxed text-[#f0f7ff] sm:text-[15px]"
+              style={{ overflowWrap: "anywhere", wordBreak: "break-word" }}
+            >
+              {bubbleReads ? aiLine || "…" : "…"}
+            </div>
+            {skippable ? (
+              <div
+                className="mt-1.5 flex items-center justify-end font-mono text-[9px] tracking-[0.2em] text-cyan/85 uppercase transition-colors hover:text-white"
+                data-reaction-continue="true"
+              >
+                CLICK TO CONTINUE →
+              </div>
+            ) : null}
+          </motion.div>
+
+          {/* Dedicated secondary channel for background easter-egg remarks (Finding #4) */}
+          <AnimatePresence>
+            {ambientAside ? (
+              <motion.div
+                key={ambientAside}
+                role="status"
+                aria-live="polite"
+                data-ambient-aside-bubble="true"
+                className="pointer-events-none border border-cyan/35 bg-[#06101c]/90 px-2.5 py-1.5 text-left shadow-[0_6px_18px_rgba(0,0,0,0.55)]"
+                initial={{ opacity: 0, y: -4, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.97 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="mb-0.5 font-mono text-[8px] tracking-[0.22em] text-cyan/75 uppercase">
+                  ASIDE // INTERJECTION
+                </div>
+                <div className="break-words text-[12px] leading-snug text-[#d4e8f8]">
+                  {ambientAside}
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
       </motion.div>
     </>
   );

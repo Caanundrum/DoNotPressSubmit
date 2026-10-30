@@ -14,6 +14,7 @@ import { rememberTitleEnding } from "@/game/storage";
 import type { ChoiceDef, GameState, OrbMood } from "@/game/types";
 import { audio } from "@/lib/audio";
 import { speech } from "@/lib/speech";
+import { useTimerRegistry } from "@/lib/useTimerRegistry";
 import { endingLineId, pokeLineId, sceneLineId, voiceMoodFromOrb } from "@/lib/voiceIds";
 import { FacilityBackground } from "../FacilityBackground";
 import { AssessmentReport } from "./AssessmentReport";
@@ -28,6 +29,15 @@ import {
 } from "./sceneAmbient";
 import type { ChoiceFlush } from "../AssistantOrb";
 import type { GlassPhase } from "./GlassStitchOverlay";
+
+/**
+ * Compute readable post-selection hold duration scaled to reaction text length
+ * (~16ms/char typing + ~42ms/char reading time, clamped between 2600ms and 4800ms).
+ */
+export function computeReactionHoldMs(reactionText?: string | null): number {
+  if (!reactionText) return 900;
+  return Math.min(4800, Math.max(2600, 1200 + reactionText.length * 42));
+}
 
 export function ScenePlayer({
   state,
@@ -66,8 +76,10 @@ function ScenePlayerInner({
   onNewGame: () => void;
 }) {
   const scene = getScene(sceneId);
+  const timers = useTimerRegistry();
   const [selected, setSelected] = useState<string | null>(null);
   const [reaction, setReaction] = useState<string | null>(null);
+  const [canSkipReaction, setCanSkipReaction] = useState(false);
   /** Reaction / poke lines are scene-scoped — never leak into the next beat. */
   const [lineSceneId, setLineSceneId] = useState(sceneId);
   const [showLate, setShowLate] = useState(() => !scene?.choices?.some((c) => c.late));
@@ -76,20 +88,21 @@ function ScenePlayerInner({
   const [hoverChoice, setHoverChoice] = useState<string | null>(null);
   const [pokeFlinch, setPokeFlinch] = useState(false);
   const [pokeNotice, setPokeNotice] = useState<string | null>(null);
+  /** Separate channel for background easter-egg remarks so they never overwrite aiLine. */
+  const [ambientAside, setAmbientAside] = useState<string | null>(null);
   const [companionReady, setCompanionReady] = useState(false);
   const [watchedPulse, setWatchedPulse] = useState(false);
   const [glassPhase, setGlassPhase] = useState<GlassPhase>("idle");
   const [chamberStatus, setChamberStatus] = useState<string | null>(null);
   const [choiceFlush, setChoiceFlush] = useState<ChoiceFlush>("neutral");
   const [choiceGlanceBoost, setChoiceGlanceBoost] = useState(0);
-  const advanceTimer = useRef<number | null>(null);
-  /** Invalidate prior crack/stitch clear timers so rapid pokes don't wipe a newer FX beat. */
-  const glassTimer = useRef<number | null>(null);
+  const pendingAdvanceRef = useRef<(() => void) | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
 
   const go = useCallback(
     (base: GameState, nextId: string, patch?: Partial<GameState>) => {
+      pendingAdvanceRef.current = null;
       const nextScene = getScene(nextId);
       onState({
         ...base,
@@ -102,33 +115,35 @@ function ScenePlayerInner({
     [onState],
   );
 
-  useEffect(() => {
-    return () => {
-      if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
-    };
-  }, []);
+  const onSkipReaction = useCallback(() => {
+    if (!canSkipReaction || !pendingAdvanceRef.current) return;
+    timers.clear("advance");
+    timers.clear("can-skip-reaction");
+    const advance = pendingAdvanceRef.current;
+    pendingAdvanceRef.current = null;
+    setCanSkipReaction(false);
+    audio.play("click", 0.35);
+    advance();
+  }, [canSkipReaction, timers]);
 
   useEffect(() => {
     if (!scene?.choices?.some((c) => c.late)) return;
-    // Soft diegetic tell before the unauthorized option materializes.
-    const hint = window.setTimeout(() => setLateHint(true), 900);
-    const reveal = window.setTimeout(() => setShowLate(true), 1600);
+    timers.schedule("late-hint", () => setLateHint(true), 900);
+    timers.schedule("late-reveal", () => setShowLate(true), 1600);
     return () => {
-      window.clearTimeout(hint);
-      window.clearTimeout(reveal);
+      timers.clear("late-hint");
+      timers.clear("late-reveal");
     };
-  }, [scene]);
-
-  useEffect(() => {
-    return () => {
-      if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
-    };
-  }, []);
+  }, [scene, timers]);
 
   // Per-scene bubble: clear sticky reaction / poke lines when the beat changes.
   useEffect(() => {
+    timers.clearAll();
+    pendingAdvanceRef.current = null;
     setReaction(null);
+    setCanSkipReaction(false);
     setPokeNotice(null);
+    setAmbientAside(null);
     setSelected(null);
     setLineSceneId(sceneId);
     setShowLate(!getScene(sceneId)?.choices?.some((c) => c.late));
@@ -138,28 +153,28 @@ function ScenePlayerInner({
     setGlassPhase("idle");
     setChoiceFlush("neutral");
     setChoiceGlanceBoost(0);
-  }, [sceneId]);
+  }, [sceneId, timers]);
 
   useEffect(() => {
     if (scene?.kind !== "companion") return;
-    const ready = window.setTimeout(
+    timers.schedule(
+      "companion-ready",
       () => setCompanionReady(true),
       scene.companion === "wait" ? 2200 : 1400,
     );
-    // Settle CTA arms sooner so the payoff is obviously triggerable (P0 gag clarity).
-    const pulse = window.setTimeout(() => setWatchedPulse(true), 650);
+    timers.schedule("companion-pulse", () => setWatchedPulse(true), 650);
     return () => {
-      window.clearTimeout(ready);
-      window.clearTimeout(pulse);
+      timers.clear("companion-ready");
+      timers.clear("companion-pulse");
     };
-  }, [scene]);
+  }, [scene, timers]);
 
   const aiLine = useMemo(() => {
     if (!scene) return "";
     const sceneOwned = lineSceneId === sceneId;
-    // Poke reactions outrank beat openings so idle never re-reads the question-start copy.
-    if (sceneOwned && pokeNotice) return pokeNotice;
+    // Post-selection reactions always outrank temporary orb poke notices.
     if (sceneOwned && reaction) return reaction;
+    if (sceneOwned && pokeNotice) return pokeNotice;
     return resolveAiLine(scene.aiLine, scene.aiLineIf, state.flags);
   }, [scene, sceneId, lineSceneId, reaction, pokeNotice, state.flags]);
 
@@ -177,10 +192,6 @@ function ScenePlayerInner({
   const panelMotion = scene?.panelMotion ?? "settle";
   const panelVar = panelVariants(panelMotion);
   const choiceMotion = scene?.choiceMotion ?? "static";
-  // Default: pokeable on every non-gag playable beat so the orb stays alive.
-  // Setpieces stay pokeable when orbPokeable:true (Act III Form 10/11/12).
-  // Gag buries: only when explicitly orbPokeable (e.g. side-channel whisper).
-  // Explicit orbPokeable:false opts out.
   const pokeable =
     scene?.kind !== "system" &&
     scene?.kind !== "climax" &&
@@ -195,8 +206,7 @@ function ScenePlayerInner({
       speech.cancel();
       return;
     }
-    // Poke banter owns the VO channel while a poke notice is sticky.
-    if (pokeNotice) {
+    if (pokeNotice && !reaction) {
       speech.speakLine({
         lineId: pokeLineId(pokeNotice),
         text: pokeNotice,
@@ -216,7 +226,7 @@ function ScenePlayerInner({
       mood: voiceMoodFromOrb(state.aiMood),
     });
     return () => speech.cancel();
-  }, [aiLine, scene, pokeNotice, state.aiMood]);
+  }, [aiLine, scene, pokeNotice, reaction, state.aiMood]);
 
   const onAmbient = useCallback(
     (id: string, secret?: string) => {
@@ -225,7 +235,7 @@ function ScenePlayerInner({
       stateRef.current = next;
       onState(next);
       const asides: Record<string, string> = {
-        "chamber-07": "Chamber 07 blinked at you. Rude architecture.",
+        "chamber-07": "Session telemetry blinked at you. Rude architecture.",
         "dashed-frame": "Dashes mean 'temporary.' Everything here is temporary.",
         "everything-fine": "Status lies for a living. Relatable.",
         "queue-counter": "Empty queues still bill hours.",
@@ -241,11 +251,13 @@ function ScenePlayerInner({
         "containment-fine": "Unsolicited reassurance from Bay 03. Don't trust architecture.",
       };
       const aside = asides[id];
-      if (aside && pokeable) {
-        setPokeNotice(aside);
+      if (aside) {
+        // Render in separate ASIDE // INTERJECTION channel so active question prompt is never erased.
+        setAmbientAside(aside);
+        timers.schedule("ambient-aside", () => setAmbientAside(null), 3200);
       }
     },
-    [onState, pokeable],
+    [onState, timers],
   );
 
   const onRoamer = useCallback(
@@ -302,8 +314,7 @@ function ScenePlayerInner({
   const onOrbPoke = () => {
     if (!pokeable) return;
     setPokeFlinch(true);
-    window.setTimeout(() => setPokeFlinch(false), 520);
-    // Always read latest counters — rapid pokes must not undercount via stale closure.
+    timers.schedule("poke-flinch", () => setPokeFlinch(false), 520);
     const current = stateRef.current;
     const pokes = (current.counters.orbPokes ?? 0) + 1;
     const currentLine =
@@ -315,51 +326,66 @@ function ScenePlayerInner({
     );
     stateRef.current = next;
     onState(next);
-    // Sticky poke line — never clear back to beat opening while still on this scene.
     setLineSceneId(sceneId);
     setPokeNotice(notice);
-    setReaction(null);
+    // Auto-restore active question prompt after 2600ms so orb pokes never permanently erase the prompt.
+    timers.schedule("poke-notice", () => setPokeNotice(null), 2600);
+
     if (glassEvent === "crack" || glassEvent === "stitch") {
-      if (glassTimer.current != null) window.clearTimeout(glassTimer.current);
+      setPanelShake(true);
+      timers.schedule("panel-shake", () => setPanelShake(false), 600);
       if (glassEvent === "crack") {
         setGlassPhase("crack");
-        // Readable shatter beat, then fade clear — never leave lines across waits.
-        // Timer ref: rapid poke 3→5 must not let the first timeout wipe the newer crack.
-        glassTimer.current = window.setTimeout(() => {
-          glassTimer.current = null;
-          setGlassPhase((p) => (p === "crack" ? "idle" : p));
-        }, 2400);
+        timers.schedule(
+          "glass-phase",
+          () => {
+            setGlassPhase((p) => (p === "crack" ? "idle" : p));
+          },
+          4500,
+        );
       } else {
-        // Ladder: residual crack → tape stitch → clear (ticket shows during stitch only).
         setGlassPhase("stitch");
-        glassTimer.current = window.setTimeout(() => {
-          glassTimer.current = null;
-          setGlassPhase("idle");
-        }, 4200);
+        const holdMs = next.flags.orbFiledTicket ? 5500 : 6500;
+        timers.schedule(
+          "glass-phase",
+          () => {
+            setGlassPhase("idle");
+          },
+          holdMs,
+        );
       }
     }
     if (status) {
       setChamberStatus(status);
-      window.setTimeout(() => setChamberStatus(null), 3600);
+      timers.schedule("chamber-status", () => setChamberStatus(null), 3600);
     }
   };
 
   const finishCompanion = (choiceId?: string) => {
+    if (selected) return;
     if (!scene.next && !(choiceId && scene.choices)) return;
     audio.play("click", 0.4);
+    setPokeNotice(null);
+    timers.clear("poke-notice");
+
     let next = state;
     let nextId = scene.next;
+    let reactionText: string | undefined;
+
     if (choiceId && scene.choices) {
       const choice = scene.choices.find((c) => c.id === choiceId);
       if (choice) {
+        setSelected(choice.id);
         next = applyEffects(state, choice.effects, choice.id);
         nextId = choice.next;
-        if (choice.effects?.aiLine) {
-          setLineSceneId(sceneId);
-          setReaction(choice.effects.aiLine);
+        reactionText = choice.effects?.aiLine;
+        if (choice.effects?.mood) {
+          next = { ...next, aiMood: choice.effects.mood };
         }
+        onState(next);
       }
     } else {
+      setSelected("companion-wait");
       next = {
         ...state,
         counters: {
@@ -370,29 +396,52 @@ function ScenePlayerInner({
         history: [...state.history, `companion:${scene.companion ?? "beat"}`],
       };
     }
+
     if (!nextId) return;
-    go(next, nextId, { aiMood: next.aiMood });
+    const targetNextId = nextId;
+
+    if (reactionText) {
+      setLineSceneId(sceneId);
+      setReaction(reactionText);
+      const delay = computeReactionHoldMs(reactionText);
+      const doAdvance = () => go(next, targetNextId, { aiMood: next.aiMood });
+      pendingAdvanceRef.current = doAdvance;
+      timers.schedule("can-skip-reaction", () => setCanSkipReaction(true), 450);
+      timers.schedule("advance", doAdvance, delay);
+    } else {
+      go(next, targetNextId, { aiMood: next.aiMood });
+    }
   };
 
   const pickChoice = (choice: ChoiceDef) => {
     if (selected) return;
     audio.play("click", 0.5);
     setSelected(choice.id);
+    // Immediately clear any orb poke notice so post-selection reaction is never blocked.
+    setPokeNotice(null);
+    timers.clear("poke-notice");
+
     const flash = choiceMoodFlash(choice);
     setChoiceFlush(flash.flush);
     setChoiceGlanceBoost(flash.glance);
-    window.setTimeout(() => {
-      setChoiceFlush("neutral");
-      setChoiceGlanceBoost(0);
-    }, 1600);
+    timers.schedule(
+      "choice-flush",
+      () => {
+        setChoiceFlush("neutral");
+        setChoiceGlanceBoost(0);
+      },
+      1600,
+    );
+
     let next = applyEffects(state, choice.effects, choice.id);
-    if (choice.effects?.aiLine) {
+    const reactionText = choice.effects?.aiLine;
+    if (reactionText) {
       setLineSceneId(sceneId);
-      setReaction(choice.effects.aiLine);
+      setReaction(reactionText);
     }
     if (choice.unauthorized || choice.danger) {
       setPanelShake(true);
-      setTimeout(() => setPanelShake(false), 600);
+      timers.schedule("panel-shake", () => setPanelShake(false), 600);
     }
     if (choice.effects?.mood) {
       next = { ...next, aiMood: choice.effects.mood };
@@ -401,12 +450,16 @@ function ScenePlayerInner({
       next = { ...next, aiMood: flash.mood };
       onState(next);
     }
-    // Visible select beat before advance — short enough not to feel blank.
-    const delay = choice.effects?.aiLine ? 1200 : 700;
-    if (advanceTimer.current) window.clearTimeout(advanceTimer.current);
-    advanceTimer.current = window.setTimeout(() => {
+
+    const delay = computeReactionHoldMs(reactionText);
+    const doAdvance = () => {
       go(next, choice.next, { aiMood: choice.effects?.mood ?? next.aiMood });
-    }, delay);
+    };
+    pendingAdvanceRef.current = doAdvance;
+    if (reactionText) {
+      timers.schedule("can-skip-reaction", () => setCanSkipReaction(true), 450);
+    }
+    timers.schedule("advance", doAdvance, delay);
   };
 
   const continueDialogue = () => {
@@ -424,6 +477,8 @@ function ScenePlayerInner({
 
   const onEscapingHit = (hits: number) => {
     setLineSceneId(sceneId);
+    setPokeNotice(null);
+    timers.clear("poke-notice");
     if (hits >= 3) {
       setReaction("All 3 hits archived. The button finally looks embarrassed.");
     } else if (hits === 2) {
@@ -436,6 +491,7 @@ function ScenePlayerInner({
   const onPopupCleared = () => {
     setLineSceneId(sceneId);
     setPokeNotice(null);
+    timers.clear("poke-notice");
     setReaction("Notices cleared. I'll take the win.");
   };
 
@@ -519,6 +575,10 @@ function ScenePlayerInner({
       buryAssistant={buryAssistant}
       safeSide={safeSide}
       aiLine={aiLine}
+      ambientAside={ambientAside}
+      reactionActive={!!reaction}
+      canSkipReaction={canSkipReaction}
+      onSkipReaction={onSkipReaction}
       glance={glance}
       pokeFlinch={pokeFlinch}
       companionReady={companionReady}

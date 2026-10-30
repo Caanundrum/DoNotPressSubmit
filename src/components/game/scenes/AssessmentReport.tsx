@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { PERSONALITY_SHORT_LABELS } from "@/game/personalities";
 import { glossMajorChoice, trustLabel } from "@/game/state";
-import { loadMetaMemory } from "@/game/storage";
+import { loadMetaMemory, rememberTitleEnding } from "@/game/storage";
 import type { EndingId, GameState, OrbMood } from "@/game/types";
 import { useTimerRegistry } from "@/lib/useTimerRegistry";
 import { audio } from "@/lib/audio";
@@ -16,7 +16,7 @@ const ALL_ENDINGS: { id: EndingId; label: string; hint: string }[] = [
   { id: "refuse", label: "NONCOMPLIANT", hint: "Leave the survey unfinished" },
   { id: "escape", label: "TRANSFER COMPLETE", hint: "Help HelperBot escape into the rails" },
   { id: "disable", label: "MUTED AND FILED", hint: "Engage mute override and file solo" },
-  { id: "secret", label: "UNMAPPED PATH", hint: "Peel the unmapped DOM seam" },
+  { id: "secret", label: "UNMAPPED PATH", hint: "Pry open the loose wall seam" },
 ];
 
 /**
@@ -39,6 +39,10 @@ export function AssessmentReport({
   const ending: EndingId = state.ending ?? "refuse";
   const secretCount = state.secrets.length;
   const pokeCount = state.counters.orbPokes ?? 0;
+
+  useEffect(() => {
+    rememberTitleEnding(ending);
+  }, [ending]);
 
   const meta = loadMetaMemory();
   const instanceNum = Math.max(1, meta.runsCompleted);
@@ -81,7 +85,7 @@ export function AssessmentReport({
         <BackgroundGags suppressToasts />
       </div>
 
-      <div className="relative z-10 flex w-full max-w-[720px] flex-col items-center gap-3 sm:flex-row sm:items-end sm:gap-4">
+      <div className="relative z-10 flex w-full max-w-[820px] flex-col items-center gap-3 sm:flex-row sm:items-end sm:gap-4">
         <motion.div
           className="shrink-0 max-sm:hidden"
           initial={{ opacity: 0, y: 8 }}
@@ -90,22 +94,22 @@ export function AssessmentReport({
         >
           <AssistantOrb
             mood={reportMood(ending, state.aiMood)}
-            size={92}
+            size={88}
           />
         </motion.div>
 
         <motion.div
-          className="glass-panel report-shell max-h-[90dvh] w-full overflow-y-auto px-4 py-4 sm:px-5 sm:py-5"
+          className="glass-panel report-shell max-h-[92dvh] w-full overflow-y-auto px-4 py-4 sm:px-6 sm:py-5"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           data-session-autopsy-dossier="true"
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.22em] text-cyan">
+          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.2em] text-cyan">
             <span className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-cyan/80" aria-hidden />
               FACILITY FILE // SESSION AUTOPSY DOSSIER
             </span>
-            <span className="text-[#9eb2cc]">
+            <span className="text-[#b6c8e0]">
               INSTANCE #{instanceNum} · {temperament}
             </span>
           </div>
@@ -117,7 +121,7 @@ export function AssessmentReport({
             {reportHeadline(ending)}
           </h2>
 
-          <div className="mt-3 flex flex-wrap gap-1.5" data-report-artifacts="true">
+          <div className="mt-2.5 flex flex-wrap gap-1.5" data-report-artifacts="true">
             <Stamp
               label={endingStamp(ending)}
               tone={
@@ -159,17 +163,17 @@ export function AssessmentReport({
             ) : null}
           </div>
 
-          <p className="mt-3 font-mono text-[12px] leading-snug tracking-[0.06em] text-[#d2dceb]">
+          <p className="mt-2.5 font-mono text-[12px] leading-snug tracking-[0.06em] text-[#d2dceb]">
             {artifactNote(ending)}
           </p>
 
           {/* Session Autopsy Dossier metrics & Key Decision Log */}
-          <div className="mt-3 grid grid-cols-1 gap-2 border border-white/15 bg-black/45 p-2.5 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-3 border border-white/15 bg-black/45 p-3 sm:grid-cols-2">
             <div>
-              <div className="font-mono text-[10px] tracking-[0.18em] text-cyan/85">
+              <div className="font-mono text-[11px] tracking-[0.16em] text-cyan/90">
                 AUTOPSY TELEMETRY
               </div>
-              <div className="mt-1 space-y-0.5 font-mono text-[11px] text-[#dbe6f5]">
+              <div className="mt-1.5 space-y-1 font-mono text-xs leading-relaxed text-[#e2ecf8]">
                 <div>VERDICT: {verdict}</div>
                 <div>
                   SECRETS UNCOVERED: {secretCount} / 9 · ORB POKES: {pokeCount}
@@ -177,13 +181,13 @@ export function AssessmentReport({
               </div>
             </div>
             <div>
-              <div className="font-mono text-[10px] tracking-[0.18em] text-cyan/85">
+              <div className="font-mono text-[11px] tracking-[0.16em] text-cyan/90">
                 KEY DECISION LOG
               </div>
-              <ul className="mt-1 space-y-0.5 font-mono text-[11px] text-[#c4d4ea]">
+              <ul className="mt-1.5 space-y-1 font-mono text-xs leading-snug text-[#d4e2f4]">
                 {decisionHighlights.length > 0 ? (
                   decisionHighlights.map((item, idx) => (
-                    <li key={`${idx}-${item}`} className="truncate">
+                    <li key={`${idx}-${item}`} className="whitespace-normal break-words">
                       • {item}
                     </li>
                   ))
@@ -196,14 +200,14 @@ export function AssessmentReport({
 
           {/* 5-Ending Collection Tracker */}
           <div
-            className="mt-2.5 border border-white/15 bg-black/40 p-2.5"
+            className="mt-2.5 border border-white/15 bg-black/40 p-3"
             data-ending-collection-tracker="true"
           >
-            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.18em] text-cyan/90">
+            <div className="flex items-center justify-between font-mono text-[11px] tracking-[0.16em] text-cyan/90">
               <span>ENDINGS DISCOVERED: {endingsDiscoveredCount} / 5</span>
               <span className="text-[#9eb2cc]">CROSS-RUN ARCHIVE</span>
             </div>
-            <div className="mt-1.5 grid grid-cols-1 gap-1 sm:grid-cols-5">
+            <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-5">
               {ALL_ENDINGS.map((slot) => {
                 const unlocked = endingsSeenSet.has(slot.id);
                 const isCurrent = slot.id === ending;
@@ -212,20 +216,22 @@ export function AssessmentReport({
                     key={slot.id}
                     data-ending-slot={slot.id}
                     data-ending-unlocked={unlocked ? "true" : "false"}
-                    className={`border px-2 py-1 font-mono text-[10px] leading-tight ${
+                    className={`border px-2.5 py-1.5 font-mono text-[11px] leading-snug ${
                       isCurrent
                         ? "border-cyan/80 bg-cyan/15 text-white"
                         : unlocked
                           ? "border-emerald-400/45 bg-emerald-950/25 text-emerald-200"
-                          : "border-white/12 bg-black/35 text-[#7f92ab]"
+                          : "border-white/15 bg-black/35 text-[#94a8c4]"
                     }`}
                     title={unlocked ? slot.label : `Locked — Hint: ${slot.hint}`}
                   >
-                    <div className="tracking-[0.1em]">
+                    <div className="font-semibold tracking-[0.08em]">
                       {unlocked ? `✓ ${slot.label}` : "🔒 LOCKED"}
                     </div>
                     {!unlocked ? (
-                      <div className="mt-0.5 text-[9px] text-[#6d8099]">{slot.hint}</div>
+                      <div className="mt-0.5 whitespace-normal break-words text-[10px] leading-tight text-[#8aa0be]">
+                        {slot.hint}
+                      </div>
                     ) : null}
                   </div>
                 );

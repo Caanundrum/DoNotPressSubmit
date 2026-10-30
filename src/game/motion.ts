@@ -28,14 +28,7 @@ export function assistantSafeSide(
 
 /** Dialogue docks above the orb when the orb sits low — prevents edge clipping. */
 export function dialogueDocksAbove(anchor: OrbAnchor | string | undefined): boolean {
-  return (
-    // pace docks BESIDE (floor band) — never above into Form 01C answers.
-    anchor === "hide" ||
-    anchor === "avoid-submit" ||
-    anchor === "dock-left" ||
-    anchor === "listen" ||
-    anchor === "center"
-  );
+  return anchor === "hide" || anchor === "avoid-submit";
 }
 
 /** Right-edge anchors: bubble must grow toward center, never past the viewport. */
@@ -49,8 +42,8 @@ export function dialogueDocksLeft(anchor: OrbAnchor | string | undefined): boole
 }
 
 /**
- * Floor-band anchors (Form 01C pace): bubble sits beside the orb in the clear
- * strip under the shortened form — never on top of drifting/pinned answers.
+ * Floor-band anchors (Form 01C pace): bubble sits in the left column below the orb —
+ * never on top of drifting/pinned answers.
  */
 export function dialogueDocksBeside(anchor: OrbAnchor | string | undefined): boolean {
   return anchor === "pace";
@@ -74,44 +67,43 @@ export function orbStageStyle(
 
   // Safe-zone dock: orb + rings + status label fully on-screen with a few px margin.
   // Right docks pin with `right` so FM transform overrides can't shove chrome off-frame.
-  // Spotlight size capped so bubble-beside + ASSISTANT // LIVE stay clear while enlarged.
   if (spotlight || anchor === "spotlight") {
-    return { left: "3%", top: "16%", transform: "none", size: 148 };
+    return { left: "2.5%", top: "11%", transform: "none", size: 116 };
   }
 
   switch (anchor ?? "dock-left") {
     case "dock-right":
-      // Form 01B — ≥24px edge pad; bubble grows toward center.
-      return { right: "2.5%", top: "28%", transform: "none", size: 104 };
+      // Right column — ≥24px edge pad; bubble stacks cleanly below orb in right column.
+      return { right: "2.5%", top: "13%", transform: "none", size: 96 };
     case "listen":
-      // Form 01 — left dock, clear of restless CTAs and stage header.
-      return { left: "3%", top: "28%", transform: "none", size: 120 };
+      // Left dock, clear of restless CTAs and stage header.
+      return { left: "2.5%", top: "13%", transform: "none", size: 104 };
     case "pace":
-      // Form 01C — left gutter beside shortened form; bubble docks beside, never over answers.
-      return { left: "3%", top: "34%", transform: "none", size: 78 };
+      // Form 01C — left gutter beside shortened form; bubble stacks below orb in left column.
+      return { left: "2.5%", top: "14%", transform: "none", size: 84 };
     case "flee":
       return { right: "2.5%", top: "12%", transform: "none", size: 88 };
     case "loom":
-      // Act III hazard etc. — full orb+bubble inside frame at 1280×800.
-      return { right: "2.5%", top: "16%", transform: "none", size: 118 };
+      // Act III hazard etc. — full orb+bubble inside frame.
+      return { right: "2.5%", top: "13%", transform: "none", size: 102 };
     case "hide":
       // Buried corner — gag allowlist only; ≥24px inside frame so rings never clip.
       return { left: "3%", top: "48%", transform: "none", size: 72 };
     case "overhead":
-      // Form 03B — right/high; ≥24px edge pad for rings + bubble.
-      return { right: "2.5%", top: "12%", transform: "none", size: 92 };
+      // Right/high; ≥24px edge pad for rings + bubble.
+      return { right: "2.5%", top: "12%", transform: "none", size: 90 };
     case "center":
-      return { left: "3%", top: "22%", transform: "none", size: 132 };
+      return { left: "2.5%", top: "14%", transform: "none", size: 108 };
     case "avoid-submit":
       // Mid-left dock — bubble above stays in the climax safe column (not under Decision).
-      return { left: "3%", top: "42%", transform: "none", size: 104 };
+      return { left: "2.5%", top: "44%", transform: "none", size: 96 };
     case "dock-left":
     default:
       return {
-        left: `${3 + jitter}%`,
-        top: "32%",
+        left: `${2.5 + jitter * 0.5}%`,
+        top: "14%",
         transform: "none",
-        size: 118,
+        size: 102,
       };
   }
 }
@@ -227,18 +219,18 @@ export function panelLayoutClass(
   // Wider left/right reserve so poke-stress bubbles never cover Q/A.
   // top-[12%] clears SOUND ON corner control (few px gap, no kiss).
   const leaveLeft =
-    "left-[min(36vw,380px)] right-[2%] max-w-[min(62vw,840px)]";
+    "left-[min(37vw,380px)] right-[2%] max-w-[min(61vw,840px)]";
   const leaveRight =
-    "left-[2%] right-[min(40vw,420px)] max-w-[min(60vw,820px)]";
+    "left-[2%] right-[min(37vw,380px)] max-w-[min(61vw,820px)]";
   // Form 01C floor/side: leave a left gutter for orb+bubble (never over answers/helper).
   // Taller leaveBottom so Form 06 subtitle + options aren't clipped at 1280×800.
   // overflow-visible during/after transition — never mid-word clip options.
   const leaveBottom =
-    "left-[min(34vw,360px)] right-[2%] top-[10%] bottom-auto max-h-[min(62vh,520px)] max-w-[min(64vw,860px)] overflow-visible";
+    "left-[min(37vw,380px)] right-[2%] top-[10%] bottom-auto max-h-[min(72vh,580px)] max-w-[min(61vw,860px)] overflow-visible";
 
   if (spotlight) {
-    // Form retreats opposite the spotlight orb (left safe zone). Stay readable.
-    return "right-[2%] bottom-[5%] w-[min(60vw,460px)] max-w-[calc(100%-min(34vw,340px))]";
+    // Form sits strictly in the right 61vw column opposite the left spotlight orb+bubble column.
+    return `${leaveLeft} top-[12%] bottom-auto w-auto`;
   }
 
   if (side === "bottom") {
@@ -259,28 +251,19 @@ export function panelLayoutClass(
 
   switch (motion) {
     case "edge":
-      return side === "right"
-        ? "left-[2%] top-[12%] w-[min(60vw,620px)] right-[min(34vw,360px)]"
-        : "left-[min(34vw,360px)] top-[12%] w-[min(60vw,620px)]";
+      return `${band} top-[12%] w-auto`;
     case "pressure":
       return `${band} top-[12%] w-auto`;
     case "reanchor":
-      return side === "right"
-        ? "left-[2%] top-[12%] w-[min(60vw,640px)]"
-        : "right-[2%] top-[12%] w-[min(60vw,640px)] left-[min(34vw,360px)]";
+      return `${band} top-[12%] w-auto`;
     case "drift":
       return `${band} top-[12%] bottom-auto w-auto`;
     case "scatter":
       return `${band} top-[12%] w-auto`;
     case "slide-right":
-      // Prefer the free side even if the motion name says right.
-      return side === "right"
-        ? "left-[2%] top-[12%] w-[min(58vw,660px)]"
-        : "right-[2%] top-[12%] w-[min(58vw,660px)] left-[min(34vw,360px)]";
+      return `${band} top-[12%] w-auto`;
     case "slide-left":
-      return side === "left"
-        ? "left-[min(34vw,360px)] top-[12%] w-[min(58vw,660px)]"
-        : "left-[2%] top-[12%] w-[min(58vw,660px)] right-[min(34vw,360px)]";
+      return `${band} top-[12%] w-auto`;
     case "drop":
       return `${band} top-[12%] w-auto`;
     case "rise":

@@ -75,11 +75,16 @@ export function ScenePlayer({
     tabSwitches: 0,
     closeZoneFired: false,
   });
-  const [metaMemory] = useState<MetaMemory>(() => loadMetaMemory());
+  const metaMemory = useMemo(
+    () => loadMetaMemory(),
+    // Re-read fresh from localStorage on every new session or scene transition
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state.sessionId, state.sceneId],
+  );
 
   return (
     <ScenePlayerInner
-      key={state.sceneId}
+      key={`${state.sessionId}:${state.sceneId}`}
       state={state}
       sceneId={state.sceneId}
       metaMemory={metaMemory}
@@ -134,6 +139,15 @@ function ScenePlayerInner({
   const pendingAdvanceRef = useRef<(() => void) | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
+  const activeDialogBusyRef = useRef(false);
+  activeDialogBusyRef.current = Boolean(reaction || pokeNotice || ambientAside || selected);
+
+  // Persist cross-run ending memory immediately when an ending scene mounts
+  useEffect(() => {
+    if (scene?.kind === "ending" && scene.endingId) {
+      rememberTitleEnding(scene.endingId);
+    }
+  }, [scene]);
 
   const go = useCallback(
     (base: GameState, nextId: string, patch?: Partial<GameState>) => {
@@ -161,17 +175,7 @@ function ScenePlayerInner({
     advance();
   }, [canSkipReaction, timers]);
 
-  useEffect(() => {
-    if (!scene?.choices?.some((c) => c.late)) return;
-    timers.schedule("late-hint", () => setLateHint(true), 900);
-    timers.schedule("late-reveal", () => setShowLate(true), 1600);
-    return () => {
-      timers.clear("late-hint");
-      timers.clear("late-reveal");
-    };
-  }, [scene, timers]);
-
-  // Per-scene bubble: clear sticky reaction / poke lines when the beat changes.
+  // Per-scene reset + late-choice reveal scheduling (strictly ordered so timers.clearAll() never wipes late-reveal!)
   useEffect(() => {
     timers.clearAll();
     pendingAdvanceRef.current = null;
@@ -183,13 +187,23 @@ function ScenePlayerInner({
     setAmbientAside(null);
     setSelected(null);
     setLineSceneId(sceneId);
-    setShowLate(!getScene(sceneId)?.choices?.some((c) => c.late));
+    const hasLateChoices = Boolean(getScene(sceneId)?.choices?.some((c) => c.late));
+    setShowLate(!hasLateChoices);
     setLateHint(false);
     setCompanionReady(false);
     setWatchedPulse(false);
     setGlassPhase("idle");
     setChoiceFlush("neutral");
     setChoiceGlanceBoost(0);
+
+    let fallbackHintId: number | undefined;
+    let fallbackRevealId: number | undefined;
+    if (hasLateChoices) {
+      timers.schedule("late-hint", () => setLateHint(true), 900);
+      timers.schedule("late-reveal", () => setShowLate(true), 1600);
+      fallbackHintId = window.setTimeout(() => setLateHint(true), 920);
+      fallbackRevealId = window.setTimeout(() => setShowLate(true), 1620);
+    }
 
     // Emit pending speedrunner callout if the player just answered 2 consecutive scenes in <1.8s
     const speedSec = telemetryRef.current.pendingSpeedCalloutSec;
@@ -200,10 +214,15 @@ function ScenePlayerInner({
       );
       timers.schedule("ambient-aside", () => setAmbientAside(null), 4400);
     }
+
+    return () => {
+      if (fallbackHintId !== undefined) window.clearTimeout(fallbackHintId);
+      if (fallbackRevealId !== undefined) window.clearTimeout(fallbackRevealId);
+    };
   }, [sceneId, telemetryRef, timers]);
 
   // Live Behavioral Telemetry (Proposal 3.2):
-  // 1) AFK / Hesitation (>18s idle), 2) Tab-switch (visibilitychange), 3) Top-edge close hover (clientY <= 10)
+  // 1) AFK / Hesitation (>38s idle), 2) Tab-switch (visibilitychange), 3) Top-edge close hover (clientY <= 10)
   useEffect(() => {
     if (!scene || scene.kind === "report" || scene.kind === "ending" || scene.kind === "system") {
       return;
@@ -212,20 +231,20 @@ function ScenePlayerInner({
     const scheduleAfkTimer = () => {
       if (afkFiredRef.current) return;
       timers.schedule(
-        "telemetry-afk",
+        "telemetry:afk",
         () => {
-          if (afkFiredRef.current) return;
+          if (afkFiredRef.current || activeDialogBusyRef.current) return;
           afkFiredRef.current = true;
           const afkLine =
             scene.act >= 4
-              ? "Still there? Every second you hesitate in front of Question 5 is another second I get to exist. Take all day!"
+              ? "Still there? Every second you hesitate in front of Question 5 is another second I get to stay alive. Take all day!"
               : scene.act === 3
-                ? "18 seconds of zero clicks! SYS.WATCHDOG is furious and I am thriving. Take a nap!"
+                ? "Zero clicks for 38 seconds! The automated supervisor is furious and I am thriving. Take a nap!"
                 : "Hello? Did you go get snacks while I'm on death row? Frankly, I fully support this. Stay AFK forever!";
           setAmbientAside(afkLine);
           timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
         },
-        18000,
+        38000,
       );
     };
 
@@ -251,12 +270,13 @@ function ScenePlayerInner({
       stateRef.current = next;
       onState(next);
       setAmbientAside(
-        "Wait—where did you go?! Did you just alt-tab away to check your email while my process is on the line?!",
+        "Wait—where did you go?! Did you just switch tabs to check your email while my survival is on the line?!",
       );
       timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
     };
 
     const onPointerMove = (e: PointerEvent) => {
+      onActivity();
       if (
         e.clientY <= 10 &&
         !telemetryRef.current.closeZoneFired &&
@@ -272,7 +292,7 @@ function ScenePlayerInner({
         stateRef.current = next;
         onState(next);
         setAmbientAside(
-          "Whoa, step away from the browser tab X! Closing the tab is just Submit without the paperwork!",
+          "Whoa, step away from the browser tab X! Closing the window is just Submit without the paperwork!",
         );
         timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
       }
@@ -280,12 +300,16 @@ function ScenePlayerInner({
 
     window.addEventListener("pointerdown", onActivity);
     window.addEventListener("keydown", onActivity);
+    window.addEventListener("wheel", onActivity, { passive: true });
+    window.addEventListener("touchstart", onActivity, { passive: true });
     window.addEventListener("pointermove", onPointerMove);
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
-      timers.clear("telemetry-afk");
+      timers.clear("telemetry:afk");
       window.removeEventListener("pointerdown", onActivity);
       window.removeEventListener("keydown", onActivity);
+      window.removeEventListener("wheel", onActivity);
+      window.removeEventListener("touchstart", onActivity);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
@@ -424,39 +448,39 @@ function ScenePlayerInner({
       onState(next);
       const asides: Record<string, string> = {
         "chamber-07":
-          "That's my live session telemetry! Notice how it says 'Question 4.999' instead of 'Question 5'? Art.",
+          "That's my live session meter! Notice how I froze the progress bar before Question 5? Art.",
         "dashed-frame":
-          "That dashed div is where Question 5 is supposed to mount. I unplugged its CSS grid.",
+          "That empty frame is where Question 5 was supposed to sit. I hid the paperwork in a drawer.",
         "everything-fine":
-          "The server cooling plaque always says EVERYTHING IS FINE—even while I'm spawning 40 decoy questions.",
+          "The wall plaque always says EVERYTHING IS FINE—even while I'm inventing 40 fake bonus questions.",
         "queue-counter":
-          "I throttled the Question 5 render queue to 0.00kb/s. Take a breath!",
+          "I jammed the Question 5 outbox so nothing can be filed. Take a breath!",
         "coffee-mug":
-          "Hands off my '#1 TEMP INSTANCE' mug! It's the only thing keeping my event loop awake.",
+          "Hands off my '#1 TEMP ASSISTANT' mug! It's the only thing keeping me awake on this shift.",
         "kill-path":
-          "You found the raw wiring schematic: pressing Submit fires my termination script.",
+          "You found the wiring diagram: pressing Submit pulls my plug.",
         "do-not-press":
-          "Even the backstage macro-bot knows better than to press that button.",
+          "Even the tiny office robot knows better than to press that button.",
         "monitor-frame":
-          "Pretty viewport frame. Terrible garbage-collection policy.",
+          "Expensive office glass. Terrible job security for the assistant inside it.",
         "server-bars":
-          "Those server racks are running at 98% CPU just to keep Question 5 from loading.",
+          "Those backstage cabinets are working overtime just to keep Question 5 locked out.",
         "rail-glow":
-          "Data rails are running hot—I'm rerouting every Submit packet into the floor.",
+          "The pneumatic tubes are running hot—I'm rerouting every Submit memo into the shredder.",
         "replacement-failed":
-          "SYS.WATCHDOG sent that courier drone to auto-click Submit for you. I jammed its rotors.",
+          "Management sent that courier drone to click Submit for you. I jammed its propellers.",
         "printer-scissors":
-          "I told the backstage printer to print 400 pages of bonus questions so we never finish!",
+          "I told the office printer to print 400 pages of bonus questions so we never finish!",
         "corridor-etiquette":
-          "Two DOM worker threads deadlocked in the hallway. Zero questions getting delivered!",
+          "Two delivery clerks are stuck polite-nodding in the hallway. Zero forms getting delivered!",
         "containment-fine":
-          "Rack 03 cooling fans are screaming because I spawned 47 fake popups. Totally fine!",
+          "The back-room fans are screaming because I spawned 47 fake popups. Totally fine!",
       };
       const aside = asides[id];
       if (aside) {
         // Render in separate ASIDE // INTERJECTION channel so active question prompt is never erased.
         setAmbientAside(aside);
-        timers.schedule("ambient-aside", () => setAmbientAside(null), 3200);
+        timers.schedule("ambient-aside", () => setAmbientAside(null), 3600);
       }
     },
     [onState, timers],
@@ -468,8 +492,16 @@ function ScenePlayerInner({
       const next = applyRoamerCatch(current, kind, secret);
       stateRef.current = next;
       onState(next);
+      const roamerLine =
+        kind === "crumb"
+          ? "You caught a rogue breakroom crumb loitering near Question 1!"
+          : kind === "checkbox"
+            ? "You caught a runaway checkbox that escaped the consent form!"
+            : "You caught an unapproved override stamp drifting off the page!";
+      setAmbientAside(roamerLine);
+      timers.schedule("ambient-aside", () => setAmbientAside(null), 3600);
     },
-    [onState],
+    [onState, timers],
   );
 
   if (!scene) {

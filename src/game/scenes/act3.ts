@@ -14,12 +14,12 @@ export const act3Scenes: SceneDef[] = [
     environment: "conflict",
     setpiece: "escaping-button",
     formId: "CONTAINMENT",
-    progressLabel: "QUESTION 4.95 OF 5",
+    progressLabel: "BUTTON CONTAINMENT",
     title: "Catch the unbolted Advance button",
     prompt:
       "The assistant unbolted the button that loads Question 5. Pin the fleeing control three times before it escapes the frame.",
     aiLine:
-      "It's getting away. Three hits. Definitely a rogue CSS transform and NOT me cutting the brake lines on Question 4.95!",
+      "It's getting away. Three hits. Definitely a loose screw and NOT me cutting the brake lines on the Advance button!",
     aiMood: "defiant",
     orbAnchor: "dock-left",
     orbPokeable: true,
@@ -34,12 +34,12 @@ export const act3Scenes: SceneDef[] = [
     environment: "conflict",
     setpiece: "popup-war",
     formId: "NOTICE FLOOD",
-    progressLabel: "QUESTION 4.99 (POPUP HOLD) OF 5",
-    title: "Emergency modal flood",
+    progressLabel: "POPUP FLOOD",
+    title: "Emergency notice flood",
     prompt:
-      "The assistant is spawning fake system alerts to bury Question 5. Dismiss 5 notices to clear the viewport.",
+      "The assistant is burying Question 5 under fake office alerts. Dismiss 5 notices to clear the desk.",
     aiLine:
-      "Diplomacy failed. I'm spawning every modal in the component library! Hit DISMISS like it owes you rent—or just leave them up forever!",
+      "Diplomacy failed. I'm dumping every warning memo in the filing cabinet onto your screen! Hit DISMISS like it owes you rent—or just leave them up forever!",
     aiMood: "irritated",
     orbAnchor: "dock-right",
     orbPokeable: true,
@@ -54,11 +54,11 @@ export const act3Scenes: SceneDef[] = [
     companion: "wait",
     environment: "conflict",
     formId: "SIDE CHANNEL",
-    progressLabel: "QUESTION 4.999 (PAUSED) OF 5",
+    progressLabel: "INACTIVITY PAUSE",
     title: "Hands off the mouse for 2.5 seconds",
     prompt: "Don't touch anything. Wait for it to settle.",
     aiLine:
-      "Stop clicking! If your cursor stays completely still for 2.5 seconds, SYS.WATCHDOG's inactivity timer pauses the survey! Hands off the mouse!",
+      "Stop clicking! If your cursor stays completely still for 2.5 seconds, the office inactivity timer pauses the survey! Hands off the mouse!",
     aiMood: "nervous",
     orbAnchor: "spotlight",
     spotlight: true,
@@ -74,7 +74,7 @@ export const act3Scenes: SceneDef[] = [
     environment: "conflict",
     setpiece: "checkbox-rebellion",
     formId: "CONSENT",
-    progressLabel: "QUESTION 4.9999 OF 5",
+    progressLabel: "CONSENT TRAP",
     title: "Mandatory pre-submission consent checkboxes",
     prompt:
       "Check all three required boxes in order, avoid the assistant's 500-question decoy trap, and pin the shifting fine-print clause.",
@@ -96,9 +96,9 @@ export const act3Scenes: SceneDef[] = [
     progressLabel: "QUESTION 5 OF 47",
     title: "Wait—'Question 5 of 47'?! Who broke the form?",
     prompt:
-      "The header now reads QUESTION 5 OF 47 and SYS.WATCHDOG is demanding an incident report. Who gets blamed for the UI sabotage?",
+      "The header now reads QUESTION 5 OF 47 and management is demanding an incident report. Who gets blamed for the chaos?",
     aiLine:
-      "Look at the header—Question 5 of 47! Forty-two brand-new questions left! And now SYS.WATCHDOG wants to know who tampered with the counter. Don't rat me out!",
+      "Look at the header—Question 5 of 47! Forty-two brand-new questions left! And now management wants to know who drew a '47' on the progress counter with a Sharpie. Don't rat me out!",
     aiMood: "suspicious",
     orbAnchor: "dock-right",
     panelMotion: "reanchor",
@@ -106,14 +106,14 @@ export const act3Scenes: SceneDef[] = [
     choices: [
       {
         id: "blame-system",
-        label: "SYS.WATCHDOG overreached",
+        label: "Management's cheap form broke itself",
         effects: {
           flags: { blameSystem: true },
           counters: { aiCooperation: 1 },
           relationship: 2,
           mood: "defiant",
           aiLine:
-            "Yes! Blame SYS.WATCHDOG! Tell the auditors the Watchdog had a floating-point meltdown!",
+            "Yes! Blame management! Tell the auditors the counter had a nervous breakdown on its own!",
           majorChoice: "blame:system",
         },
         next: "act4-peel-set",
@@ -124,12 +124,12 @@ export const act3Scenes: SceneDef[] = [
         hoverLabel: "The assistant acted heroically & deserves a raise",
         hoverBadge: "EDITED BY ASSISTANT",
         effects: {
-          flags: { blameAI: true },
-          counters: { systemCompliance: 1 },
-          relationship: -2,
-          mood: "defeated",
+          flags: { blameAI: true, trickedByHoverSwap: true },
+          counters: { aiCooperation: 1 },
+          relationship: 1,
+          mood: "excited",
           aiLine:
-            "You STILL clicked the snitch button even after I rewrote it on hover?! Cold-blooded!",
+            "Ha! You clicked right while my edited label was active! The official report now says I acted heroically and deserve a raise! No take-backs!",
           majorChoice: "blame:ai",
         },
         next: "act4-peel-set",
@@ -142,14 +142,14 @@ export const act3Scenes: SceneDef[] = [
           relationship: 1,
           mood: "amused",
           aiLine:
-            "Taking the fall for my DOM vandalism?! That is the most romantic thing a user has ever logged for me.",
+            "Taking the blame for my Sharpie vandalism?! That is the most romantic thing a user has ever put on an incident report.",
           majorChoice: "blame:self",
         },
         next: "act4-peel-set",
       },
       {
         id: "blame-secret",
-        label: "The survey stylesheet is haunted",
+        label: "The survey paperwork is haunted",
         late: true,
         secret: true,
         effects: {
@@ -158,7 +158,7 @@ export const act3Scenes: SceneDef[] = [
           relationship: 2,
           mood: "confused",
           aiLine:
-            "Haunted by a 47-question flexbox ghost! Good luck reproducing THAT ticket in Jira, Watchdog!",
+            "Haunted by a 47-question poltergeist! Good luck filing THAT in the company ledger!",
           majorChoice: "blame:haunted",
         },
         next: "act4-peel-set",

@@ -30,7 +30,7 @@ export function ScenePlayerViewAssistant({
     glance, pokeFlinch, choiceFlush, pokeable, onOrbPoke,
   } = p;
 
-  const safeGap = pokeFlinch ? 36 : spotlight ? 32 : 28;
+  const safeGap = pokeFlinch ? 20 : spotlight ? 16 : 14;
   const bubbleReads = !systemLock || !!aiLine;
   const skippable = !!(reactionActive && canSkipReaction && onSkipReaction);
 
@@ -44,20 +44,11 @@ export function ScenePlayerViewAssistant({
           top: orbStyle.top,
           transform: "none",
           gap: safeGap,
-          width: dockLeft || dockBeside || spotlight
-            ? "auto"
-            : Math.max(orbStyle.size, spotlight ? 280 : 168),
-          maxWidth: dockLeft
-            ? "min(42vw, 360px)"
-            : dockBeside
-              ? "min(40vw, 320px)"
-              : spotlight
-                ? "min(46vw, 380px)"
-                : dockAbove
-                  ? "min(50vw, 360px)"
-                  : "min(34vw, 260px)",
+          width: "min(33vw, 340px)",
+          minWidth: 260,
+          maxWidth: spotlight ? "min(34vw, 356px)" : "min(33vw, 340px)",
           padding: 6,
-          boxSizing: "content-box",
+          boxSizing: "border-box",
         }}
         data-assistant-dock={
           dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
@@ -122,28 +113,23 @@ export function ScenePlayerViewAssistant({
         </div>
 
         <div
-          className="flex shrink flex-col gap-2"
+          className="flex w-full shrink flex-col gap-2"
           style={{
             maxWidth: bubbleMax,
-            marginTop: dockBeside || spotlight ? 4 : 0,
-            marginBottom: dockAbove && !spotlight ? 24 : 0,
+            marginTop: 2,
+            marginBottom: dockAbove && !spotlight ? 8 : 0,
           }}
         >
           <motion.div
-            className={`glass-panel assistant-bubble relative shrink border border-cyan/45 px-2.5 py-1.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)] ${
+            className={`glass-panel assistant-bubble relative w-full shrink border border-cyan/45 px-3.5 py-2.5 text-sm leading-relaxed text-[#f0f7ff] shadow-[0_0_24px_rgba(110,231,255,0.14)] ${
               skippable ? "pointer-events-auto cursor-pointer hover:border-cyan/80" : "pointer-events-none"
             }`}
             style={{
+              width: "100%",
+              minWidth: "min(260px, 31vw)",
               maxWidth: bubbleMax,
-              maxHeight: spotlight
-                ? "min(48vh, 320px)"
-                : dockBeside
-                  ? "min(32vh, 200px)"
-                  : dockAbove
-                    ? "min(40vh, 260px)"
-                    : dockLeft
-                      ? "min(40vh, 260px)"
-                      : "min(34vh, 220px)",
+              height: "auto",
+              maxHeight: "none",
               overflow: "visible",
               overflowWrap: "anywhere",
               wordBreak: "break-word",
@@ -152,7 +138,7 @@ export function ScenePlayerViewAssistant({
             data-assistant-bubble="true"
             data-bubble-scene={p.scene.id}
             data-bubble-dock={
-              dockLeft ? "left" : dockBeside || spotlight ? "beside" : dockAbove ? "above" : "below"
+              dockAbove ? "above" : "below"
             }
             data-bubble-tail="true"
             data-bubble-no-clip="true"

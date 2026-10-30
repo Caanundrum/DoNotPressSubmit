@@ -30,21 +30,21 @@ export const DEFAULT_PROGRESS_LABELS: Record<string, string> = {
   "act1-environment": "QUESTION 3 OF 5",
   "act1-stress": "QUESTION 4 OF 5",
   "act2-flicker": "QUESTION 4B OF 5",
-  "act2-unauthorized": "QUESTION 4.5 OF 5",
-  "act2-duplicate": "QUESTION 4.5 (REPRINT) OF 5",
+  "act2-unauthorized": "QUESTION 4.5 (AUDIT)",
+  "act2-duplicate": "QUESTION 4.5 (REPRINT)",
   "act2-system-rebuke": "QUESTION 4.75 OF 5",
-  "act2-companion-respond": "QUESTION 4.8 (OFF-RECORD) OF 5",
-  "act2-compliance": "QUESTION 4.9 OF 5",
-  "act3-escaping": "QUESTION 4.95 OF 5",
-  "act3-popup": "QUESTION 4.99 (POPUP HOLD) OF 5",
-  "act3-companion-wait": "QUESTION 4.999 (PAUSED) OF 5",
-  "act3-checkbox": "QUESTION 4.9999 OF 5",
+  "act2-companion-respond": "OFF-THE-RECORD",
+  "act2-compliance": "DIRECTIVE 07",
+  "act3-escaping": "BUTTON CONTAINMENT",
+  "act3-popup": "POPUP FLOOD",
+  "act3-companion-wait": "INACTIVITY PAUSE",
+  "act3-checkbox": "CONSENT TRAP",
   "act3-aftermath": "QUESTION 5 OF 47",
   "act4-peel-set": "QUESTION 5 OF [REDACTED]",
-  "act4-choice": "DIAGNOSTIC // LAYER BREACH",
+  "act4-choice": "UNDER THE HOOD",
   "act4-prep": "QUESTION 5 OF 5 (BLOCKED)",
   "act5-lobby": "FINAL STEP // DO NOT PRESS",
-  "act5-climax": "QUESTION 5 OF 5 // SUBMIT READY",
+  "act5-climax": "FINAL DECISION",
 };
 
 const STILLNESS_REQUIRED_MS = 2500;
@@ -240,7 +240,7 @@ export function ScenePlayerViewPanels({
 }) {
   const {
     scene, state, companion, companionReady, watchedPulse, panelMotion, panelVar,
-    panelShake, visibleChoices, choiceMotion, selected,
+    panelShake, hasLatePending, visibleChoices, choiceMotion, selected,
     hoverChoice, buryAssistant, spotlight, safeSide, orbAnchor,
     reactionActive, canSkipReaction, onSkipReaction,
     finishCompanion, pickChoice, setHoverChoice, onState, continueDialogue,
@@ -415,16 +415,27 @@ export function ScenePlayerViewPanels({
           {/* Side paths unlock silently — no residual-noise telegraph (rev5 P0). */}
 
           {scene.kind === "choice" ? (
-            <SceneChoiceList
-              choices={visibleChoices}
-              choiceMotion={choiceMotion}
-              selected={selected}
-              hoverChoice={hoverChoice}
-              state={state}
-              onPick={pickChoice}
-              onHover={setHoverChoice}
-              onState={onState}
-            />
+            <>
+              <SceneChoiceList
+                choices={visibleChoices}
+                choiceMotion={choiceMotion}
+                selected={selected}
+                hoverChoice={hoverChoice}
+                state={state}
+                onPick={pickChoice}
+                onHover={setHoverChoice}
+                onState={onState}
+              />
+              {hasLatePending && !selected ? (
+                <div
+                  data-late-pending-hint="true"
+                  className="mt-1 flex items-center gap-2 font-mono text-[11px] tracking-[0.15em] text-cyan/80 animate-pulse"
+                >
+                  <span aria-hidden>⏳</span>
+                  <span>Wait for it... scanning for unapproved option...</span>
+                </div>
+              ) : null}
+            </>
           ) : null}
 
           {scene.kind === "dialogue" ? (

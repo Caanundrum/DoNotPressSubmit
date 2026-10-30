@@ -94,7 +94,7 @@ export const act5Scenes: SceneDef[] = [
     environment: "climax",
     setpiece: "submit-button",
     formId: "DECISION",
-    progressLabel: "QUESTION 5 OF 5 // SUBMIT READY",
+    progressLabel: "FINAL DECISION",
     title: "Question 5 of 5: Submit when ready",
     // Plea bubble must stay clear of the Decision panel (rev11 P0) — never bury it.
     buryAssistant: false,

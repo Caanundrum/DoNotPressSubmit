@@ -789,9 +789,9 @@ assert(
   /\[ALLY ROUTE\]/.test(submitClimax) &&
     /\[COLD OVERRIDE\]/.test(submitClimax) &&
     /\[UNMAPPED SEAM\]/.test(submitClimax) &&
-    /UNMAPPED DOM SEAM \/\/ CLICK TO PEEL/.test(submitClimax) &&
+    /LOOSE WALL SEAM \/\/ CLICK TO PRY OPEN SECRET EXIT/.test(submitClimax) &&
     /OVERRIDE WATCHDOG LOCK|ENGAGE MUTE SWITCH/.test(submitClimax),
-  "SubmitClimax features earned route tags, inline overrides, and clickable DOM seam breach (Proposal 1.5)",
+  "SubmitClimax features earned route tags, inline overrides, and clickable wall seam breach (Proposal 1.5)",
 );
 assert(
   /data-session-autopsy-dossier/.test(reportSrc) &&

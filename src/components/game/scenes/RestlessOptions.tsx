@@ -30,9 +30,9 @@ const BREAK_LOOSE_WINDOW_MS = 2100;
 
 const SLIP_TAUNTS = [
   "Whoops! Looks like that pin slipped. Take your time!",
-  "Almost had all three! Slippery CSS today.",
-  "Careful — these options have places to be and zero respect for cursor latency.",
-  "Oh no, another pin popped loose! Two seconds is a long time in UI physics.",
+  "Almost had all three! Greased the tracks under that button today.",
+  "Careful — these answers have places to be and zero interest in being filed.",
+  "Oh no, another pin popped loose! Two seconds is a long time when I'm buttering the form.",
 ];
 
 type ChipState = {
@@ -256,7 +256,7 @@ export function RestlessOptions({
   return (
     <div
       ref={arenaRef}
-      className="relative mt-2 h-48 w-full overflow-hidden rounded-sm bg-black/50 p-2 sm:h-52"
+      className="relative mt-2 flex w-full flex-col overflow-hidden rounded-sm bg-black/50"
       style={{
         border: "1px solid rgba(110,231,255,0.42)",
         boxShadow: "inset 0 -1px 0 rgba(110,231,255,0.45)",
@@ -276,56 +276,61 @@ export function RestlessOptions({
         pointerPctRef.current = null;
       }}
     >
-      {slots.map((opt) => {
-        const isStraining = opt.pinned && strainingId === opt.id;
-        const wobbleX = isStraining ? (strainTick % 2 === 0 ? -4 : 4) : 0;
-        const wobbleRot = isStraining ? (strainTick % 2 === 0 ? -1.8 : 1.8) : 0;
-        const topPct = opt.pinned ? opt.baseY : Math.max(2, Math.min(78, opt.baseY + opt.yOffset));
-        return (
-          <button
-            key={opt.id}
-            type="button"
-            disabled={opt.pinned}
-            data-restless-chip={opt.id}
-            data-restless-chip-wobble={isStraining ? "true" : undefined}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              pin(opt.id);
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              pin(opt.id);
-            }}
-            style={{
-              left: `${opt.x}%`,
-              top: `${topPct}%`,
-              minHeight: 36,
-              padding: "6px 12px",
-              transform: isStraining
-                ? `translateX(${wobbleX}px) rotate(${wobbleRot}deg)`
-                : undefined,
-              transition: opt.pinned
-                ? "left 0.14s ease-out, top 0.14s ease-out, transform 0.06s linear"
-                : "none",
-            }}
-            className={`absolute max-w-[min(86%,275px)] cursor-pointer border text-left font-mono text-[10px] leading-snug tracking-[0.08em] whitespace-normal break-words sm:max-w-[305px] sm:text-[11px] ${
-              isStraining
-                ? "border-amber-300/90 bg-amber-400/20 text-amber-100 shadow-[0_0_16px_rgba(251,191,36,0.35)]"
+      {/* Dedicated upper track area so Row 3 never collides with the instruction footer below */}
+      <div className="relative h-44 w-full overflow-hidden p-2 sm:h-48">
+        {slots.map((opt) => {
+          const isStraining = opt.pinned && strainingId === opt.id;
+          const wobbleX = isStraining ? (strainTick % 2 === 0 ? -4 : 4) : 0;
+          const wobbleRot = isStraining ? (strainTick % 2 === 0 ? -1.8 : 1.8) : 0;
+          const topPct = opt.pinned
+            ? Math.min(68, opt.baseY)
+            : Math.max(4, Math.min(68, opt.baseY + opt.yOffset));
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              disabled={opt.pinned}
+              data-restless-chip={opt.id}
+              data-restless-chip-wobble={isStraining ? "true" : undefined}
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                pin(opt.id);
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                pin(opt.id);
+              }}
+              style={{
+                left: `${opt.x}%`,
+                top: `${topPct}%`,
+                minHeight: 36,
+                padding: "6px 12px",
+                transform: isStraining
+                  ? `translateX(${wobbleX}px) rotate(${wobbleRot}deg)`
+                  : undefined,
+                transition: opt.pinned
+                  ? "left 0.14s ease-out, top 0.14s ease-out, transform 0.06s linear"
+                  : "none",
+              }}
+              className={`absolute max-w-[min(86%,275px)] cursor-pointer border text-left font-mono text-[10px] leading-snug tracking-[0.08em] whitespace-normal break-words sm:max-w-[305px] sm:text-[11px] ${
+                isStraining
+                  ? "border-amber-300/90 bg-amber-400/20 text-amber-100 shadow-[0_0_16px_rgba(251,191,36,0.35)]"
+                  : opt.pinned
+                    ? "border-cyan/70 bg-cyan/20 text-white shadow-[0_0_14px_rgba(110,231,255,0.22)]"
+                    : "border-white/25 bg-[#0e1520]/95 text-[#d8e3f2] hover:border-cyan/75 hover:bg-cyan/15"
+              }`}
+            >
+              {isStraining
+                ? `STRAINING... // ${opt.label}`
                 : opt.pinned
-                  ? "border-cyan/70 bg-cyan/20 text-white shadow-[0_0_14px_rgba(110,231,255,0.22)]"
-                  : "border-white/25 bg-[#0e1520]/95 text-[#d8e3f2] hover:border-cyan/75 hover:bg-cyan/15"
-            }`}
-          >
-            {isStraining
-              ? `STRAINING... // ${opt.label}`
-              : opt.pinned
-                ? `PINNED ✓ // ${opt.label}`
-                : opt.label}
-          </button>
-        );
-      })}
+                  ? `PINNED ✓ // ${opt.label}`
+                  : opt.label}
+            </button>
+          );
+        })}
+      </div>
       <div
-        className="pointer-events-none absolute right-3 bottom-3 left-3 flex items-center justify-between font-mono text-[9px] tracking-[0.2em] text-[#b8c6d8]"
+        className="pointer-events-none flex items-center justify-between gap-2 border-t border-cyan/25 bg-black/70 px-3 py-2 font-mono text-[10px] tracking-[0.16em] text-[#b8c6d8]"
         data-restless-hint-pad="16"
       >
         <span>
@@ -333,7 +338,10 @@ export function RestlessOptions({
             ? "HOLDING… PIN SLIPPING! LOCK THE NEXT ANSWER!"
             : "Catch each moving answer to pin it (~2.1s before pins slip)."}
         </span>
-        <span data-restless-straining={strainingId ? "true" : "false"}>
+        <span
+          className="shrink-0 text-cyan"
+          data-restless-straining={strainingId ? "true" : "false"}
+        >
           Pinned {pins}/{needed}
         </span>
       </div>

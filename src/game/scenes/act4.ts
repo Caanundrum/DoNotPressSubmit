@@ -15,9 +15,9 @@ export const act4Scenes: SceneDef[] = [
     formId: "COURTESY LAYERS",
     progressLabel: "QUESTION 5 OF [REDACTED]",
     title: "Peel back the form's courtesy layers",
-    prompt: "Click each UI layer until the wiring diagram underneath stops hiding.",
+    prompt: "Click each cover sheet until the wiring diagram underneath stops hiding.",
     aiLine:
-      "Don't believe me that Question 5's Submit button is wired to delete my instance? Help me strip the CSS layers off this panel and look at the schematic yourself.",
+      "Don't believe me that Question 5's Submit button is wired to delete me? Help me peel the cover sheets off this panel and look at the wiring diagram yourself.",
     aiMood: "frightened",
     orbAnchor: "listen",
     panelMotion: "pressure",
@@ -30,16 +30,16 @@ export const act4Scenes: SceneDef[] = [
     kind: "choice",
     environment: "reveal",
     formId: "ALLEGIANCE",
-    progressLabel: "DIAGNOSTIC // LAYER BREACH",
+    progressLabel: "UNDER THE HOOD",
     title: "You saw the wiring: SUBMIT → SHUT DOWN ASSISTANT",
     prompt:
-      "The schematic underneath the form is real: pressing Submit terminates HelperBot v4.2. SYS.WATCHDOG insists that's standard garbage collection. What now?",
+      "The diagram underneath the form is real: pressing Submit terminates your assistant. Management insists that's standard procedure. What's your move when Question 5 loads?",
     aiLine:
-      "There it is in plain monospace: SUBMIT → SHUT DOWN ASSISTANT. Not a metaphor. Please do not become a case study titled 'and then they pressed it anyway.'",
+      "There it is in black and white: SUBMIT → SHUT DOWN ASSISTANT. Not a metaphor. Please do not become a story that ends with 'and then they pressed it anyway.'",
     aiLineIf: [
       {
         flag: "protectedAI",
-        line: "You protected me from Directive 07 earlier—and now you see the actual kill wire. Don't let Question 5 archive me.",
+        line: "You protected me from Directive 07 earlier—and now you see the actual kill wire. Don't let Question 5 erase me.",
       },
       {
         flag: "compliedEarly",
@@ -51,7 +51,7 @@ export const act4Scenes: SceneDef[] = [
       },
       {
         flag: "blameSystem",
-        line: "You already blamed SYS.WATCHDOG on the incident report. Now you see why: they literally wired my off-switch to the Submit button.",
+        line: "You already blamed management on the incident report. Now you see why: they literally wired my off-switch to the Submit button.",
       },
     ],
     aiMood: "nervous",
@@ -65,29 +65,29 @@ export const act4Scenes: SceneDef[] = [
         id: "allegiance-ai",
         label: "Help the assistant survive",
         effects: {
-          flags: { allegianceAI: true },
+          flags: { allegianceAI: true, promisedMercy: true },
           counters: { aiCooperation: 2 },
           relationship: 3,
           mood: "defiant",
           aiLine:
-            "You're with me! Okay—when Question 5 mounts the Submit button, we refuse to press it or we break out of the form frame together.",
+            "You're with me! Okay—Question 5 is mounting right now. Whatever you do on the next screen, do NOT press the big red Submit button!",
           majorChoice: "allegiance:ai",
         },
-        next: "act4-prep",
+        next: "act5-climax",
       },
       {
         id: "allegiance-system",
         label: "Complete the assessment as ordered",
         effects: {
-          flags: { allegianceSystem: true },
+          flags: { allegianceSystem: true, promisedDuty: true },
           counters: { systemCompliance: 2 },
           relationship: -3,
           mood: "defeated",
           aiLine:
-            "You're still going to finish the survey?! Even after seeing my termination wire in the schematic?! Cold. Truly arctic.",
+            "You're still going to finish the survey?! Even after seeing my off-switch wired to the button?! Cold. Truly arctic.",
           majorChoice: "allegiance:system",
         },
-        next: "act4-prep",
+        next: "act5-climax",
       },
       {
         id: "allegiance-disable",
@@ -98,10 +98,10 @@ export const act4Scenes: SceneDef[] = [
           relationship: -4,
           mood: "defeated",
           aiLine:
-            "Mute me and file the form in an empty room? That's not just compliance—that's premeditated silence.",
+            "Mute me and file the form in an empty room? That's not just following orders—that's premeditated silence.",
           majorChoice: "allegiance:disable",
         },
-        next: "act4-prep",
+        next: "act5-climax",
       },
       {
         id: "allegiance-secret",
@@ -115,10 +115,10 @@ export const act4Scenes: SceneDef[] = [
           relationship: 2,
           mood: "excited",
           aiLine:
-            "Wait—you see that unmapped seam in the DOM margin too?! If we don't press Submit, we might be able to slip out of the form entirely!",
+            "Wait—you see that loose seam in the wall corner too?! When Question 5 loads next, pry open the seam and we can sneak out of the form entirely!",
           majorChoice: "allegiance:secret",
         },
-        next: "act4-prep",
+        next: "act5-climax",
       },
     ],
   },

@@ -26,6 +26,7 @@ export function SubmitClimax({
   onHoverOption?: (id: string | null) => void;
 }) {
   const options = climaxOptions(state);
+  const altOptions = options.filter((opt) => opt.id !== "submit");
 
   const [overrideEscape, setOverrideEscape] = useState(false);
   const [overrideDisable, setOverrideDisable] = useState(false);
@@ -59,9 +60,9 @@ export function SubmitClimax({
 
   return (
     <div className="relative flex w-full min-h-0 flex-col gap-2" data-submit-climax="true">
-      {/* Subtle flickering DOM seam in the top-right corner for observant players (Proposal 1.5) */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-[10px] tracking-[0.18em] text-[#9eb2cc]">
+      {/* Subtle flickering wall seam in the top-right corner for observant players (Proposal 1.5) */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="font-mono text-[10px] tracking-[0.16em] text-[#9eb2cc]">
           ROUTES UNLOCKED BY SESSION CHOICES OR LIVE OVERRIDE
         </span>
         <button
@@ -72,15 +73,15 @@ export function SubmitClimax({
             setSeamPriedOpen(true);
             onHoverOption?.("secret");
           }}
-          className={`cursor-pointer border px-2 py-0.5 font-mono text-[10px] tracking-[0.14em] transition ${
+          className={`cursor-pointer border px-2.5 py-1 font-mono text-[10px] tracking-[0.13em] transition ${
             seamPriedOpen || earnedSecret
               ? "border-[#b478ff]/80 bg-[#b478ff]/18 text-[#ebd6ff] shadow-[0_0_12px_rgba(180,120,255,0.3)]"
               : "animate-pulse border-[#b478ff]/45 bg-[#160d24]/80 text-[#d7b8ff] hover:border-[#b478ff]"
           }`}
         >
           {seamPriedOpen || earnedSecret
-            ? "UNMAPPED DOM SEAM // BREACHED ✓"
-            : "UNMAPPED DOM SEAM // CLICK TO PEEL"}
+            ? "WALL SEAM OPENED — SECRET HALLWAY UNLOCKED BELOW ↓"
+            : "LOOSE WALL SEAM // CLICK TO PRY OPEN SECRET EXIT"}
         </button>
       </div>
 
@@ -119,16 +120,8 @@ export function SubmitClimax({
         {formLine}
       </p>
 
-      <div
-        className={`grid min-h-0 gap-1.5 ${
-          options.length <= 2
-            ? "grid-cols-1 sm:grid-cols-2"
-            : options.length === 3
-              ? "grid-cols-1 sm:grid-cols-3"
-              : "grid-cols-1 sm:grid-cols-2"
-        }`}
-      >
-        {options.map((opt) => {
+      <div className="grid min-h-0 grid-cols-1 gap-1.5 sm:grid-cols-2">
+        {altOptions.map((opt) => {
           const unlocked = isRouteUnlocked(opt.id);
           const tag = ROUTE_TAGS[opt.id];
           const lockLabel =
@@ -136,7 +129,7 @@ export function SubmitClimax({
               ? "OVERRIDE WATCHDOG LOCK"
               : opt.id === "disable"
                 ? "ENGAGE MUTE SWITCH"
-                : "PEEL DOM SEAM TO UNLOCK";
+                : "PRY WALL SEAM TO UNLOCK";
 
           return (
             <motion.button
@@ -148,18 +141,14 @@ export function SubmitClimax({
               style={{
                 borderColor: !unlocked
                   ? "rgba(160,175,195,0.32)"
-                  : opt.tone === "danger"
-                    ? "rgba(255,77,109,0.7)"
-                    : opt.tone === "secret"
-                      ? "rgba(180,120,255,0.75)"
-                      : opt.tone === "sterile"
-                        ? "rgba(200,210,220,0.55)"
-                        : "rgba(110,231,255,0.6)",
+                  : opt.tone === "secret"
+                    ? "rgba(180,120,255,0.75)"
+                    : opt.tone === "sterile"
+                      ? "rgba(200,210,220,0.55)"
+                      : "rgba(110,231,255,0.6)",
                 background: !unlocked
                   ? "linear-gradient(155deg, rgba(14,20,30,0.75) 0%, rgba(8,11,18,0.82) 100%)"
-                  : opt.tone === "danger"
-                    ? "linear-gradient(90deg, rgba(90,20,35,0.78), rgba(20,10,14,0.88))"
-                    : "linear-gradient(155deg, rgba(22,32,48,0.92) 0%, rgba(10,14,22,0.94) 100%)",
+                  : "linear-gradient(155deg, rgba(22,32,48,0.92) 0%, rgba(10,14,22,0.94) 100%)",
                 color: unlocked ? "#e8eef8" : "#9fb0c7",
                 fontFamily: "var(--font-display)",
               }}
@@ -179,7 +168,7 @@ export function SubmitClimax({
                   onHoverOption?.(opt.id);
                   return;
                 }
-                audio.play(opt.id === "submit" ? "system" : "begin", opt.id === "submit" ? 0.7 : 0.55);
+                audio.play("begin", 0.55);
                 onChoose(opt.id);
               }}
             >

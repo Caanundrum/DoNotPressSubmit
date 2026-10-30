@@ -235,7 +235,7 @@ export function BackgroundGags({
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 z-[5] overflow-hidden opacity-[0.78]"
+      className="pointer-events-none absolute inset-0 z-[5] overflow-hidden opacity-[0.45]"
       data-ambient-roam="true"
       data-ambient-subtle="true"
       data-title-calm={calm ? "true" : undefined}
@@ -339,9 +339,9 @@ export function BackgroundGags({
         </div>
       ) : null}
 
-      {/* Single shared toast host — bus replaces lines so memos never stack (P1 #7). */}
+      {/* Single shared toast host — when live (onAmbient), ScenePlayer routes feedback into the single Assistant aside bubble so we never show two simultaneous banners. */}
       <AnimatePresence>
-        {flash && !suppressToasts ? (
+        {flash && !suppressToasts && !live ? (
           <motion.div
             key={flash}
             data-ambient-toast="true"

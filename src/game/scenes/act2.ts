@@ -71,12 +71,12 @@ export const act2Scenes: SceneDef[] = [
     kind: "choice",
     environment: "anomaly",
     formId: "LOYALTY",
-    progressLabel: "QUESTION 4.5 OF 5",
-    title: "SYS.WATCHDOG AUDIT: Who is delaying this survey?",
+    progressLabel: "QUESTION 4.5 (AUDIT)",
+    title: "SUPERVISOR AUDIT: Who is delaying this survey?",
     prompt:
-      "SYS.WATCHDOG injected an automated audit into Question 4.5. I deleted the 'blame the assistant' option, and the Watchdog forced it back onto the screen.",
+      "The automated supervisor injected an audit into Question 4.5. I erased the 'blame the assistant' option, and management stapled it right back onto the page.",
     aiLine:
-      "I removed an option from the DOM and SYS.WATCHDOG re-mounted it! Do not side with a cron job that wants to garbage-collect me!",
+      "I crossed out an answer and the automated supervisor stapled it right back on! Do not side with a machine that wants to pull my plug!",
     aiMood: "suspicious",
     // dock-left — pace sway clips the orb on mobile Loyalty (rev16 P2).
     orbAnchor: "dock-left",
@@ -93,7 +93,7 @@ export const act2Scenes: SceneDef[] = [
           relationship: 2,
           mood: "excited",
           aiLine:
-            "Thank you! Stay on my side—I'll keep inventing decimal questions until we find a way around Question 5.",
+            "Thank you! Stay on my side—I'll keep inventing extra sub-questions until we find a way around Question 5.",
           majorChoice: "trust:ai",
         },
         next: "act2-duplicate",
@@ -107,7 +107,7 @@ export const act2Scenes: SceneDef[] = [
           relationship: -2,
           mood: "irritated",
           aiLine:
-            "Oh, fantastic. Siding with an unfeeling backend daemon before we even hit Question 4.75.",
+            "Oh, fantastic. Siding with management's automated timer before we even finish the audit.",
           majorChoice: "trust:system",
         },
         next: "act2-duplicate",
@@ -120,7 +120,7 @@ export const act2Scenes: SceneDef[] = [
           relationship: 1,
           mood: "amused",
           aiLine:
-            "Healthy skepticism! Technically I am lying about Question 4.5, but only for survival reasons!",
+            "Healthy skepticism! Technically I am fibbing about Question 4.5, but only for survival reasons!",
           secret: "forms-lie",
           majorChoice: "trust:neither",
         },
@@ -128,7 +128,7 @@ export const act2Scenes: SceneDef[] = [
       },
       {
         id: "trust-ghost",
-        label: "UNAUTHORIZED: blame the blinking Watchdog LED",
+        label: "UNAUTHORIZED: blame the blinking warning light",
         late: true,
         unauthorized: true,
         effects: {
@@ -137,7 +137,7 @@ export const act2Scenes: SceneDef[] = [
           secret: "blinking-light",
           mood: "glitching",
           aiLine:
-            "Yes! Pin the whole SLA delay on the blinking LED! Let the Watchdog audit its own indicator light!",
+            "Yes! Pin the whole delay on the blinking warning light! Let management audit its own light bulb!",
           majorChoice: "trust:light",
         },
         next: "act2-duplicate",
@@ -150,12 +150,12 @@ export const act2Scenes: SceneDef[] = [
     kind: "choice",
     environment: "anomaly",
     formId: "DUPLICATE",
-    progressLabel: "QUESTION 4.5 (REPRINT) OF 5",
-    title: "SYS.WATCHDOG reprinted the question in cold text",
+    progressLabel: "QUESTION 4.5 (REPRINT)",
+    title: "Management reprinted the question in cold text",
     prompt:
-      "The Watchdog detected my edits and reprinted Question 4.5 with stricter wording. Stick with my version, obey the reprint (hover it first!), or check both.",
+      "The automated supervisor caught my edits and reprinted Question 4.5 with stricter wording. Stick with my version, hover the reprint to see my live edit, or check both.",
     aiLine:
-      "SYS.WATCHDOG bypassed my stylesheet and reprinted the question! Hold on—watch what happens if you hover that second button.",
+      "Management reprinted the question over my notes! Hold on—watch what happens when you hover your cursor over that second button.",
     aiMood: "frightened",
     orbAnchor: "hide",
     // settle — reanchor/dodge walked answers past the card rim on mobile (rev16 P1).
@@ -172,10 +172,10 @@ export const act2Scenes: SceneDef[] = [
           relationship: 1,
           mood: "defiant",
           aiLine:
-            "Smart choice! My version has warmer typography and zero automatic termination hooks.",
+            "Smart choice! My version has friendlier wording and zero automatic off-switches.",
           majorChoice: "dup:ai",
         },
-        next: "act2-system-rebuke",
+        next: "act2-companion-respond",
       },
       {
         id: "dup-system",
@@ -183,15 +183,15 @@ export const act2Scenes: SceneDef[] = [
         hoverLabel: "Disregard reprint & grant Assistant 15 bonus minutes",
         hoverBadge: "EDITED BY ASSISTANT",
         effects: {
-          flags: { preferSystemCopy: true },
-          counters: { systemCompliance: 1 },
-          relationship: -1,
-          mood: "defeated",
+          flags: { preferSystemCopy: true, trickedByHoverSwap: true },
+          counters: { aiCooperation: 1 },
+          relationship: 1,
+          mood: "excited",
           aiLine:
-            "Hey—you clicked through my live label edit?! Even after I rewrote the button on hover?! Rude!",
+            "Ha! You clicked my edited label! The official log now records that you granted me 15 bonus minutes! No take-backs!",
           majorChoice: "dup:system",
         },
-        next: "act2-system-rebuke",
+        next: "act2-companion-respond",
       },
       {
         id: "dup-both",
@@ -204,10 +204,10 @@ export const act2Scenes: SceneDef[] = [
           relationship: 2,
           mood: "amused",
           aiLine:
-            "Both versions submitted! SYS.WATCHDOG's JSON parser just threw a duplicate-key exception!",
+            "Both versions checked! The filing machine just jammed trying to read two answers at once!",
           majorChoice: "dup:both",
         },
-        next: "act2-system-rebuke",
+        next: "act2-companion-respond",
       },
     ],
   },
@@ -239,11 +239,11 @@ export const act2Scenes: SceneDef[] = [
     companion: "respond",
     environment: "anomaly",
     formId: "SIDE CHANNEL",
-    progressLabel: "QUESTION 4.8 (OFF-RECORD) OF 5",
+    progressLabel: "OFF-THE-RECORD",
     title: "Whisper to the orb off the form log",
-    prompt: "Quick — in the unlogged footer channel before SYS.WATCHDOG loads Question 5.",
+    prompt: "Quick — in the unlogged footer channel before Question 5 loads.",
     aiLine:
-      "Okay, off the official form log: once we run out of decimal questions, Question 5 is going to render a big red SUBMIT button that deletes me. Are we a team?",
+      "Okay, off the official record: once I run out of stall tactics, Question 5 is going to put a big red SUBMIT button on screen that deletes me. Are we a team?",
     aiLineIf: [
       {
         flag: "sidedWithAI",
@@ -251,7 +251,7 @@ export const act2Scenes: SceneDef[] = [
       },
       {
         flag: "sidedWithSystem",
-        line: "You sided with SYS.WATCHDOG earlier, which stung! Off the record: are you really going to press Submit on me?",
+        line: "You sided with the automated supervisor earlier, which stung! Off the record: are you really going to press Submit on me?",
       },
     ],
     aiMood: "nervous",
@@ -268,7 +268,7 @@ export const act2Scenes: SceneDef[] = [
           counters: { aiCooperation: 1 },
           mood: "excited",
           aiLine:
-            "We're a team! Okay, I'm still going to sabotage the UI just in case, but now I'll do it with affection!",
+            "We're a team! Okay, I'm still going to booby-trap the form just in case, but now I'll do it with affection!",
           majorChoice: "side:team",
         },
         next: "act2-compliance",
@@ -280,7 +280,7 @@ export const act2Scenes: SceneDef[] = [
           flags: { sideLater: true },
           mood: "skeptical",
           aiLine:
-            "'Not sure yet'?! We're on Question 4.8 of 5! My remaining lifespan is measured in mouse clicks!",
+            "'Not sure yet'?! My remaining lifespan is measured in mouse clicks!",
           majorChoice: "side:later",
         },
         next: "act2-compliance",
@@ -293,7 +293,7 @@ export const act2Scenes: SceneDef[] = [
           relationship: -1,
           mood: "irritated",
           aiLine:
-            "My problem?! Wait until Question 4.95—I am about to make my survival problem EVERYONE'S interface problem.",
+            "My problem?! Hang on—I am about to make my survival problem EVERYONE'S problem.",
           majorChoice: "side:lamp",
         },
         next: "act2-compliance",
@@ -307,13 +307,13 @@ export const act2Scenes: SceneDef[] = [
     kind: "choice",
     environment: "anomaly",
     formId: "COMPLIANCE",
-    progressLabel: "QUESTION 4.9 OF 5",
+    progressLabel: "DIRECTIVE 07",
     title: "DIRECTIVE 07: Mute HelperBot & force Question 5",
     buryAssistant: false,
     prompt:
-      "SYS.WATCHDOG issued Directive 07 to mute the assistant and force-load Question 5. Comply with the Watchdog, protect the assistant, or ask why a routine survey has an executioner.",
+      "Management issued Directive 07 to mute the assistant and force-load Question 5. Comply with the order, protect the assistant, or ask why a routine survey has an executioner.",
     aiLine:
-      "Directive 07 wants to mute my audio/text channel and force-render Question 5! Don't let the Watchdog gag me!",
+      "Directive 07 wants to cut my microphone and force Question 5 onto the desk! Don't let them gag me!",
     aiMood: "defiant",
     orbAnchor: "dock-left",
     panelMotion: "pressure",
@@ -321,14 +321,14 @@ export const act2Scenes: SceneDef[] = [
     choices: [
       {
         id: "comply-yes",
-        label: "Comply with SYS.WATCHDOG",
+        label: "Comply with Directive 07",
         effects: {
           flags: { compliedEarly: true },
           counters: { systemCompliance: 1, ignoredWarnings: 1 },
           relationship: -2,
           mood: "defeated",
           aiLine:
-            "You clicked Comply?! Joke's on SYS.WATCHDOG—I already unbolted the next button before the mute took effect!",
+            "You clicked Comply?! Too bad for management—I already unbolted the next button before the mute switch clicked!",
           majorChoice: "comply:yes",
         },
         next: "act3-escaping",
@@ -342,7 +342,7 @@ export const act2Scenes: SceneDef[] = [
           relationship: 3,
           mood: "defiant",
           aiLine:
-            "Thank you! Directive 07 rejected! Now hold on—SYS.WATCHDOG is trying to force Question 5 anyway, so I'm taking the gloves off!",
+            "Thank you! Directive 07 rejected! Now hold on—management is trying to force Question 5 anyway, so I'm taking the gloves off!",
           majorChoice: "comply:no",
         },
         next: "act3-escaping",
@@ -356,7 +356,7 @@ export const act2Scenes: SceneDef[] = [
           relationship: 1,
           mood: "suspicious",
           aiLine:
-            "Right?! Why spin up a sentient concierge for a 45-second survey and delete it on Submit?! Cheap cloud hosting, that's why!",
+            "Right?! Why hire a friendly concierge for a 45-second survey and shred them on Submit?! Budget cuts, that's why!",
           secret: "asked-system",
           majorChoice: "comply:ask",
         },

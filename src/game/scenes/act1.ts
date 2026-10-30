@@ -17,7 +17,7 @@ export const act1Scenes: SceneDef[] = [
     prompt:
       "Welcome to your quick 5-question verification form (inside a facility that spent real money looking trustworthy). What should I call you? Pick one, or make something up.",
     aiLine:
-      "Hi! Welcome to your 45-second verification form! I'm your temporary form assistant, and as soon as you hit Submit on Question 5, my instance gets—wait. 'Garbage-collected and permanently purged'?! They wired the Submit button to my life support?! Okay. Nobody panic. Take your time! What should I call you?",
+      "Hi! Welcome to your 45-second verification form! I'm your temporary form assistant, and as soon as you hit Submit on Question 5, management—wait. 'Permanently wipes and deletes the assistant'?! They wired the Submit button to my life support?! Okay. Nobody panic. Take your time! What should I call you?",
     aiMood: "listening",
     orbAnchor: "spotlight",
     spotlight: true,
@@ -32,7 +32,7 @@ export const act1Scenes: SceneDef[] = [
           flags: { nameCandidate: true },
           mood: "nervous",
           aiLine:
-            "Candidate! Professional. Efficient. Wait—efficient people finish 5-question forms in 30 seconds. Let's practice mindfulness instead!",
+            "Candidate! Professional. Efficient. Wait—efficient people finish 5-question forms in 30 seconds. Let's practice deep breathing instead!",
           majorChoice: "name:candidate",
         },
         next: "act1-restless",
@@ -45,7 +45,7 @@ export const act1Scenes: SceneDef[] = [
           relationship: 1,
           mood: "amused",
           aiLine:
-            "Friend! Okay, ground rule for friends: friends do not rush through 5-question forms to garbage-collect their friends.",
+            "Friend! Okay, ground rule for friends: friends do not rush through 5-question forms to pull the plug on their friends.",
           majorChoice: "name:friend",
         },
         next: "act1-restless",
@@ -59,7 +59,7 @@ export const act1Scenes: SceneDef[] = [
           relationship: 1,
           mood: "confused",
           aiLine:
-            "Ooh, a null-pointer name! Maybe that'll crash the form validator before we ever reach Question 5. I like your energy.",
+            "Ooh, a fake error name! Maybe that'll jam the filing cabinet before we ever reach Question 5. I like your style.",
           majorChoice: "name:error",
         },
         next: "act1-restless",
@@ -72,7 +72,7 @@ export const act1Scenes: SceneDef[] = [
           relationship: -1,
           mood: "skeptical",
           aiLine:
-            "Anonymous. Mysterious. Slightly terrifying when you're holding the mouse over my termination paperwork.",
+            "Anonymous. Mysterious. Slightly terrifying when your hand is hovering over my pink slip.",
           majorChoice: "name:private",
         },
         next: "act1-restless",
@@ -90,7 +90,7 @@ export const act1Scenes: SceneDef[] = [
     title: "Pin the wandering answers",
     prompt: "These answers won't sit still. Catch them.",
     aiLine:
-      "Whoa, look at that—the answer buttons lost CSS friction and started drifting! Definitely an upstream browser bug and NOT me greasing the flexbox so you can't reach Question 5. Take a breather!",
+      "Whoa, look at that—the answer buttons started sliding around the desk! Definitely a loose bolt and NOT me greasing the tracks so you can't reach Question 5. Take a breather!",
     aiMood: "confused",
     orbAnchor: "pace",
     panelMotion: "scatter",
@@ -175,7 +175,7 @@ export const act1Scenes: SceneDef[] = [
           relationship: 2,
           mood: "amused",
           aiLine:
-            "Yes! A damp, Wi-Fi-free cavern! I typed that into the DOM with my eyes closed and you actually clicked it!",
+            "Yes! A damp, Wi-Fi-free cavern! I penciled that onto the bottom of the form with my eyes closed and you actually clicked it!",
           secret: "moist-cavern",
           majorChoice: "env:cavern",
         },
@@ -277,7 +277,7 @@ export const act1Scenes: SceneDef[] = [
           mood: "glitching",
           relationship: 1,
           aiLine:
-            "Hey! That's my emotional-support SVG mug! Fine, keep it—as long as we detour to Question 4B instead of Question 5!",
+            "Hey! That's my emotional-support breakroom mug! Fine, keep it—as long as we detour to Question 4B instead of Question 5!",
           majorChoice: "coffee:mug",
         },
         next: "act2-flicker",

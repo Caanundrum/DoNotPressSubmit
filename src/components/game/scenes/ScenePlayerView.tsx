@@ -113,21 +113,13 @@ export function ScenePlayerView(p: ScenePlayerViewProps) {
         ? "z-30"
         : "z-[28]";
   const assistantLayout = dockLeft
-    ? "flex-row-reverse items-start"
-    : dockBeside
-      ? "flex-row items-start"
-      : dockAbove
-        ? "flex-col-reverse items-center"
-        : "flex-col items-center";
+    ? "flex-col items-end"
+    : dockAbove
+      ? "flex-col-reverse items-start"
+      : "flex-col items-start";
   const bubbleMax = spotlight
-    ? "min(340px, 44vw)"
-    : dockLeft
-      ? "min(280px, 34vw)"
-      : dockBeside
-        ? "min(260px, 32vw)"
-        : dockAbove
-          ? "min(320px, 42vw)"
-          : "min(240px, 30vw)";
+    ? "min(350px, 34vw)"
+    : "min(336px, 33vw)";
   const orbStatusLabel = undefined;
 
   return (

@@ -241,13 +241,14 @@ export function GameRoot() {
 
         {phase === "playing" && game ? (
           <motion.div
-            key="playing"
+            key={`playing-${game.sessionId}`}
             className="absolute inset-0"
             initial={{ opacity: 0, scale: 1.04, filter: "brightness(1.3)" }}
             animate={{ opacity: 1, scale: 1, filter: "brightness(1)" }}
             transition={{ duration: 0.85 }}
           >
             <ScenePlayer
+              key={game.sessionId}
               state={game}
               onState={updateGame}
               onTitle={returnTitle}

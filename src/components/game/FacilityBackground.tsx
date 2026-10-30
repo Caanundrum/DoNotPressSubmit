@@ -232,7 +232,7 @@ export function FacilityBackground({
             left: chamberSlot.left,
             top: chamberSlot.top,
             transition: "left 1.8s ease-in-out, top 1.8s ease-in-out, opacity 0.9s ease",
-            opacity: calm ? 0.55 : 0.72,
+            opacity: calm ? 0.42 : 0.46,
           }}
           data-roam-egg="chamber-07"
           data-session-badge="SESSION // LIVE"
@@ -347,7 +347,7 @@ export function FacilityBackground({
             left: dashedSlot.left,
             top: dashedSlot.top,
             transition: "left 1.8s ease-in-out, top 1.8s ease-in-out, opacity 0.9s ease",
-            opacity: calm ? 0.5 : 0.7,
+            opacity: calm ? 0.38 : 0.44,
           }}
           data-roam-egg="dashed-frame"
           aria-label={live ? "Inspect dashed frame" : undefined}

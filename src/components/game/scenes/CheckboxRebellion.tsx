@@ -121,7 +121,7 @@ export function CheckboxRebellion({
       "All three consent boxes locked?! Fine! Put that in the audit log under 'unreasonably persistent.'",
       "defeated",
     );
-    timers.schedule("complete", () => onComplete(), 580);
+    timers.schedule("complete", () => onComplete(), 3800);
   };
 
   const handleDecoy = () => {
@@ -197,8 +197,8 @@ export function CheckboxRebellion({
       data-checkbox-rebellion="hostile-sabotage"
     >
       {/* Status Banner */}
-      <div className="mb-2 flex items-center justify-between border-b border-white/10 pb-1.5 font-mono text-[9px] tracking-[0.18em] text-[#b8c6d8]">
-        <span className="truncate pr-2">{statusBanner}</span>
+      <div className="mb-2 flex items-start justify-between gap-2 border-b border-white/10 pb-1.5 font-mono text-[10px] leading-snug tracking-[0.14em] text-[#b8c6d8]">
+        <span className="whitespace-normal break-words pr-2">{statusBanner}</span>
         <span className="shrink-0 text-cyan">
           Checked {checks}/{needed}
         </span>
@@ -254,10 +254,10 @@ export function CheckboxRebellion({
           </div>
         ) : null}
 
-        {/* Checkbox 3 (shifts when fine-print is injected) */}
+        {/* Checkbox 3 (shifts slightly when fine-print is injected, keeping full label readable) */}
         <div
-          className={`flex transition-all duration-200 ${
-            box3Shifted && !box3 ? " justify-end pl-6 sm:pl-14" : "justify-start"
+          className={`flex w-full transition-all duration-200 ${
+            box3Shifted && !box3 ? "translate-x-1 sm:translate-x-2" : ""
           }`}
         >
           <button
@@ -284,15 +284,32 @@ export function CheckboxRebellion({
             >
               {box3 ? "✓" : ""}
             </span>
-            <span className="flex-1">
+            <span className="min-w-0 flex-1 whitespace-normal break-words text-[#f0f7ff]">
               3. I wish to submit this form{" "}
-              {box3Shifted && !box3 ? "(PIN MOVED CLAUSE)" : ""}
+              {box3Shifted && !box3 ? "(MOVED — CLICK AGAIN TO PIN)" : ""}
             </span>
-            <span className="text-[9px] tracking-[0.18em] text-cyan/80">
+            <span className="shrink-0 text-[9px] tracking-[0.18em] text-cyan/80">
               {box3 ? "LOCKED ✓" : box3Shifted ? "CLICK TO PIN" : "REQUIRED"}
             </span>
           </button>
         </div>
+
+        {box3 ? (
+          <div className="mt-1 flex justify-end">
+            <button
+              type="button"
+              data-checkbox-continue="true"
+              onClick={() => {
+                timers.clear("complete");
+                audio.play("click", 0.4);
+                onComplete();
+              }}
+              className="cursor-pointer border border-cyan/60 bg-cyan/15 px-4 py-1.5 font-mono text-[11px] tracking-[0.18em] text-white transition hover:bg-cyan/25"
+            >
+              CONTINUE →
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );

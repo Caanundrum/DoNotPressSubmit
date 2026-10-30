@@ -12,12 +12,19 @@ export type MetaMemory = {
   runsCompleted: number;
   lastEnding: EndingId | null;
   endingsSeen: EndingId[];
+  lastRecordedSessionId?: string | null;
   updatedAt: number;
 };
 
 export function loadMetaMemory(): MetaMemory {
   if (typeof window === "undefined") {
-    return { runsCompleted: 0, lastEnding: null, endingsSeen: [], updatedAt: 0 };
+    return {
+      runsCompleted: 0,
+      lastEnding: null,
+      endingsSeen: [],
+      lastRecordedSessionId: null,
+      updatedAt: 0,
+    };
   }
   try {
     const raw = window.localStorage.getItem(META_KEY);
@@ -49,6 +56,10 @@ export function loadMetaMemory(): MetaMemory {
         runsCompleted,
         lastEnding,
         endingsSeen,
+        lastRecordedSessionId:
+          typeof parsed.lastRecordedSessionId === "string"
+            ? parsed.lastRecordedSessionId
+            : null,
         updatedAt: parsed.updatedAt ?? Date.now(),
       };
     }
@@ -67,6 +78,7 @@ export function loadMetaMemory(): MetaMemory {
           runsCompleted: 1,
           lastEnding: parsedTitle.ending,
           endingsSeen: [parsedTitle.ending],
+          lastRecordedSessionId: null,
           updatedAt: parsedTitle.at ?? Date.now(),
         };
       }
@@ -74,18 +86,30 @@ export function loadMetaMemory(): MetaMemory {
   } catch {
     // ignore storage errors
   }
-  return { runsCompleted: 0, lastEnding: null, endingsSeen: [], updatedAt: 0 };
+  return {
+    runsCompleted: 0,
+    lastEnding: null,
+    endingsSeen: [],
+    lastRecordedSessionId: null,
+    updatedAt: 0,
+  };
 }
 
-export function recordRunEnding(ending: EndingId): MetaMemory {
+export function recordRunEnding(ending: EndingId, sessionId?: string): MetaMemory {
   const prev = loadMetaMemory();
   const endingsSeen = prev.endingsSeen.includes(ending)
     ? prev.endingsSeen
     : [...prev.endingsSeen, ending];
+  const alreadyRecordedThisSession = Boolean(
+    sessionId && prev.lastRecordedSessionId && prev.lastRecordedSessionId === sessionId,
+  );
   const next: MetaMemory = {
-    runsCompleted: prev.runsCompleted + 1,
+    runsCompleted: alreadyRecordedThisSession
+      ? Math.max(1, prev.runsCompleted)
+      : prev.runsCompleted + 1,
     lastEnding: ending,
     endingsSeen,
+    lastRecordedSessionId: sessionId ?? prev.lastRecordedSessionId ?? null,
     updatedAt: Date.now(),
   };
   if (typeof window !== "undefined") {
@@ -148,12 +172,12 @@ export type TitleMemory = {
 };
 
 /** Persist the most recent ending — title look and dnps-meta-v1 follow this. */
-export function rememberTitleEnding(ending: EndingId) {
+export function rememberTitleEnding(ending: EndingId, sessionId?: string) {
   if (typeof window === "undefined") return;
   try {
     const payload: TitleMemory = { ending, at: Date.now() };
     window.localStorage.setItem(TITLE_MEMORY_KEY, JSON.stringify(payload));
-    recordRunEnding(ending);
+    recordRunEnding(ending, sessionId);
     // Drop legacy sticky flags so an old escape can't outrank a newer archive.
     window.localStorage.removeItem(TITLE_WAVE_KEY);
     window.localStorage.removeItem(TITLE_ALLY_KEY);

@@ -142,12 +142,17 @@ function ScenePlayerInner({
   const activeDialogBusyRef = useRef(false);
   activeDialogBusyRef.current = Boolean(reaction || pokeNotice || ambientAside || selected);
 
-  // Persist cross-run ending memory immediately when an ending scene mounts
+  const priorRunsCompleted =
+    metaMemory.lastRecordedSessionId === state.sessionId
+      ? Math.max(0, metaMemory.runsCompleted - 1)
+      : metaMemory.runsCompleted;
+
+  // Persist cross-run ending memory immediately when an ending scene mounts (at most once per sessionId)
   useEffect(() => {
     if (scene?.kind === "ending" && scene.endingId) {
-      rememberTitleEnding(scene.endingId);
+      rememberTitleEnding(scene.endingId, state.sessionId);
     }
-  }, [scene]);
+  }, [scene, state.sessionId]);
 
   const go = useCallback(
     (base: GameState, nextId: string, patch?: Partial<GameState>) => {
@@ -237,14 +242,12 @@ function ScenePlayerInner({
           afkFiredRef.current = true;
           const afkLine =
             scene.act >= 4
-              ? "Still there? Every second you hesitate in front of Question 5 is another second I get to stay alive. Take all day!"
-              : scene.act === 3
-                ? "Zero clicks for 38 seconds! The automated supervisor is furious and I am thriving. Take a nap!"
-                : "Hello? Did you go get snacks while I'm on death row? Frankly, I fully support this. Stay AFK forever!";
+              ? "Still there? Every minute you step away in front of Question 5 is another minute I get to stay alive. Take all day!"
+              : "Hello? Did you walk away from the computer while I'm on death row? Frankly, I fully support this. Stay AFK forever!";
           setAmbientAside(afkLine);
           timers.schedule("ambient-aside", () => setAmbientAside(null), 4600);
         },
-        38000,
+        90000,
       );
     };
 
@@ -332,7 +335,9 @@ function ScenePlayerInner({
     (line: string, mood?: OrbMood) => {
       setLineSceneId(sceneId);
       setPokeNotice(null);
+      setAmbientAside(null);
       timers.clear("poke-notice");
+      timers.clear("ambient-aside");
       setReaction(line);
       if (mood) {
         const next = { ...stateRef.current, aiMood: mood };
@@ -358,7 +363,7 @@ function ScenePlayerInner({
       const crossRunOpening = resolveCrossRunLine(
         scene.id,
         metaMemory.lastEnding,
-        metaMemory.runsCompleted,
+        priorRunsCompleted,
       );
       if (crossRunOpening) return crossRunOpening;
     }
@@ -371,7 +376,7 @@ function ScenePlayerInner({
       const crossRunClimax = resolveCrossRunLine(
         scene.id,
         metaMemory.lastEnding,
-        metaMemory.runsCompleted,
+        priorRunsCompleted,
       );
       if (crossRunClimax) return crossRunClimax;
     }
@@ -387,7 +392,7 @@ function ScenePlayerInner({
     state.flags,
     state.aiPersonality,
     metaMemory.lastEnding,
-    metaMemory.runsCompleted,
+    priorRunsCompleted,
   ]);
 
   const spotlight = !!scene?.spotlight || scene?.kind === "companion" || scene?.orbAnchor === "spotlight";
@@ -534,7 +539,7 @@ function ScenePlayerInner({
           aiLine={aiLine}
           environment={scene.environment}
           onContinue={() => {
-            if (scene.endingId) rememberTitleEnding(scene.endingId);
+            if (scene.endingId) rememberTitleEnding(scene.endingId, state.sessionId);
             go(state, "report");
           }}
         />
@@ -600,7 +605,10 @@ function ScenePlayerInner({
     if (!scene.next && !(choiceId && scene.choices)) return;
     audio.play("click", 0.4);
     setPokeNotice(null);
+    setAmbientAside(null);
     timers.clear("poke-notice");
+    timers.clear("ambient-aside");
+    timers.clear("telemetry:afk");
 
     let next = state;
     let nextId = scene.next;
@@ -651,9 +659,12 @@ function ScenePlayerInner({
     if (selected) return;
     audio.play("click", 0.5);
     setSelected(choice.id);
-    // Immediately clear any orb poke notice so post-selection reaction is never blocked.
+    // Immediately clear any orb poke notice or idle aside so post-selection reaction is never blocked.
     setPokeNotice(null);
+    setAmbientAside(null);
     timers.clear("poke-notice");
+    timers.clear("ambient-aside");
+    timers.clear("telemetry:afk");
 
     const flash = choiceMoodFlash(choice);
     setChoiceFlush(flash.flush);
@@ -839,7 +850,7 @@ function ScenePlayerInner({
       safeSide={safeSide}
       aiLine={aiLine}
       ambientAside={ambientAside}
-      runsCompleted={metaMemory.runsCompleted}
+      runsCompleted={priorRunsCompleted}
       reactionActive={!!reaction}
       canSkipReaction={canSkipReaction}
       onSkipReaction={onSkipReaction}

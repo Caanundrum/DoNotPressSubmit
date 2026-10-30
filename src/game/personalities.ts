@@ -24,7 +24,7 @@ export function formatInstanceBadge(
   if (runsCompleted >= 1) {
     return `HELPERBOT INSTANCE #${runsCompleted + 1} // ${label}`;
   }
-  return PERSONALITY_BADGES[personality] ?? "INSTANCE // LIVE";
+  return `INSTANCE #1 // ${label}`;
 }
 
 /**

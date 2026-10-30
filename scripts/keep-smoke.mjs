@@ -800,6 +800,27 @@ assert(
     /glossMajorChoice|trustLabel/.test(reportSrc),
   "AssessmentReport upgraded into shareable Session Autopsy Dossier with 5-ending tracker (Proposal 4.3)",
 );
+const choiceListSrc = read("src/components/game/scenes/SceneChoiceList.tsx");
+assert(
+  /data-choice-badge-row="true"/.test(choiceListSrc) &&
+    /flex-col items-start text-left/.test(choiceListSrc),
+  "SceneChoiceList renders badges in top badge row above full-width choice text (Issue A)",
+);
+assert(
+  /data-checkbox-continue="true"/.test(checkbox) &&
+    !/timers\.schedule\("complete"/.test(checkbox),
+  "CheckboxRebellion CONTINUE -> is strictly player-controlled with no auto-advance timer (Issue B)",
+);
+assert(
+  /Fell for HelperBot's button-swap/.test(read("src/game/state.ts")) &&
+    /Fell for HelperBot's edited reprint/.test(read("src/game/state.ts")),
+  "glossMajorChoice syncs with hover-rewrite prank on Q7 and Q15 (Issue C)",
+);
+assert(
+  /lastRecordedSessionId/.test(read("src/game/storage.ts")) &&
+    /90000/.test(scenePlayer),
+  "Single-increment instance counter per sessionId and 90s AFK timer (Issue D)",
+);
 
 console.log(failed ? `\nKEEP smoke: FAILED (${failed})` : "\nKEEP smoke: OK");
 process.exit(failed ? 1 : 0);

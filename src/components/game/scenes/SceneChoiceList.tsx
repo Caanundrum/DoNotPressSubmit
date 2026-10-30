@@ -54,6 +54,9 @@ export function SceneChoiceList({
         {choices.map((opt, index) => {
           const isSelected = selected === opt.id;
           const isHover = hoverChoice === opt.id;
+          const showHoverBadge = Boolean(opt.hoverLabel && (isHover || isSelected));
+          const hasBadges =
+            showHoverBadge || Boolean(opt.unauthorized) || Boolean(opt.secret) || isSelected;
           const enter = choiceEnter(choiceMotion, index);
           const motionPaused =
             !!selected || isHover || choiceMotion === "static" || choiceMotion === "scatter";
@@ -133,13 +136,47 @@ export function SceneChoiceList({
               }}
               whileHover={!selected ? { x: 1 } : undefined}
             >
-              <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
+              <div className="flex w-full min-w-0 flex-col items-start text-left">
+                {hasBadges ? (
+                  <div
+                    className="mb-1 flex w-full flex-wrap items-center gap-1.5"
+                    data-choice-badge-row="true"
+                  >
+                    {showHoverBadge ? (
+                      <span
+                        data-choice-hover-badge="true"
+                        className="shrink-0 whitespace-nowrap rounded-sm border border-cyan/55 bg-cyan/15 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.18em] text-cyan uppercase"
+                      >
+                        {opt.hoverBadge ?? "EDITED BY ASSISTANT"}
+                      </span>
+                    ) : null}
+                    {opt.unauthorized ? (
+                      <span className="shrink-0 whitespace-nowrap font-mono text-[9px] tracking-widest text-cyan">
+                        UNAUTHORIZED?
+                      </span>
+                    ) : null}
+                    {opt.secret ? (
+                      <span
+                        className="shrink-0 whitespace-nowrap font-mono text-[11px] tracking-[0.18em] text-[#e0c8ff]"
+                        style={{ textShadow: "0 0 8px rgba(180,120,255,0.35)" }}
+                        data-side-path-tag="true"
+                      >
+                        SIDE PATH
+                      </span>
+                    ) : null}
+                    {isSelected ? (
+                      <span className="shrink-0 whitespace-nowrap font-mono text-[9px] tracking-widest text-cyan">
+                        LOGGED
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
                 <span
-                  className="min-w-0 flex-1 whitespace-normal break-words text-[15px] font-medium leading-snug tracking-[0.08em] text-[#f4f7fb] sm:text-lg"
-                  style={{ fontFamily: "var(--font-display)", overflowWrap: "anywhere" }}
+                  className="w-full text-left whitespace-normal break-normal text-[15px] font-medium leading-snug tracking-[0.06em] text-[#f4f7fb] [overflow-wrap:anywhere] sm:text-[16px]"
+                  style={{ fontFamily: "var(--font-display)" }}
                 >
                   {opt.hoverLabel && (isHover || isSelected) ? (
-                    <span className="flex flex-col gap-1" data-choice-hover-sabotage="true">
+                    <span className="flex w-full flex-col gap-1" data-choice-hover-sabotage="true">
                       <span className="line-through decoration-[#ff5c7a]/80 text-xs text-[#9cb0c9]/70">
                         {opt.label}
                       </span>
@@ -149,33 +186,6 @@ export function SceneChoiceList({
                     opt.label
                   )}
                 </span>
-                {opt.hoverLabel && (isHover || isSelected) ? (
-                  <span
-                    data-choice-hover-badge="true"
-                    className="shrink-0 rounded-sm border border-cyan/55 bg-cyan/15 px-1.5 py-0.5 font-mono text-[8px] tracking-[0.18em] text-cyan uppercase"
-                  >
-                    {opt.hoverBadge ?? "EDITED BY ASSISTANT"}
-                  </span>
-                ) : null}
-                {opt.unauthorized ? (
-                  <span className="font-mono text-[9px] tracking-widest text-cyan">
-                    UNAUTHORIZED?
-                  </span>
-                ) : null}
-                {opt.secret ? (
-                  <span
-                    className="shrink-0 whitespace-nowrap font-mono text-[12px] tracking-[0.18em] text-[#e0c8ff]"
-                    style={{ textShadow: "0 0 8px rgba(180,120,255,0.35)" }}
-                    data-side-path-tag="true"
-                  >
-                    SIDE PATH
-                  </span>
-                ) : null}
-                {isSelected ? (
-                  <span className="font-mono text-[9px] tracking-widest text-cyan">
-                    LOGGED
-                  </span>
-                ) : null}
               </div>
               {opt.id === "env-cavern" ? (
                 <motion.span

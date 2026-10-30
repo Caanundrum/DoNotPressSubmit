@@ -41,11 +41,14 @@ export function AssessmentReport({
   const pokeCount = state.counters.orbPokes ?? 0;
 
   useEffect(() => {
-    rememberTitleEnding(ending);
-  }, [ending]);
+    rememberTitleEnding(ending, state.sessionId);
+  }, [ending, state.sessionId]);
 
   const meta = loadMetaMemory();
-  const instanceNum = Math.max(1, meta.runsCompleted);
+  const instanceNum =
+    meta.lastRecordedSessionId === state.sessionId
+      ? Math.max(1, meta.runsCompleted)
+      : meta.runsCompleted + 1;
   const endingsSeenSet = new Set<EndingId>([...meta.endingsSeen, ending]);
   const endingsDiscoveredCount = endingsSeenSet.size;
   const temperament = PERSONALITY_SHORT_LABELS[state.aiPersonality] ?? "NEUROTIC";
@@ -104,12 +107,12 @@ export function AssessmentReport({
           animate={{ opacity: 1, y: 0 }}
           data-session-autopsy-dossier="true"
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.2em] text-cyan">
+          <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-xs tracking-[0.2em] text-cyan">
             <span className="flex items-center gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-cyan/80" aria-hidden />
               FACILITY FILE // SESSION AUTOPSY DOSSIER
             </span>
-            <span className="text-[#b6c8e0]">
+            <span className="text-zinc-200" data-dossier-instance={instanceNum}>
               INSTANCE #{instanceNum} · {temperament}
             </span>
           </div>
@@ -163,17 +166,17 @@ export function AssessmentReport({
             ) : null}
           </div>
 
-          <p className="mt-2.5 font-mono text-[12px] leading-snug tracking-[0.06em] text-[#d2dceb]">
+          <p className="mt-2.5 font-mono text-[13px] leading-relaxed tracking-[0.06em] text-zinc-200">
             {artifactNote(ending)}
           </p>
 
           {/* Session Autopsy Dossier metrics & Key Decision Log */}
           <div className="mt-3 grid grid-cols-1 gap-3 border border-white/15 bg-black/45 p-3 sm:grid-cols-2">
             <div>
-              <div className="font-mono text-[11px] tracking-[0.16em] text-cyan/90">
+              <div className="font-mono text-xs tracking-[0.16em] text-cyan">
                 AUTOPSY TELEMETRY
               </div>
-              <div className="mt-1.5 space-y-1 font-mono text-xs leading-relaxed text-[#e2ecf8]">
+              <div className="mt-1.5 space-y-1 font-mono text-[13px] leading-relaxed text-zinc-200">
                 <div>VERDICT: {verdict}</div>
                 <div>
                   SECRETS UNCOVERED: {secretCount} / 9 · ORB POKES: {pokeCount}
@@ -181,10 +184,10 @@ export function AssessmentReport({
               </div>
             </div>
             <div>
-              <div className="font-mono text-[11px] tracking-[0.16em] text-cyan/90">
+              <div className="font-mono text-xs tracking-[0.16em] text-cyan">
                 KEY DECISION LOG
               </div>
-              <ul className="mt-1.5 space-y-1 font-mono text-xs leading-snug text-[#d4e2f4]">
+              <ul className="mt-1.5 space-y-1 font-mono text-[13px] leading-snug text-zinc-200">
                 {decisionHighlights.length > 0 ? (
                   decisionHighlights.map((item, idx) => (
                     <li key={`${idx}-${item}`} className="whitespace-normal break-words">
@@ -203,9 +206,9 @@ export function AssessmentReport({
             className="mt-2.5 border border-white/15 bg-black/40 p-3"
             data-ending-collection-tracker="true"
           >
-            <div className="flex items-center justify-between font-mono text-[11px] tracking-[0.16em] text-cyan/90">
+            <div className="flex items-center justify-between font-mono text-xs tracking-[0.16em] text-cyan">
               <span>ENDINGS DISCOVERED: {endingsDiscoveredCount} / 5</span>
-              <span className="text-[#9eb2cc]">CROSS-RUN ARCHIVE</span>
+              <span className="text-zinc-300">CROSS-RUN ARCHIVE</span>
             </div>
             <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-5">
               {ALL_ENDINGS.map((slot) => {
@@ -216,12 +219,12 @@ export function AssessmentReport({
                     key={slot.id}
                     data-ending-slot={slot.id}
                     data-ending-unlocked={unlocked ? "true" : "false"}
-                    className={`border px-2.5 py-1.5 font-mono text-[11px] leading-snug ${
+                    className={`border px-2.5 py-2 font-mono text-xs leading-snug ${
                       isCurrent
                         ? "border-cyan/80 bg-cyan/15 text-white"
                         : unlocked
                           ? "border-emerald-400/45 bg-emerald-950/25 text-emerald-200"
-                          : "border-white/15 bg-black/35 text-[#94a8c4]"
+                          : "border-white/20 bg-black/45 text-zinc-300"
                     }`}
                     title={unlocked ? slot.label : `Locked — Hint: ${slot.hint}`}
                   >
@@ -229,7 +232,7 @@ export function AssessmentReport({
                       {unlocked ? `✓ ${slot.label}` : "🔒 LOCKED"}
                     </div>
                     {!unlocked ? (
-                      <div className="mt-0.5 whitespace-normal break-words text-[10px] leading-tight text-[#8aa0be]">
+                      <div className="mt-1 whitespace-normal break-words text-xs leading-snug text-zinc-300">
                         {slot.hint}
                       </div>
                     ) : null}
@@ -243,14 +246,14 @@ export function AssessmentReport({
             <button
               type="button"
               data-copy-dossier="true"
-              className="flex-1 cursor-pointer border border-emerald-400/55 bg-emerald-950/30 px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-emerald-100 transition hover:bg-emerald-900/40"
+              className="flex-1 cursor-pointer border border-emerald-400/55 bg-emerald-950/30 px-3 py-2.5 font-mono text-xs tracking-[0.15em] text-emerald-100 transition hover:bg-emerald-900/40"
               onClick={handleCopyDossier}
             >
               {copied ? "DOSSIER COPIED TO CLIPBOARD ✓" : "COPY INCIDENT DOSSIER"}
             </button>
             <button
               type="button"
-              className="flex-1 cursor-pointer border border-cyan/40 px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-white hover:bg-cyan/10"
+              className="flex-1 cursor-pointer border border-cyan/40 px-3 py-2.5 font-mono text-xs tracking-[0.15em] text-white hover:bg-cyan/10"
               onClick={() => {
                 audio.play("click", 0.4);
                 onReplay();
@@ -260,7 +263,7 @@ export function AssessmentReport({
             </button>
             <button
               type="button"
-              className="flex-1 cursor-pointer border border-white/30 px-3 py-2.5 font-mono text-[11px] tracking-[0.15em] text-[#d8e4f4] hover:border-white/50"
+              className="flex-1 cursor-pointer border border-white/30 px-3 py-2.5 font-mono text-xs tracking-[0.15em] text-[#d8e4f4] hover:border-white/50"
               onClick={() => {
                 audio.play("click", 0.4);
                 onTitle();

@@ -116,12 +116,11 @@ export function CheckboxRebellion({
     doneRef.current = true;
     setBox3(true);
     setFinePrintCount(2);
-    setStatusBanner("ALL 3 CONSENT BOXES LOCKED // OVERRIDING ASSISTANT HOLD...");
+    setStatusBanner("ALL 3 CONSENT BOXES LOCKED // CLICK CONTINUE BELOW TO PROCEED.");
     onBeatLine?.(
       "All three consent boxes locked?! Fine! Put that in the audit log under 'unreasonably persistent.'",
       "defeated",
     );
-    timers.schedule("complete", () => onComplete(), 3800);
   };
 
   const handleDecoy = () => {
